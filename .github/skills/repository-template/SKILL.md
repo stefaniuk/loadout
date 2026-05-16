@@ -1,6 +1,7 @@
 ---
 name: repository-template
 description: Create code repository from template, or/and update it in parts from the content of the template that contains example of use of tools like make, pre-commit git hooks, Docker, and quality checks.
+argument-hint: "Name the capability to add, remove, or improve from the repository template"
 ---
 
 # Repository Template Skill 🧩

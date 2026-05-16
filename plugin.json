@@ -1,0 +1,12 @@
+{
+  "name": "awesome-copilot-promptfiles",
+  "description": "Spec-driven development toolkit with enforcement audits, architecture documentation, code review, and repository scaffolding",
+  "version": "1.0.0",
+  "author": {
+    "name": "Daniel Stefaniuk",
+    "url": "https://github.com/stefaniuk"
+  },
+  "skills": ".github/skills/",
+  "agents": ".github/agents/",
+  "hooks": "hooks.json"
+}

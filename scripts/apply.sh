@@ -37,8 +37,11 @@ set -euo pipefail
 #   - Utility prompts (util.*)
 #   - Shared includes (baselines)
 #   - Default templates (Makefile, Dockerfile, compose.yaml, shell-script)
-#   - repository-template skill
+#   - Default skills: repository-template, enforcement-audit, architecture-docs, code-review
 #   - copilot-instructions.md
+#   - AGENTS.md (cross-agent baseline at destination root)
+#   - .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
+#   - scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
 #   - pull_request_template.md (if not already present)
 #   - constitution.md
 #   - .specify/scripts/bash
@@ -68,10 +71,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 COPILOT_AGENTS_DIR="${REPO_ROOT}/.github/agents"
+COPILOT_HOOKS_DIR="${REPO_ROOT}/.github/hooks"
 COPILOT_INSTRUCTIONS_DIR="${REPO_ROOT}/.github/instructions"
 COPILOT_PROMPTS_DIR="${REPO_ROOT}/.github/prompts"
 COPILOT_SKILLS_DIR="${REPO_ROOT}/.github/skills"
 COPILOT_INSTRUCTIONS_MD_FILE="${REPO_ROOT}/.github/copilot-instructions.md"
+AGENTS_MD_FILE="${REPO_ROOT}/AGENTS.md"
+HOOK_SCRIPTS_DIR="${REPO_ROOT}/scripts/hooks"
 
 SPECIFY_MEMORY="${REPO_ROOT}/.specify/memory"
 SPECIFY_SCRIPTS_BASH="${REPO_ROOT}/.specify/scripts/bash"
@@ -99,7 +105,7 @@ DEFAULT_PROMPT_PATTERNS=("architecture.*" "dev.implement-*" "enforce.docker" "en
 DEFAULT_TEMPLATES=("Makefile.template" "Dockerfile.template" "compose.yaml.template" "shell-script.template.sh")
 
 # Default skills
-DEFAULT_SKILLS=("repository-template")
+DEFAULT_SKILLS=("repository-template" "enforcement-audit" "architecture-docs" "code-review")
 
 # All technology switches (for iteration)
 ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "playwright" "django" "fastapi")
@@ -298,6 +304,7 @@ function copilot-apply() {
     copilot-clean-directories "${destination}"
   fi
   copilot-copy-agents "${destination}"
+  copilot-copy-hooks "${destination}"
   copilot-copy-instructions "${destination}"
   copilot-copy-prompts "${destination}"
   copilot-copy-skills "${destination}"
@@ -323,6 +330,8 @@ function copy-shared-resources() {
   copy-docs-architecture "${destination}"
   copy-docs-prompts "${destination}"
   copy-workspace-file "${destination}"
+  copy-agents-md "${destination}"
+  copy-hook-scripts "${destination}"
   update-gitignore "${destination}"
 
   return 0
@@ -381,7 +390,7 @@ function is-tech-enabled() {
 function copilot-clean-directories() {
 
   local dest="$1/.github"
-  local dirs=("agents" "instructions" "prompts" "skills")
+  local dirs=("agents" "hooks" "instructions" "prompts" "skills")
 
   for dir in "${dirs[@]}"; do
     if [[ -d "${dest}/${dir}" ]]; then
@@ -418,7 +427,7 @@ function revert-copilot() {
   local dest="$1"
 
   # Remove .github directories
-  local github_dirs=("agents" "instructions" "prompts" "skills")
+  local github_dirs=("agents" "hooks" "instructions" "prompts" "skills")
   for dir in "${github_dirs[@]}"; do
     if [[ -d "${dest}/.github/${dir}" ]]; then
       print-info "Removing ${dest}/.github/${dir}"
@@ -430,6 +439,19 @@ function revert-copilot() {
   if [[ -f "${dest}/.github/copilot-instructions.md" ]]; then
     print-info "Removing ${dest}/.github/copilot-instructions.md"
     rm -f "${dest}/.github/copilot-instructions.md"
+  fi
+
+  # Remove AGENTS.md
+  if [[ -f "${dest}/AGENTS.md" ]]; then
+    print-info "Removing ${dest}/AGENTS.md"
+    rm -f "${dest}/AGENTS.md"
+  fi
+
+  # Remove hook scripts (scripts/hooks/ is fully managed by promptfiles;
+  # any user-authored files placed there will be removed on revert)
+  if [[ -d "${dest}/scripts/hooks" ]]; then
+    print-info "Removing ${dest}/scripts/hooks"
+    rm -rf "${dest:?}/scripts/hooks"
   fi
 
   return 0
@@ -501,7 +523,7 @@ function revert-shared-resources() {
   fi
 
   # Clean up empty parent directories
-  for dir in "${dest}/.github" "${dest}/docs/adr" "${dest}/docs" "${dest}/.vscode"; do
+  for dir in "${dest}/.github" "${dest}/docs/adr" "${dest}/docs" "${dest}/.vscode" "${dest}/scripts"; do
     if [[ -d "${dir}" ]] && [[ -z "$(ls -A "${dir}" 2>/dev/null)" ]]; then
       print-info "Removing empty directory ${dir}"
       rmdir "${dir}"
@@ -673,6 +695,59 @@ function copilot-copy-instructions-md() {
 
   print-info "Copying copilot-instructions.md to ${dest}"
   cp "${COPILOT_INSTRUCTIONS_MD_FILE}" "${dest}/"
+}
+
+# Copy .github/hooks/ to the destination.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copilot-copy-hooks() {
+
+  local dest="$1/.github/hooks"
+  mkdir -p "${dest}"
+
+  print-info "Copying hooks to ${dest}"
+  local hooks=()
+  shopt -s nullglob
+  hooks=("${COPILOT_HOOKS_DIR}"/*.json)
+  shopt -u nullglob
+  if (( ${#hooks[@]} == 0 )); then
+    print-info "No hook configuration files to copy"
+    return 0
+  fi
+  cp "${hooks[@]}" "${dest}/"
+}
+
+# Copy AGENTS.md to the destination root.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copy-agents-md() {
+
+  local dest="$1"
+  mkdir -p "${dest}"
+
+  print-info "Copying AGENTS.md to ${dest}"
+  cp "${AGENTS_MD_FILE}" "${dest}/"
+}
+
+# Copy scripts/hooks/ to the destination.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copy-hook-scripts() {
+
+  local dest="$1/scripts/hooks"
+  mkdir -p "${dest}"
+
+  print-info "Copying hook scripts to ${dest}"
+  local scripts=()
+  shopt -s nullglob
+  scripts=("${HOOK_SCRIPTS_DIR}"/*.sh)
+  shopt -u nullglob
+  if (( ${#scripts[@]} == 0 )); then
+    print-info "No hook scripts to copy"
+    return 0
+  fi
+  cp "${scripts[@]}" "${dest}/"
+  chmod +x "${dest}"/*.sh
 }
 
 # Copy pull_request_template.md to the destination if missing.
@@ -1058,6 +1133,7 @@ Technology switches (set to 'true' to include):
     all=true                Include all technology-specific files
     python=true             Python instruction and prompt
     typescript=true         TypeScript instruction and prompt
+    go=true                 Go instruction and prompt
     reactjs=true            ReactJS instruction and prompt
     rust=true               Rust instruction and prompt
     terraform=true          Terraform instruction and prompt
@@ -1070,6 +1146,17 @@ Other options:
     clean=true              Remove destination directories before copying
     revert=true             Remove all promptfiles-managed artifacts and exit
     VERBOSE=true            Show all executed commands
+
+Always copied (default/glue layer):
+    AGENTS.md (cross-agent baseline at destination root)
+    .github/copilot-instructions.md
+    .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
+    scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
+    Default skills: repository-template, enforcement-audit, architecture-docs, code-review
+    Spec-kit agents, prompts, templates and constitution
+    Shell, Docker, Makefile instructions and prompts
+    docs/architecture/, docs/prompts/, ADR template, Tech_Radar.md
+    project.code-workspace and managed .gitignore section
 
 Examples:
     $(basename "$0") /path/to/my-project

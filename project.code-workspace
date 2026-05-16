@@ -21,12 +21,12 @@
       "path": ".github/skills/",
     },
     {
-      "name": "Spec-kit: Constitution",
-      "path": ".specify/memory/",
+      "name": "Copilot: Hooks",
+      "path": ".github/hooks/",
     },
     {
-      "name": "Spec-kit: Specification",
-      "path": "./specs",
+      "name": "Spec-kit: Constitution",
+      "path": ".specify/memory/",
     },
     {
       "name": "Docs: ADRs",

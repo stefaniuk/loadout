@@ -76,7 +76,44 @@ Get up and running in minutes:
 - It does not provide runtime execution environments for prompts
 - It is not a replacement for language-specific linters or test frameworks
 
-## How it solves the problem
+## How it works
+
+The prompt library is organised into six customisation layers. Each layer builds on the one below, from governance foundations through to deterministic automation hooks.
+
+```text
+┌─────────────────────────────────────────────┐
+│  Layer 5: Hooks (deterministic gates)       │
+│  .github/hooks/*.json                       │
+├─────────────────────────────────────────────┤
+│  Layer 4: Skills (reusable capabilities)    │
+│  .github/skills/*/SKILL.md                  │
+├─────────────────────────────────────────────┤
+│  Layer 3: Agents (personas + handoffs)      │
+│  .github/agents/*.agent.md                  │
+├─────────────────────────────────────────────┤
+│  Layer 2: Prompts (one-off tasks)           │
+│  .github/prompts/*.prompt.md                │
+├─────────────────────────────────────────────┤
+│  Layer 1: Instructions (standards + rules)  │
+│  .github/instructions/*.instructions.md     │
+│  .github/instructions/includes/*.include.md │
+├─────────────────────────────────────────────┤
+│  Layer 0: Governance (constitution + ADRs)  │
+│  .specify/memory/constitution.md            │
+│  docs/adr/                                  │
+│  AGENTS.md                                  │
+└─────────────────────────────────────────────┘
+```
+
+| Type             | When to use                                                   | When NOT to use                             |
+| ---------------- | ------------------------------------------------------------- | ------------------------------------------- |
+| **Instructions** | Coding standards, conventions, rules that apply to file types | Multi-step workflows, reusable capabilities |
+| **Prompts**      | One-off tasks, quick operations, utility commands             | Complex workflows with supporting scripts   |
+| **Agents**       | Persistent personas, tool-restricted roles, handoff chains    | Simple prompts that don't need tool control |
+| **Skills**       | Reusable multi-step capabilities with scripts/resources       | Simple conventions or file-type rules       |
+| **Hooks**        | Deterministic automation (lint, format, gates, audit)         | Advisory guidance, style preferences        |
+
+## Spec-kit lifecycle
 
 The spec-kit lifecycle follows a structured flow:
 
@@ -149,10 +186,12 @@ make apply dest=/absolute/path/to/target
 <details>
 <summary><strong>What gets copied?</strong></summary>
 
-- `.github/agents`, `.github/instructions`, `.github/prompts`, `.github/skills`
+- `AGENTS.md`
+- `.github/agents`, `.github/hooks`, `.github/instructions`, `.github/prompts`, `.github/skills`
 - `.github/copilot-instructions.md`
 - `.github/pull_request_template.md` (only if missing in the target)
 - `.specify/memory/constitution.md`
+- `scripts/hooks/`
 - `.specify/scripts/bash`, `.specify/templates`
 - `docs/adr/ADR-nnn_Any_Decision_Record_Template.md`
 - `docs/architecture/`, `docs/prompts/`, `docs/.gitignore`
@@ -229,6 +268,18 @@ Each spec-kit stage produces artefacts worth committing. The table below maps ev
 
 </details>
 
+### Plugin installation
+
+This repository can also be installed as a VS Code agent plugin, providing skills, agents, and hooks without needing `make apply`.
+
+1. Open VS Code with Copilot agent mode enabled
+2. Run `Cmd+Shift+P` → **Chat: Install Plugin From Source**
+3. Enter the repository URL: `https://github.com/stefaniuk/awesome-copilot-promptfiles`
+
+After installation, skills like `/enforcement-audit` and `/architecture-docs` appear as slash commands, and `speckit.*` agents appear in the agent dropdown.
+
+> **Note:** Plugin installation provides skills, agents, and hooks only. For project-specific instructions, templates, and include baselines, use `make apply`.
+
 ### Examples
 
 #### Featured artefacts
@@ -291,7 +342,9 @@ make test   # Run tests
 
 ## Repository layout
 
+- `AGENTS.md` — Cross-agent always-on instructions
 - `.github/agents/` — Copilot agent definitions for spec-kit ceremonies
+- `.github/hooks/` — Quality gate hook configurations for VS Code agent mode
 - `.github/instructions/` — Coding standards by language/framework
 - `.github/prompts/` — Task-specific prompt files
 - `.github/skills/` — Bundled capabilities with supporting assets

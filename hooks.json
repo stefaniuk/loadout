@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/post-edit-lint.sh",
+        "timeout": 60000
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/stop-gate.sh",
+        "timeout": 30000
+      }
+    ]
+  }
+}

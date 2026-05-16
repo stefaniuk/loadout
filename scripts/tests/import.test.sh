@@ -44,6 +44,10 @@ function main() {
     test-import-force-copies-multiple-changed-files \
     test-import-dry-run-reports-changed-count \
     test-import-dry-run-reports-new-count \
+    test-import-detects-modified-agents-md \
+    test-import-detects-modified-copilot-hook-config \
+    test-import-detects-modified-hook-script \
+    test-import-force-preserves-hook-script-exec-bit \
   )
   local status=0
   for test in "${tests[@]}"; do
@@ -501,6 +505,97 @@ function test-import-dry-run-reports-new-count() {
 
   # Assert — should report count of new files
   echo "${output}" | grep -q "New files in destination (2)" || return 1
+
+  return 0
+}
+
+function test-import-detects-modified-agents-md() {
+
+  # Arrange
+  local dest
+  dest=$(helper-apply-copilot "detect-agents-md")
+  track-repo-file-state "AGENTS.md"
+  local marker
+  marker="AGENTS-MD-IMPORT-MARKER-$(date +%s)"
+  echo "${marker}" >> "${dest}/AGENTS.md"
+
+  # Act — dry-run detection
+  local output
+  output=$(./scripts/import.sh "${dest}" 2>&1)
+  echo "${output}" | grep -qE "(^|[[:space:]])AGENTS\.md" || return 1
+
+  # Act — force import round-trips the change
+  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+
+  # Assert
+  grep -q "${marker}" "${REPO_ROOT}/AGENTS.md" || return 1
+
+  return 0
+}
+
+function test-import-detects-modified-copilot-hook-config() {
+
+  # Arrange
+  local dest
+  dest=$(helper-apply-copilot "detect-hook-config")
+  local rel_path=".github/hooks/quality-gates.json"
+  track-repo-file-state "${rel_path}"
+  # Modify the JSON in a benign way (append a trailing newline + comment-like marker)
+  printf '\n' >> "${dest}/${rel_path}"
+
+  # Act — dry-run detection
+  local output
+  output=$(./scripts/import.sh "${dest}" 2>&1)
+  echo "${output}" | grep -q "quality-gates.json" || return 1
+
+  # Act — force import round-trips the change
+  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+
+  # Assert — repo file now matches the destination byte-for-byte
+  diff -q "${dest}/${rel_path}" "${REPO_ROOT}/${rel_path}" > /dev/null 2>&1 || return 1
+
+  return 0
+}
+
+function test-import-detects-modified-hook-script() {
+
+  # Arrange
+  local dest
+  dest=$(helper-apply-copilot "detect-hook-script")
+  local rel_path="scripts/hooks/post-edit-lint.sh"
+  track-repo-file-state "${rel_path}"
+  local marker
+  marker="# HOOK-SCRIPT-IMPORT-MARKER-$(date +%s)"
+  echo "${marker}" >> "${dest}/${rel_path}"
+
+  # Act — dry-run detection
+  local output
+  output=$(./scripts/import.sh "${dest}" 2>&1)
+  echo "${output}" | grep -q "post-edit-lint.sh" || return 1
+
+  # Act — force import round-trips the change
+  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+
+  # Assert
+  grep -q "${marker}" "${REPO_ROOT}/${rel_path}" || return 1
+
+  return 0
+}
+
+function test-import-force-preserves-hook-script-exec-bit() {
+
+  # Arrange
+  local dest
+  dest=$(helper-apply-copilot "preserve-exec-bit")
+  local rel_path="scripts/hooks/stop-gate.sh"
+  track-repo-file-state "${rel_path}"
+  echo "# EXEC-BIT-MARKER-$(date +%s)" >> "${dest}/${rel_path}"
+
+  # Act
+  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+
+  # Assert — imported file must remain executable in the source repo
+  [[ -x "${REPO_ROOT}/${rel_path}" ]] || return 1
 
   return 0
 }

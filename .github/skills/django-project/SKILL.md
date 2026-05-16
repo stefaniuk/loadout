@@ -1,6 +1,7 @@
 ---
 name: django-project
 description: Scaffold and evolve Django projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.
+argument-hint: "Describe the Django project action: scaffold, add capability, or evolve an existing project"
 ---
 
 # Django Project Skill 🧩

@@ -65,6 +65,14 @@ function main() {
     test-apply-skips-existing-workspace-file \
     test-apply-skips-existing-pull-request-template \
     test-apply-updates-existing-gitignore-managed-section \
+    test-apply-default-copies-agents-md \
+    test-apply-default-copies-hooks \
+    test-apply-default-copies-hook-scripts \
+    test-apply-default-copies-enforcement-audit-skill \
+    test-apply-default-copies-architecture-docs-skill \
+    test-apply-default-copies-code-review-skill \
+    test-apply-revert-removes-agents-md \
+    test-apply-revert-removes-hooks \
   )
   local status=0
   for test in "${tests[@]}"; do
@@ -700,7 +708,10 @@ function test-apply-revert-removes-github-dirs() {
   [[ ! -d "${dest}/.github/instructions" ]] || return 1
   [[ ! -d "${dest}/.github/prompts" ]] || return 1
   [[ ! -d "${dest}/.github/skills" ]] || return 1
+  [[ ! -d "${dest}/.github/hooks" ]] || return 1
   [[ ! -f "${dest}/.github/copilot-instructions.md" ]] || return 1
+  [[ ! -f "${dest}/AGENTS.md" ]] || return 1
+  [[ ! -d "${dest}/scripts/hooks" ]] || return 1
 
   return 0
 }
@@ -835,6 +846,124 @@ function test-apply-updates-existing-gitignore-managed-section() {
   grep -q "Custom rules" "${dest}/.gitignore" || return 1
   # Assert — managed section still exists
   grep -qF "promptfiles-copilot managed content" "${dest}/.gitignore" || return 1
+
+  return 0
+}
+
+function test-apply-default-copies-agents-md() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/default-agents-md"
+
+  # Act
+  helper-apply "${dest}" || return 1
+
+  # Assert
+  [[ -f "${dest}/AGENTS.md" ]] || return 1
+
+  return 0
+}
+
+function test-apply-default-copies-hooks() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/default-hooks"
+
+  # Act
+  helper-apply "${dest}" || return 1
+
+  # Assert
+  [[ -f "${dest}/.github/hooks/quality-gates.json" ]] || return 1
+
+  return 0
+}
+
+function test-apply-default-copies-hook-scripts() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/default-hook-scripts"
+
+  # Act
+  helper-apply "${dest}" || return 1
+
+  # Assert
+  [[ -x "${dest}/scripts/hooks/post-edit-lint.sh" ]] || return 1
+  [[ -x "${dest}/scripts/hooks/stop-gate.sh" ]] || return 1
+
+  return 0
+}
+
+function test-apply-revert-removes-agents-md() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/revert-agents-md"
+  helper-apply "${dest}" || return 1
+  [[ -f "${dest}/AGENTS.md" ]] || return 1
+
+  # Act
+  revert=true helper-apply "${dest}" || return 1
+
+  # Assert
+  [[ ! -f "${dest}/AGENTS.md" ]] || return 1
+
+  return 0
+}
+
+function test-apply-revert-removes-hooks() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/revert-hooks"
+  helper-apply "${dest}" || return 1
+  [[ -d "${dest}/.github/hooks" ]] || return 1
+
+  # Act
+  revert=true helper-apply "${dest}" || return 1
+
+  # Assert
+  [[ ! -d "${dest}/.github/hooks" ]] || return 1
+  [[ ! -d "${dest}/scripts/hooks" ]] || return 1
+
+  return 0
+}
+
+function test-apply-default-copies-enforcement-audit-skill() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/default-enforcement-audit-skill"
+
+  # Act
+  helper-apply "${dest}" || return 1
+
+  # Assert
+  [[ -f "${dest}/.github/skills/enforcement-audit/SKILL.md" ]] || return 1
+
+  return 0
+}
+
+function test-apply-default-copies-architecture-docs-skill() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/default-architecture-docs-skill"
+
+  # Act
+  helper-apply "${dest}" || return 1
+
+  # Assert
+  [[ -f "${dest}/.github/skills/architecture-docs/SKILL.md" ]] || return 1
+
+  return 0
+}
+
+function test-apply-default-copies-code-review-skill() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/default-code-review-skill"
+
+  # Act
+  helper-apply "${dest}" || return 1
+
+  # Assert
+  [[ -f "${dest}/.github/skills/code-review/SKILL.md" ]] || return 1
 
   return 0
 }
