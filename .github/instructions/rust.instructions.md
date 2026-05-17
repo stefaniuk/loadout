@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.rs"
+description: "Rust Engineering Instructions"
 ---
 
 # Rust Engineering Instructions 🦀

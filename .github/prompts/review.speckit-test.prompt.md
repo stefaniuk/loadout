@@ -1,5 +1,6 @@
 ---
 agent: agent
+argument-hint: "Optional: test scope to review (defaults to whole test suite)"
 description: Review the test automation implementation against the specification and the desired test pyramid shape; detect and explain misalignment - prioritise unit tests, identify high-value gaps and brittle tests, and provide actionable recommendations (including refactoring) to improve behavioural confidence
 ---
 

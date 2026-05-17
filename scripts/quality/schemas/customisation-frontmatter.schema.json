@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/stefaniuk/awesome-copilot-promptfiles/schemas/customisation-frontmatter.schema.json",
+  "title": "Customisation Frontmatter",
+  "description": "Schema for YAML frontmatter across the four customisation artefact types (instruction, prompt, agent, skill). Canonical source: docs/conventions.md \u00a7'Frontmatter schema'.",
+  "oneOf": [
+    {
+      "title": "instruction",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "applyTo"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "applyTo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    {
+      "title": "prompt",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "argument-hint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tools": {
+          "oneOf": [
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "string" }
+          ]
+        }
+      }
+    },
+    {
+      "title": "agent",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "argument-hint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "handoffs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "agent"],
+            "properties": {
+              "label": { "type": "string", "minLength": 1 },
+              "agent": { "type": "string", "minLength": 1 },
+              "prompt": { "type": "string", "minLength": 1 },
+              "send": { "type": "boolean" }
+            }
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "user-invocable": {
+          "type": "boolean"
+        },
+        "disable-model-invocation": {
+          "type": "boolean"
+        },
+        "agents": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "subagent": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "title": "skill",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "argument-hint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowed-tools": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 ---
 agent: agent
+argument-hint: "Optional: target paths or scope for the infrastructure-diagram step"
 description: Produce AWS/Azure infrastructure diagram from Terraform (evidence-first, consistent with C4 container naming)
 ---
 

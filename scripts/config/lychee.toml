@@ -3,6 +3,6 @@ offline = true
 accept = [200]
 exclude = [
   ".github/skills/repository-template/assets/**",
-  "docs/architecture/**",
+  "docs/prompt-reports/**",
   "docs/prompts/**",
 ]

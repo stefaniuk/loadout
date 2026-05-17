@@ -1,5 +1,6 @@
 ---
 agent: agent
+argument-hint: "Optional: scope of code to review (defaults to whole repository)"
 description: Review the implementation against the entire spec-driven development documentation set (including the constitution) for compliance; detect and explain drift among code↔spec↔plan↔tasks - provide prioritised, actionable recommendations (including refactoring) to bring all artefacts into alignment
 ---
 

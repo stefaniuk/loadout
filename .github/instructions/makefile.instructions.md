@@ -1,5 +1,6 @@
 ---
 applyTo: "{Makefile,**/Makefile,**/*.mk}"
+description: "Makefile Engineering Instructions (developer experience, CI-aligned)"
 ---
 
 # Makefile Engineering Instructions (developer experience, CI-aligned) 🛠️

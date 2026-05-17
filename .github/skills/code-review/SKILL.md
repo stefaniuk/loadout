@@ -2,6 +2,9 @@
 name: code-review
 description: Run a structured Spec Kit review focused on code compliance, documentation quality, or test coverage, positioned within the spec-driven development pipeline.
 argument-hint: "Specify review type: code, documentation, or test"
+license: MIT
+version: 1.0.0
+allowed-tools: []
 ---
 
 # Code Review Skill
@@ -100,3 +103,7 @@ Headline objectives:
 - Reference constitution rules and spec requirements by identifier.
 - Keep recommendations actionable — each should be implementable without further clarification.
 - Prioritise findings by severity: blockers first, then warnings, then suggestions.
+
+## Examples
+
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) — a `code`-type review of a freshly implemented feature, showing the behaviour inventory, discrepancy register, and proposed resolutions.

@@ -23,10 +23,10 @@ All artefacts must be fully backed by the diff between `main` and the current `H
 
 ### A. Establish the diff against `main`
 
-Run the labelled batch below **once** from the repository root. Output is written to `docs/prompts/git-commit-message-diff.txt` so that large diffs do not overflow the terminal context.
+Run the labelled batch below **once** from the repository root. Output is written to `docs/prompt-reports/git-commit-message-diff.txt` so that large diffs do not overflow the terminal context.
 
 ```bash
-_diff_file="docs/prompts/git-commit-message-diff.txt"
+_diff_file="docs/prompt-reports/git-commit-message-diff.txt"
 : > "$_diff_file"
 if ! git show-ref --verify --quiet refs/heads/main; then
   printf '\n>>> %s\n' "git fetch origin main:main" | tee -a "$_diff_file"
@@ -46,7 +46,7 @@ done
 printf '\nDiff captured → %s (%s bytes)\n' "$_diff_file" "$(wc -c < "$_diff_file")"
 ```
 
-After the script completes, **read the file `docs/prompts/git-commit-message-diff.txt`** in full and use its contents as the authoritative diff evidence for the rest of this review.
+After the script completes, **read the file `docs/prompt-reports/git-commit-message-diff.txt`** in full and use its contents as the authoritative diff evidence for the rest of this review.
 
 1. Use the labelled outputs above to confirm `main` is up to date.
 2. Use `git diff --stat main...HEAD` for the overview and `git diff main...HEAD` for full context.

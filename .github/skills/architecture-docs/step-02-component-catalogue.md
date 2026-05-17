@@ -4,15 +4,15 @@ Create component-level summaries (responsibilities, interfaces, data, and extens
 
 ## Goal
 
-Create (or update) the component catalogue at `docs/architecture/component-*.md`.
+Create (or update) the component catalogue at `docs/prompt-reports/component-*.md`.
 
-Also ensure they are linked from the architecture overview at `docs/architecture/README.md`.
+Also ensure they are linked from the architecture overview at `docs/prompt-reports/README.md`.
 
 ## Discovery (run before writing)
 
 ### A. Refresh what is already known
 
-1. Re-read: `docs/architecture/repository-map.md`.
+1. Re-read: `docs/prompt-reports/repository-map.md`.
 2. Extract (briefly) into working notes:
    - Deployable units and entry points
    - Repo-level architecture statement and tech stack summary (do not repeat in every component)
@@ -57,7 +57,7 @@ Also ensure they are linked from the architecture overview at `docs/architecture
 
 ### 2) Create one document per component (consistent scope)
 
-For each component, create `docs/architecture/component-[XXX]-[name].md`, where:
+For each component, create `docs/prompt-reports/component-[XXX]-[name].md`, where:
 
 - `[XXX]` is a stable numeric order (e.g. `001`, `002`, `003`, ...) so links don't churn
 - `[name]` is short and meaningful (kebab-case)
@@ -176,7 +176,7 @@ Document component-specific implementation details only. If a concern is identic
 
 ### 5) Update the index
 
-Update `docs/architecture/README.md` with a **Component Catalogue** section linking to every component document (in `[XXX]` order).
+Update `docs/prompt-reports/README.md` with a **Component Catalogue** section linking to every component document (in `[XXX]` order).
 
 ## Template snippet per component
 

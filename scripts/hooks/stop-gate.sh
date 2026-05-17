@@ -15,10 +15,16 @@ set -euo pipefail
 #   1) This script is invoked by VS Code Agent hooks. Do not run interactively.
 #   2) Requires jq and make in the environment.
 #   3) Uses a re-entry guard to prevent infinite loops.
+#   4) Diagnostics: see ${COPILOT_PROMPT_LOG_DIR:-~/.local/state/copilot-prompts}/{hooks,errors}.log
 
 # ==============================================================================
 
+# shellcheck disable=SC1091
+source "$(dirname "$0")/_common.sh"
+
 function main() {
+
+  hook_init_diagnostics "Stop"
 
   cd "$(git rev-parse --show-toplevel)"
 
@@ -27,7 +33,7 @@ function main() {
 
   # Re-entry guard: if this hook is already active, allow completion
   local hook_active
-  hook_active=$(echo "$input" | jq -r '.stop_hook_active // empty' 2>/dev/null || echo "")
+  hook_active=$(echo "$input" | jq -r '.stop_hook_active // empty')
   if [[ "$hook_active" == "true" ]]; then
     echo '{}'
     return 0

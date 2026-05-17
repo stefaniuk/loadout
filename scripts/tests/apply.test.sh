@@ -73,6 +73,16 @@ function main() {
     test-apply-default-copies-code-review-skill \
     test-apply-revert-removes-agents-md \
     test-apply-revert-removes-hooks \
+    test-apply-subset-default-omitted-copies-everything \
+    test-apply-subset-all-equivalent-to-no-subset \
+    test-apply-subset-agents-only \
+    test-apply-subset-prompts-and-agents \
+    test-apply-subset-instructions-only-with-python-tech \
+    test-apply-subset-invalid-value-fails-with-helpful-message \
+    test-apply-subset-comma-whitespace-trimmed \
+    test-apply-subset-speckit-only-narrows-agents-and-prompts \
+    test-apply-subset-docs-only \
+    test-apply-subset-project-only \
   )
   local status=0
   for test in "${tests[@]}"; do
@@ -321,7 +331,7 @@ function test-apply-default-copies-shared-resources() {
   [[ -d "${dest}/.specify/templates" ]] || return 1
   [[ -f "${dest}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" ]] || return 1
   [[ -f "${dest}/docs/adr/Tech_Radar.md" ]] || return 1
-  [[ -d "${dest}/docs/architecture" ]] || return 1
+  [[ -d "${dest}/docs/prompt-reports" ]] || return 1
   [[ -d "${dest}/docs/prompts" ]] || return 1
 
   return 0
@@ -964,6 +974,216 @@ function test-apply-default-copies-code-review-skill() {
 
   # Assert
   [[ -f "${dest}/.github/skills/code-review/SKILL.md" ]] || return 1
+
+  return 0
+}
+
+# --- Subset selector tests ---
+
+function test-apply-subset-default-omitted-copies-everything() {
+
+  # Arrange
+  local dest_no_subset="${TEMP_DIR}/subset-no-subset"
+  local dest_with_subset="${TEMP_DIR}/subset-omitted"
+
+  # Act — both runs omit subset (the second sets it to empty string)
+  helper-apply "${dest_no_subset}" || return 1
+  subset="" helper-apply "${dest_with_subset}" || return 1
+
+  # Assert — file counts are identical
+  local count_no_subset count_with_subset
+  count_no_subset=$(find "${dest_no_subset}" -type f | wc -l | tr -d ' ')
+  count_with_subset=$(find "${dest_with_subset}" -type f | wc -l | tr -d ' ')
+  [[ "${count_no_subset}" == "${count_with_subset}" ]] || return 1
+
+  return 0
+}
+
+function test-apply-subset-all-equivalent-to-no-subset() {
+
+  # Arrange
+  local dest_default="${TEMP_DIR}/subset-all-baseline"
+  local dest_all="${TEMP_DIR}/subset-all"
+
+  # Act
+  helper-apply "${dest_default}" || return 1
+  subset=all helper-apply "${dest_all}" || return 1
+
+  # Assert — file counts match
+  local count_default count_all
+  count_default=$(find "${dest_default}" -type f | wc -l | tr -d ' ')
+  count_all=$(find "${dest_all}" -type f | wc -l | tr -d ' ')
+  [[ "${count_default}" == "${count_all}" ]] || return 1
+
+  return 0
+}
+
+function test-apply-subset-agents-only() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/subset-agents-only"
+
+  # Act
+  subset=agents helper-apply "${dest}" || return 1
+
+  # Assert — agents present
+  [[ -d "${dest}/.github/agents" ]] || return 1
+  local agent_count
+  agent_count=$(find "${dest}/.github/agents" -name "*.md" -type f | wc -l | tr -d ' ')
+  [[ "${agent_count}" -gt 0 ]] || return 1
+  # Assert — prompts and skills NOT present
+  [[ ! -d "${dest}/.github/prompts" ]] || return 1
+  [[ ! -d "${dest}/.github/skills" ]] || return 1
+  # Assert — project-level files NOT present
+  [[ ! -f "${dest}/AGENTS.md" ]] || return 1
+  [[ ! -f "${dest}/.github/copilot-instructions.md" ]] || return 1
+
+  return 0
+}
+
+function test-apply-subset-prompts-and-agents() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/subset-prompts-agents"
+
+  # Act
+  subset="prompts,agents" helper-apply "${dest}" || return 1
+
+  # Assert — both present
+  [[ -d "${dest}/.github/agents" ]] || return 1
+  [[ -d "${dest}/.github/prompts" ]] || return 1
+  [[ -f "${dest}/.github/prompts/enforce.shell.prompt.md" ]] || return 1
+  # Assert — others absent
+  [[ ! -d "${dest}/.github/skills" ]] || return 1
+  [[ ! -d "${dest}/.github/instructions" ]] || return 1
+
+  return 0
+}
+
+function test-apply-subset-instructions-only-with-python-tech() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/subset-instructions-python"
+
+  # Act
+  subset=instructions python=true helper-apply "${dest}" || return 1
+
+  # Assert — instructions present (including python-specific)
+  [[ -f "${dest}/.github/instructions/python.instructions.md" ]] || return 1
+  [[ -f "${dest}/.github/instructions/shell.instructions.md" ]] || return 1
+  # Assert — prompts and skills NOT copied
+  [[ ! -d "${dest}/.github/prompts" ]] || return 1
+  [[ ! -d "${dest}/.github/skills" ]] || return 1
+
+  return 0
+}
+
+function test-apply-subset-invalid-value-fails-with-helpful-message() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/subset-invalid"
+  mkdir -p "${dest}"
+  local output
+
+  # Act — must fail with exit code 1
+  output=$(subset=bogus ./scripts/apply.sh "${dest}" 2>&1) && return 1
+  local exit_code=$?
+  [[ "${exit_code}" -eq 1 ]] || return 1
+
+  # Assert — stderr message lists valid values
+  echo "${output}" | grep -qF "Valid values:" || return 1
+  echo "${output}" | grep -qF "bogus" || return 1
+
+  return 0
+}
+
+function test-apply-subset-comma-whitespace-trimmed() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/subset-whitespace"
+
+  # Act — values surrounded by spaces should still be accepted
+  subset=" prompts , agents " helper-apply "${dest}" || return 1
+
+  # Assert
+  [[ -d "${dest}/.github/agents" ]] || return 1
+  [[ -d "${dest}/.github/prompts" ]] || return 1
+  [[ ! -d "${dest}/.github/instructions" ]] || return 1
+
+  return 0
+}
+
+function test-apply-subset-speckit-only-narrows-agents-and-prompts() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/subset-speckit-only"
+
+  # Act
+  subset=speckit helper-apply "${dest}" || return 1
+
+  # Assert — speckit agents present
+  [[ -f "${dest}/.github/agents/speckit.specify.agent.md" ]] || return 1
+  [[ -f "${dest}/.github/agents/speckit.implement.agent.md" ]] || return 1
+  # Assert — persona/non-speckit agents absent
+  [[ ! -d "${dest}/.github/agents/personas" ]] || return 1
+  # Assert — speckit prompts present
+  [[ -f "${dest}/.github/prompts/speckit.specify.prompt.md" ]] || return 1
+  [[ -f "${dest}/.github/prompts/review.speckit-code.prompt.md" ]] || return 1
+  # Assert — non-speckit prompts absent
+  [[ ! -f "${dest}/.github/prompts/enforce.shell.prompt.md" ]] || return 1
+  [[ ! -f "${dest}/.github/prompts/enforce.docker.prompt.md" ]] || return 1
+  [[ ! -f "${dest}/.github/prompts/util.git-commit-message.prompt.md" ]] || return 1
+  # Assert — specify/* shared resources present (speckit pulls in .specify)
+  [[ -d "${dest}/.specify/memory" ]] || return 1
+  [[ -d "${dest}/.specify/templates" ]] || return 1
+  # Assert — unrelated categories absent
+  [[ ! -d "${dest}/.github/instructions" ]] || return 1
+  [[ ! -d "${dest}/.github/skills" ]] || return 1
+  [[ ! -f "${dest}/AGENTS.md" ]] || return 1
+
+  return 0
+}
+
+function test-apply-subset-docs-only() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/subset-docs-only"
+
+  # Act
+  subset=docs helper-apply "${dest}" || return 1
+
+  # Assert — docs artefacts present
+  [[ -f "${dest}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" ]] || return 1
+  [[ -f "${dest}/docs/adr/Tech_Radar.md" ]] || return 1
+  [[ -d "${dest}/docs/prompt-reports" ]] || return 1
+  # Assert — other categories absent
+  [[ ! -d "${dest}/.github/agents" ]] || return 1
+  [[ ! -d "${dest}/.github/prompts" ]] || return 1
+  [[ ! -f "${dest}/AGENTS.md" ]] || return 1
+
+  return 0
+}
+
+function test-apply-subset-project-only() {
+
+  # Arrange
+  local dest="${TEMP_DIR}/subset-project-only"
+
+  # Act
+  subset=project helper-apply "${dest}" || return 1
+
+  # Assert — project files touched
+  [[ -f "${dest}/.vscode/settings.json" ]] || return 1
+  [[ -f "${dest}/project.code-workspace" ]] || return 1
+  [[ -f "${dest}/.gitignore" ]] || return 1
+  [[ -f "${dest}/AGENTS.md" ]] || return 1
+  [[ -f "${dest}/.github/copilot-instructions.md" ]] || return 1
+  [[ -f "${dest}/.github/pull_request_template.md" ]] || return 1
+  # Assert — agents and prompts absent
+  [[ ! -d "${dest}/.github/agents" ]] || return 1
+  [[ ! -d "${dest}/.github/prompts" ]] || return 1
+  [[ ! -d "${dest}/.github/instructions" ]] || return 1
+  [[ ! -d "${dest}/.github/skills" ]] || return 1
 
   return 0
 }

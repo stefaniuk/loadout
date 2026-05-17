@@ -15,10 +15,16 @@ set -euo pipefail
 # Notes:
 #   1) This script is invoked by VS Code Agent hooks. Do not run interactively.
 #   2) Requires jq and make in the environment.
+#   3) Diagnostics: see ${COPILOT_PROMPT_LOG_DIR:-~/.local/state/copilot-prompts}/{hooks,errors}.log
 
 # ==============================================================================
 
+# shellcheck disable=SC1091
+source "$(dirname "$0")/_common.sh"
+
 function main() {
+
+  hook_init_diagnostics "PostToolUse"
 
   cd "$(git rev-parse --show-toplevel)"
 
@@ -26,7 +32,7 @@ function main() {
   input=$(cat)
 
   local tool_name
-  tool_name=$(echo "$input" | jq -r '.toolName // .tool_name // empty' 2>/dev/null || echo "")
+  tool_name=$(echo "$input" | jq -r '.toolName // .tool_name // empty')
 
   if ! is-edit-tool "$tool_name"; then
     echo '{}'

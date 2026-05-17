@@ -1,5 +1,7 @@
 ---
 description: Generate a custom checklist for the current feature based on user requirements.
+argument-hint: "Optional: additional context for the checklist step"
+subagent: true
 handoffs:
   - label: Return to Implementation
     agent: speckit.implement

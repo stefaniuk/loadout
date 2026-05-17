@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.{js,ts,tsx}"
+description: "TypeScript Engineering Instructions (CLI + API + UI, framework-agnostic)"
 ---
 
 # TypeScript Engineering Instructions (CLI + API + UI, framework-agnostic) 🟦

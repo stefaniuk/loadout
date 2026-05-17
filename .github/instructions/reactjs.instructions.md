@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.{jsx,tsx,js,ts}"
+description: "ReactJS Engineering Instructions"
 ---
 
 # ReactJS Engineering Instructions ⚛️

@@ -1,35 +1,40 @@
-# Security
+# Security Policy
 
-NHS England takes security and the protection of private data extremely seriously. If you believe you have found a vulnerability or other issue which has compromised or could compromise the security of any of our systems and/or private data managed by our systems, please do not hesitate to contact us using the methods outlined below.
+## Supported versions
 
-## Table of Contents
+This repository follows semantic versioning. Only the latest minor release receives security fixes.
 
-- [Security](#security)
-  - [Table of Contents](#table-of-contents)
-  - [Reporting a vulnerability](#reporting-a-vulnerability)
-    - [Email](#email)
-    - [NCSC](#ncsc)
-  - [General Security Enquiries](#general-security-enquiries)
+| Version | Supported |
+| ------- | --------- |
+| 1.x     | ✅        |
+| < 1.0   | ❌        |
 
 ## Reporting a vulnerability
 
-Please note, email is our preferred method of receiving reports.
+If you believe you have found a security vulnerability in this repository — for example a prompt or agent definition that could be abused, or a script that could exfiltrate data — please **do not** open a public issue.
 
-### Email
+Instead, use GitHub's private vulnerability reporting:
 
-If you wish to notify us of a vulnerability via email, please include detailed information on the nature of the vulnerability and any steps required to reproduce it.
+1. Go to the [Security tab](https://github.com/stefaniuk/awesome-copilot-promptfiles/security) of this repository.
+2. Click **Report a vulnerability**.
+3. Provide a clear description, reproduction steps, and any suggested mitigation.
 
-You can reach us at:
+You should receive an acknowledgement within 7 calendar days. We aim to triage and respond with a remediation plan within 30 days.
 
-- _[ A product team email address ]_
-- [cybersecurity@nhs.net](cybersecurity@nhs.net)
+## Scope
 
-### NCSC
+In scope:
 
-You can send your report to the National Cyber Security Centre, who will assess your report and pass it on to NHS England if necessary.
+- Prompts, agents, skills, and hooks shipped from this repository.
+- The `make apply` distribution scripts (`scripts/apply.sh`, `scripts/import.sh`).
+- Build and CI configuration that runs against this repository.
 
-You can report vulnerabilities here: [https://www.ncsc.gov.uk/information/vulnerability-reporting](https://www.ncsc.gov.uk/information/vulnerability-reporting)
+Out of scope:
 
-## General Security Enquiries
+- Issues in downstream consumer repositories caused by misconfiguration.
+- Issues in GitHub Copilot or VS Code themselves (report to the upstream vendor).
+- Third-party MCP servers integrated by consumers.
 
-If you have general enquiries regarding our cybersecurity, please reach out to us at [cybersecurity@nhs.net](cybersecurity@nhs.net)
+## Responsible disclosure
+
+We follow coordinated disclosure. Please give us a reasonable window to fix and release before publishing details.

@@ -2,6 +2,9 @@
 name: repository-template
 description: Create code repository from template, or/and update it in parts from the content of the template that contains example of use of tools like make, pre-commit git hooks, Docker, and quality checks.
 argument-hint: "Name the capability to add, remove, or improve from the repository template"
+license: MIT
+version: 1.0.0
+allowed-tools: []
 ---
 
 # Repository Template Skill 🧩
@@ -1346,6 +1349,12 @@ To pull updates from the upstream run the following command:
 ```
 
 Then selectively copy relevant files to your repository.
+
+---
+
+## Examples 📓
+
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) — adopting the Core Make System and Pre-commit Hooks capabilities into a fresh repository, including verification commands and expected outputs.
 
 ---
 

@@ -13,6 +13,13 @@ set -euo pipefail
 # Options:
 #   clean=true              # Remove destination .github/{agents,instructions,prompts,skills} before copying, default is 'false'
 #   revert=true             # Remove all promptfiles-managed artifacts from destination and exit, default is 'false'
+#   subset=<csv>            # Restrict copy to named categories (comma-separated). Valid tokens:
+#                           #   agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, mcp, all
+#                           # Omitted or 'all' preserves the default full-copy behaviour byte-for-byte.
+#                           # The 'speckit' token narrows agents/prompts copy functions to speckit.* and
+#                           # review.speckit-* files only when used WITHOUT 'agents'/'prompts' respectively.
+#                           # The 'mcp' token is opt-in only and is NOT included by 'all' default-copy
+#                           # behaviour unless explicitly listed in the subset csv (or 'all' is used).
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
 # Technology switches (default is 'false' for all, set to 'true' to include):
@@ -48,10 +55,11 @@ set -euo pipefail
 #   - .specify/templates
 #   - ADR-nnn_Any_Decision_Record_Template.md
 #   - Tech_Radar.md
-#   - docs/architecture/
+#   - docs/prompt-reports/
 #   - docs/prompts/
 #   - project.code-workspace (if not already present)
 #   - .gitignore content (managed section with begin/end markers)
+#   - MCP example pack (.vscode/mcp.json.example, .github/mcp/, docs/mcp.md)
 #
 # Exit codes:
 #   0 - All files copied successfully
@@ -86,8 +94,11 @@ SPECIFY_TEMPLATES="${REPO_ROOT}/.specify/templates"
 PULL_REQUEST_TEMPLATE="${REPO_ROOT}/.github/pull_request_template.md"
 ADR_TEMPLATE="${REPO_ROOT}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
 ADR_TECH_RADAR="${REPO_ROOT}/docs/adr/Tech_Radar.md"
-DOCS_ARCHITECTURE="${REPO_ROOT}/docs/architecture"
+DOCS_ARCHITECTURE="${REPO_ROOT}/docs/prompt-reports"
 DOCS_PROMPTS="${REPO_ROOT}/docs/prompts"
+MCP_VSCODE_EXAMPLE="${REPO_ROOT}/.vscode/mcp.json.example"
+MCP_GITHUB_DIR="${REPO_ROOT}/.github/mcp"
+MCP_DOC="${REPO_ROOT}/docs/mcp.md"
 WORKSPACE_FILE="${REPO_ROOT}/project.code-workspace"
 GITIGNORE_PROMPTFILES="${REPO_ROOT}/.gitignore.promptfiles"
 
@@ -109,6 +120,28 @@ DEFAULT_SKILLS=("repository-template" "enforcement-audit" "architecture-docs" "c
 
 # All technology switches (for iteration)
 ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "playwright" "django" "fastapi")
+
+# Valid subset selector tokens (closed set).
+SUBSET_VALID_TOKENS=("agents" "hooks" "instructions" "prompts" "skills" "specify" "docs" "project" "speckit" "mcp" "all")
+
+# Subset category flags — populated by parse-subset. Default (no subset) enables all.
+SUBSET_AGENTS=true
+SUBSET_HOOKS=true
+SUBSET_INSTRUCTIONS=true
+SUBSET_PROMPTS=true
+SUBSET_SKILLS=true
+SUBSET_SPECIFY=true
+SUBSET_DOCS=true
+SUBSET_PROJECT=true
+SUBSET_SPECKIT=true
+# MCP is opt-in: included by default full-copy (no subset) and by 'all', but
+# NOT enabled by any other individual subset token unless 'mcp' is named.
+SUBSET_MCP=true
+# True only when subset was explicitly set (used to gate observability messages).
+SUBSET_EXPLICIT=false
+# Narrowing flags — true when subset contains 'speckit' but not the broader category.
+SPECKIT_NARROW_AGENTS=false
+SPECKIT_NARROW_PROMPTS=false
 
 # ==============================================================================
 
@@ -144,6 +177,8 @@ function main() {
       print-error "playwright=true requires either python=true or typescript=true to be set"
     fi
   fi
+
+  parse-subset
 
   local destination
   destination=$(normalise-destination-path "$1")
@@ -291,7 +326,114 @@ function get-tech-skill() {
   esac
 }
 
-# ==============================================================================
+# Parse the optional `subset` env var and populate SUBSET_* and
+# SPECKIT_NARROW_* flags. An empty/unset `subset` preserves the default
+# behaviour (all flags true, SUBSET_EXPLICIT=false). Validation is strict —
+# the first invalid token aborts with exit code 1.
+function parse-subset() {
+
+  local raw="${subset:-}"
+
+  if [[ -z "${raw// /}" ]]; then
+    return 0
+  fi
+
+  SUBSET_EXPLICIT=true
+
+  # All flags default to false when subset is explicit; tokens turn them on.
+  SUBSET_AGENTS=false
+  SUBSET_HOOKS=false
+  SUBSET_INSTRUCTIONS=false
+  SUBSET_PROMPTS=false
+  SUBSET_SKILLS=false
+  SUBSET_SPECIFY=false
+  SUBSET_DOCS=false
+  SUBSET_PROJECT=false
+  SUBSET_SPECKIT=false
+  SUBSET_MCP=false
+
+  local -a tokens=()
+  local token lc trimmed valid match
+  # Use a space-delimited string for membership tracking (bash 3.2 compatible —
+  # no associative arrays).
+  local seen=" "
+
+  IFS=',' read -r -a tokens <<< "${raw}"
+  for token in "${tokens[@]}"; do
+    # Trim leading/trailing whitespace
+    trimmed="${token#"${token%%[![:space:]]*}"}"
+    trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+    [[ -z "${trimmed}" ]] && continue
+    # Lowercase
+    lc="$(printf '%s' "${trimmed}" | tr '[:upper:]' '[:lower:]')"
+    # Dedupe
+    if [[ "${seen}" == *" ${lc} "* ]]; then
+      continue
+    fi
+    # Validate against the closed set
+    valid=false
+    for match in "${SUBSET_VALID_TOKENS[@]}"; do
+      if [[ "${lc}" == "${match}" ]]; then
+        valid=true
+        break
+      fi
+    done
+    if [[ "${valid}" != "true" ]]; then
+      echo "[apply] ERROR: invalid subset value '${lc}'. Valid values: agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, mcp, all." >&2
+      exit 1
+    fi
+    seen="${seen}${lc} "
+  done
+
+  if [[ "${seen}" == *" all "* ]]; then
+    SUBSET_AGENTS=true
+    SUBSET_HOOKS=true
+    SUBSET_INSTRUCTIONS=true
+    SUBSET_PROMPTS=true
+    SUBSET_SKILLS=true
+    SUBSET_SPECIFY=true
+    SUBSET_DOCS=true
+    SUBSET_PROJECT=true
+    SUBSET_SPECKIT=true
+    SUBSET_MCP=true
+    return 0
+  fi
+
+  [[ "${seen}" == *" agents "* ]] && SUBSET_AGENTS=true
+  [[ "${seen}" == *" hooks "* ]] && SUBSET_HOOKS=true
+  [[ "${seen}" == *" instructions "* ]] && SUBSET_INSTRUCTIONS=true
+  [[ "${seen}" == *" prompts "* ]] && SUBSET_PROMPTS=true
+  [[ "${seen}" == *" skills "* ]] && SUBSET_SKILLS=true
+  [[ "${seen}" == *" specify "* ]] && SUBSET_SPECIFY=true
+  [[ "${seen}" == *" docs "* ]] && SUBSET_DOCS=true
+  [[ "${seen}" == *" project "* ]] && SUBSET_PROJECT=true
+  [[ "${seen}" == *" speckit "* ]] && SUBSET_SPECKIT=true
+  [[ "${seen}" == *" mcp "* ]] && SUBSET_MCP=true
+
+  # Speckit narrowing: when the caller asked for speckit but NOT the broader
+  # category, restrict agent/prompt copies to speckit.* and review.speckit-*.
+  if [[ "${SUBSET_SPECKIT}" == "true" && "${SUBSET_AGENTS}" != "true" ]]; then
+    SPECKIT_NARROW_AGENTS=true
+  fi
+  if [[ "${SUBSET_SPECKIT}" == "true" && "${SUBSET_PROMPTS}" != "true" ]]; then
+    SPECKIT_NARROW_PROMPTS=true
+  fi
+
+  return 0
+}
+
+# Emit a "skipping" info message for an unselected category. No-op unless
+# subset was explicitly set by the caller.
+# Arguments:
+#   $1=[category name]
+function subset-skip() {
+
+  if [[ "${SUBSET_EXPLICIT}" == "true" ]]; then
+    echo "[apply] skipping $1 (not in subset)"
+  fi
+
+  return 0
+}
 
 # Apply copilot-specific assets to the destination.
 # Arguments (provided as function parameters):
@@ -303,14 +445,42 @@ function copilot-apply() {
   if is-arg-true "${clean:-false}"; then
     copilot-clean-directories "${destination}"
   fi
-  copilot-copy-agents "${destination}"
-  copilot-copy-hooks "${destination}"
-  copilot-copy-instructions "${destination}"
-  copilot-copy-prompts "${destination}"
-  copilot-copy-skills "${destination}"
-  copilot-copy-instructions-md "${destination}"
+  if [[ "${SUBSET_AGENTS}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
+    copilot-copy-agents "${destination}"
+  else
+    subset-skip "agents"
+  fi
+  if [[ "${SUBSET_HOOKS}" == "true" ]]; then
+    copilot-copy-hooks "${destination}"
+  else
+    subset-skip "hooks"
+  fi
+  if [[ "${SUBSET_INSTRUCTIONS}" == "true" ]]; then
+    copilot-copy-instructions "${destination}"
+  else
+    subset-skip "instructions"
+  fi
+  if [[ "${SUBSET_PROMPTS}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
+    copilot-copy-prompts "${destination}"
+  else
+    subset-skip "prompts"
+  fi
+  if [[ "${SUBSET_SKILLS}" == "true" ]]; then
+    copilot-copy-skills "${destination}"
+  else
+    subset-skip "skills"
+  fi
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    copilot-copy-instructions-md "${destination}"
+  else
+    subset-skip "copilot-instructions.md"
+  fi
   copy-shared-resources "${destination}"
-  update-vscode-settings "${destination}"
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    update-vscode-settings "${destination}"
+  else
+    subset-skip "vscode-settings"
+  fi
 
   return 0
 }
@@ -322,17 +492,46 @@ function copy-shared-resources() {
 
   local destination="$1"
 
-  copy-specify-memory "${destination}"
-  copy-specify-scripts-bash "${destination}"
-  copy-specify-templates "${destination}"
-  copy-pull-request-template "${destination}"
-  copy-adr-template "${destination}"
-  copy-docs-architecture "${destination}"
-  copy-docs-prompts "${destination}"
-  copy-workspace-file "${destination}"
-  copy-agents-md "${destination}"
-  copy-hook-scripts "${destination}"
-  update-gitignore "${destination}"
+  if [[ "${SUBSET_SPECIFY}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
+    copy-specify-memory "${destination}"
+    copy-specify-scripts-bash "${destination}"
+    copy-specify-templates "${destination}"
+  else
+    subset-skip "specify"
+  fi
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    copy-pull-request-template "${destination}"
+  else
+    subset-skip "pull-request-template"
+  fi
+  if [[ "${SUBSET_DOCS}" == "true" ]]; then
+    copy-adr-template "${destination}"
+    copy-docs-architecture "${destination}"
+    copy-docs-prompts "${destination}"
+  else
+    subset-skip "docs"
+  fi
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    copy-workspace-file "${destination}"
+    copy-agents-md "${destination}"
+  else
+    subset-skip "project-files"
+  fi
+  if [[ "${SUBSET_HOOKS}" == "true" || "${SUBSET_PROJECT}" == "true" ]]; then
+    copy-hook-scripts "${destination}"
+  else
+    subset-skip "hook-scripts"
+  fi
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    update-gitignore "${destination}"
+  else
+    subset-skip "gitignore"
+  fi
+  if [[ "${SUBSET_MCP}" == "true" ]]; then
+    copy-mcp-assets "${destination}"
+  else
+    subset-skip "mcp"
+  fi
 
   return 0
 }
@@ -479,13 +678,13 @@ function revert-shared-resources() {
     fi
   done
 
-  # Remove docs/architecture directory if empty or only contains .gitkeep
-  if [[ -d "${dest}/docs/architecture" ]]; then
+  # Remove docs/prompt-reports directory if empty or only contains .gitkeep
+  if [[ -d "${dest}/docs/prompt-reports" ]]; then
     local arch_contents
-    arch_contents=$(ls -A "${dest}/docs/architecture" 2>/dev/null)
+    arch_contents=$(ls -A "${dest}/docs/prompt-reports" 2>/dev/null)
     if [[ -z "${arch_contents}" ]] || [[ "${arch_contents}" == ".gitkeep" ]]; then
-      print-info "Removing ${dest}/docs/architecture"
-      rm -rf "${dest:?}/docs/architecture"
+      print-info "Removing ${dest}/docs/prompt-reports"
+      rm -rf "${dest:?}/docs/prompt-reports"
     fi
   fi
 
@@ -522,6 +721,20 @@ function revert-shared-resources() {
     fi
   fi
 
+  # Remove MCP example pack
+  if [[ -f "${dest}/.vscode/mcp.json.example" ]]; then
+    print-info "Removing ${dest}/.vscode/mcp.json.example"
+    rm -f "${dest}/.vscode/mcp.json.example"
+  fi
+  if [[ -d "${dest}/.github/mcp" ]]; then
+    print-info "Removing ${dest}/.github/mcp"
+    rm -rf "${dest:?}/.github/mcp"
+  fi
+  if [[ -f "${dest}/docs/mcp.md" ]]; then
+    print-info "Removing ${dest}/docs/mcp.md"
+    rm -f "${dest}/docs/mcp.md"
+  fi
+
   # Clean up empty parent directories
   for dir in "${dest}/.github" "${dest}/docs/adr" "${dest}/docs" "${dest}/.vscode" "${dest}/scripts"; do
     if [[ -d "${dir}" ]] && [[ -z "$(ls -A "${dir}" 2>/dev/null)" ]]; then
@@ -543,7 +756,26 @@ function copilot-copy-agents() {
   mkdir -p "${dest_agents}"
 
   print-info "Copying agent files to ${dest_agents}"
-  find "${COPILOT_AGENTS_DIR}" -maxdepth 1 -name "*.md" -type f -exec cp {} "${dest_agents}/" \;
+  # Recursive copy so nested persona files under personas/ are included.
+  # Preserve the relative directory structure under .github/agents/.
+  # When SPECKIT_NARROW_AGENTS is set, restrict to top-level speckit.*.agent.md
+  # files only (excludes personas/ and any non-speckit agents).
+  local src_file rel_path target_dir
+  if [[ "${SPECKIT_NARROW_AGENTS:-false}" == "true" ]]; then
+    while IFS= read -r -d '' src_file; do
+      rel_path="${src_file#"${COPILOT_AGENTS_DIR}/"}"
+      target_dir="${dest_agents}/$(dirname "${rel_path}")"
+      mkdir -p "${target_dir}"
+      cp "${src_file}" "${target_dir}/"
+    done < <(find "${COPILOT_AGENTS_DIR}" -maxdepth 1 -name "speckit.*.agent.md" -type f -print0)
+  else
+    while IFS= read -r -d '' src_file; do
+      rel_path="${src_file#"${COPILOT_AGENTS_DIR}/"}"
+      target_dir="${dest_agents}/$(dirname "${rel_path}")"
+      mkdir -p "${target_dir}"
+      cp "${src_file}" "${target_dir}/"
+    done < <(find "${COPILOT_AGENTS_DIR}" -name "*.md" -type f -print0)
+  fi
 }
 
 # Copy copilot instruction files to the destination.
@@ -627,11 +859,24 @@ function copilot-copy-prompts() {
 
   print-info "Copying prompt files to ${dest_prompts}"
 
+  # Default prompt pattern set; narrow to speckit-only when requested.
+  local -a patterns
+  if [[ "${SPECKIT_NARROW_PROMPTS:-false}" == "true" ]]; then
+    patterns=("speckit.*" "review.speckit-*")
+  else
+    patterns=("${DEFAULT_PROMPT_PATTERNS[@]}")
+  fi
+
   # Copy default prompt files using patterns
-  for pattern in "${DEFAULT_PROMPT_PATTERNS[@]}"; do
+  for pattern in "${patterns[@]}"; do
     # Use find with -name to match patterns
     find "${COPILOT_PROMPTS_DIR}" -maxdepth 1 -name "${pattern}.prompt.md" -type f -exec cp {} "${dest_prompts}/" \; 2>/dev/null || true
   done
+
+  # Skip technology-specific prompts when narrowing to speckit only.
+  if [[ "${SPECKIT_NARROW_PROMPTS:-false}" == "true" ]]; then
+    return 0
+  fi
 
   # Copy technology-specific prompt files
   for tech in "${ALL_TECHS[@]}"; do
@@ -819,16 +1064,16 @@ function copy-adr-template() {
   return 0
 }
 
-# Copy docs/architecture directory to the destination.
+# Copy docs/prompt-reports directory to the destination.
 # Only copies .gitkeep if the destination directory is empty or doesn't exist.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function copy-docs-architecture() {
 
-  local dest="$1/docs/architecture"
+  local dest="$1/docs/prompt-reports"
   mkdir -p "${dest}"
 
-  print-info "Copying docs/architecture to ${dest}"
+  print-info "Copying docs/prompt-reports to ${dest}"
 
   # Check if destination directory has any files (excluding hidden files that start with .)
   local file_count
@@ -1098,6 +1343,40 @@ function remove-vscode-json-property() {
   return 0
 }
 
+# Copy MCP example pack to the destination.
+# Distributes .vscode/mcp.json.example, .github/mcp/ (per-server READMEs) and
+# docs/mcp.md. The .example suffix prevents VS Code from auto-loading the
+# config so the explicit trust prompt remains in effect.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copy-mcp-assets() {
+
+  local dest="$1"
+
+  if [[ -f "${MCP_VSCODE_EXAMPLE}" ]]; then
+    local dest_vscode="${dest}/.vscode"
+    mkdir -p "${dest_vscode}"
+    print-info "Copying .vscode/mcp.json.example to ${dest_vscode}"
+    cp "${MCP_VSCODE_EXAMPLE}" "${dest_vscode}/"
+  fi
+
+  if [[ -d "${MCP_GITHUB_DIR}" ]]; then
+    local dest_mcp="${dest}/.github/mcp"
+    mkdir -p "${dest_mcp}"
+    print-info "Copying .github/mcp to ${dest_mcp}"
+    copy-directory-excluding-git "${MCP_GITHUB_DIR}" "${dest_mcp}"
+  fi
+
+  if [[ -f "${MCP_DOC}" ]]; then
+    local dest_docs="${dest}/docs"
+    mkdir -p "${dest_docs}"
+    print-info "Copying docs/mcp.md to ${dest_docs}"
+    cp "${MCP_DOC}" "${dest_docs}/"
+  fi
+
+  return 0
+}
+
 # Copy a directory without bringing across any nested .git metadata.
 # Arguments (provided as function parameters):
 #   $1=[source directory path]
@@ -1145,6 +1424,10 @@ Technology switches (set to 'true' to include):
 Other options:
     clean=true              Remove destination directories before copying
     revert=true             Remove all promptfiles-managed artifacts and exit
+    subset=<csv>            Restrict copy to named categories (comma-separated).
+                            Valid tokens: agents, hooks, instructions, prompts,
+                            skills, specify, docs, project, speckit, mcp, all.
+                            Omitted or 'all' preserves full-copy behaviour.
     VERBOSE=true            Show all executed commands
 
 Always copied (default/glue layer):
@@ -1155,7 +1438,7 @@ Always copied (default/glue layer):
     Default skills: repository-template, enforcement-audit, architecture-docs, code-review
     Spec-kit agents, prompts, templates and constitution
     Shell, Docker, Makefile instructions and prompts
-    docs/architecture/, docs/prompts/, ADR template, Tech_Radar.md
+    docs/prompt-reports/, docs/prompts/, ADR template, Tech_Radar.md
     project.code-workspace and managed .gitignore section
 
 Examples:

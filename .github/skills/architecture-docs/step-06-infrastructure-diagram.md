@@ -4,18 +4,18 @@ Author cloud infrastructure diagrams in `draw.io` (one diagram per cloud provide
 
 ## Goal
 
-Create (or update) infrastructure diagrams at `docs/architecture/infrastructure/`.
+Create (or update) infrastructure diagrams at `docs/prompt-reports/infrastructure/`.
 
-Also ensure they are linked from the architecture overview at `docs/architecture/README.md`.
+Also ensure they are linked from the architecture overview at `docs/prompt-reports/README.md`.
 
 ## Discovery (run before writing)
 
 ### A. Refresh what is already known
 
 1. Re-read:
-   - `docs/architecture/repository-map.md`
-   - `docs/architecture/component-*.md`
-   - `docs/architecture/likec4/**`
+   - `docs/prompt-reports/repository-map.md`
+   - `docs/prompt-reports/component-*.md`
+   - `docs/prompt-reports/likec4/**`
 2. Extract into working notes:
    - Deployable units and what they need at runtime (compute, storage, network, secrets)
    - Datastores and managed services already evidenced
@@ -47,8 +47,8 @@ Identify which cloud provider(s) are used. Common signals:
 
 For each cloud provider in use, create:
 
-- `docs/architecture/infrastructure/infra-{provider}.drawio` (editable source)
-- `docs/architecture/infrastructure/infra-{provider}.drawio.svg` (rendered export, committed)
+- `docs/prompt-reports/infrastructure/infra-{provider}.drawio` (editable source)
+- `docs/prompt-reports/infrastructure/infra-{provider}.drawio.svg` (rendered export, committed)
 
 Examples:
 
@@ -124,7 +124,7 @@ Include on the diagram:
 
 ### 7) Evidence (mandatory)
 
-In `docs/architecture/infrastructure/README.md`:
+In `docs/prompt-reports/infrastructure/README.md`:
 
 1. For each cloud provider diagram, list the evidence:
    - IaC files and modules used to derive the diagram
@@ -135,11 +135,11 @@ In `docs/architecture/infrastructure/README.md`:
 
 ### 8) Update the architecture index
 
-Update `docs/architecture/README.md` with an **Infrastructure** section that:
+Update `docs/prompt-reports/README.md` with an **Infrastructure** section that:
 
 - Links to each `infra-{provider}.drawio.svg` for inline rendering
 - Links to the corresponding `.drawio` source for editing
-- Links to `docs/architecture/infrastructure/README.md` for evidence and notes
+- Links to `docs/prompt-reports/infrastructure/README.md` for evidence and notes
 
 ## Operating principles (must follow)
 

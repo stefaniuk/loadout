@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.{ts,tsx}"
+description: "Playwright TypeScript Test Generation Instructions"
 ---
 
 # Playwright TypeScript Test Generation Instructions 🎭

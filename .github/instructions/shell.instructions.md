@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.{sh,bash,zsh}"
+description: "Shell Script Engineering Instructions (Bash, CLI wrappers, automation)"
 ---
 
 # Shell Script Engineering Instructions (Bash, CLI wrappers, automation) 🐚

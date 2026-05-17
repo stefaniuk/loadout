@@ -1,5 +1,6 @@
 ---
 applyTo: "{**/Dockerfile,**/Dockerfile.*,**/compose.yaml,**/compose.*.yaml,**/docker-compose.yaml,**/docker-compose.*.yaml}"
+description: "Dockerfile Engineering Instructions (container image development)"
 ---
 
 # Dockerfile Engineering Instructions (container image development) 🐳

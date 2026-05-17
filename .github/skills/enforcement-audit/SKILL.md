@@ -2,6 +2,9 @@
 name: enforcement-audit
 description: Run a compliance audit against a technology instruction file, detecting discrepancies, planning workstreams, implementing fixes, and validating quality gates.
 argument-hint: "Specify the technology to audit: python, typescript, go, docker, rust, shell, makefile, terraform, reactjs, tauri, playwright-python, or playwright-typescript"
+license: MIT
+version: 1.0.0
+allowed-tools: []
 ---
 
 # Enforcement Audit Skill
@@ -104,3 +107,7 @@ Enumerate every artefact of the resolved technology in the repository, detect an
 - Prefer automation (scripts, linters) over manual spot checks where feasible.
 - Maintain ASCII-only text unless the repository already contains Unicode in the touched files.
 - When information is missing, record **Unknown from code — {suggested action}** instead of guessing.
+
+## Examples
+
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) — a full `python` audit producing the inventory and alignment plan, implementing fixes across five workstreams, and validating with `make lint` and `make test`.

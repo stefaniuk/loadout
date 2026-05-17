@@ -2,6 +2,9 @@
 name: architecture-docs
 description: Generate architecture documentation for a repository, producing structured artefacts from repository maps to C4 models and infrastructure diagrams.
 argument-hint: "Specify step: repository-map, component-catalogue, runtime-flows, domain-analysis, c4-model, infrastructure-diagram, or all"
+license: MIT
+version: 1.0.0
+allowed-tools: []
 ---
 
 # Architecture Documentation Skill
@@ -12,15 +15,15 @@ This skill generates architecture documentation following a structured six-step 
 
 Resolve the step from the user's input (`$ARGUMENTS`). Match against the table below.
 
-| Step | Slug                     | Output path                                | Dependencies |
-| ---- | ------------------------ | ------------------------------------------ | ------------ |
-| 01   | repository-map           | `docs/architecture/repository-map.md`      | None         |
-| 02   | component-catalogue      | `docs/architecture/component-*.md`         | Step 01      |
-| 03   | runtime-flows            | `docs/architecture/runtime-flow-*.md`      | Steps 01–02  |
-| 04   | domain-analysis          | `docs/architecture/domain-*.md`            | Steps 01–03  |
-| 05   | c4-model                 | `docs/architecture/*.c4`                   | Steps 01–04  |
-| 06   | infrastructure-diagram   | `docs/architecture/cloud-infrastructure.*` | Steps 01–05  |
-| all  | (all steps sequentially) | All of the above                           | None         |
+| Step | Slug                     | Output path                                  | Dependencies |
+| ---- | ------------------------ | -------------------------------------------- | ------------ |
+| 01   | repository-map           | `docs/prompt-reports/repository-map.md`      | None         |
+| 02   | component-catalogue      | `docs/prompt-reports/component-*.md`         | Step 01      |
+| 03   | runtime-flows            | `docs/prompt-reports/runtime-flow-*.md`      | Steps 01–02  |
+| 04   | domain-analysis          | `docs/prompt-reports/domain-*.md`            | Steps 01–03  |
+| 05   | c4-model                 | `docs/prompt-reports/*.c4`                   | Steps 01–04  |
+| 06   | infrastructure-diagram   | `docs/prompt-reports/cloud-infrastructure.*` | Steps 01–05  |
+| all  | (all steps sequentially) | All of the above                             | None         |
 
 If "all" is specified, run steps 01 through 06 in sequence. If a single step is specified, check that its dependency outputs exist before proceeding.
 
@@ -33,7 +36,7 @@ Before starting any step:
 
 ## Goal
 
-Produce accurate, evidence-based architecture documentation for the repository. Each step targets a specific output artefact. Update the `docs/architecture/README.md` index after each step.
+Produce accurate, evidence-based architecture documentation for the repository. Each step targets a specific output artefact. Update the `docs/prompt-reports/README.md` index after each step.
 
 ## Workflow Per Step
 
@@ -67,7 +70,7 @@ After producing the output for any step:
 
 1. Validate all evidence links resolve to real files and line ranges.
 2. Use **Unknown from code — {action}** for anything that cannot be determined from the codebase.
-3. Update the `docs/architecture/README.md` index to include the new artefact.
+3. Update the `docs/prompt-reports/README.md` index to include the new artefact.
 
 ## Output Requirements
 
@@ -75,3 +78,7 @@ After producing the output for any step:
 - Maintain ASCII-only text unless the repository already contains Unicode.
 - When information is missing, record **Unknown from code — {suggested action}** instead of guessing.
 - Prefix file path links with `/` for absolute repository paths.
+
+## Examples
+
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) — full end-to-end run of `step all` on a small FastAPI service, producing every artefact from the repository map through to the AWS infrastructure diagram.

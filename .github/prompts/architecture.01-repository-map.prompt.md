@@ -1,5 +1,6 @@
 ---
 agent: agent
+argument-hint: "Optional: target paths or scope for the repository-map step"
 description: Build a repository map to document architecture, technology stack, and repo-level conventions (evidence-first)
 ---
 

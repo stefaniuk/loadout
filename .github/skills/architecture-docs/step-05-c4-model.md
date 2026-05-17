@@ -4,19 +4,19 @@ Author the C4 model in LikeC4 (Context, Container, Component) — evidence-first
 
 ## Goal
 
-Create (or update) the C4 model in `docs/architecture/likec4/` using LikeC4 DSL.
+Create (or update) the C4 model in `docs/prompt-reports/likec4/` using LikeC4 DSL.
 
-Also ensure the model is linked from the architecture overview at `docs/architecture/README.md`.
+Also ensure the model is linked from the architecture overview at `docs/prompt-reports/README.md`.
 
 ## Discovery (run before writing)
 
 ### A. Refresh what is already known
 
 1. Re-read:
-   - `docs/architecture/repository-map.md`
-   - `docs/architecture/component-*.md`
-   - `docs/architecture/runtime-flow-*.md`
-   - `docs/architecture/domain-*.md`
+   - `docs/prompt-reports/repository-map.md`
+   - `docs/prompt-reports/component-*.md`
+   - `docs/prompt-reports/runtime-flow-*.md`
+   - `docs/prompt-reports/domain-*.md`
 2. Extract into working notes:
    - Deployable units → candidate **containers**
    - Components within each unit → candidate **components**
@@ -37,10 +37,10 @@ Also ensure the model is linked from the architecture overview at `docs/architec
 
 ### 1) Lay out the LikeC4 workspace
 
-Create or update the following structure under `docs/architecture/likec4/`:
+Create or update the following structure under `docs/prompt-reports/likec4/`:
 
 ```text
-docs/architecture/likec4/
+docs/prompt-reports/likec4/
   README.md              # short, links to views and explains naming
   model.c4               # high-level model: systems, actors, top-level relationships
   containers.c4          # containers per system, top-level relationships between containers
@@ -127,21 +127,21 @@ In `styles.c4`:
 
 ### 7) README for the LikeC4 model
 
-In `docs/architecture/likec4/README.md`:
+In `docs/prompt-reports/likec4/README.md`:
 
 1. Briefly explain:
    - What is modelled (system, containers, components)
    - Naming conventions used
    - How to render views (link to LikeC4 CLI/docs)
 2. Link to:
-   - `docs/architecture/repository-map.md`
-   - `docs/architecture/component-*.md`
-   - `docs/architecture/runtime-flow-*.md`
-   - `docs/architecture/domain-*.md`
+   - `docs/prompt-reports/repository-map.md`
+   - `docs/prompt-reports/component-*.md`
+   - `docs/prompt-reports/runtime-flow-*.md`
+   - `docs/prompt-reports/domain-*.md`
 
 ### 8) Update the architecture index
 
-Update `docs/architecture/README.md` with a **C4 Model (LikeC4)** section linking to the LikeC4 README and the main views.
+Update `docs/prompt-reports/README.md` with a **C4 Model (LikeC4)** section linking to the LikeC4 README and the main views.
 
 ## Operating principles (must follow)
 

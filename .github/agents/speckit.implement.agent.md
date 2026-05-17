@@ -1,5 +1,6 @@
 ---
 description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
+argument-hint: "Optional: additional context for the implement step"
 handoffs:
   - label: Run Checklist
     agent: speckit.checklist

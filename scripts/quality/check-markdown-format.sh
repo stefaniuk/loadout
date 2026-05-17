@@ -55,7 +55,42 @@ function main() {
     else
       files="$files" run-markdownlint-in-docker
     fi
+    files="$files" check-frontmatter-blank-line
   fi
+}
+
+# Enforce a blank line between the YAML frontmatter closing `---` and the
+# following content. `markdownlint` does not provide a built-in rule for this
+# (MD022 ignores frontmatter delimiters), so we enforce it here.
+# Arguments (provided as environment variables):
+#   files=[files to check]
+function check-frontmatter-blank-line() {
+
+  python3 - <<'PY'
+import os, sys
+files = os.environ.get("files", "").split()
+violations = []
+for path in files:
+    try:
+        with open(path, encoding="utf-8") as fh:
+            lines = fh.read().splitlines()
+    except (OSError, UnicodeDecodeError):
+        continue
+    if not lines or lines[0].rstrip() != "---":
+        continue
+    end = None
+    for i in range(1, len(lines)):
+        if lines[i].rstrip() == "---":
+            end = i
+            break
+    if end is None:
+        continue
+    if end + 1 < len(lines) and lines[end + 1].strip() != "":
+        violations.append(f"{path}:{end + 2}: missing blank line after YAML frontmatter")
+if violations:
+    sys.stderr.write("\n".join(violations) + "\n")
+    sys.exit(1)
+PY
 }
 
 # Run markdownlint natively.

@@ -1,5 +1,6 @@
 ---
 agent: agent
+argument-hint: "Optional: target paths or scope for the c4-model step"
 description: Produce C4 model diagrams (Context, Container, Component) in LikeC4 format (https://likec4.dev/, evidence-first, consistent naming)
 ---
 

@@ -7,7 +7,7 @@ description: Generate pull request review using architecture overview context
 - Read the [constitution](../../.specify/memory/constitution.md) and honour its non-negotiable rules.
 - Read the Pull Request template at [pull_request_template.md](../pull_request_template.md) so the generated content mirrors it exactly.
 - Read the technology-specific instructions for every language touched in the diff (for example [python.instructions.md](../instructions/python.instructions.md), [shell.instructions.md](../instructions/shell.instructions.md), [makefile.instructions.md](../instructions/makefile.instructions.md)).
-- Review the design context under `docs/architecture/` to describe affected components accurately.
+- Review the design context under `docs/prompt-reports/` to describe affected components accurately.
 
 ## Goal 🎯
 
@@ -16,7 +16,7 @@ Produce a thorough, evidence-based peer review of the current branch changes com
 Your output must be grounded in:
 
 - The actual diff between this branch and `main`
-- The existing design overview documentation under `docs/architecture/`
+- The existing design overview documentation under `docs/prompt-reports/`
 
 Where evidence cannot be found, record **Unknown from code – {suggested action}**.
 
@@ -26,7 +26,7 @@ Where evidence cannot be found, record **Unknown from code – {suggested action
 
 ### A. Load design overview context (read before reviewing code)
 
-1. Read the repository documentation that exists under `docs/architecture/`:
+1. Read the repository documentation that exists under `docs/prompt-reports/`:
    - `README.md`
    - `repository-map.md`
    - `loc-report.txt`
@@ -39,10 +39,10 @@ Where evidence cannot be found, record **Unknown from code – {suggested action
 
 ### B. Establish an accurate diff against `main`
 
-Run the labelled batch below **once** from the repository root. Output is written to `docs/prompts/git-pr-review-diff.txt` so that large diffs do not overflow the terminal context.
+Run the labelled batch below **once** from the repository root. Output is written to `docs/prompt-reports/git-pr-review-diff.txt` so that large diffs do not overflow the terminal context.
 
 ```bash
-_diff_file="docs/prompts/git-pr-review-diff.txt"
+_diff_file="docs/prompt-reports/git-pr-review-diff.txt"
 : > "$_diff_file"
 if ! git show-ref --verify --quiet refs/heads/main; then
   printf '\n>>> %s\n' "git fetch origin main:main" | tee -a "$_diff_file"
@@ -59,7 +59,7 @@ done
 printf '\nDiff captured → %s (%s bytes)\n' "$_diff_file" "$(wc -c < "$_diff_file")"
 ```
 
-After the script completes, **read the file `docs/prompts/git-pr-review-diff.txt`** in full and use its contents as the authoritative diff evidence for the rest of this review.
+After the script completes, **read the file `docs/prompt-reports/git-pr-review-diff.txt`** in full and use its contents as the authoritative diff evidence for the rest of this review.
 
 1. Use `git diff --stat main...HEAD` for the overview and `git diff main...HEAD` for detailed evidence.
 2. Capture branch/working-tree information from `git status -sb` and `git rev-parse --abbrev-ref HEAD`.
@@ -83,7 +83,7 @@ If the diff cannot be produced, record **Unknown from code – run git diff agai
 ### C. Detect prior reviews and new commits (incremental review)
 
 1. Define the review output file path for today:
-   - `docs/prompts/pr-review-YYYYMMDD.report.md` (use today's date)
+   - `docs/prompt-reports/pr-review-YYYYMMDD.report.md` (use today's date)
 2. If the file already exists:
    - Read it fully.
    - Treat it as the previous review baseline for this branch.
@@ -201,7 +201,7 @@ Use the following checklist and report findings with evidence links and file pat
 
 Write all review output to:
 
-- `docs/prompts/pr-review-YYYYMMDD.report.md` (use today's date)
+- `docs/prompt-reports/pr-review-YYYYMMDD.report.md` (use today's date)
 
 If the file exists, append a new section:
 

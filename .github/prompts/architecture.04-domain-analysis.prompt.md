@@ -1,5 +1,6 @@
 ---
 agent: agent
+argument-hint: "Optional: target paths or scope for the domain-analysis step"
 description: Domain analysis (DDD) to document bounded contexts, language, events, and context map (evidence-first)
 ---
 

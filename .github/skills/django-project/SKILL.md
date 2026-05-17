@@ -2,6 +2,9 @@
 name: django-project
 description: Scaffold and evolve Django projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.
 argument-hint: "Describe the Django project action: scaffold, add capability, or evolve an existing project"
+license: MIT
+version: 1.0.0
+allowed-tools: []
 ---
 
 # Django Project Skill 🧩
@@ -151,6 +154,12 @@ When executing this skill, produce:
 - A short validation checklist using the canonical quality gates
 
 When information is missing, record **Unknown from code – {suggested action}** instead of guessing.
+
+---
+
+## Examples 📚
+
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) — scaffolding a new `orders` Django project with PostgreSQL, structured logging, request-ID middleware, and health endpoints, ending with all quality gates green.
 
 ---
 

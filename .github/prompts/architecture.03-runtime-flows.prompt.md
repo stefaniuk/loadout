@@ -1,5 +1,6 @@
 ---
 agent: agent
+argument-hint: "Optional: target paths or scope for the runtime-flows step"
 description: Document key runtime flows with diagrams (trigger → orchestration → data lineage), evidence-first
 ---
 

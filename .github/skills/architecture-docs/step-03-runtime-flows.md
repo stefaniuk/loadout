@@ -4,17 +4,17 @@ Document key runtime flows with diagrams (trigger → orchestration → data lin
 
 ## Goal
 
-Create (or update) runtime flows at `docs/architecture/runtime-flow-*.md`.
+Create (or update) runtime flows at `docs/prompt-reports/runtime-flow-*.md`.
 
-Also ensure they are linked from the architecture overview at `docs/architecture/README.md`.
+Also ensure they are linked from the architecture overview at `docs/prompt-reports/README.md`.
 
 ## Discovery (run before writing)
 
 ### A. Refresh what is already known
 
 1. Review:
-   - `docs/architecture/repository-map.md`
-   - All component documents: `docs/architecture/component-*.md`
+   - `docs/prompt-reports/repository-map.md`
+   - All component documents: `docs/prompt-reports/component-*.md`
 2. Extract into working notes:
    - All entry points (HTTP, CLI, schedulers, message consumers)
    - Known external integrations
@@ -60,7 +60,7 @@ Search for and open the files that define or register:
 
 ### 2) Create one document per flow (consistent naming and scope)
 
-For each flow, create `docs/architecture/runtime-flow-[XXX]-[name].md`, where:
+For each flow, create `docs/prompt-reports/runtime-flow-[XXX]-[name].md`, where:
 
 - `[XXX]` is a stable numeric order (e.g. `001`, `002`, `003`, ...) so links don't churn
 - `[name]` is short and meaningful (kebab-case)
@@ -169,7 +169,7 @@ If any item cannot be supported by code/config, record:
 
 ### 5) Update the index
 
-Update `docs/architecture/README.md` with a **Runtime Flows** section linking to every flow document (in `[XXX]` order).
+Update `docs/prompt-reports/README.md` with a **Runtime Flows** section linking to every flow document (in `[XXX]` order).
 
 Also add (or update) a brief flow index table in the README (evidence-based):
 

@@ -1,5 +1,6 @@
 ---
 agent: agent
+argument-hint: "Optional: target paths/files to audit (defaults to whole repository)"
 description: Enforce repository-wide compliance with go.instructions.md
 ---
 

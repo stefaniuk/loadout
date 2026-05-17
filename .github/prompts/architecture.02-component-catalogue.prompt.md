@@ -1,5 +1,6 @@
 ---
 agent: agent
+argument-hint: "Optional: target paths or scope for the component-catalogue step"
 description: Create component-level summaries (responsibilities, interfaces, data, and extension points)
 ---
 

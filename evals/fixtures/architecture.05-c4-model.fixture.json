@@ -1,0 +1,6 @@
+{
+  "prompt": ".github/prompts/architecture.05-c4-model.prompt.md",
+  "required_frontmatter_fields": ["description"],
+  "must_contain_substrings": ["$ARGUMENTS", "skill"],
+  "tolerances": { "token_count": 0.1 }
+}

@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.py"
+description: "Python Engineering Instructions (CLI + API, framework-agnostic)"
 ---
 
 # Python Engineering Instructions (CLI + API, framework-agnostic) 🐍

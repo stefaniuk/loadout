@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.{rs,ts,tsx,js,jsx}"
+description: "Tauri Engineering Instructions"
 ---
 
 # Tauri Engineering Instructions 🖥️

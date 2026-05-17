@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.go"
+description: "Go Engineering Instructions (CLI + API, framework-agnostic)"
 ---
 
 # Go Engineering Instructions (CLI + API, framework-agnostic) 🐹

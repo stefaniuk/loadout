@@ -1,6 +1,9 @@
 ---
 description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.
+argument-hint: "Optional: additional context for the analyze step"
 tools: [search, read_file, list_dir, semantic_search, grep_search, file_search]
+subagent: true
+user-invocable: false
 handoffs:
   - label: Start Implementation
     agent: speckit.implement

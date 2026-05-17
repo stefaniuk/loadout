@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.py"
+description: "Playwright Python Test Generation Instructions"
 ---
 
 # Playwright Python Test Generation Instructions 🎭

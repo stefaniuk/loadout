@@ -27,7 +27,7 @@ Inspect and use only information evidenced in:
 
 - Existing `README.md` (if present)
 - `.github/contributing.md`, `LICENCE.md`, `.github/SECURITY.md`, `.github/CODE_OF_CONDUCT.md`
-- `docs/` (especially files in the `docs/architecture` directory)
+- `docs/` (especially files in the `docs/prompt-reports` directory)
 - Build/run metadata:
   - Node: `package.json`, `pnpm-lock.yaml`, `yarn.lock`
   - Python: `pyproject.toml`, `requirements.txt`, `uv.lock`

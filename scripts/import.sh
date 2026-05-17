@@ -125,7 +125,7 @@ function collect-copilot-changes() {
   local source_dir="$1"
 
   compare-file "${source_dir}" ".github/copilot-instructions.md"
-  compare-directory-files "${source_dir}" ".github/agents" "*.md"
+  compare-directory-recursive "${source_dir}" ".github/agents"
   compare-directory-files "${source_dir}" ".github/hooks" "*.json"
   compare-directory-files "${source_dir}" ".github/instructions" "*.instructions.md"
   compare-directory-recursive "${source_dir}" ".github/instructions/includes"

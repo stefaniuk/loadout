@@ -1,5 +1,6 @@
 ---
 description: Create or update the feature specification from a natural language feature description.
+argument-hint: "Optional: additional context for the specify step"
 tools:
   [
     search,

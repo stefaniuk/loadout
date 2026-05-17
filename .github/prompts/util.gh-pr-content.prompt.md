@@ -7,7 +7,7 @@ description: Create pull request content from the current branch changes
 - Read the [constitution](../../.specify/memory/constitution.md) and honour its non-negotiable rules.
 - Read the Pull Request template at [pull_request_template.md](../pull_request_template.md) so the generated content mirrors it exactly.
 - Read the technology-specific instructions for every language touched in the diff (for example [python.instructions.md](../instructions/python.instructions.md), [shell.instructions.md](../instructions/shell.instructions.md), [makefile.instructions.md](../instructions/makefile.instructions.md)).
-- Review the design context under `docs/architecture/` to describe affected components accurately.
+- Review the design context under `docs/prompt-reports/` to describe affected components accurately.
 
 ## Goal 🎯
 
@@ -19,10 +19,10 @@ Craft a diff-driven pull request title and body, ready to copy/paste, that compa
 
 ### A. Establish the diff against `main`
 
-Run the labelled batch below **once** from the repository root. Output is written to `docs/prompts/git-pr-content-diff.txt` so that large diffs do not overflow the terminal context.
+Run the labelled batch below **once** from the repository root. Output is written to `docs/prompt-reports/git-pr-content-diff.txt` so that large diffs do not overflow the terminal context.
 
 ```bash
-_diff_file="docs/prompts/git-pr-content-diff.txt"
+_diff_file="docs/prompt-reports/git-pr-content-diff.txt"
 : > "$_diff_file"
 if ! git show-ref --verify --quiet refs/heads/main; then
   printf '\n>>> %s\n' "git fetch origin main:main" | tee -a "$_diff_file"
@@ -39,7 +39,7 @@ done
 printf '\nDiff captured → %s (%s bytes)\n' "$_diff_file" "$(wc -c < "$_diff_file")"
 ```
 
-After the script completes, **read the file `docs/prompts/git-pr-content-diff.txt`** in full and use its contents as the authoritative diff evidence for the rest of this review.
+After the script completes, **read the file `docs/prompt-reports/git-pr-content-diff.txt`** in full and use its contents as the authoritative diff evidence for the rest of this review.
 
 - Use `git diff --stat main...HEAD` for the overview and `git diff main...HEAD` for detailed evidence.
 - Capture branch/working-tree information from `git status -sb` and `git rev-parse --abbrev-ref HEAD`.
@@ -47,7 +47,7 @@ After the script completes, **read the file `docs/prompts/git-pr-content-diff.tx
 
 ### B. Summarise behavioural impact
 
-1. Enumerate the files, components, and flows touched (map component names to `docs/architecture/*`).
+1. Enumerate the files, components, and flows touched (map component names to `docs/prompt-reports/*`).
 2. Identify change categories (bug fix, feature, refactor, documentation, tooling) and note any public interfaces affected.
 3. Record configuration, schema, or dependency updates.
 4. Capture open questions as **Unknown from code – {action needed}**.
@@ -61,7 +61,7 @@ After the script completes, **read the file `docs/prompts/git-pr-content-diff.tx
 ### D. Detect prior content and determine output file
 
 1. Define the output file path for today:
-   - `docs/prompts/pr-content-YYYYMMDD.report.md` (use today's date)
+   - `docs/prompt-reports/pr-content-YYYYMMDD.report.md` (use today's date)
 2. If the file already exists:
    - Read it fully.
    - Compare against the current diff to identify what has changed since the last run.
@@ -99,7 +99,7 @@ After the script completes, **read the file `docs/prompts/git-pr-content-diff.tx
 8. **Call out follow-ups**
    - If additional work is deferred, list it succinctly (for example documentation gaps, pending ADRs) under Description or Context as bullet points.
 9. **Write the output file (required)**
-   - Write all generated PR content to `docs/prompts/pr-content-YYYYMMDD.report.md` (use today's date).
+   - Write all generated PR content to `docs/prompt-reports/pr-content-YYYYMMDD.report.md` (use today's date).
    - If the file exists, overwrite it with the updated content.
    - Include a **Generated** footer with the current timestamp.
 
@@ -107,7 +107,7 @@ After the script completes, **read the file `docs/prompts/git-pr-content-diff.tx
 
 ## Output requirements 📋
 
-- Write the generated content to `docs/prompts/pr-content-YYYYMMDD.report.md`.
+- Write the generated content to `docs/prompt-reports/pr-content-YYYYMMDD.report.md`.
 - Produce copy-ready raw Markdown using the structure below (include the title and every section in order).
 - Replace placeholder ellipses with actual content; never leave template instructions in the final text.
 - Use workspace-relative Markdown links (for example `[scripts/apply.sh](scripts/apply.sh#L10-L40)`).

@@ -6,7 +6,7 @@ Use this shared baseline for producing and maintaining architecture overview doc
 
 ## Scope 🎯
 
-- [CBO-SCP-001] Produce and maintain Markdown documents under `docs/architecture/`.
+- [CBO-SCP-001] Produce and maintain Markdown documents under `docs/prompt-reports/`.
 - [CBO-SCP-002] Treat the repository as the only authoritative source.
 
 ## Hard rules 🚫
@@ -51,7 +51,7 @@ Use this shared baseline for producing and maintaining architecture overview doc
 - [CBO-DSC-001] List top-level directories (e.g. `ls`) and identify likely source roots.
 - [CBO-DSC-002] Identify language/tooling indicators (`Makefile`, `pyproject.toml`, `package.json`, `go.mod`, etc.).
 - [CBO-DSC-003] Identify CI/deploy indicators (`.github/workflows/`, `Dockerfile`, Helm, Kubernetes, Terraform).
-- [CBO-DSC-004] Record any new findings in `docs/architecture/repository-map.md` (even if partial).
+- [CBO-DSC-004] Record any new findings in `docs/prompt-reports/repository-map.md` (even if partial).
 
 ### Prompt execution order
 
@@ -70,7 +70,7 @@ Use this shared baseline for producing and maintaining architecture overview doc
 
 ## Indexing and navigation 🗂️
 
-- [CBO-NAV-001] Treat `docs/architecture/README.md` as the canonical landing page.
+- [CBO-NAV-001] Treat `docs/prompt-reports/README.md` as the canonical landing page.
 - [CBO-NAV-002] Link every `component-*.md`, `runtime-flow-*.md` and `domain-*` document from the README.
 - [CBO-NAV-003] Maintain an **Unknowns / to verify** section in the README for follow-up work.
 

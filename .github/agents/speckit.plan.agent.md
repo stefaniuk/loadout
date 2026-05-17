@@ -1,5 +1,6 @@
 ---
 description: Execute the implementation planning workflow using the plan template to generate design artifacts.
+argument-hint: "Optional: additional context for the plan step"
 handoffs: 
   - label: Create Tasks
     agent: speckit.tasks
