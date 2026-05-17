@@ -83,7 +83,13 @@ Grouped by prefix, alphabetical within each group.
 
 | File | Description |
 | ---- | ----------- |
-| [util.doc-readme-update.prompt.md](util.doc-readme-update.prompt.md) | Create or update the top-level README.md following readme.instructions.md: canonical structure, evidence-based content, and validation check |
+| [util.doc-system.prompt.md](util.doc-system.prompt.md) | Establish, synchronise, audit, or review the repository documentation system by running the system-documentation skill |
 | [util.gh-pr-content.prompt.md](util.gh-pr-content.prompt.md) | Create pull request content from the current branch changes |
 | [util.gh-pr-review.prompt.md](util.gh-pr-review.prompt.md) | Generate pull request review using architecture overview context |
 | [util.git-commit-message.prompt.md](util.git-commit-message.prompt.md) | Generate conventional commit message and description from the current changes diff |
+
+### `other.`
+
+| File | Description |
+| ---- | ----------- |
+| [spec.consolidate.prompt.md](spec.consolidate.prompt.md) | Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline while excludi |

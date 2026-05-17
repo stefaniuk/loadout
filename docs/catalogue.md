@@ -4,18 +4,18 @@ Auto-generated index of every Copilot customisation artefact in this repository.
 
 > **Do not edit by hand.** Regenerate with `make catalogue`.
 
-Pack breakdown: core=51, speckit=21 (see [docs/conventions.md#plugin-packs](conventions.md#plugin-packs) for the boundary).
+Pack breakdown: core=54, speckit=21 (see [docs/conventions.md#plugin-packs](conventions.md#plugin-packs) for the boundary).
 
 ## Summary
 
 | Type | Count |
 | ---- | ----- |
 | Instructions | 14 |
-| Prompts | 37 |
+| Prompts | 38 |
 | Agents | 13 |
-| Skills | 6 |
+| Skills | 8 |
 | Hooks | 2 |
-| **Total** | **72** |
+| **Total** | **75** |
 
 ## Instructions
 
@@ -64,6 +64,7 @@ Pack breakdown: core=51, speckit=21 (see [docs/conventions.md#plugin-packs](conv
 | review.speckit-code | [review.speckit-code](../.github/prompts/review.speckit-code.prompt.md) | `agent` | speckit | review | Review the implementation against the entire spec-driven development documentation set (including the constitution) for compliance; detect and explain drift among code↔spec↔plan↔tasks - provide prioritised, actionable recommendations (including refactoring) to bring all artefacts into alignment |
 | review.speckit-documentation | [review.speckit-documentation](../.github/prompts/review.speckit-documentation.prompt.md) | `agent` | speckit | review | Review the entire spec-driven development documentation set (including the constitution) for consistency, cohesion, coherence, and traceability; identify issues - provide prioritised, actionable, tech-aligned recommendations to bring all artefacts into alignment |
 | review.speckit-test | [review.speckit-test](../.github/prompts/review.speckit-test.prompt.md) | `agent` | speckit | review | Review the test automation implementation against the specification and the desired test pyramid shape; detect and explain misalignment - prioritise unit tests, identify high-value gaps and brittle tests, and provide actionable recommendations (including refactoring) to improve behavioural confidence |
+| spec.consolidate | [spec.consolidate](../.github/prompts/spec.consolidate.prompt.md) | `agent` | core | spec | Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline while excluding plan.md and tasks.md from the final output. |
 | speckit.analyze | [speckit.analyze](../.github/prompts/speckit.analyze.prompt.md) | `speckit.analyze` | speckit | speckit | Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation. |
 | speckit.checklist | [speckit.checklist](../.github/prompts/speckit.checklist.prompt.md) | `speckit.checklist` | speckit | speckit | Generate a custom checklist for the current feature based on user requirements. |
 | speckit.clarify | [speckit.clarify](../.github/prompts/speckit.clarify.prompt.md) | `speckit.clarify` | speckit | speckit | Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec. |
@@ -73,7 +74,7 @@ Pack breakdown: core=51, speckit=21 (see [docs/conventions.md#plugin-packs](conv
 | speckit.specify | [speckit.specify](../.github/prompts/speckit.specify.prompt.md) | `speckit.specify` | speckit | speckit | Create or update the feature specification from a natural language feature description. |
 | speckit.tasks | [speckit.tasks](../.github/prompts/speckit.tasks.prompt.md) | `speckit.tasks` | speckit | speckit | Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts. |
 | speckit.taskstoissues | [speckit.taskstoissues](../.github/prompts/speckit.taskstoissues.prompt.md) | `speckit.taskstoissues` | speckit | speckit | Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts. |
-| util.doc-readme-update | [util.doc-readme-update](../.github/prompts/util.doc-readme-update.prompt.md) | — | core | util | Create or update the top-level README.md following readme.instructions.md: canonical structure, evidence-based content, and validation checklist. |
+| util.doc-system | [util.doc-system](../.github/prompts/util.doc-system.prompt.md) | `agent` | core | util | Establish, synchronise, audit, or review the repository documentation system by running the system-documentation skill. |
 | util.gh-pr-content | [util.gh-pr-content](../.github/prompts/util.gh-pr-content.prompt.md) | — | core | util | Create pull request content from the current branch changes |
 | util.gh-pr-review | [util.gh-pr-review](../.github/prompts/util.gh-pr-review.prompt.md) | — | core | util | Generate pull request review using architecture overview context |
 | util.git-commit-message | [util.git-commit-message](../.github/prompts/util.git-commit-message.prompt.md) | — | core | util | Generate conventional commit message and description from the current changes diff |
@@ -106,6 +107,8 @@ Pack breakdown: core=51, speckit=21 (see [docs/conventions.md#plugin-packs](conv
 | enforcement-audit | [enforcement-audit](../.github/skills/enforcement-audit/SKILL.md) | 1.0.0 | — | Run a compliance audit against a technology instruction file, detecting discrepancies, planning workstreams, implementing fixes, and validating quality gates. |
 | fastapi-project | [fastapi-project](../.github/skills/fastapi-project/SKILL.md) | 1.0.0 | — | Scaffold and evolve FastAPI projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md. |
 | repository-template | [repository-template](../.github/skills/repository-template/SKILL.md) | 1.0.0 | — | Create code repository from template, or/and update it in parts from the content of the template that contains example of use of tools like make, pre-commit git hooks, Docker, and quality checks. |
+| spec-consolidation | [spec-consolidation](../.github/skills/spec-consolidation/SKILL.md) | 1.2.0 | — | Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline, excluding plan.md and tasks.md from the final output. |
+| system-documentation | [system-documentation](../.github/skills/system-documentation/SKILL.md) | 1.2.0 | — | Establish, synchronise, audit, and review an opinionated repository documentation system across entrypoints, architecture, reference, explanation, tutorials, how-to guides, operations, audience indexes, and governance/lifecycle artefacts. |
 
 ## Hooks
 
@@ -144,4 +147,4 @@ Instruction-only artefacts without an enforce prompt — see [conventions.md](co
 
 ---
 
-_Generated at 2026-05-17T06:18:54Z from revision `4f69b76`._
+_Generated at 2026-05-17T17:41:06Z from revision `f9b2ed2`._

@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-05-17T06:18:54Z",
-  "sourceRevision": "4f69b76",
+  "generatedAt": "2026-05-17T17:41:06Z",
+  "sourceRevision": "f9b2ed2",
   "counts": {
     "instruction": 14,
-    "prompt": 37,
+    "prompt": 38,
     "agent": 13,
-    "skill": 6,
+    "skill": 8,
     "hook": 2,
-    "total": 72,
+    "total": 75,
     "packs": 12,
     "byPack": {
-      "core": 51,
+      "core": 54,
       "speckit": 21
     }
   },
@@ -582,6 +582,22 @@
       "pack": "speckit"
     },
     {
+      "id": "prompt:.github/prompts/spec.consolidate.prompt.md",
+      "type": "prompt",
+      "path": ".github/prompts/spec.consolidate.prompt.md",
+      "name": "spec.consolidate",
+      "description": "Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline while excluding plan.md and tasks.md from the final output.",
+      "applyTo": null,
+      "tags": [
+        "spec"
+      ],
+      "metadata": {
+        "agent": "agent",
+        "argumentHint": "Optional: step (spec, data-model, research, quickstart, contracts, checklists, all) and baseline (working-tree, HEAD, default-branch) — defaults to all on the working tree"
+      },
+      "pack": "core"
+    },
+    {
       "id": "prompt:.github/prompts/speckit.analyze.prompt.md",
       "type": "prompt",
       "path": ".github/prompts/speckit.analyze.prompt.md",
@@ -726,18 +742,18 @@
       "pack": "speckit"
     },
     {
-      "id": "prompt:.github/prompts/util.doc-readme-update.prompt.md",
+      "id": "prompt:.github/prompts/util.doc-system.prompt.md",
       "type": "prompt",
-      "path": ".github/prompts/util.doc-readme-update.prompt.md",
-      "name": "util.doc-readme-update",
-      "description": "Create or update the top-level README.md following readme.instructions.md: canonical structure, evidence-based content, and validation checklist.",
+      "path": ".github/prompts/util.doc-system.prompt.md",
+      "name": "util.doc-system",
+      "description": "Establish, synchronise, audit, or review the repository documentation system by running the system-documentation skill.",
       "applyTo": null,
       "tags": [
         "util"
       ],
       "metadata": {
-        "agent": null,
-        "argumentHint": null
+        "agent": "agent",
+        "argumentHint": "Optional: step (foundation, architecture, reference, explanation, how-to, tutorials, operations, audience-indexes, governance, all), mode (establish, sync, audit, pre-pr-review), and scope (path, feature dir, or changed files)"
       },
       "pack": "core"
     },
@@ -1193,6 +1209,42 @@
         "license": "MIT",
         "allowedTools": [],
         "argumentHint": "Name the capability to add, remove, or improve from the repository template"
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/spec-consolidation/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/spec-consolidation/SKILL.md",
+      "name": "spec-consolidation",
+      "description": "Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline, excluding plan.md and tasks.md from the final output.",
+      "applyTo": null,
+      "tags": [
+        "spec-consolidation"
+      ],
+      "metadata": {
+        "version": "1.2.0",
+        "license": "MIT",
+        "allowedTools": [],
+        "argumentHint": "Specify step: spec, data-model, research, quickstart, contracts, checklists, or all. Optional baseline: working-tree, HEAD, or default-branch"
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/system-documentation/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/system-documentation/SKILL.md",
+      "name": "system-documentation",
+      "description": "Establish, synchronise, audit, and review an opinionated repository documentation system across entrypoints, architecture, reference, explanation, tutorials, how-to guides, operations, audience indexes, and governance/lifecycle artefacts.",
+      "applyTo": null,
+      "tags": [
+        "system-documentation"
+      ],
+      "metadata": {
+        "version": "1.2.0",
+        "license": "MIT",
+        "allowedTools": [],
+        "argumentHint": "Optional: step (foundation, architecture, reference, explanation, how-to, tutorials, operations, audience-indexes, governance, all), mode (establish, sync, audit, pre-pr-review), and scope (path, feature dir, or changed files)"
       },
       "pack": "core"
     },

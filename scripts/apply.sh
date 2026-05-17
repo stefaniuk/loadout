@@ -45,7 +45,7 @@ set -euo pipefail
 #   - Utility prompts (util.*)
 #   - Shared includes (baselines)
 #   - Default templates (Makefile, Dockerfile, compose.yaml, shell-script)
-#   - Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation
+#   - Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
 #   - copilot-instructions.md
 #   - AGENTS.md (cross-agent baseline at destination root)
 #   - .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
@@ -119,7 +119,7 @@ DEFAULT_PROMPT_PATTERNS=("architecture.*" "dev.implement-*" "enforce.docker" "en
 DEFAULT_TEMPLATES=("Makefile.template" "Dockerfile.template" "compose.yaml.template" "shell-script.template.sh")
 
 # Default skills
-DEFAULT_SKILLS=("repository-template" "enforcement-audit" "architecture-docs" "code-review" "spec-consolidation")
+DEFAULT_SKILLS=("repository-template" "enforcement-audit" "architecture-docs" "code-review" "spec-consolidation" "system-documentation")
 
 # All technology switches (for iteration)
 ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "playwright" "django" "fastapi")
@@ -1438,7 +1438,7 @@ Always copied (default/glue layer):
     .github/copilot-instructions.md
     .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
     scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
-    Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation
+    Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
     Spec-kit agents, prompts, templates and constitution
     Shell, Docker, Makefile instructions and prompts
     docs/prompt-reports/, docs/prompts/, ADR template, Tech_Radar.md

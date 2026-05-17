@@ -197,6 +197,7 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/.github/skills/architecture-docs/SKILL.md" ]] || return 1
   [[ -f "${d}/.github/skills/code-review/SKILL.md" ]] || return 1
   [[ -f "${d}/.github/skills/spec-consolidation/SKILL.md" ]] || return 1
+  [[ -f "${d}/.github/skills/system-documentation/SKILL.md" ]] || return 1
   # Singleton files
   [[ -f "${d}/.github/copilot-instructions.md" ]] || return 1
   [[ -f "${d}/AGENTS.md" ]] || return 1
