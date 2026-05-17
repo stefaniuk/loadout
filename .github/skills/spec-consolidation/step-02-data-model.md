@@ -12,6 +12,9 @@ against the actual types defined in the selected baseline implementation.
 2. Read every `specs/NNN-*/data-model.md`.
 3. Enumerate concrete types in the implementation tree: dataclasses, models,
    typed dictionaries, enums, schemas under `contracts/`, or equivalent.
+   Distinguish code-backed domain types from contract-only payloads,
+   workflow records, benchmark observations, and helper abstractions that are
+   documented but not implemented as first-class types.
 4. For each entity, capture: name, attributes, types, invariants, lifecycle,
    relationships, and the owning implementation component.
 5. If entity ownership or boundaries are still unclear, inspect the matching
@@ -19,16 +22,22 @@ against the actual types defined in the selected baseline implementation.
 
 ## Authoring
 
-1. One entity per section. Use the name that appears in code (rename in the
+1. Promote only code-backed domain types to entity sections. If a source
+   `data-model.md` includes contract-only payloads, workflow records,
+   benchmark observations, CLI invocation logs, or helper abstractions that
+   are not first-class implementation types in the selected baseline, keep
+   them in `contracts/` or `research.md` instead of forcing them into the
+   consolidated data model.
+2. One entity per section. Use the name that appears in code (rename in the
    spec if the code is more canonical and reflects current intent).
-2. Assign product-level identifiers `ENT-PRD-NNN`. Preserve original IDs in
+3. Assign product-level identifiers `ENT-PRD-NNN`. Preserve original IDs in
    an appendix mapping table.
-3. Where two features defined overlapping entities, merge them into one with a
+4. Where two features defined overlapping entities, merge them into one with a
    clear note on which implementation component owns the canonical definition
    and which components consume it.
-4. Cite the implementing source file and line range for every attribute that
+5. Cite the implementing source file and line range for every attribute that
    exists in the selected baseline.
-5. Flag attributes documented in old specs but absent in code as
+6. Flag attributes documented in old specs but absent in code as
    `Unknown from code — confirm intent` and route them to `research.md`.
 
 ## Template (skeleton)
@@ -62,4 +71,7 @@ against the actual types defined in the selected baseline implementation.
 - Exactly one `data-model.md` exists under `specs/product/`.
 - Every entity has a code-evidenced owner module in the selected baseline.
 - No entity, field, or invariant is defined in more than one place.
+- Contract-only or operational concepts documented in source data models are
+  either linked from `contracts/` or recorded in `research.md`, not duplicated
+  as product entities.
 - Appendix maps every product entity ID to its per-feature origin IDs.

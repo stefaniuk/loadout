@@ -3,7 +3,7 @@ name: spec-consolidation
 description: Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline, excluding plan.md and tasks.md from the final output.
 argument-hint: "Specify step: spec, data-model, research, quickstart, contracts, checklists, or all. Optional baseline: working-tree, HEAD, or default-branch"
 license: MIT
-version: 1.0.0
+version: 1.2.0
 allowed-tools: []
 ---
 
@@ -48,7 +48,7 @@ specs/product/
 ├── data-model.md      # Consolidated domain model
 ├── research.md        # Consolidated decisions and trade-offs (links ADRs)
 ├── quickstart.md      # Unified operator quickstart
-├── contracts/         # Merged contract files (CLI, API, NDJSON schemas, …)
+├── contracts/         # Merged or derived contract files (CLI, API, schemas, …)
 └── checklists/        # Optional merged review checklists (deduplicated)
 ```
 
@@ -105,8 +105,8 @@ Before starting any step:
    to the default branch (or another commit) only when the user input in
    `$ARGUMENTS` explicitly names that alternative baseline.
 7. Build an inventory of the selected baseline implementation modules,
-   contracts, and validation artefacts using repository-appropriate discovery
-   commands.
+   shipped public surfaces, contracts, and validation artefacts using
+   repository-appropriate discovery commands.
 
 ## Performance Guidance
 
@@ -143,15 +143,36 @@ Before starting any step:
    out of scope for product intent.
 6. **Single source of truth per concept.** Each domain term, requirement, and
    contract MUST live in exactly one place. Replace duplicates with links.
-7. **Evidence-first.** Every requirement in `spec.md` cites the source feature
+7. **Code-backed data model only.** The consolidated `data-model.md` is for
+   code-backed domain types in the selected baseline. If a source
+   `data-model.md` also documents contract-only payloads, workflow records,
+   benchmark observations, or helper abstractions that are not first-class
+   implementation types, keep them in `contracts/` or `research.md` rather
+   than promoting them to product entities.
+8. **Evidence-first.** Every requirement in `spec.md` cites the source feature
    section and the implementing evidence path from the selected baseline.
-8. **Mark unknowns.** Where intent cannot be recovered from specs or the
-   selected baseline,
-   write `Unknown from code — {suggested action}` rather than guessing.
-9. **Non-destructive.** Never delete or rewrite the source `specs/NNN-*/`
-   directories. Archival is an operator decision documented in the final
-   summary message.
-10. **British English, ASCII-only**, in line with [AGENTS.md](../../../AGENTS.md).
+9. **Account for source coverage explicitly.** Every source requirement,
+   entity, contract, and checklist item must end in exactly one documented
+   state: merged into a consolidated artefact, explicitly excluded with
+   rationale, or recorded in `research.md` as drift or out-of-product scope.
+   Silent omission is not allowed.
+10. **Start contracts from shipped surfaces.** Build contract coverage from
+    the selected baseline's shipped public surfaces as well as source
+    contract files. Every shipped CLI, API, schema, or equivalent exposed
+    surface must have exactly one product-facing contract or an explicit
+    rationale for why no separate contract is needed.
+11. **Defer forward links cleanly.** If an earlier step should reference an
+    output produced by a later step, either defer that link until the target
+    exists or add it only when a final whole-tree validation pass will run
+    after the last requested step. Do not leave knowingly broken internal links
+    behind as a temporary state.
+12. **Mark unknowns.** Where intent cannot be recovered from specs or the
+    selected baseline,
+    write `Unknown from code — {suggested action}` rather than guessing.
+13. **Non-destructive.** Never delete or rewrite the source `specs/NNN-*/`
+    directories. Archival is an operator decision documented in the final
+    summary message.
+14. **British English, ASCII-only**, in line with [AGENTS.md](../../../AGENTS.md).
 
 ## Workflow Per Step
 
@@ -196,7 +217,8 @@ executed.
   every shipped CLI and library entry point.
 - **Step 05 — Contracts.** See [step-05-contracts.md](step-05-contracts.md).
   Produces `specs/product/contracts/` by merging schema files, CLI contracts,
-  and API contracts, eliminating overlap.
+  API contracts, and inline normative contract sections where standalone
+  source contract files are missing or incomplete.
 - **Step 06 — Checklists.** See [step-06-checklists.md](step-06-checklists.md).
   Produces `specs/product/checklists/` by deduplicating review checklists.
 
@@ -204,24 +226,34 @@ executed.
 
 After producing the output for any step:
 
-1. Validate that every link resolves to a real file and line range.
+1. Validate every link that targets an artefact that already exists. If a step
+   should cross-link to a later-step output, defer that link until the target
+   exists or ensure a final whole-tree validation pass will run after the last
+   requested step.
 2. Confirm no schedule or task content from `plan.md` or `tasks.md` has leaked
    into the output.
-3. Run focused validation on `specs/product/**` first: Markdown structure,
-   links, JSON validity for schemas, and path existence for referenced
-   implementation or validation artefacts.
+3. Run focused, non-mutating validation on `specs/product/**` first: Markdown
+   structure, links, JSON validity for schemas, and path existence for
+   referenced implementation or validation artefacts.
 4. If broader repository gates such as `make lint` or `make test` exist, run
    them after focused validation. If they fail for unrelated pre-existing
    issues, report that separately from any new consolidation failures.
-5. Update the index document under `specs/product/` with an entry for the
+5. When multiple requested steps were run, rerun focused validation across the
+   full `specs/product/**` tree after the final requested step to catch
+   deferred cross-links and whole-set consistency issues.
+6. Run one cross-artefact completeness pass across the requested outputs:
+   reconcile consolidated capabilities, quickstart entry points, contract
+   index entries, checklist traces, and the source-coverage ledger so that no
+   shipped public surface or source identifier is silently omitted.
+7. Update the index document under `specs/product/` with an entry for the
    artefact, the
    baseline used, and the source feature directories consumed. If a step is
    skipped because no source artefacts exist, say so explicitly.
-6. In the final assistant message, include a concise before/after analysis:
+8. In the final assistant message, include a concise before/after analysis:
    fragmentation before consolidation, strongest improvements after
    consolidation, remaining risks, and confidence that the product set matches
    the selected baseline.
-7. In the final assistant message, list any duplicate derived artefacts that
+9. In the final assistant message, list any duplicate derived artefacts that
    now have a product-facing counterpart and could be archived after human
    review. Do not recommend deleting the `specs/NNN-*` feature histories.
 
@@ -234,11 +266,25 @@ After producing the output for any step:
   anywhere in the output.
 - Every requirement, entity, contract, and checklist item appears in exactly
   one consolidated location.
+- Every source requirement, entity, contract, and checklist item is accounted
+  for: merged, explicitly excluded with rationale, or recorded as drift or
+  out-of-product scope.
+- The consolidated data model includes only code-backed domain entities in the
+  selected baseline; contract-only or operational concepts remain in
+  `contracts/` or `research.md`.
 - Every claim cites evidence in the source specs and/or selected baseline
   code.
 - All consolidated requirements are traceable to the selected baseline; drift
   is logged in `specs/product/research.md`.
+- Every shipped public surface in the selected baseline has exactly one
+  consolidated contract or an explicit rationale for why no separate
+  product-facing contract is needed.
 - Focused validation passes on the new `specs/product/**` artefacts.
+- When multiple steps are requested, a final focused validation pass succeeds
+  across the whole `specs/product/**` tree after the last step is written.
+- A cross-artefact completeness pass succeeds across the requested outputs:
+  consolidated capabilities, quickstart entry points, contract index entries,
+  checklist traces, and source-coverage accounting are mutually consistent.
 - If repo-wide quality gates such as `make lint` or `make test` exist, they
   are run and any unrelated pre-existing failures are explicitly separated from
   new consolidation failures.

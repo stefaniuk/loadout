@@ -22,18 +22,17 @@ check-shell-lint: # Lint all shell scripts in this project @Quality
 	files=$$(find . -type f -name "*.sh" \
 		! -path "./.github/skills/repository-template/*" \
 		! -path "./.specify/*")
-	if command -v shellcheck > /dev/null 2>&1; then
+	if command -v shellcheck > /dev/null 2>&1 && [[ ! "${FORCE_USE_DOCKER:-false}" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then
 		# Fast path: lint every file in a single shellcheck invocation (~10x faster
 		# than the per-file Docker wrapper). Equivalent coverage to the per-file API.
-		# Native shellcheck is preferred whenever it is available; FORCE_USE_DOCKER
-		# is honoured only in the fallback wrapper used when no native binary exists.
 		# shellcheck disable=SC2086
 		echo "$$files" | xargs shellcheck
 	else
-		# Fallback: per-file invocation via the wrapper (Docker-only environments).
+		# Fallback or forced container path: lint per file via the wrapper so CI can
+		# pin ShellCheck independently of the runner's preinstalled version.
 		failed=0
 		for file in $$files; do
-			if ! file=$${file} scripts/quality/check-shell-lint.sh; then
+			if ! file=$${file} FORCE_USE_DOCKER="${FORCE_USE_DOCKER:-false}" scripts/quality/check-shell-lint.sh; then
 				failed=1
 			fi
 		done
