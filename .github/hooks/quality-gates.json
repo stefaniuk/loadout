@@ -25,7 +25,7 @@
       {
         "type": "command",
         "command": "./scripts/hooks/stop-gate.sh",
-        "timeout": 30000
+        "timeout": 60000
       }
     ],
     "SubagentStart": [

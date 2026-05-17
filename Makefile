@@ -37,9 +37,12 @@ test: # Run all tests @Testing
 	bash ./scripts/tests/import.test.sh && echo "import: ok"
 	bash ./scripts/tests/subagent-hooks.test.sh && echo "subagent-hooks: ok"
 	$(MAKE) test-evals
+	$(MAKE) test-install
 
 test-evals: # Run prompt regression eval harness; optional: UPDATE_SNAPSHOTS=1 @Testing
 	uv run --with pytest --with tiktoken --with pyyaml pytest -q evals
+
+test-install: # Run install/uninstall wrapper tests @Testing
 	bash ./scripts/tests/install.test.sh && echo "install: ok"
 
 clone-rt: # Clone the repository template into .github/skills/repository-template @Operations

@@ -47,7 +47,7 @@ function json_field() {
   if command -v jq >/dev/null 2>&1; then
     echo "$payload" | jq -r --arg f "$field" '.[$f] // empty'
   else
-    echo "$payload" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('$field',''))"
+    printf '%s' "$payload" | FIELD="$field" python3 -c 'import json, os, sys; d = json.load(sys.stdin); print(d.get(os.environ["FIELD"], ""))'
   fi
 }
 

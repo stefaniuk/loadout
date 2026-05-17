@@ -46,13 +46,36 @@ function main() {
   if [[ $lint_exit -eq 0 ]]; then
     echo '{}'
   else
+    local truncated
+    truncated=$(truncate-output "$lint_output")
     jq -n \
       --arg event "PostToolUse" \
-      --arg context "$lint_output" \
+      --arg context "$truncated" \
       '{hookSpecificOutput: {hookEventName: $event, additionalContext: $context}}'
   fi
 
   return 0
+}
+
+# Truncate long lint output so the model context isn't flooded after every
+# edit. Keeps the last MAX_LINT_OUTPUT_LINES lines (default 80) and prefixes
+# a marker line if anything was dropped. The full log remains in the user's
+# terminal/CI output where `make lint` originally ran.
+# Arguments:
+#   $1 - full output string
+function truncate-output() {
+
+  local output="$1"
+  local max_lines="${MAX_LINT_OUTPUT_LINES:-80}"
+  local total
+  total=$(printf '%s\n' "$output" | wc -l | tr -d ' ')
+  if (( total <= max_lines )); then
+    printf '%s' "$output"
+    return 0
+  fi
+  local dropped=$(( total - max_lines ))
+  printf '...(truncated %s earlier line(s); showing last %s)...\n' "$dropped" "$max_lines"
+  printf '%s\n' "$output" | tail -n "$max_lines"
 }
 
 # Check whether the given tool name is a file-editing tool.
