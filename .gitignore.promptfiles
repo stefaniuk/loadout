@@ -5,11 +5,18 @@
 # GitHub Copilot configuration
 # ------------------------------------------------------------------------------
 
-# Agents (spec-kit)
-.github/agents/speckit.*
+# Agents (spec-kit agents, personas, READMEs)
+.github/agents/
+
+# Hooks (Copilot agent hooks, e.g. quality-gates.json)
+.github/hooks/
 
 # Instructions (shell, docker, makefile, readme, and technology-specific)
 .github/instructions/
+
+# MCP server bindings (opt-in via subset=mcp)
+.github/mcp/
+.vscode/mcp.json.example
 
 # Prompts (architecture, enforce, review, speckit, util)
 .github/prompts/
@@ -17,7 +24,7 @@
 # Skills (repository-template and technology-specific)
 .github/skills/
 
-# Instructions file
+# Copilot instructions file
 .github/copilot-instructions.md
 
 # ------------------------------------------------------------------------------
@@ -34,6 +41,16 @@
 .specify/templates/
 
 # ------------------------------------------------------------------------------
+# Cross-agent baseline and hook executables
+# ------------------------------------------------------------------------------
+
+# Cross-agent always-on instructions (copied to destination repo root)
+AGENTS.md
+
+# Hook executables invoked by .github/hooks/*.json
+scripts/hooks/
+
+# ------------------------------------------------------------------------------
 # Documentation
 # ------------------------------------------------------------------------------
 
@@ -43,6 +60,12 @@
 # ADR template
 docs/adr/ADR-nnn_Any_Decision_Record_Template.md
 docs/adr/Tech_Radar.md
+
+# Prompt reports (research notes, marketplace submission, PR diffs)
+docs/prompt-reports/
+
+# MCP documentation (opt-in via subset=mcp)
+docs/mcp.md
 
 # Prompts documentation
 docs/prompts/

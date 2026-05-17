@@ -18,8 +18,9 @@ set -euo pipefail
 #                           # Omitted or 'all' preserves the default full-copy behaviour byte-for-byte.
 #                           # The 'speckit' token narrows agents/prompts copy functions to speckit.* and
 #                           # review.speckit-* files only when used WITHOUT 'agents'/'prompts' respectively.
-#                           # The 'mcp' token is opt-in only and is NOT included by 'all' default-copy
-#                           # behaviour unless explicitly listed in the subset csv (or 'all' is used).
+#                           # The 'mcp' token is opt-in only: MCP assets are NOT copied by default and NOT
+#                           # included by 'all'. They are copied only when 'mcp' is named explicitly in the
+#                           # subset csv (e.g. subset=all,mcp or subset=mcp).
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
 # Technology switches (default is 'false' for all, set to 'true' to include):
@@ -59,7 +60,9 @@ set -euo pipefail
 #   - docs/prompts/
 #   - project.code-workspace (if not already present)
 #   - .gitignore content (managed section with begin/end markers)
-#   - MCP example pack (.vscode/mcp.json.example, .github/mcp/, docs/mcp.md)
+#
+# Opt-in only (requires explicit subset token):
+#   - MCP example pack (.vscode/mcp.json.example, .github/mcp/, docs/mcp.md) — subset=mcp
 #
 # Exit codes:
 #   0 - All files copied successfully
@@ -134,9 +137,9 @@ SUBSET_SPECIFY=true
 SUBSET_DOCS=true
 SUBSET_PROJECT=true
 SUBSET_SPECKIT=true
-# MCP is opt-in: included by default full-copy (no subset) and by 'all', but
-# NOT enabled by any other individual subset token unless 'mcp' is named.
-SUBSET_MCP=true
+# MCP is opt-in only: NOT copied by default and NOT enabled by 'all'. It is
+# included only when the subset csv explicitly contains 'mcp'.
+SUBSET_MCP=false
 # True only when subset was explicitly set (used to gate observability messages).
 SUBSET_EXPLICIT=false
 # Narrowing flags — true when subset contains 'speckit' but not the broader category.
@@ -395,7 +398,7 @@ function parse-subset() {
     SUBSET_DOCS=true
     SUBSET_PROJECT=true
     SUBSET_SPECKIT=true
-    SUBSET_MCP=true
+    # MCP remains opt-in even with 'all'; require explicit 'mcp' token.
     return 0
   fi
 
