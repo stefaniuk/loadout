@@ -45,7 +45,7 @@ set -euo pipefail
 #   - Utility prompts (util.*)
 #   - Shared includes (baselines)
 #   - Default templates (Makefile, Dockerfile, compose.yaml, shell-script)
-#   - Default skills: repository-template, enforcement-audit, architecture-docs, code-review
+#   - Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation
 #   - copilot-instructions.md
 #   - AGENTS.md (cross-agent baseline at destination root)
 #   - .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
@@ -113,13 +113,13 @@ GITIGNORE_END_MARKER="# <<< promptfiles-copilot managed content - DO NOT EDIT AB
 DEFAULT_INSTRUCTIONS=("docker" "makefile" "readme" "shell")
 
 # Default prompt patterns (glue layer and spec-kit)
-DEFAULT_PROMPT_PATTERNS=("architecture.*" "dev.implement-*" "enforce.docker" "enforce.makefile" "enforce.shell" "review.speckit-*" "speckit.*" "util.*")
+DEFAULT_PROMPT_PATTERNS=("architecture.*" "dev.implement-*" "enforce.docker" "enforce.makefile" "enforce.shell" "review.speckit-*" "spec.*" "speckit.*" "util.*")
 
 # Default templates (glue layer)
 DEFAULT_TEMPLATES=("Makefile.template" "Dockerfile.template" "compose.yaml.template" "shell-script.template.sh")
 
 # Default skills
-DEFAULT_SKILLS=("repository-template" "enforcement-audit" "architecture-docs" "code-review")
+DEFAULT_SKILLS=("repository-template" "enforcement-audit" "architecture-docs" "code-review" "spec-consolidation")
 
 # All technology switches (for iteration)
 ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "playwright" "django" "fastapi")
@@ -1438,7 +1438,7 @@ Always copied (default/glue layer):
     .github/copilot-instructions.md
     .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
     scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
-    Default skills: repository-template, enforcement-audit, architecture-docs, code-review
+    Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation
     Spec-kit agents, prompts, templates and constitution
     Shell, Docker, Makefile instructions and prompts
     docs/prompt-reports/, docs/prompts/, ADR template, Tech_Radar.md

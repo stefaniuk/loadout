@@ -8,10 +8,16 @@ This prompt delegates to the **spec-consolidation** skill.
 
 Run the `spec-consolidation` skill. If the user input below names a step
 (`spec`, `data-model`, `research`, `quickstart`, `contracts`, `checklists`),
-run only that step. Otherwise run **all applicable** steps in order.
+run only that step. Otherwise run **all steps defined in the
+`spec-consolidation` skill** in order.
 
 Use the current working tree at `HEAD` as the baseline unless the user
 explicitly asks for the default branch or another historical view.
+
+If the user input is invalid or incomplete (for example, an unknown step
+name or a baseline reference that cannot be resolved), respond with an
+error message that names the offending value and lists the accepted
+options, and do not start the consolidation run.
 
 ```text
 $ARGUMENTS
@@ -20,6 +26,8 @@ $ARGUMENTS
 Mandatory behavioural constraints (see
 [SKILL.md](../skills/spec-consolidation/SKILL.md) and its
 [AGENTS.md](../skills/spec-consolidation/AGENTS.md) for full detail):
+
+**Discovery and inputs**
 
 - For medium or large repos, use one read-only exploration-agent pass up front
   to inventory feature artefacts, overlapping capabilities, likely evidence
@@ -30,11 +38,17 @@ Mandatory behavioural constraints (see
   recoverable from `spec.md`, `research.md`, `data-model.md`, `quickstart.md`,
   `contracts/`, or the code. Never emit phases, task IDs, or implementation
   order into `specs/product/`.
-- Reconcile against the selected baseline. Default to the current working tree
-  at `HEAD`, not the default branch, unless the user asks for a shipped-only
-  view.
+
+**Baseline and file-handling rules**
+
+- Reconcile against the selected baseline; the baseline default is set above.
 - Write only to `specs/product/`. Never modify, move, or delete any existing
   `specs/NNN-*/` directory.
+- Only create `specs/product/checklists/` when source feature checklists exist.
+  Otherwise skip step 06 and say so.
+
+**Content rules**
+
 - When per-feature specs disagree, the behaviour evidenced by the selected
   baseline implementation and validation artefacts wins; record divergence in
   `specs/product/research.md`.
@@ -42,16 +56,20 @@ Mandatory behavioural constraints (see
   guidance surface, entry-point declarations, runtime or packaging metadata,
   and executable validation artefacts when the source feature quickstarts are
   stale.
-- Only create `specs/product/checklists/` when source feature checklists exist.
-  Otherwise skip step 06 and say so.
 - In consolidated checklists, leave items unchecked unless the current
   consolidation run actually validated them.
 - Every consolidated requirement, entity, contract, and checklist item must
   appear in exactly one place and cite both its source spec section and the
   implementing code path.
+
+**Validation rules**
+
 - Validate `specs/product/**` first, then run broader repo gates if available.
   If repo-wide validation fails for unrelated pre-existing issues, report that
   separately from any new product-doc failures.
+
+**Final-message rules**
+
 - After completion, include a concise before/after analysis in the final
   assistant message: fragmentation before, improvements after, remaining risks,
   and confidence that the product set matches the selected baseline.

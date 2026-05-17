@@ -32,12 +32,18 @@ lint: # Run linter to check code style and errors @Quality
 	$(MAKE) lint-customisations
 	$(MAKE) lint-mcp
 
-test: # Run all tests @Testing
+test: # Run fast local test suite (apply + subagent-hooks + evals + install). Slower tests run in CI via `test-all` @Testing
 	bash ./scripts/tests/apply.test.sh && echo "apply: ok"
-	bash ./scripts/tests/import.test.sh && echo "import: ok"
 	bash ./scripts/tests/subagent-hooks.test.sh && echo "subagent-hooks: ok"
 	$(MAKE) test-evals
 	$(MAKE) test-install
+
+test-import: # Run import wrapper tests (slower; included in `test-all` and CI) @Testing
+	bash ./scripts/tests/import.test.sh && echo "import: ok"
+
+test-all: # Run the whole test suite (fast + import); used by the CI/CD workflow @Testing
+	$(MAKE) test
+	$(MAKE) test-import
 
 test-evals: # Run prompt regression eval harness; optional: UPDATE_SNAPSHOTS=1 @Testing
 	uv run --with pytest --with tiktoken --with pyyaml pytest -q evals
@@ -110,4 +116,6 @@ ${VERBOSE}.SILENT: \
 	lint-shell \
 	specify \
 	test \
+	test-all \
 	test-evals \
+	test-import \

@@ -71,16 +71,19 @@ Resolve the step from the user's input (`$ARGUMENTS`).
 | 06   | checklists  | `specs/product/checklists/`   | Steps 01-05 + source present |
 | all  | (all steps) | All applicable outputs        | None                         |
 
-Before step 01, resolve the consolidation baseline. Use the current working
-tree at `HEAD` by default. Only switch to the default branch or another commit
-when the user explicitly asks for a shipped-only or historical view.
+Apply the following independent rules in order; stop at the first match.
 
-If `all` is specified, execute steps 01 through 05 in order. Execute step 06
-only if at least one source `checklists/` directory exists. If a single step is
-specified, verify its dependency outputs already exist before proceeding; if
-not, instruct the user to run the prerequisite steps first. If step 06 is
-requested and no source checklists exist, stop and report that there is
-nothing to consolidate.
+1. **Baseline first.** Before any step runs, resolve the consolidation
+   baseline as described in Mandatory Preparation step 6.
+2. **`all` selected.** Run steps 01 → 02 → 03 → 04 → 05 in order. Then run
+   step 06 if and only if at least one source `specs/NNN-*/checklists/`
+   directory exists; otherwise skip it and say so.
+3. **Single step selected.** Check that every dependency output listed for
+   that step already exists under `specs/product/`. If any is missing, stop
+   and instruct the user to run the prerequisite steps first.
+4. **Step 06 selected with no source checklists.** Stop and report that
+   there is nothing to consolidate.
+5. **Otherwise.** Execute the selected step.
 
 ## Mandatory Preparation
 
@@ -97,9 +100,10 @@ Before starting any step:
    groups, likely code owners, and obvious drift candidates.
 5. Read any existing architecture decision records, technology guidance, and
    equivalent governance material that already shape the repository.
-6. Resolve the baseline to consolidate against and state it in the output:
-   current working tree at `HEAD` by default; default branch only on explicit
-   request.
+6. Resolve the baseline to consolidate against and state it in the output.
+   The default baseline is always the current working tree at `HEAD`. Switch
+   to the default branch (or another commit) only when the user input in
+   `$ARGUMENTS` explicitly names that alternative baseline.
 7. Build an inventory of the selected baseline implementation modules,
    contracts, and validation artefacts using repository-appropriate discovery
    commands.
