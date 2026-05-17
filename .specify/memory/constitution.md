@@ -332,12 +332,18 @@ If strict call-order would reduce clarity (for example shared utilities used wid
 
 ### 7.9 Mandatory Local Quality Gates
 
-After making **any** change to implementation code or tests, you must run:
+After making **any** change to implementation code or tests, the repository's
+canonical local quality gates must pass before the work is considered complete.
 
-- `make lint`
-- `make test`
-
-You must continue iterating on the changes until **both commands complete successfully with no errors or warnings**. This is mandatory and must be done automatically as part of AI-assisted development, without requiring an additional prompt.
+- Where hooks or equivalent automation enforce local gates, rely on that
+  enforcement rather than manually rerunning the same commands after every
+  edit.
+- Where automation is unavailable, or when diagnosing a failure, run the
+  canonical local gate commands manually.
+- In this repository, the canonical local gates are `make lint` and
+  `make test`.
+- Continue iterating until the canonical gates complete successfully with no
+  errors or warnings.
 
 ### 7.10 Automated Quality Enforcement
 

@@ -1,6 +1,8 @@
 # GitHub Copilot Instructions ✨
 
-GitHub Copilot in VS Code reads this file alongside [`AGENTS.md`](/AGENTS.md). `AGENTS.md` is the **canonical baseline** for every agent (governance, communication style, toolchain version, ADR discipline, TDD, quality gates) — read and follow it first. This file holds only the Copilot-specific additions; it must not contradict `AGENTS.md`.
+ GitHub Copilot in VS Code reads this file alongside [`AGENTS.md`](/AGENTS.md). `AGENTS.md` is the **canonical baseline** for every agent (governance, communication style, toolchain version, ADR discipline, TDD, and workflow guardrails) — read and follow it first. This file holds only the Copilot-specific additions; it must not contradict `AGENTS.md`.
+
+Local quality-gate commands are intentionally not restated here. The canonical policy lives in the constitution and is enforced in Copilot sessions by repository hooks.
 
 ## Repository tooling
 
@@ -12,5 +14,5 @@ This workspace ships a set of reusable [skills](/.github/skills/) and [prompts](
 
 ---
 
-> **Version**: 2.0.0
-> **Last Amended**: 2026-05-16
+> **Version**: 2.0.1
+> **Last Amended**: 2026-05-17

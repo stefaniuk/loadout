@@ -52,7 +52,7 @@ For any technology or language choice, consult the [Tech Radar](/docs/adr/Tech_R
 
 After any source code change:
 
-1. Run `make lint` and `make test`
-2. Fix all errors and warnings — including those in files you did not modify
-3. Repeat until both commands complete with zero errors and zero warnings
-4. Do this automatically without prompting
+1. The repository's canonical local quality gates must pass before the task is complete
+2. In environments where hooks or other automation enforce those gates, rely on that enforcement rather than manually duplicating the same commands after every edit
+3. If a gate fails, fix all errors and warnings — including those in files you did not modify when they block the gate
+4. Manually rerun the relevant gate only when diagnosing a failure, recovering from unavailable automation, or when the user explicitly asks for the output
