@@ -82,6 +82,10 @@ function main() {
     '{timestamp: $ts, repo: $repo, branch: $branch, cwd: $cwd, prompt: $prompt}' \
     >>"$log_file"
 
+  # Snapshot the working tree fingerprint so the Stop gate can detect whether
+  # this turn produced any file changes and skip quality gates otherwise.
+  hook_tree_fingerprint >"$(hook_tree_snapshot_path)" 2>/dev/null || true
+
   echo '{}'
 }
 

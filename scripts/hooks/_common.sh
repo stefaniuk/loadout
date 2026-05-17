@@ -68,3 +68,48 @@ function hook_diag() {
 
   printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2
 }
+
+# Compute a stable path for the per-repo working-tree snapshot used to detect
+# whether the current turn modified any files. The snapshot is stored in the
+# diagnostics log directory keyed by an absolute-path hash so concurrent
+# repositories do not collide.
+# Echoes the absolute snapshot file path on stdout.
+function hook_tree_snapshot_path() {
+
+  local log_dir
+  log_dir="$(hook_log_dir)"
+
+  local repo_root
+  repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+  local key
+  if command -v shasum >/dev/null 2>&1; then
+    key="$(printf '%s' "$repo_root" | shasum | awk '{print $1}')"
+  else
+    key="$(printf '%s' "$repo_root" | cksum | awk '{print $1}')"
+  fi
+
+  echo "${log_dir}/turn-snapshot.${key}"
+}
+
+# Compute a fingerprint of the current working tree (untracked + staged +
+# unstaged) so two snapshots can be compared cheaply. Echoes the hex digest on
+# stdout. Returns the literal string "no-git" when not inside a git repo.
+function hook_tree_fingerprint() {
+
+  if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+    echo "no-git"
+    return 0
+  fi
+
+  local hasher
+  if command -v shasum >/dev/null 2>&1; then
+    hasher="shasum"
+  else
+    hasher="cksum"
+  fi
+
+  { git status --porcelain=v1 2>/dev/null; git diff --no-color 2>/dev/null; \
+    git diff --cached --no-color 2>/dev/null; } \
+    | "$hasher" | awk '{print $1}'
+}

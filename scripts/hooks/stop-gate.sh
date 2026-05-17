@@ -39,6 +39,22 @@ function main() {
     return 0
   fi
 
+  # No-edit guard: compare the current tree fingerprint with the snapshot
+  # taken at UserPromptSubmit. If they match, this turn did not modify any
+  # files (typical Q&A) and the quality gates have nothing to verify.
+  local snapshot_path
+  snapshot_path="$(hook_tree_snapshot_path)"
+  if [[ -f "$snapshot_path" ]]; then
+    local before after
+    before="$(cat "$snapshot_path" 2>/dev/null || true)"
+    after="$(hook_tree_fingerprint)"
+    if [[ -n "$before" && "$before" == "$after" ]]; then
+      hook_diag "Stop: tree unchanged since UserPromptSubmit; skipping make lint/test"
+      echo '{}'
+      return 0
+    fi
+  fi
+
   local lint_output
   local lint_exit=0
   lint_output=$(make lint 2>&1) || lint_exit=$?
