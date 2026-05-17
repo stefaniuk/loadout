@@ -31,10 +31,12 @@ The branch-wide diff (`main...HEAD`) is otherwise **context only**: stat + recen
 
 ### A. Capture a bounded evidence report
 
-Run the labelled batch below **once** from the repository root. It writes a small, capped report to `docs/prompt-reports/git-commit-message-diff.txt` so reads stay cheap. Per-file diffs are capped to keep large changes from blowing up the context.
+Run the labelled batch below **once** from the repository root. It writes a small, capped report to `docs/prompt-reports/git-commit-message-diff-YYYYMMDD-<slug>.report.txt` (where `<slug>` is the sanitised current branch name, so per-branch runs do not overwrite each other). Per-file diffs are capped to keep large changes from blowing up the context.
 
 ```bash
-_report="docs/prompt-reports/git-commit-message-diff.txt"
+_date=$(date -u +%Y%m%d)
+_slug=$(git rev-parse --abbrev-ref HEAD | tr '/' '-' | tr -cd 'A-Za-z0-9_-')
+_report="docs/prompt-reports/git-commit-message-diff-$_date-$_slug.report.txt"
 mkdir -p "$(dirname "$_report")"
 : > "$_report"
 
@@ -99,7 +101,7 @@ printf '\nReport → %s (%s bytes, %s lines)\n' \
   "$_report" "$(wc -c < "$_report")" "$(wc -l < "$_report")"
 ```
 
-After the script completes, **read `docs/prompt-reports/git-commit-message-diff.txt`** as the authoritative evidence. The report is bounded by design; a single read is sufficient and you must not re-run `git diff main...HEAD` for full content.
+After the script completes, **read `$_report`** (the per-branch, per-day file written above) as the authoritative evidence. The report is bounded by design; a single read is sufficient and you must not re-run `git diff main...HEAD` for full content.
 
 1. Confirm branch state from `git rev-parse --abbrev-ref HEAD` and `git status -sb`.
 2. Determine the commit scope using the Scope policy above:
@@ -182,8 +184,15 @@ Return content exactly in this shape for easy copy/paste:
 - ...
 ```
 
+### 5) Write the output file (required)
+
+- Write the same content emitted in step 4 to `docs/prompt-reports/git-commit-message-YYYYMMDD-<slug>.report.md` (compute `<slug>` exactly as in §A: the sanitised current branch name).
+- If the file exists, overwrite it with the updated content.
+- Include a **Generated** footer with the current UTC timestamp.
+
 ## Output requirements 📋
 
+- Write the generated content to `docs/prompt-reports/git-commit-message-YYYYMMDD-<slug>.report.md` (slug as derived in §A) **and** print the same content inline for copy/paste.
 - Ground every statement in the **in-scope** diff (staged > unstaged > branch fallback); if evidence is missing, record **Unknown from code – {suggested action}**.
 - When using the branch-fallback mode, the **Overview** must state explicitly that the message summarises the branch because no staged or unstaged changes were present.
 - When unstaged-only mode is used, the **Overview** must note that nothing is staged yet and suggest `git add` for the relevant files.
@@ -196,5 +205,5 @@ Return content exactly in this shape for easy copy/paste:
 
 ---
 
-> **Version**: 1.3.1
+> **Version**: 1.5.0
 > **Last Amended**: 2026-05-17
