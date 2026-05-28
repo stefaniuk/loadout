@@ -1,10 +1,5 @@
 ---
 description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
-argument-hint: "Optional: additional context for the implement step"
-handoffs:
-  - label: Run Checklist
-    agent: speckit.checklist
-    prompt: Create a post-implementation checklist
 ---
 
 ## User Input
@@ -95,6 +90,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **IF EXISTS**: Read data-model.md for entities and relationships
    - **IF EXISTS**: Read contracts/ for API specifications and test requirements
    - **IF EXISTS**: Read research.md for technical decisions and constraints
+   - **IF EXISTS**: Read .specify/memory/constitution.md for governance constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
 
 4. **Project Setup Verification**:

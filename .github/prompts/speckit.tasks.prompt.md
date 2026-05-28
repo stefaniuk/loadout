@@ -15,7 +15,7 @@ You **MUST** adhere to the following mandatory requirements when generating deve
 
 - Repository Tooling
 - Test-Driven Development
-- Quality Gates
+- Repository verification policy
 
 ## Show & Tell Sections (Mandatory)
 
@@ -63,7 +63,7 @@ Before marking `tasks.md` as complete, verify:
 - [ ] There is a task for each repository-template capability that was planned to be implemented using the skill at [.github/skills/repository-template/SKILL.md](/.github/skills/repository-template/SKILL.md)
 - [ ] TDD sequencing is applied: Red (write failing test), Green (implement to pass), Refactor
 - [ ] Test tasks are listed before their corresponding implementation tasks
-- [ ] Each phase and user story ends with a task that runs `make lint` and `make test`
+- [ ] Each phase and user story ends with a validation task aligned to the repository's verification model; do not add redundant gate-only tasks when hooks already enforce the local quality gates
 - [ ] Each phase and user story includes a `Show & Tell` subsection with executable steps
 - [ ] AI Assistant executes every Show & Tell step during implementation
 - [ ] Every Show & Tell step has explicit expected output/state and clear pass/fail criteria
@@ -71,5 +71,5 @@ Before marking `tasks.md` as complete, verify:
 
 ---
 
-> **Version**: 1.6.1
-> **Last Amended**: 2026-03-01
+> **Version**: 1.6.2
+> **Last Amended**: 2026-05-17
