@@ -1,6 +1,5 @@
 ---
 agent: speckit.implement
-description: "Execute the implementation plan by processing and executing all tasks defined in tasks.md"
 ---
 
 You **MUST** adhere to the following mandatory requirements when implementing features.

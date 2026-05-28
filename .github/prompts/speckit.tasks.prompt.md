@@ -1,6 +1,5 @@
 ---
 agent: speckit.tasks
-description: "Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts."
 ---
 
 You **MUST** adhere to the following mandatory requirements when generating development tasks.
