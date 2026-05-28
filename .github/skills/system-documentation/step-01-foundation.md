@@ -56,13 +56,28 @@ outputs.
 
 ### `README.md`
 
-Prefer these sections when the file is being standardised:
+The canonical normative rules for `README.md` live in
+[readme.instructions.md](../../instructions/readme.instructions.md), which
+fixes the required `## Why this project exists` subsections (`Purpose`,
+`Benefit to the user`, `Problem it solves`, `How it solves it (high level)`)
+and the surrounding section vocabulary (`Quick start`, `What it does`,
+`How it solves the problem`, `How to use`, `Contributing`,
+`Repository layout`, `Licence`).
 
-1. Purpose
-2. What the repository contains
-3. Quick start
-4. Key workflows
-5. Documentation map
+The skill MUST treat [readme-templates.md](readme-templates.md) as the
+deterministic scaffold for producing or syncing the top-level `README.md`.
+That document fixes the canonical section order, the content rules per
+section, the prose-first writing constraints, the pacing guidance, the
+README-specific validation checks, and the two inline templates (top-level
+`README.md` and `## How to use` for up to three CLI use cases) the skill must
+reuse without improvising.
+
+When the repository ships at least one user-facing CLI binary, apply
+[readme-templates.md](readme-templates.md) in full. For other archetypes
+(libraries, frameworks, applications, services and platforms), keep the
+section order and rules but substitute the CLI-specific examples with the
+equivalent surface. In all cases, prefer a guided, human-readable landing page
+over a checklist-shaped README.
 
 ### `docs/README.md`
 
@@ -100,3 +115,5 @@ Prefer these sections:
   pages.
 - Readers can navigate from the repository root to the correct canonical
   documentation area.
+- For the top-level `README.md`, the README-specific Definition of Done in
+  [readme-templates.md](readme-templates.md) also passes.

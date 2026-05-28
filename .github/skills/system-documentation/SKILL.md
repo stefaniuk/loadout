@@ -212,15 +212,19 @@ If an expected anchor is missing, apply these fallback rules:
 3. **Keep documentation modes separate.** Tutorials teach, how-to guides
    solve tasks, reference docs define interfaces, explanation docs clarify
    concepts, runbooks protect operations, and audience indexes route readers.
-4. **Feature history stays under `specs/NNN-*`.** Treat `specs/product/` as
+4. **Entrypoints are human-first.** Foundation docs, especially `README.md`,
+   must read as guided entrypoints for people: prose-led where context is
+   needed, selective in their use of bullets, and explicit about where deeper
+   canonical docs live.
+5. **Feature history stays under `specs/NNN-*`.** Treat `specs/product/` as
    derived, not canonical feature history.
-5. **ADR discipline stays intact.** Use ADRs only for long-lived technical
+6. **ADR discipline stays intact.** Use ADRs only for long-lived technical
    decisions with alternatives and consequences.
-6. **`docs/prompt-reports/` is evidence-only.** Do not place normative docs
+7. **`docs/prompt-reports/` is evidence-only.** Do not place normative docs
    there.
-7. **Generated inventories stay generated.** Regenerate `docs/catalogue.md`
+8. **Generated inventories stay generated.** Regenerate `docs/catalogue.md`
    and folder indexes with `make catalogue` instead of editing them by hand.
-8. **`plan.md` is narrow context only.** `tasks.md` is never a documentation
+9. **`plan.md` is narrow context only.** `tasks.md` is never a documentation
    source.
 
 ## Common document contract
@@ -330,7 +334,9 @@ artefact contracts, and a Definition of Done.
 
 - **Step 01 - Foundation.** See [step-01-foundation.md](step-01-foundation.md).
   Establishes root and docs entrypoints, conventions, onboarding, and
-  baseline directories.
+  baseline directories. The deterministic scaffold and templates for the
+  top-level `README.md` live in
+  [readme-templates.md](readme-templates.md).
 - **Step 02 - Architecture.** See
   [step-02-architecture.md](step-02-architecture.md). Maintains the current
   architecture overview and ADR linkage.
