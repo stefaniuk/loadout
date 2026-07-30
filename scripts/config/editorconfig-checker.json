@@ -2,7 +2,7 @@
   "Exclude": [
     "^\\.github/agents/speckit\\..*\\.agent\\.md$",
     "^\\.github/instructions/makefile\\.instructions\\.md$",
-    "^\\.specify/scripts/bash/.*\\.sh$",
+    "^\\.specify/scripts/python/.*\\.py$",
     "^\\.specify/templates/.*-template\\.md$"
   ]
 }

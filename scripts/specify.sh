@@ -32,6 +32,8 @@ MANIFEST_FILE="${EXTENSIONS_DIR}/manifest.yaml"
 TARGET_AGENTS="${REPO_ROOT}/.github/agents"
 TARGET_PROMPTS="${REPO_ROOT}/.github/prompts"
 TARGET_TEMPLATES="${REPO_ROOT}/.specify/templates"
+TARGET_SCRIPTS="${REPO_ROOT}/.specify/scripts/python"
+VERSION_FILE="${REPO_ROOT}/.specify/.speckit-version"
 
 # Global variable for temp directory (used by trap)
 TEMP_DIR=""
@@ -50,10 +52,19 @@ function main() {
 
   fetch-upstream-files "$TEMP_DIR"
 
+  echo "==> Saving spec-kit version..."
+  save-speckit-version
+
   echo "==> Applying local extensions..."
   patch-category "$TEMP_DIR" "copilot" "agents" ".github/agents" "${TARGET_AGENTS}" "speckit.*.agent.md"
   patch-category "$TEMP_DIR" "copilot" "prompts" ".github/prompts" "${TARGET_PROMPTS}" "speckit.*.prompt.md"
   patch-category "$TEMP_DIR" "" "templates" ".specify/templates" "${TARGET_TEMPLATES}" "*-template.md"
+
+  echo "==> Copying spec-kit scripts (Python)..."
+  copy-scripts "$TEMP_DIR"
+
+  echo "==> Syncing prompt descriptions from agents..."
+  sync-prompt-descriptions
 
   if is-arg-true "$dry_run"; then
     echo "==> Dry run complete. No files were modified."
@@ -88,6 +99,170 @@ function cleanup-temp-directory() {
   return 0
 }
 
+# Detect and save the installed spec-kit CLI version to the version file.
+# Warns if the installed version is older than the latest GitHub release.
+function save-speckit-version() {
+  local dry_run=${dry_run:-false}
+  local version_output
+  version_output=$(specify --version 2>/dev/null || echo "")
+  local version="${version_output#specify }"
+
+  if [[ -z "$version" ]]; then
+    echo "    Warning: Could not detect spec-kit version"
+    return 0
+  fi
+
+  echo "    Installed: ${version}"
+  check-speckit-latest "$version"
+
+  if ! is-arg-true "$dry_run"; then
+    echo "$version" > "$VERSION_FILE"
+  fi
+
+  return 0
+}
+
+# Compare the installed version against the latest GitHub release.
+# Emits a warning if the installed version is behind.
+# Arguments:
+#   $1=[installed version string, e.g. "0.14.2"]
+function check-speckit-latest() {
+  local installed="$1"
+  local latest
+
+  # Fetch latest release tag from GitHub (silent, best-effort)
+  latest=$(curl -fsSL \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/repos/github/spec-kit/releases/latest" 2>/dev/null \
+    | grep -m1 '"tag_name"' | sed 's/.*"v\?\([^"]*\)".*/\1/')
+
+  if [[ -z "$latest" ]]; then
+    return 0
+  fi
+
+  if [[ "$installed" == "$latest" ]]; then
+    echo "    Latest:    ${latest} (up to date)"
+  elif is-version-older "$installed" "$latest"; then
+    echo "    Latest:    ${latest}"
+    echo "    WARNING: Installed spec-kit ${installed} is behind latest ${latest}."
+    echo "             Run: specify self upgrade"
+  else
+    echo "    Latest:    ${latest} (up to date)"
+  fi
+
+  return 0
+}
+
+# Compare two semver strings. Returns 0 (true) if $1 < $2.
+# Arguments:
+#   $1=[version a]
+#   $2=[version b]
+function is-version-older() {
+  local IFS='.'
+  # shellcheck disable=SC2206
+  local a=($1) b=($2)
+  local i
+
+  for i in 0 1 2; do
+    local ai="${a[$i]:-0}"
+    local bi="${b[$i]:-0}"
+    if (( ai < bi )); then
+      return 0
+    elif (( ai > bi )); then
+      return 1
+    fi
+  done
+
+  # Equal
+  return 1
+}
+
+# Sync description from agent files into corresponding prompt files.
+# Prompt files that delegate via `agent:` need a `description:` field
+# to satisfy the customisation linter.
+function sync-prompt-descriptions() {
+  local dry_run=${dry_run:-false}
+  local prompt_file
+
+  for prompt_file in "${TARGET_PROMPTS}"/speckit.*.prompt.md; do
+    [[ -f "$prompt_file" ]] || continue
+
+    local filename
+    filename=$(basename "$prompt_file")
+    local agent_name="${filename%.prompt.md}"
+    local agent_file="${TARGET_AGENTS}/${agent_name}.agent.md"
+
+    # Skip if prompt already has a description
+    if grep -q '^description:' "$prompt_file" 2>/dev/null; then
+      continue
+    fi
+
+    # Extract description from corresponding agent file
+    if [[ ! -f "$agent_file" ]]; then
+      continue
+    fi
+
+    local description
+    description=$(sed -n '/^---$/,/^---$/{ /^description:/{ s/^description: *//; p; q; } }' "$agent_file")
+
+    if [[ -z "$description" ]]; then
+      continue
+    fi
+
+    echo "    ${filename}: added description"
+
+    if ! is-arg-true "$dry_run"; then
+      # Insert description: line after agent: line in frontmatter
+      sed -i'' -e "/^agent: ${agent_name}$/a\\
+description: ${description}" "$prompt_file"
+    fi
+  done
+
+  return 0
+}
+
+# Copy Python scripts from the upstream init output, removing any
+# legacy bash scripts directory.
+# Arguments:
+#   $1=[path to temporary directory]
+function copy-scripts() {
+  local temp_dir="$1"
+  local source_dir="${temp_dir}/.specify/scripts/python"
+  local bash_dir="${REPO_ROOT}/.specify/scripts/bash"
+  local dry_run=${dry_run:-false}
+
+  if [[ ! -d "$source_dir" ]]; then
+    echo "    Warning: Python scripts directory not found: ${source_dir}"
+    return 0
+  fi
+
+  # Remove legacy bash scripts
+  if [[ -d "$bash_dir" ]]; then
+    echo "    Removing legacy bash scripts"
+    if ! is-arg-true "$dry_run"; then
+      rm -rf "$bash_dir"
+    fi
+  fi
+
+  # Copy Python scripts
+  if ! is-arg-true "$dry_run"; then
+    mkdir -p "$TARGET_SCRIPTS"
+  fi
+
+  local file
+  for file in "${source_dir}"/*.py; do
+    [[ -f "$file" ]] || continue
+    local filename
+    filename=$(basename "$file")
+    echo "    Copying: ${filename}"
+    if ! is-arg-true "$dry_run"; then
+      cp "$file" "${TARGET_SCRIPTS}/${filename}"
+    fi
+  done
+
+  return 0
+}
+
 # Fetch upstream spec-kit files using the specify CLI.
 # Runs specify init for copilot so that all upstream artifacts are
 # available for patching.
@@ -99,10 +274,9 @@ function fetch-upstream-files() {
   (
     cd "$temp_dir"
     specify init \
-      --ai copilot \
-      --script sh \
+      --integration copilot \
+      --script py \
       --ignore-agent-tools \
-      --no-git \
       --here \
       --force \
       > /dev/null 2>&1
