@@ -13,7 +13,7 @@ Produce three copy-ready outputs that describe the **next commit** the user is a
 
 1. A **Branch Name**: if already on a feature branch, report whether it is suitable (and suggest an improvement if not); if on `main`/detached `HEAD`, propose a new branch using `scope-short-description` (e.g. `auth-add-sso-callback`).
 2. A single-line conventional **Commit Message** (`type(scope): summary`) describing the dominant change in the commit being prepared.
-3. A concise **Description** (Markdown) capturing intent and rationale (when evidenced), not just a restatement of file changes.
+3. A **commit body** with an overview and highlights capturing intent and rationale (when evidenced), not just a restatement of file changes.
 
 ### Scope policy (non-negotiable) 🎯
 
@@ -87,44 +87,35 @@ Follow these rules:
 
 ### 3) Write the change summary (copy-ready)
 
-Produce a short Markdown block containing:
+Produce the commit body:
 
-- **Overview:** 1–2 sentences describing the change impact.
-- **Highlights:** Bullet list (max 7) with evidence-backed points referencing files/components.
-- **Testing:** Commands or checks run (or **Unknown from code – run {command}**). Do not print that section at all if no testing was possible.
-- **Breaking Changes:** Explicit call-outs if any. Do not print that section at all if none exist.
+- 1-2 sentence overview of the change impact.
+- Bullet list (max 7) with evidence-backed highlights referencing files/components.
+- A `Testing:` line with commands or checks run (or **Unknown from code, run {command}**). Omit entirely if no testing was possible.
+- A `Breaking changes:` line with explicit call-outs. Omit entirely if none exist.
 
 ### 4) Compile the final output (copy-ready template)
 
-Return content exactly in this shape for easy copy/paste:
+Return content exactly in this shape for easy copy/paste. The commit block (subject + body) must be directly pasteable into `git commit` with no labels or headings to remove.
 
 ```markdown
-## Branch Name
-
-{branch name}
-
-## Commit Message
-
-{single line of commit message}
-
-## Description
-
-**Overview**
-
-...
-
-**Highlights**
-
-- ...
-
-**Testing**
-
-- ...
-
-**Breaking Changes**
-
-- ...
+Branch: {branch name}
 ```
+
+```markdown
+{type(scope): summary}
+
+{1-2 sentence overview}
+
+- {highlight}
+- ...
+
+Testing: {commands or checks}
+
+Breaking changes: {details}
+```
+
+Omit the `Testing` and `Breaking changes` lines entirely when they do not apply.
 
 ### 5) Write the output file (required)
 
