@@ -85,23 +85,25 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
    - Reflect the dominant change category and scope (for example `fix(ci): stabilise markdown lint`).
    - Mention breaking changes explicitly by adding `!` after the type/scope (for example `feat(api)!: ...`).
 2. **Populate the Description section**
-   - Summarise behaviour changes in 1–2 sentences referencing affected components.
-   - Use bullet points for specifics (inputs, outputs, contracts, migrations, configuration).
-   - Reference evidence via workspace-relative Markdown links wherever possible.
-3. **Populate the Context section**
+   - Open with 1-2 short paragraphs of plain prose explaining what the change does and why it matters. Write for a reviewer who has not seen the code yet. Avoid jargon and keep sentences short.
+   - Follow the prose with 5-7 bullet points grounded in the diff. Each bullet should name the file or component changed and state the observable effect. Reference evidence via workspace-relative Markdown links.
+   - Do not start with bullets. The prose comes first.
+3. **Populate the How to test it section**
+   - List every CLI command a reviewer needs to verify the change, in the order they should run. Use fenced code blocks.
+   - Include setup steps (for example `git checkout`, `make install`, environment variables) so the reviewer can reproduce from a clean state.
+   - If the change is not testable from the CLI (for example pure documentation), state that explicitly and describe how to verify instead (for example "open the rendered Markdown and confirm the links resolve").
+   - Aim for empathy: assume the reviewer is unfamiliar with the area and make the path from checkout to confidence as short as possible.
+4. **Populate the Context section**
    - Explain the problem statement, user need, or specification driver.
    - Call out linked specs/ADRs/tasks via Markdown links.
-4. **Set the "Type of changes" checkboxes**
+5. **Set the "Type of changes" checkboxes**
    - Choose `x` for every applicable category (Refactoring, New feature, Breaking change, Bug fix) based on the diff.
    - Leave non-applicable items unchecked (`[ ]`). Never delete a line from the template.
-5. **Update the Checklist section**
+6. **Update the Checklist section**
    - Reflect actual work done (`[x]`) vs outstanding (`[ ]`).
    - Always reference whether tests/docs were updated, style guidelines were followed, and collaboration mode (pair/mob/vibe) occurred.
-6. **Populate "Sensitive Information Declaration"**
+7. **Populate "Sensitive Information Declaration"**
    - Confirm (`[x]`) only if you verified no PII/PID/sensitive data exists in the changes; otherwise leave unchecked and note required remediation.
-7. **Highlight verification evidence**
-   - Mention commands run (`make lint`, `make test`, bespoke scripts) and their outcomes inside Description or Context bullets.
-   - Use **Unknown from code – run {command}** where evidence is missing.
 8. **Call out follow-ups**
    - If additional work is deferred, list it succinctly (for example documentation gaps, pending ADRs) under Description or Context as bullet points.
 9. **Write the output file (required)**
@@ -119,20 +121,29 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
 - Use workspace-relative Markdown links (for example `[scripts/apply.sh](scripts/apply.sh#L10-L40)`).
 - Maintain ASCII-only content unless evidence requires Unicode.
 
-```markdown
+````markdown
 # {pull request title}
 
 ## Description
 
-{3-5 bullet points grounded in the diff}
+{1-2 paragraphs of plain prose explaining the change and its purpose}
+
+- {5-7 diff-grounded bullets naming files/components and observable effects}
+- ...
 
 ## Context
 
 {why the change is needed, linked artefacts/specs}
 
-## How to test it
+## How to test it
 
-{steps to verify the change, commands run, evidence}
+    ```bash
+    {command 1 - setup}
+    {command 2 - run tests or verify}
+    {command 3 - check output}
+    ```
+
+{brief notes on expected output or manual verification if CLI is not applicable}
 
 ## Type of changes
 
@@ -157,6 +168,6 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
 ---
 
 > Generated: YYYY-MM-DD hh:mm:ss
-```
+````
 
 Add additional sections (for example "Testing", "Follow-ups") **only** if the template explicitly gains them in future revisions, and keep the order consistent with the template file.
