@@ -58,17 +58,17 @@ The build system must be **fully usable locally**, providing rapid feedback befo
 
 Provide repository-standard targets so an engineer can operate the repo quickly:
 
-- [MK-LCL-001] Bootstrap: `make deps` — installs production and development dependencies from the lock file, as defined in Section 11. Use `make deps-prod` for production-only dependencies.
-- [MK-LCL-002] Lint/format: `make lint` and `make format` — run the paired lint and format targets defined in Section 11.
-- [MK-LCL-003] Type-check: `make typecheck` — runs the static type checker (e.g. mypy) as a blocking gate.
-- [MK-LCL-004] Test (fast lane): `make test` — must run quickly (aim: < 5 seconds for unit tests) and deterministically, matching the Section 11 target.
+- [MK-LCL-001] Bootstrap: `make deps` - installs production and development dependencies from the lock file, as defined in Section 11. Use `make deps-prod` for production-only dependencies.
+- [MK-LCL-002] Lint/format: `make lint` and `make format` - run the paired lint and format targets defined in Section 11.
+- [MK-LCL-003] Type-check: `make typecheck` - runs the static type checker (e.g. mypy) as a blocking gate.
+- [MK-LCL-004] Test (fast lane): `make test` - must run quickly (aim: < 5 seconds for unit tests) and deterministically, matching the Section 11 target.
 - [MK-LCL-005] Full suite: optionally add an extended target (commonly `make test-all`) that builds on the Section 11 `test` recipe to include integration/e2e tiers when applicable.
 - [MK-LCL-006] Build: reuse the Section 11 `build` target (from the CI/CD block) to compile or package artefacts locally when applicable.
-- [MK-LCL-007] Run locally: `make run` or `make up` / `make down` — use the Section 11 operations targets to start/stop the application or dependency stack (if applicable).
-- [MK-LCL-013] Install: `make install` — install the project's package or binary locally and ensure its CLI entry point is available on the user's `PATH`. The target must be language- and packaging-agnostic (e.g. `pip install .`, `uv tool install .`, `npm install -g .`, `cargo install --path .`, `go install ./...`, `make build && cp …`), idempotent, and emit an actionable message when the resulting command is not yet on `PATH`.
-- [MK-LCL-014] Uninstall: `make uninstall` — reverse `make install` by removing the project's package or binary from the user environment using the same package manager or path it was installed with (e.g. `pip uninstall -y <pkg>`, `uv tool uninstall <pkg>`, `npm uninstall -g <pkg>`, `cargo uninstall <pkg>`, `rm -f $(GOBIN)/<bin>`). The target must be idempotent (succeed when nothing is installed) and must not remove unrelated files.
-- [MK-LCL-015] Link (alternative to install): `make link` — link a built package or binary from the repository into a user-writable bin directory that is already on `PATH` (e.g. `~/.local/bin`, `~/bin`, or `$(go env GOBIN)`), so changes in the working tree are reflected without reinstalling. Implementations may use editable installs (`pip install -e .`, `uv pip install -e .`), packaging links (`npm link`, `pnpm link --global`), or symlinks to built artefacts (`ln -sf $(PWD)/dist/<bin> ~/.local/bin/<bin>`). The target must select the destination from a documented, overridable variable (e.g. `BIN_DIR ?= $(HOME)/.local/bin`), refuse to overwrite an unrelated file at the destination, and warn when `BIN_DIR` is not on `PATH`.
-- [MK-LCL-016] Unlink: `make unlink` — reverse `make link` by removing the editable install or symlink created in `$(BIN_DIR)` (e.g. `pip uninstall -y <pkg>`, `npm unlink -g <pkg>`, `rm -f $(BIN_DIR)/<bin>`). The target must verify the link points into the repository before removing it (to avoid deleting unrelated files), be idempotent, and use the same overridable `BIN_DIR` as `link`.
+- [MK-LCL-007] Run locally: `make run` or `make up` / `make down` - use the Section 11 operations targets to start/stop the application or dependency stack (if applicable).
+- [MK-LCL-013] Install: `make install` - install the project's package or binary locally and ensure its CLI entry point is available on the user's `PATH`. The target must be language- and packaging-agnostic (e.g. `pip install .`, `uv tool install .`, `npm install -g .`, `cargo install --path .`, `go install ./...`, `make build && cp …`), idempotent, and emit an actionable message when the resulting command is not yet on `PATH`.
+- [MK-LCL-014] Uninstall: `make uninstall` - reverse `make install` by removing the project's package or binary from the user environment using the same package manager or path it was installed with (e.g. `pip uninstall -y <pkg>`, `uv tool uninstall <pkg>`, `npm uninstall -g <pkg>`, `cargo uninstall <pkg>`, `rm -f $(GOBIN)/<bin>`). The target must be idempotent (succeed when nothing is installed) and must not remove unrelated files.
+- [MK-LCL-015] Link (alternative to install): `make link` - link a built package or binary from the repository into a user-writable bin directory that is already on `PATH` (e.g. `~/.local/bin`, `~/bin`, or `$(go env GOBIN)`), so changes in the working tree are reflected without reinstalling. Implementations may use editable installs (`pip install -e .`, `uv pip install -e .`), packaging links (`npm link`, `pnpm link --global`), or symlinks to built artefacts (`ln -sf $(PWD)/dist/<bin> ~/.local/bin/<bin>`). The target must select the destination from a documented, overridable variable (e.g. `BIN_DIR ?= $(HOME)/.local/bin`), refuse to overwrite an unrelated file at the destination, and warn when `BIN_DIR` is not on `PATH`.
+- [MK-LCL-016] Unlink: `make unlink` - reverse `make link` by removing the editable install or symlink created in `$(BIN_DIR)` (e.g. `pip uninstall -y <pkg>`, `npm unlink -g <pkg>`, `rm -f $(BIN_DIR)/<bin>`). The target must verify the link points into the repository before removing it (to avoid deleting unrelated files), be idempotent, and use the same overridable `BIN_DIR` as `link`.
 
 ### 2.2 Clear, actionable errors
 
@@ -136,9 +136,9 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 
 **Section summary (key subsections):**
 
-- 5.1 Fail-fast defaults — non-negotiable shell safety
-- 5.2 Parallelism and environment — recursive calls and job control
-- 5.3 Keep recipes small — delegation to scripts
+- 5.1 Fail-fast defaults - non-negotiable shell safety
+- 5.2 Parallelism and environment - recursive calls and job control
+- 5.3 Keep recipes small - delegation to scripts
 
 ### 5.1 Fail-fast defaults (non-negotiable)
 
@@ -181,9 +181,9 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 
 **Section summary (key subsections):**
 
-- 7.1 Destructive actions — safe defaults, confirmation patterns
-- 7.2 Secrets handling — never embed or print secrets
-- 7.3 Network and cloud operations — explicit intent, no implicit cloud calls
+- 7.1 Destructive actions - safe defaults, confirmation patterns
+- 7.2 Secrets handling - never embed or print secrets
+- 7.3 Network and cloud operations - explicit intent, no implicit cloud calls
 
 ### 7.1 Destructive actions
 
@@ -210,8 +210,8 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 
 **Section summary (key subsections):**
 
-- 8.1 Target naming and stability — predictable CI interface
-- 8.2 Reproducibility — determinism and clean workspaces
+- 8.1 Target naming and stability - predictable CI interface
+- 8.2 Reproducibility - determinism and clean workspaces
 
 ### 8.1 Target naming and stability
 
@@ -281,20 +281,15 @@ The default Makefile format lives in [templates/Makefile.template](./templates/M
 
 These patterns cause recurring issues in Makefiles and build scripts. Avoid them unless an ADR documents a justified exception.
 
-- [MK-ANT-001] **`|| true` without comment** — masks failures silently; always document why it is safe.
-- [MK-ANT-002] **Large inline shell blocks (>5 lines)** — hard to test and debug; extract to `scripts/**/*.sh`.
-- [MK-ANT-003] **Hardcoded absolute paths** — breaks portability across machines; use variables with sensible defaults.
-- [MK-ANT-004] **`rm -rf` without path constraints** — dangerous; scope to known directories (e.g. `rm -rf $(BUILD_DIR)`).
-- [MK-ANT-005] **Recursive `make` without `$(MAKE)`** — breaks jobserver and flag propagation; always use `$(MAKE)`.
-- [MK-ANT-006] **Secrets in variable defaults** — leaks to logs and process lists; inject via environment at runtime.
-- [MK-ANT-007] **Tab/space inconsistency** — recipes require tabs; mixed indentation breaks execution.
-- [MK-ANT-008] **Targets without help descriptions** — poor discoverability; always add `# description @Category`.
-- [MK-ANT-009] **Silent failures via subshell** — `(command)` can hide exit codes; use `set -e` or check explicitly.
-- [MK-ANT-010] **Over-engineered dependency graphs** — hard to maintain and debug; keep prerequisites simple and explicit.
-- [MK-ANT-011] **`$(shell ...)` in prerequisites** — evaluated at parse time, not execution; can cause surprising behaviour.
-- [MK-ANT-012] **Missing `.PHONY` for non-file targets** — causes skipped execution if a file with that name exists.
-
----
-
-> **Version**: 1.4.1
-> **Last Amended**: 2026-01-17
+- [MK-ANT-001] **`|| true` without comment** - masks failures silently; always document why it is safe.
+- [MK-ANT-002] **Large inline shell blocks (>5 lines)** - hard to test and debug; extract to `scripts/**/*.sh`.
+- [MK-ANT-003] **Hardcoded absolute paths** - breaks portability across machines; use variables with sensible defaults.
+- [MK-ANT-004] **`rm -rf` without path constraints** - dangerous; scope to known directories (e.g. `rm -rf $(BUILD_DIR)`).
+- [MK-ANT-005] **Recursive `make` without `$(MAKE)`** - breaks jobserver and flag propagation; always use `$(MAKE)`.
+- [MK-ANT-006] **Secrets in variable defaults** - leaks to logs and process lists; inject via environment at runtime.
+- [MK-ANT-007] **Tab/space inconsistency** - recipes require tabs; mixed indentation breaks execution.
+- [MK-ANT-008] **Targets without help descriptions** - poor discoverability; always add `# description @Category`.
+- [MK-ANT-009] **Silent failures via subshell** - `(command)` can hide exit codes; use `set -e` or check explicitly.
+- [MK-ANT-010] **Over-engineered dependency graphs** - hard to maintain and debug; keep prerequisites simple and explicit.
+- [MK-ANT-011] **`$(shell ...)` in prerequisites** - evaluated at parse time, not execution; can cause surprising behaviour.
+- [MK-ANT-012] **Missing `.PHONY` for non-file targets** - causes skipped execution if a file with that name exists.

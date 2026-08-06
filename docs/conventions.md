@@ -23,9 +23,9 @@ A **language pack** is a named, composable unit of Copilot customisation keyed b
 
 Every language pack belongs to one of three classes:
 
-- **language** — general-purpose programming languages: `python`, `typescript`, `go`, `rust`.
-- **tool** — non-language tooling with its own grammar and idioms: `docker`, `makefile`, `shell`, `terraform`.
-- **framework** — composite or framework-specific packs that sit on top of a language: `reactjs`, `tauri`, `playwright-python`, `playwright-typescript`.
+- **language** - general-purpose programming languages: `python`, `typescript`, `go`, `rust`.
+- **tool** - non-language tooling with its own grammar and idioms: `docker`, `makefile`, `shell`, `terraform`.
+- **framework** - composite or framework-specific packs that sit on top of a language: `reactjs`, `tauri`, `playwright-python`, `playwright-typescript`.
 
 ### Foundation packs (orphan policy)
 
@@ -79,8 +79,8 @@ Language-pack ADR clusters are numbered by language (ADR-001 python, ADR-002 typ
 
 The canonical pack listing is regenerated on every `make catalogue` run:
 
-- [catalogue.json](../catalogue.json) — machine-readable, with derived `packs`, `foundationPacks`, and `counts.packs` fields.
-- [catalogue.md](catalogue.md) — human-readable, with **Language packs** and **Foundation packs** tables.
+- [catalogue.json](../catalogue.json) - machine-readable, with derived `packs`, `foundationPacks`, and `counts.packs` fields.
+- [catalogue.md](catalogue.md) - human-readable, with **Language packs** and **Foundation packs** tables.
 
 Selective-install flags accepted by `make apply` (for example `python=true`, `terraform=true`) correspond one-to-one with the language packs above.
 
@@ -242,16 +242,16 @@ For tooling choices inside a language pack, consult the [Tech Radar](adr/Tech_Ra
 
 VS Code combines every applicable instruction file into the chat context. When the rules conflict, the **higher-priority source wins**:
 
-1. **Personal instructions** — user-profile `.instructions.md` files and personal `AGENTS.md`/`CLAUDE.md` variants. Highest priority.
-2. **Repository instructions** — `.github/copilot-instructions.md`, `AGENTS.md`, and every `.github/instructions/*.instructions.md` whose `applyTo` glob matches the current file.
-3. **Organisation instructions** — GitHub-org-level instructions discovered via `github.copilot.chat.organizationInstructions.enabled`. Lowest priority.
+1. **Personal instructions** - user-profile `.instructions.md` files and personal `AGENTS.md`/`CLAUDE.md` variants. Highest priority.
+2. **Repository instructions** - `.github/copilot-instructions.md`, `AGENTS.md`, and every `.github/instructions/*.instructions.md` whose `applyTo` glob matches the current file.
+3. **Organisation instructions** - GitHub-org-level instructions discovered via `github.copilot.chat.organizationInstructions.enabled`. Lowest priority.
 
 Within a single tier, **no merge order is guaranteed**. VS Code states explicitly that "if you have multiple instruction files in your project, VS Code combines and adds them to the chat context, no specific order is guaranteed" ([custom-instructions docs](https://code.visualstudio.com/docs/copilot/customization/custom-instructions#_types-of-instruction-files)). Treat every set of co-applying instruction files as an **unordered bag of rules**.
 
 Practical consequences in this repository:
 
 - `AGENTS.md` is the canonical baseline (see its preamble). Workspace `.instructions.md` files must not contradict it; agent-specific additions live in sibling files such as `.github/copilot-instructions.md`.
-- Two instruction packs whose `applyTo` globs overlap (for example `playwright-typescript.instructions.md` and `typescript.instructions.md` both match `**/*.ts`) are both loaded. Their rules **must be compatible** — if a tension exists, narrow one pack's `applyTo` or move the disputed rule into an include shared by both.
+- Two instruction packs whose `applyTo` globs overlap (for example `playwright-typescript.instructions.md` and `typescript.instructions.md` both match `**/*.ts`) are both loaded. Their rules **must be compatible** - if a tension exists, narrow one pack's `applyTo` or move the disputed rule into an include shared by both.
 - Foundation packs (`likec4`, `readme`) are loaded purely by `applyTo` matching and have no enforce prompt to resolve conflicts; keep them strictly additive.
 
 ### Writing conflict-safe instructions
@@ -266,8 +266,8 @@ Practical consequences in this repository:
 
 Independently of the per-tech _language packs_, the repository's artefacts are also split into two **plugin packs**, which describe the spec-kit boundary for selective install:
 
-- **Core pack** — all language packs, foundation packs, persona agents, util/dev/architecture prompts, hooks, and skills (with the caveat noted below).
-- **Speckit pack** (optional sub-pack) — every `speckit.*` agent, every `speckit.*` prompt, the `review.speckit-*` review prompts, and the entire `.specify/` tree (constitution, templates, scripts).
+- **Core pack** - all language packs, foundation packs, persona agents, util/dev/architecture prompts, hooks, and skills (with the caveat noted below).
+- **Speckit pack** (optional sub-pack) - every `speckit.*` agent, every `speckit.*` prompt, the `review.speckit-*` review prompts, and the entire `.specify/` tree (constitution, templates, scripts).
 
 VS Code's plugin manifest does not currently support first-class sub-plugins, so [plugin.json](../plugin.json) ships **both packs together** under a single manifest. To install only one pack, use the `make apply subset=…` flag (see [onboarding.md#subset-selection](onboarding.md#subset-selection)).
 

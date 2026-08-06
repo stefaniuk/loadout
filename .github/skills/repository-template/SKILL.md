@@ -36,7 +36,7 @@ AI assistants or automation should detect the active context before copying file
 Use the following checks after confirming the git URL:
 
 1. If `.github/skills/repository-template/assets/` exists and contains files, use that subtree as the source (typical in the prompt catalogue or when the assets subtree is vendor-copied).
-2. If the `assets/` directory exists but is empty while template root files such as `Makefile`, `scripts/`, and `docs/` are present, you are inside the `repository-template` itself—read directly from the project root.
+2. If the `assets/` directory exists but is empty while template root files such as `Makefile`, `scripts/`, and `docs/` are present, you are inside the `repository-template` itself-read directly from the project root.
 3. If neither case applies (for example, inside a repository that was generated from the template), treat the instructions as referring to files rooted in the current repository, because the template content has already been adopted there.
 
 When in doubt, follow the [Updating from the template repository](./SKILL.md#updating-from-the-template-repository) workflow to pull fresh assets.
@@ -45,10 +45,10 @@ When in doubt, follow the [Updating from the template repository](./SKILL.md#upd
 
 When adopting **any** capability from this skill, AI assistants **must** follow these rules:
 
-1. **Core Make System is a prerequisite** — Most capabilities depend on make targets defined in `scripts/init.mk`. If `scripts/init.mk` does not exist in the target repository, adopt the [Core Make System](#1-core-make-system-gnu-make) first.
-2. **Preserve `init.mk` in full** — Never partially copy `scripts/init.mk`. It contains interdependent targets (`_install-dependencies`, `githooks-config`, `clean`, etc.) that other capabilities rely on. Always copy the complete file.
-3. **Ensure `include scripts/init.mk`** — The repository's `Makefile` must contain `include scripts/init.mk` near the top. Without this, make targets from `init.mk` are unavailable.
-4. **Wire up `config::` for dependencies** — When adopting capabilities that require asdf-managed tools (pre-commit, gitleaks, etc.):
+1. **Core Make System is a prerequisite** - Most capabilities depend on make targets defined in `scripts/init.mk`. If `scripts/init.mk` does not exist in the target repository, adopt the [Core Make System](#1-core-make-system-gnu-make) first.
+2. **Preserve `init.mk` in full** - Never partially copy `scripts/init.mk`. It contains interdependent targets (`_install-dependencies`, `githooks-config`, `clean`, etc.) that other capabilities rely on. Always copy the complete file.
+3. **Ensure `include scripts/init.mk`** - The repository's `Makefile` must contain `include scripts/init.mk` near the top. Without this, make targets from `init.mk` are unavailable.
+4. **Wire up `config::` for dependencies** - When adopting capabilities that require asdf-managed tools (pre-commit, gitleaks, etc.):
    - Add the tool to `.tool-versions`
    - Ensure the `Makefile` has a `config::` target that calls `$(MAKE) _install-dependencies`
    - Example:
@@ -58,7 +58,7 @@ When adopting **any** capability from this skill, AI assistants **must** follow 
          $(MAKE) _install-dependencies
      ```
 
-5. **Verify after adoption** — Always run the verification commands listed in each capability section to confirm correct integration.
+5. **Verify after adoption** - Always run the verification commands listed in each capability section to confirm correct integration.
 
 ## Scope and non-goals 🎯
 
@@ -166,8 +166,8 @@ They are in the `assets/` subtree under this skill.
 
 **Source files** (in `assets/`):
 
-- [`Makefile`](assets/Makefile) — Project-specific targets (customise this)
-- [`scripts/init.mk`](assets/scripts/init.mk) — Common targets and infrastructure (do not edit)
+- [`Makefile`](assets/Makefile) - Project-specific targets (customise this)
+- [`scripts/init.mk`](assets/scripts/init.mk) - Common targets and infrastructure (do not edit)
 
 **Key make targets**:
 
@@ -186,12 +186,12 @@ make version-create-effective-file # Create .version from VERSION
 
 **Template project targets (from `assets/Makefile`)**:
 
-- `make env` — Set up project environment (placeholder)
-- `make deps` — Install project dependencies (placeholder)
-- `make format` — Auto-format code (placeholder)
-- `make lint-file-format`, `make lint-markdown-format`, `make lint-markdown-links`, `make lint-shell` — Run individual checks
-- `make lint` — Runs all four lint targets above
-- `make typecheck`, `make test`, `make build`, `make publish`, `make deploy` — Project-specific placeholders you implement
+- `make env` - Set up project environment (placeholder)
+- `make deps` - Install project dependencies (placeholder)
+- `make format` - Auto-format code (placeholder)
+- `make lint-file-format`, `make lint-markdown-format`, `make lint-markdown-links`, `make lint-shell` - Run individual checks
+- `make lint` - Runs all four lint targets above
+- `make typecheck`, `make test`, `make build`, `make publish`, `make deploy` - Project-specific placeholders you implement
 
 **To adopt**:
 
@@ -255,17 +255,17 @@ make help
 
 **Source files** (in `assets/`):
 
-- [`scripts/config/pre-commit.yaml`](assets/scripts/config/pre-commit.yaml) — Hook definitions
-- [`scripts/quality/scan-secrets.sh`](assets/scripts/quality/scan-secrets.sh) — Secret scan hook wrapper
-- [`scripts/quality/check-file-format.sh`](assets/scripts/quality/check-file-format.sh) — File format hook wrapper
-- [`scripts/quality/check-markdown-format.sh`](assets/scripts/quality/check-markdown-format.sh) — Markdown format hook wrapper
-- [`scripts/quality/check-markdown-links.sh`](assets/scripts/quality/check-markdown-links.sh) — Markdown link hook wrapper
-- [`scripts/config/gitleaks.toml`](assets/scripts/config/gitleaks.toml) — Gitleaks configuration
-- [`scripts/config/.gitleaksignore`](assets/scripts/config/.gitleaksignore) — Gitleaks ignore list
-- [`scripts/config/editorconfig-checker.json`](assets/scripts/config/editorconfig-checker.json) — EditorConfig checker configuration
-- [`scripts/config/markdownlint.yaml`](assets/scripts/config/markdownlint.yaml) — Markdownlint configuration
-- [`scripts/config/.markdownlintignore`](assets/scripts/config/.markdownlintignore) — Markdownlint ignore list
-- [`scripts/config/lychee.toml`](assets/scripts/config/lychee.toml) — Lychee configuration
+- [`scripts/config/pre-commit.yaml`](assets/scripts/config/pre-commit.yaml) - Hook definitions
+- [`scripts/quality/scan-secrets.sh`](assets/scripts/quality/scan-secrets.sh) - Secret scan hook wrapper
+- [`scripts/quality/check-file-format.sh`](assets/scripts/quality/check-file-format.sh) - File format hook wrapper
+- [`scripts/quality/check-markdown-format.sh`](assets/scripts/quality/check-markdown-format.sh) - Markdown format hook wrapper
+- [`scripts/quality/check-markdown-links.sh`](assets/scripts/quality/check-markdown-links.sh) - Markdown link hook wrapper
+- [`scripts/config/gitleaks.toml`](assets/scripts/config/gitleaks.toml) - Gitleaks configuration
+- [`scripts/config/.gitleaksignore`](assets/scripts/config/.gitleaksignore) - Gitleaks ignore list
+- [`scripts/config/editorconfig-checker.json`](assets/scripts/config/editorconfig-checker.json) - EditorConfig checker configuration
+- [`scripts/config/markdownlint.yaml`](assets/scripts/config/markdownlint.yaml) - Markdownlint configuration
+- [`scripts/config/.markdownlintignore`](assets/scripts/config/.markdownlintignore) - Markdownlint ignore list
+- [`scripts/config/lychee.toml`](assets/scripts/config/lychee.toml) - Lychee configuration
 
 **Configuration**:
 
@@ -276,10 +276,10 @@ make githooks-run      # Run all hooks manually
 
 **Available hooks** (each can be enabled/disabled in `pre-commit.yaml`):
 
-- `scan-secrets` — Gitleaks secret scanning
-- `check-file-format` — EditorConfig compliance
-- `check-markdown-format` — Markdown linting
-- `check-markdown-links` — Markdown link checking
+- `scan-secrets` - Gitleaks secret scanning
+- `check-file-format` - EditorConfig compliance
+- `check-markdown-format` - Markdown linting
+- `check-markdown-links` - Markdown link checking
 
 **To adopt**:
 
@@ -334,9 +334,9 @@ pre-commit run --config scripts/config/pre-commit.yaml --all-files
 
 **Source files** (in `assets/`):
 
-- [`scripts/quality/scan-secrets.sh`](assets/scripts/quality/scan-secrets.sh) — Scanner wrapper
-- [`scripts/config/gitleaks.toml`](assets/scripts/config/gitleaks.toml) — Gitleaks configuration
-- [`scripts/config/.gitleaksignore`](assets/scripts/config/.gitleaksignore) — Ignore file for false positives
+- [`scripts/quality/scan-secrets.sh`](assets/scripts/quality/scan-secrets.sh) - Scanner wrapper
+- [`scripts/config/gitleaks.toml`](assets/scripts/config/gitleaks.toml) - Gitleaks configuration
+- [`scripts/config/.gitleaksignore`](assets/scripts/config/.gitleaksignore) - Ignore file for false positives
 
 **Optional baseline file**:
 
@@ -413,9 +413,9 @@ gitleaks detect --config scripts/config/gitleaks.toml --source . --verbose --red
 
 **Source files** (in `assets/`):
 
-- [`.editorconfig`](assets/.editorconfig) — Format rules
-- [`scripts/quality/check-file-format.sh`](assets/scripts/quality/check-file-format.sh) — Checker wrapper
-- [`scripts/config/editorconfig-checker.json`](assets/scripts/config/editorconfig-checker.json) — Checker configuration
+- [`.editorconfig`](assets/.editorconfig) - Format rules
+- [`scripts/quality/check-file-format.sh`](assets/scripts/quality/check-file-format.sh) - Checker wrapper
+- [`scripts/config/editorconfig-checker.json`](assets/scripts/config/editorconfig-checker.json) - Checker configuration
 
 **Configuration** (`.editorconfig`):
 
@@ -503,9 +503,9 @@ editorconfig-checker -config scripts/config/editorconfig-checker.json
 
 **Source files** (in `assets/`):
 
-- [`scripts/quality/check-markdown-format.sh`](assets/scripts/quality/check-markdown-format.sh) — Linter wrapper
-- [`scripts/config/markdownlint.yaml`](assets/scripts/config/markdownlint.yaml) — Rule configuration
-- [`scripts/config/.markdownlintignore`](assets/scripts/config/.markdownlintignore) — Ignore patterns
+- [`scripts/quality/check-markdown-format.sh`](assets/scripts/quality/check-markdown-format.sh) - Linter wrapper
+- [`scripts/config/markdownlint.yaml`](assets/scripts/config/markdownlint.yaml) - Rule configuration
+- [`scripts/config/.markdownlintignore`](assets/scripts/config/.markdownlintignore) - Ignore patterns
 
 **Configuration** (`scripts/config/markdownlint.yaml`):
 
@@ -589,8 +589,8 @@ markdownlint --config scripts/config/markdownlint.yaml --ignore-path scripts/con
 
 **Source files** (in `assets/`):
 
-- [`scripts/quality/check-markdown-links.sh`](assets/scripts/quality/check-markdown-links.sh) — Link checker wrapper
-- [`scripts/config/lychee.toml`](assets/scripts/config/lychee.toml) — Lychee configuration
+- [`scripts/quality/check-markdown-links.sh`](assets/scripts/quality/check-markdown-links.sh) - Link checker wrapper
+- [`scripts/config/lychee.toml`](assets/scripts/config/lychee.toml) - Lychee configuration
 
 **Configuration** (`scripts/config/lychee.toml`):
 
@@ -662,7 +662,7 @@ lychee --config scripts/config/lychee.toml --no-progress --quiet "**/*.md"
 
 **Source files** (in `assets/`):
 
-- [`scripts/quality/check-shell-lint.sh`](assets/scripts/quality/check-shell-lint.sh) — ShellCheck wrapper
+- [`scripts/quality/check-shell-lint.sh`](assets/scripts/quality/check-shell-lint.sh) - ShellCheck wrapper
 
 **Configuration**:
 
@@ -729,13 +729,13 @@ make check-shell-lint
 
 **Source files** (in `assets/`):
 
-- [`scripts/docker/docker.mk`](assets/scripts/docker/docker.mk) — Make targets
-- [`scripts/docker/docker.lib.sh`](assets/scripts/docker/docker.lib.sh) — Shell functions library
-- [`scripts/docker/dockerfile-linter.sh`](assets/scripts/docker/dockerfile-linter.sh) — Hadolint wrapper
-- [`scripts/docker/Dockerfile.metadata`](assets/scripts/docker/Dockerfile.metadata) — OCI label template
-- [`scripts/config/hadolint.yaml`](assets/scripts/config/hadolint.yaml) — Hadolint configuration
-- [`scripts/docker/dgoss.sh`](assets/scripts/docker/dgoss.sh) — Container testing with dgoss
-- [`scripts/docker/tests/`](assets/scripts/docker/tests/) — Docker test fixtures
+- [`scripts/docker/docker.mk`](assets/scripts/docker/docker.mk) - Make targets
+- [`scripts/docker/docker.lib.sh`](assets/scripts/docker/docker.lib.sh) - Shell functions library
+- [`scripts/docker/dockerfile-linter.sh`](assets/scripts/docker/dockerfile-linter.sh) - Hadolint wrapper
+- [`scripts/docker/Dockerfile.metadata`](assets/scripts/docker/Dockerfile.metadata) - OCI label template
+- [`scripts/config/hadolint.yaml`](assets/scripts/config/hadolint.yaml) - Hadolint configuration
+- [`scripts/docker/dgoss.sh`](assets/scripts/docker/dgoss.sh) - Container testing with dgoss
+- [`scripts/docker/tests/`](assets/scripts/docker/tests/) - Docker test fixtures
 
 **Make targets**:
 
@@ -756,7 +756,7 @@ make docker-test-suite-run  # Run Docker test suite
 - OCI-compliant image labels (title, version, git info, build date)
 - Trusted registry allowlist in hadolint config
 - Test suite support with dgoss
-- **Docker image version pinning via `.tool-versions`** — see [Tool Version Management (asdf)](#12-tool-version-management-asdf) for the extended format
+- **Docker image version pinning via `.tool-versions`** - see [Tool Version Management (asdf)](#12-tool-version-management-asdf) for the extended format
 
 **Docker image versioning**:
 
@@ -821,14 +821,14 @@ make help | grep -E "docker-bake-dockerfile|docker-build|docker-lint|docker-push
 
 **Source files** (in `assets/`):
 
-- [`assets/.github/workflows/cicd-1-pull-request.yaml`](assets/.github/workflows/cicd-1-pull-request.yaml) — Main PR workflow
-- [`assets/.github/workflows/cicd-2-publish.yaml`](assets/.github/workflows/cicd-2-publish.yaml) — Publish workflow
-- [`assets/.github/workflows/cicd-3-deploy.yaml`](assets/.github/workflows/cicd-3-deploy.yaml) — Deployment workflow
-- [`assets/.github/workflows/stage-1-commit.yaml`](assets/.github/workflows/stage-1-commit.yaml) — Commit stage (quality checks)
-- [`assets/.github/workflows/stage-2-test.yaml`](assets/.github/workflows/stage-2-test.yaml) — Test stage
-- [`assets/.github/workflows/stage-3-build.yaml`](assets/.github/workflows/stage-3-build.yaml) — Build stage
-- [`assets/.github/workflows/stage-4-acceptance.yaml`](assets/.github/workflows/stage-4-acceptance.yaml) — Acceptance stage
-- [`assets/.github/actions/`](assets/.github/actions/) — Composite actions for each check
+- [`assets/.github/workflows/cicd-1-pull-request.yaml`](assets/.github/workflows/cicd-1-pull-request.yaml) - Main PR workflow
+- [`assets/.github/workflows/cicd-2-publish.yaml`](assets/.github/workflows/cicd-2-publish.yaml) - Publish workflow
+- [`assets/.github/workflows/cicd-3-deploy.yaml`](assets/.github/workflows/cicd-3-deploy.yaml) - Deployment workflow
+- [`assets/.github/workflows/stage-1-commit.yaml`](assets/.github/workflows/stage-1-commit.yaml) - Commit stage (quality checks)
+- [`assets/.github/workflows/stage-2-test.yaml`](assets/.github/workflows/stage-2-test.yaml) - Test stage
+- [`assets/.github/workflows/stage-3-build.yaml`](assets/.github/workflows/stage-3-build.yaml) - Build stage
+- [`assets/.github/workflows/stage-4-acceptance.yaml`](assets/.github/workflows/stage-4-acceptance.yaml) - Acceptance stage
+- [`assets/.github/actions/`](assets/.github/actions/) - Composite actions for each check
 
 **Metadata job**:
 
@@ -893,7 +893,7 @@ grep -r "uses:.*\.github/actions/" .github/workflows/
 
 **Source files** (in `assets/`):
 
-- [`.github/dependabot.yaml`](assets/.github/dependabot.yaml) — Dependabot configuration
+- [`.github/dependabot.yaml`](assets/.github/dependabot.yaml) - Dependabot configuration
 
 **Configured ecosystems**:
 
@@ -951,36 +951,36 @@ yq eval '.updates[].package-ecosystem' .github/dependabot.yaml
 
 **Source files** (in `assets/`):
 
-- [`.vscode/extensions.json`](assets/.vscode/extensions.json) — Recommended extensions
-- [`.vscode/settings.json`](assets/.vscode/settings.json) — Workspace settings
-- [`project.code-workspace`](assets/project.code-workspace) — Multi-root workspace file
+- [`.vscode/extensions.json`](assets/.vscode/extensions.json) - Recommended extensions
+- [`.vscode/settings.json`](assets/.vscode/settings.json) - Workspace settings
+- [`project.code-workspace`](assets/project.code-workspace) - Multi-root workspace file
 
 **Recommended extensions**:
 
-- `alefragnani.bookmarks` — Bookmarks
-- `davidanson.vscode-markdownlint` — Markdown linting
-- `dbaeumer.vscode-eslint` — ESLint
-- `eamodio.gitlens` — Git enhancements
-- `editorconfig.editorconfig` — EditorConfig support
-- `esbenp.prettier-vscode` — Formatting support
-- `github.github-vscode-theme` — GitHub theme
-- `github.vscode-github-actions` — GitHub Actions
-- `github.vscode-pull-request-github` — GitHub PRs
-- `johnpapa.vscode-peacock` — Workspace colour
-- `mhutchie.git-graph` — Git graph
-- `ms-azuretools.vscode-docker` — Docker support
-- `ms-vscode.hexeditor` — Hex editor
-- `ms-vscode.live-server` — Live server
-- `ms-vsliveshare.vsliveshare` — Live Share
-- `redhat.vscode-xml` — XML support
-- `streetsidesoftware.code-spell-checker-british-english` — British English spellchecking
-- `tamasfe.even-better-toml` — TOML support
-- `tomoki1207.pdf` — PDF preview
-- `vscode-icons-team.vscode-icons` — File icons
-- `vstirbu.vscode-mermaid-preview` — Mermaid diagram preview
-- `wayou.vscode-todo-highlight` — TODO highlighting
-- `yzhang.dictionary-completion` — Dictionary completion
-- `yzhang.markdown-all-in-one` — Markdown tooling
+- `alefragnani.bookmarks` - Bookmarks
+- `davidanson.vscode-markdownlint` - Markdown linting
+- `dbaeumer.vscode-eslint` - ESLint
+- `eamodio.gitlens` - Git enhancements
+- `editorconfig.editorconfig` - EditorConfig support
+- `esbenp.prettier-vscode` - Formatting support
+- `github.github-vscode-theme` - GitHub theme
+- `github.vscode-github-actions` - GitHub Actions
+- `github.vscode-pull-request-github` - GitHub PRs
+- `johnpapa.vscode-peacock` - Workspace colour
+- `mhutchie.git-graph` - Git graph
+- `ms-azuretools.vscode-docker` - Docker support
+- `ms-vscode.hexeditor` - Hex editor
+- `ms-vscode.live-server` - Live server
+- `ms-vsliveshare.vsliveshare` - Live Share
+- `redhat.vscode-xml` - XML support
+- `streetsidesoftware.code-spell-checker-british-english` - British English spellchecking
+- `tamasfe.even-better-toml` - TOML support
+- `tomoki1207.pdf` - PDF preview
+- `vscode-icons-team.vscode-icons` - File icons
+- `vstirbu.vscode-mermaid-preview` - Mermaid diagram preview
+- `wayou.vscode-todo-highlight` - TODO highlighting
+- `yzhang.dictionary-completion` - Dictionary completion
+- `yzhang.markdown-all-in-one` - Markdown tooling
 
 **Verification** (run after adoption):
 
@@ -1022,7 +1022,7 @@ jq -r '.recommendations[]' .vscode/extensions.json
 
 **Source files** (in `assets/`):
 
-- [`.tool-versions`](assets/.tool-versions) — Tool version pins (standard and Docker)
+- [`.tool-versions`](assets/.tool-versions) - Tool version pins (standard and Docker)
 
 **Standard tool entries**:
 
@@ -1125,16 +1125,16 @@ grep "^# docker/" .tool-versions
 
 **Source files** (in `assets/`):
 
-- [`.github/ISSUE_TEMPLATE/`](assets/.github/ISSUE_TEMPLATE/) — Issue form templates
-- [`.github/pull_request_template.md`](assets/.github/pull_request_template.md) — PR description template
-- [`.github/security.md`](assets/.github/security.md) — Security vulnerability reporting policy
-- [`.github/contributing.md`](assets/.github/contributing.md) — Contributing guide
+- [`.github/ISSUE_TEMPLATE/`](assets/.github/ISSUE_TEMPLATE/) - Issue form templates
+- [`.github/pull_request_template.md`](assets/.github/pull_request_template.md) - PR description template
+- [`.github/security.md`](assets/.github/security.md) - Security vulnerability reporting policy
+- [`.github/contributing.md`](assets/.github/contributing.md) - Contributing guide
 
 **Issue templates**:
 
-- `1_support_request.yaml` — Support and help requests
-- `2_feature_request.yaml` — New feature proposals
-- `3_bug_report.yaml` — Bug reports with reproduction steps
+- `1_support_request.yaml` - Support and help requests
+- `2_feature_request.yaml` - New feature proposals
+- `3_bug_report.yaml` - Bug reports with reproduction steps
 
 **PR template contents**:
 
@@ -1193,12 +1193,12 @@ done
 
 **Source files** (in `assets/`):
 
-- [`docs/adr/`](assets/docs/adr/) — Architecture Decision Records
-- [`docs/guides/`](assets/docs/guides/) — Developer and user guides
+- [`docs/adr/`](assets/docs/adr/) - Architecture Decision Records
+- [`docs/guides/`](assets/docs/guides/) - Developer and user guides
 
 **ADR structure** (`docs/adr/`):
 
-- `ADR-nnn_Any_Decision_Record_Template.md` — Template for new ADRs
+- `ADR-nnn_Any_Decision_Record_Template.md` - Template for new ADRs
 
 **ADR template fields**:
 
@@ -1212,11 +1212,11 @@ done
 
 **Guides** (`docs/guides/`):
 
-- `Bash_and_Make.md` — Shell scripting and Make conventions
-- `Run_Git_hooks_on_commit.md` — Pre-commit hook usage
-- `Scan_secrets.md` — Secret scanning usage
-- `Scripting_Docker.md` — Docker patterns and practices
-- `Sign_Git_commits.md` — Git commit signing guidance
+- `Bash_and_Make.md` - Shell scripting and Make conventions
+- `Run_Git_hooks_on_commit.md` - Pre-commit hook usage
+- `Scan_secrets.md` - Secret scanning usage
+- `Scripting_Docker.md` - Docker patterns and practices
+- `Sign_Git_commits.md` - Git commit signing guidance
 
 **To adopt**:
 
@@ -1354,9 +1354,4 @@ Then selectively copy relevant files to your repository.
 
 ## Examples 📓
 
-- [example-01-happy-path.md](./examples/example-01-happy-path.md) — adopting the Core Make System and Pre-commit Hooks capabilities into a fresh repository, including verification commands and expected outputs.
-
----
-
-> **Version**: 2.0.0
-> **Last Amended**: 2026-01-31
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) - adopting the Core Make System and Pre-commit Hooks capabilities into a fresh repository, including verification commands and expected outputs.

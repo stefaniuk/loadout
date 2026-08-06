@@ -1,4 +1,4 @@
-# Code Review — Documentation Type
+# Code Review - Documentation Type
 
 Full workflow for the **documentation** review type: review the entire spec-driven development documentation set (including the constitution) for consistency, cohesion, coherence, and traceability; identify issues and provide prioritised, actionable, tech-aligned recommendations to bring all artefacts into alignment.
 
@@ -69,7 +69,7 @@ Before reporting findings, gather full context by:
 - Ensure downstream documents (plan, tasks, checklists) **reference identifiers** rather than paraphrasing behaviour.
 - Confirm identifier formats are consistent across documents (same prefixes, casing, and numbering style).
 - If identifiers are missing, list the exact items that need identifiers and propose a consistent identifier scheme (**do not invent new requirements**).
-- When recommending identifier ranges, use an em dash (—) with spaces (for example `FR-001 — FR-008`).
+- When recommending identifier ranges, use an em dash (-) with spaces (for example `FR-001 - FR-008`).
 
 ### 2. Ubiquitous Language Enforcement
 

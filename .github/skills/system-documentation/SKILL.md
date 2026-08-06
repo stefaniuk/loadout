@@ -28,8 +28,8 @@ The skill combines two established frameworks with repository evidence from
 mature open-source projects (Django, FastAPI, Kubernetes, Backstage):
 
 - **Diátaxis** ([diataxis.fr](https://diataxis.fr/)) defines the four
-  reader-needs modes — tutorials, how-to guides, reference, and
-  explanation — and is used here as the **content-quality control**
+  reader-needs modes - tutorials, how-to guides, reference, and
+  explanation - and is used here as the **content-quality control**
   framework: every page must have exactly one mode.
 - **Docs as Code**
   ([writethedocs.org/guide/docs-as-code](https://www.writethedocs.org/guide/docs-as-code/))
@@ -285,18 +285,18 @@ Useful change-to-doc heuristics for `sync`, `audit`, and `pre-pr-review`:
 
 Derived from cross-repository evidence in the research report:
 
-1. README-as-everything — tutorial, explanation, reference, changelog, and
+1. README-as-everything - tutorial, explanation, reference, changelog, and
    support guide collapsed into a single file.
-2. Mode mixing — a how-to that becomes an architecture essay, or a
+2. Mode mixing - a how-to that becomes an architecture essay, or a
    reference page that teaches from scratch.
-3. No operational surface — deployment, debugging, or upgrade guidance
+3. No operational surface - deployment, debugging, or upgrade guidance
    missing for a deployed system.
-4. No architecture history — significant decisions visible only in old pull
+4. No architecture history - significant decisions visible only in old pull
    requests or tribal memory.
-5. No security policy — vulnerability reporters left to guess the channel.
-6. No documentation contribution guidance — doc quality dependent on
+5. No security policy - vulnerability reporters left to guess the channel.
+6. No documentation contribution guidance - doc quality dependent on
    institutional memory.
-7. Generated reference without curation — reference exists but has no
+7. Generated reference without curation - reference exists but has no
    landing page or routes.
 8. Audience pages that shadow-copy canonical docs instead of routing to
    them.

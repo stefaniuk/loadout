@@ -8,7 +8,7 @@ that ships one CLI tool or a suite of CLI tools.
 
 This document is the deterministic counterpart to step 01 for the top-level
 `README.md`. Where step 01 defines the README role and the four required
-subsections of `## Why this project exists` (driven by
+topics within `## Why this project exists` (driven by
 [readme.instructions.md](../../instructions/readme.instructions.md)), this
 document fixes the reader-facing flow, the section order, the content of each
 section, the writing constraints, and the two inline templates the skill must
@@ -27,14 +27,14 @@ form.
 
 Apply this document during step 01 whenever:
 
-- the repository ships at least one user-facing CLI binary; or
+- the repository ships at least one user-facing CLI binary
 - `make apply`, `make install`, or a packaging target produces a CLI surface
-  exposed on `PATH`; or
+  exposed on `PATH`
 - the user requests a README rewrite, audit, or pre-PR review and the primary
-  user-facing surface is a command-line tool.
+  user-facing surface is a command-line tool
 
-If the repository does not ship a CLI, still apply sections 1-7, 9-11, and
-the line budgets; replace the CLI-specific text in `## How to use`,
+If the repository does not ship a CLI, still apply sections 1-7, 9-10, and
+12 along with the line budgets. Replace the CLI-specific text in `## How to use`,
 `## How it solves the problem`, and the templates with the equivalent surface
 (library API, HTTP API, service control plane, application UI).
 
@@ -48,7 +48,7 @@ The skill MUST honour these principles when writing the top-level `README.md`:
 3. Make the first successful command obvious and short, and state the
    expected success signal.
 4. Keep the README as an orientation document; route everything else.
-5. Limit `## How to use` to the top three workflows; move the rest to
+5. Limit `## How to use` to three to five workflows. Move the rest to
    `docs/how-to/`.
 6. Move exhaustive command, flag, schema, and config reference to
    `docs/reference/`.
@@ -56,8 +56,8 @@ The skill MUST honour these principles when writing the top-level `README.md`:
 8. Move newcomer learning journeys to `docs/tutorials/`.
 9. Move runbooks and incident response to `docs/operations/`.
 10. Keep the canonical section order defined below; do not reorder.
-11. Prefer short prose that guides the reader from question to question;
-    use bullets only when they improve scanning.
+11. Prefer short prose that guides the reader from question to question.
+    Use bullets only when they improve scanning.
 
 ## Human-first writing rules
 
@@ -92,19 +92,23 @@ Apply these rules when producing or syncing a top-level `README.md`:
 7. Let the README sound edited.
    Repeated sentence stems, identical paragraph shapes, and back-to-back list
    blocks are signs the page has become robotic and should be revised.
+8. Use `TODO:` placeholders for missing or unverified information.
+   When a fact, command, or link cannot be confirmed from repository evidence,
+   insert an explicit `TODO:` marker rather than guessing or omitting the
+   content. Keep TODO items visible until the underlying information is
+   confirmed.
 
 ## Canonical section order
 
 The top-level `README.md` MUST present sections in exactly this order. Add
-optional sections only between section 8 and section 10. Do not insert
-sections before section 1.
+optional sections at position 8 or position 11 only. Do not insert sections
+before section 1.
 
 1. `# <Project Name>` and a one-line summary.
-2. Optional badge row (release, CI, licence; maximum three).
-3. `## Why this project exists`, with the four required subsections from
-   [readme.instructions.md](../../instructions/readme.instructions.md):
-   `### Purpose`, `### Benefit to the user`, `### Problem it solves`,
-   `### How it solves it (high level)`.
+2. Optional badge row (release, CI, licence, maximum three).
+3. `## Why this project exists`, covering the four required topics from
+   [readme.instructions.md](../../instructions/readme.instructions.md)
+   (purpose, benefit, problem, approach) in unified prose.
 4. `## Quick start`.
 5. `## What it does`.
 6. `## How it solves the problem`.
@@ -113,7 +117,9 @@ sections before section 1.
    `Release policy`). Add only when they solve a real navigation need.
 9. `## Contributing`.
 10. `## Repository layout`.
-11. `## Licence`.
+11. Optional sections (for example FAQ, Roadmap). Add only when they solve
+    a real reader need.
+12. `## Licence`.
 
 ## Content rules by section
 
@@ -138,14 +144,17 @@ sentence below the fold.
 ### `## Why this project exists`
 
 This section should read like a calm explanation to a new reader, not a form.
-Each required subsection must contain at least one short paragraph of prose.
+Write it as unified prose, with no subsection headings, covering four topics
+in a natural flow:
 
-- `### Purpose` explains what the tool exists to help a user do.
-- `### Benefit to the user` names the practical gain in everyday terms.
-- `### Problem it solves` describes the user's friction, not the repository's
-  internal structure.
-- `### How it solves it (high level)` explains the broad approach in plain
-  language and should naturally set up the quick-start path that follows.
+1. **Purpose:** what the tool exists to help a user do and why that job matters.
+2. **Benefit:** the practical gain in everyday terms.
+3. **Problem:** the user's friction, not the repository's internal structure.
+4. **Approach:** the broad solution in plain language, leading naturally into
+   the quick start that follows.
+
+Let the narrative move from one topic to the next so the section reads as a
+single guided explanation rather than four filled-in form fields.
 
 ### `## Quick start`
 
@@ -154,7 +163,7 @@ about to prove: that the tool installs cleanly and works on their machine.
 
 - `### Prerequisites` captures runtime, platform, and shell assumptions.
 - `### Install` gives one primary install path first, then alternatives by OS
-  or package manager only when relevant; link to `docs/how-to/install.md` if
+  or package manager only when relevant. Link to `docs/how-to/install.md` if
   a longer guide exists.
 - `### First run` gives one or two commands the reader can run immediately,
   followed by a clearly labelled `Expected result` block stating what success
@@ -167,12 +176,13 @@ plain language. After that, use lists sparingly for the parts readers scan.
 
 - `### Key features` should usually be a short list of 3 to 8 capabilities,
   phrased in terms of outcomes rather than implementation detail.
-- `### Non-goals` should clarify boundaries only where doing so prevents a
-  likely misunderstanding.
+- `### Non-goals` should include 2-6 bullets when they prevent a likely
+  misunderstanding. Omit only when boundaries are self-evident from the
+  feature list.
 - `### Supported environments` should appear only when the repository makes
   explicit support claims.
 - `### Tool map` should appear only when the repository ships more than one
-  binary; one bullet per binary is enough.
+  binary. One bullet per binary is enough.
 
 ### `## How it solves the problem`
 
@@ -189,21 +199,24 @@ documentation set.
 
 - `### Configuration` should explain the minimum setup in prose, then show the
   commands and note where configuration lives or how secrets are supplied.
-- `### Common workflows` should cover only the top three user jobs. Each
+- `### Common workflows` should cover three to five user jobs. Each
   workflow needs a short sentence explaining when to use it, a copyable command
   block, a short explanation of what happens, an `Expected result` list, and a
   link to the canonical how-to under `docs/how-to/`.
 - `### Examples` should route outward rather than repeat detail. Prefer links
   to `docs/reference/`, `docs/how-to/`, and `docs/tutorials/`.
 - `### Troubleshooting` should appear only when at least one recurring issue
-  is evidenced; otherwise omit it and let `docs/how-to/troubleshooting/` carry
+  is evidenced. Otherwise omit it and let `docs/how-to/troubleshooting/` carry
   the recovery path.
 
 ### `## Contributing`
 
 Write this as a short invitation followed by the minimal next steps. Link to
 `.github/contributing.md`, summarise local setup, and include the exact
-quality commands the project gates contributions on.
+quality commands the project gates contributions on. If
+`.github/contributing.md` does not exist, create a contributing file. Include
+links to `.github/SECURITY.md` and `.github/CODE_OF_CONDUCT.md` when those
+files exist.
 
 ### `## Repository layout`
 
@@ -217,23 +230,25 @@ State the licence in a short sentence and link to `LICENCE.md`.
 
 ## Size and pacing guidance
 
-Use these soft limits to keep the README compact without forcing it into a
+Target under 200 lines for the whole `README.md` ([RD-STR-014]). Use the
+soft limits below to keep the README compact without forcing it into a
 checklist shape. Treat them as pacing guidance, not a reason to chop prose
 into unnatural fragments. If a section grows materially beyond its guidance,
 move detail into the correct canonical doc and leave a link behind.
 
-- the opening screen should let a reader identify the project, understand the
+- The opening screen should let a reader identify the project, understand the
   outcome, and reach the start of either `## Why this project exists` or
-  `## Quick start` without scrolling past badge walls or decorative content;
-- `## Why this project exists` should usually be four short paragraphs, one per
-  required subsection;
+  `## Quick start` without scrolling past badge walls or decorative content.
+- `## Why this project exists` should usually be three to five short paragraphs
+  that flow naturally across the four required topics (purpose, benefit,
+  problem, approach), not one paragraph rigidly mapped to each topic.
 - `## Quick start` should stay focused on one install path, optional
-  alternatives, and one first success path;
+  alternatives, and one first success path.
 - `## What it does` should usually be one short orienting paragraph plus a
-  small amount of scannable detail;
-- `## How it solves the problem` should stay conceptual and brief;
-- `## How to use` should cover only the most common workflows, not the whole
-  manual;
+  small amount of scannable detail.
+- `## How it solves the problem` should stay conceptual and brief.
+- `## How to use` should cover only the most common workflows (three to five),
+  not the whole manual.
 - `## Contributing`, `## Repository layout`, and `## Licence` should stay
   concise and direct.
 
@@ -243,25 +258,25 @@ Detect and report these anti-patterns during `audit` and `pre-pr-review`,
 and refactor them during `sync`:
 
 - README-as-everything: tutorial, explanation, reference, changelog, or
-  runbook content embedded directly in the top-level README;
-- a README that reads like a filled-in template rather than a guided landing
-  page;
-- section after section made only of bullets, labels, or micro-headings with
-  no connective prose;
-- installation and usage mixed in one block with no clear first-run path;
-- the README presented as a reference manual (long flag tables, exhaustive
-  config keys, full schema dumps);
-- support, bug reporting, and contribution blended into a single generic
-  block instead of separated by purpose;
-- decorative screenshots that do not shorten an explanation;
-- command examples without an `Expected result` block;
-- sponsor or marketing content placed above `## Quick start`;
-- more than three badges, or badges that signal nothing actionable;
-- benchmark sections in the README instead of a short claim plus a link to
-  evidence;
-- large feature comparison matrices in the README instead of in
-  `docs/reference/` or a product page;
-- duplicated canonical facts that also live in `docs/reference/`,
+  runbook content embedded directly in the top-level README.
+- A README that reads like a filled-in template rather than a guided landing
+  page.
+- Section after section made only of bullets, labels, or micro-headings with
+  no connective prose.
+- Installation and usage mixed in one block with no clear first-run path.
+- The README presented as a reference manual (long flag tables, exhaustive
+  config keys, full schema dumps).
+- Support, bug reporting, and contribution blended into a single generic
+  block instead of separated by purpose.
+- Decorative screenshots that do not shorten an explanation.
+- Command examples without an `Expected result` block.
+- Sponsor or marketing content placed above `## Quick start`.
+- More than three badges, or badges that signal nothing actionable.
+- Benchmark sections in the README instead of a short claim plus a link to
+  evidence.
+- Large feature comparison matrices in the README instead of in
+  `docs/reference/` or a product page.
+- Duplicated canonical facts that also live in `docs/reference/`,
   `docs/how-to/`, `docs/architecture.md`, `CHANGELOG.md`, or
   `.github/SECURITY.md`.
 
@@ -271,17 +286,19 @@ In addition to the skill-wide validation gates, the skill MUST verify the
 following for the top-level `README.md` in `establish` and `sync` modes:
 
 1. The H1 is the project name and is the first heading in the file.
-2. Sections 1, 3, 4, 5, 7, 9, 10, and 11 are present in canonical order.
-3. `## Why this project exists` contains all four required subsections from
-   [readme.instructions.md](../../instructions/readme.instructions.md).
-4. Each subsection under `## Why this project exists` contains prose, not only
-   bullets or placeholder fragments.
+2. Sections 1, 3, 4, 5, 7, 9, 10, and 12 are present in canonical order.
+3. `## Why this project exists` covers all four required topics (purpose,
+   benefit, problem, approach) from
+   [readme.instructions.md](../../instructions/readme.instructions.md) in
+   unified prose.
+4. `## Why this project exists` reads as connected narrative, not as four
+   separate form fields or disconnected bullet lists.
 5. `## Quick start` opens with a short orienting paragraph and contains an
    `Expected result` block under `### First run` or its first runnable example.
 6. `## What it does` and `## How to use` each begin with a short paragraph that
    frames the section before any list or command block.
 7. `## How to use` contains a `### Configuration` subsection and a
-   `### Common workflows` subsection with at most three workflows.
+   `### Common workflows` subsection with three to five workflows.
 8. Each workflow under `### Common workflows` includes a short sentence
    explaining when to use it, a command block, a short explanation of what it
    does, and an `Expected result` list.
@@ -293,18 +310,20 @@ following for the top-level `README.md` in `establish` and `sync` modes:
     would better explain purpose or flow.
 12. The licence section names the licence and links to `LICENCE.md`.
 13. Every relative link points to a file or anchor that exists.
+14. Links to `.github/SECURITY.md` and `.github/CODE_OF_CONDUCT.md` are
+    included when those files exist in the repository.
 
 ## Definition of Done (README-specific)
 
 A `README.md` produced or updated under this document is done when:
 
-- the section order matches the canonical order above;
-- the content and writing-shape rules for each section pass;
-- the pacing guidance is respected (or any overshoot is justified by a linked
-  evidence file);
-- the README-specific validation checks above pass alongside the
-  skill-wide validation gates defined in [SKILL.md](SKILL.md);
-- no anti-pattern in the list above is present.
+- The section order matches the canonical order above.
+- The content and writing-shape rules for each section pass.
+- The pacing guidance is respected (or any overshoot is justified by a linked
+  evidence file).
+- The README-specific validation checks above pass alongside the
+  skill-wide validation gates defined in [SKILL.md](SKILL.md).
+- No anti-pattern in the list above is present.
 
 ## Template A - Top-level `README.md` for a CLI repository
 
@@ -312,7 +331,10 @@ The skill MUST treat this template as the starting scaffold when creating a
 new top-level `README.md` for a CLI repository. Replace every `<placeholder>`
 with evidenced content. Do not reorder sections. Remove the `Tool map`
 subsection when only one binary ships. Remove `### Troubleshooting` when no
-recurring issue is evidenced.
+recurring issue is evidenced. Remove links to `.github/SECURITY.md` and
+`.github/CODE_OF_CONDUCT.md` when those files do not exist. Insert `TODO:`
+placeholders for any content that cannot be confirmed from repository
+evidence.
 
 ````md
 # <Project Name>
@@ -325,25 +347,13 @@ A CLI tool that <primary outcome> for <primary audience>.
 
 ## Why this project exists
 
-### Purpose
-
-<State in one short paragraph what the tool helps the reader do and why that
-job matters.>
-
-### Benefit to the user
-
-<Describe the practical gain in everyday terms: what becomes faster, safer,
-clearer, or easier to automate once the tool is in use.>
-
-### Problem it solves
-
-<Describe the user's friction, wasted effort, or repeated failure mode. Keep
-the focus on the reader's problem, not the repository internals.>
-
-### How it solves it (high level)
-
-<Explain the broad approach in plain language and lead naturally into the quick
-start that follows.>
+<Write unified prose that flows naturally through four topics: what the tool
+helps the reader do and why that job matters (purpose), the practical gain in
+everyday terms and what becomes faster, safer, clearer, or easier to automate
+(benefit), the user's friction, wasted effort, or repeated failure mode that
+motivated the project (problem), and the broad approach the tool takes to
+solve it, leading naturally into the quick start that follows (approach).
+Do not split these into separate subsections.>
 
 ## Quick start
 
@@ -430,8 +440,8 @@ Key concepts:
 
 ## How to use
 
-The README covers the three workflows most readers need first. If you need the
-full manual, use the linked how-to and reference docs.
+The README covers three to five workflows most readers need first. If you need
+the full manual, use the linked how-to and reference docs.
 
 ### Configuration
 
@@ -516,9 +526,9 @@ More detail:
 
 ### Examples
 
-- [docs/reference/cli.md](docs/reference/cli.md) - full command and flag reference
-- [docs/how-to/README.md](docs/how-to/README.md) - task-oriented guides
-- [docs/tutorials/README.md](docs/tutorials/README.md) - newcomer journeys
+- [docs/reference/cli.md](docs/reference/cli.md): full command and flag reference
+- [docs/how-to/README.md](docs/how-to/README.md): task-oriented guides
+- [docs/tutorials/README.md](docs/tutorials/README.md): newcomer journeys
 
 ### Troubleshooting
 
@@ -532,12 +542,14 @@ If you want to contribute, start with the contributor guide and the local
 quality gates below.
 
 See [.github/contributing.md](.github/contributing.md) for the full process.
+See also [.github/SECURITY.md](.github/SECURITY.md) and
+[.github/CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md).
 
 In short:
 
-- install the dev environment;
-- run the quality gates;
-- open an issue or pull request with context.
+- Install the dev environment.
+- Run the quality gates.
+- Open an issue or pull request with context.
 
 Required checks:
 
@@ -565,18 +577,18 @@ This project is licensed under the <Licence Name>.
 See [LICENCE.md](LICENCE.md) for details.
 ````
 
-## Template B - `## How to use` for up to three main CLI use cases
+## Template B - `## How to use` for three to five main CLI use cases
 
-Use this when the README should teach the three most common jobs a user wants
-to complete. If the tool has more than three important workflows, keep the
-top three here and move the rest into `docs/how-to/`.
+Use this when the README should teach the most common jobs a user wants
+to complete. The template shows three use cases. Extend with up to two more
+following the same pattern. Move remaining workflows into `docs/how-to/`.
 
 ````md
 ## How to use
 
 This section should feel like a guided starting point, not a miniature manual.
-Use it to cover the three workflows most readers are likely to need first, and
-link out for everything deeper.
+Use it to cover three to five workflows most readers need first, and link out
+for everything deeper.
 
 ### Configuration
 
@@ -590,14 +602,14 @@ export <ENV_VAR>=<value>
 
 Why this matters:
 
-- sets the runtime context;
-- authenticates the user or machine;
-- stores the default behaviour needed by later commands.
+- Sets the runtime context.
+- Authenticates the user or machine.
+- Stores the default behaviour needed by later commands.
 
 Expected result:
 
-- the CLI confirms authentication or saved configuration;
-- later commands can run without repeating setup.
+- The CLI confirms authentication or saved configuration.
+- Later commands can run without repeating setup.
 
 ### Use case 1 - <primary user job>
 
@@ -691,9 +703,9 @@ More detail:
 
 ### Examples
 
-- [docs/reference/cli.md](docs/reference/cli.md) - full command reference
-- [docs/how-to/README.md](docs/how-to/README.md) - task-oriented guides
-- [docs/tutorials/README.md](docs/tutorials/README.md) - first-run journeys
+- [docs/reference/cli.md](docs/reference/cli.md): full command reference
+- [docs/how-to/README.md](docs/how-to/README.md): task-oriented guides
+- [docs/tutorials/README.md](docs/tutorials/README.md): first-run journeys
 
 ### Troubleshooting
 

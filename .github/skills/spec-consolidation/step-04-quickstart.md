@@ -1,4 +1,4 @@
-# Step 04 — Consolidated Quickstart
+# Step 04 - Consolidated Quickstart
 
 **Output:** `specs/product/quickstart.md`
 **Dependencies:** steps 01–02.

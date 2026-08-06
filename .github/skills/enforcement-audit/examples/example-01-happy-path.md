@@ -1,4 +1,4 @@
-# Example 01 — Audit a Python codebase against `python.instructions.md`
+# Example 01 - Audit a Python codebase against `python.instructions.md`
 
 ## Scenario metadata
 
@@ -24,30 +24,30 @@
 - Read `.github/instructions/python.instructions.md` end to end; captured every `[PY-XX-NNN]` identifier into a working checklist.
 - Read `architecture-baseline.include.md` for evidence-gathering conventions.
 - Ran `git ls-files '*.py' pyproject.toml uv.lock requirements*.txt Makefile` to enumerate 142 files in scope.
-- Confirmed no overriding ADR for Python tooling — instructions are fully binding.
+- Confirmed no overriding ADR for Python tooling - instructions are fully binding.
 - Checked for prior runs: neither inventory nor plan file existed.
 
 ## Execution
 
-1. **Build the artefact matrix** — wrote `docs/prompts/python-inventory.md` listing each file, its role (entrypoint, library, test, config, tooling), and the applicable `PY-*` tags. Highlighted three high-risk areas: outbound HTTP client (no timeouts), logging configuration (non-structured), test layout (mixing unit and integration without markers).
-2. **Detect discrepancies** — produced 17 findings, each with an evidence link of the form `- Evidence: [path](path#Lx-Ly) — violates [PY-RES-003] because ...` (for example, the outbound payments client did not set an explicit timeout on its `httpx.AsyncClient`).
-3. **Plan the rework** — grouped findings into five workstreams in `docs/prompts/python-instructions-alignment-plan.md`: (W1) timeouts and retries, (W2) structured logging, (W3) ruff/mypy config completeness, (W4) test markers and layout, (W5) `pyproject.toml` metadata hygiene. Safety-critical items (W1, W2) ordered first.
-4. **Implement in batches** — landed each workstream as a narrowly scoped change set, referencing instruction tags in commit subjects (e.g. `fix(http): set explicit timeouts [PY-RES-003]`). After each batch ran `make lint` and `make test` to confirm green.
-5. **Validate quality gates** — final `make lint` and `make test` runs both passed with zero warnings. `uv lock --check` confirmed lockfile drift had been resolved.
-6. **Summarise outcomes** — appended a final report section to the plan file: resolved discrepancies (17/17), remaining gaps (none), follow-ups (raise an ADR for retry policy values; tracked as a separate workstream).
+1. **Build the artefact matrix** - wrote `docs/prompts/python-inventory.md` listing each file, its role (entrypoint, library, test, config, tooling), and the applicable `PY-*` tags. Highlighted three high-risk areas: outbound HTTP client (no timeouts), logging configuration (non-structured), test layout (mixing unit and integration without markers).
+2. **Detect discrepancies** - produced 17 findings, each with an evidence link of the form `- Evidence: [path](path#Lx-Ly) - violates [PY-RES-003] because ...` (for example, the outbound payments client did not set an explicit timeout on its `httpx.AsyncClient`).
+3. **Plan the rework** - grouped findings into five workstreams in `docs/prompts/python-instructions-alignment-plan.md`: (W1) timeouts and retries, (W2) structured logging, (W3) ruff/mypy config completeness, (W4) test markers and layout, (W5) `pyproject.toml` metadata hygiene. Safety-critical items (W1, W2) ordered first.
+4. **Implement in batches** - landed each workstream as a narrowly scoped change set, referencing instruction tags in commit subjects (e.g. `fix(http): set explicit timeouts [PY-RES-003]`). After each batch ran `make lint` and `make test` to confirm green.
+5. **Validate quality gates** - final `make lint` and `make test` runs both passed with zero warnings. `uv lock --check` confirmed lockfile drift had been resolved.
+6. **Summarise outcomes** - appended a final report section to the plan file: resolved discrepancies (17/17), remaining gaps (none), follow-ups (raise an ADR for retry policy values; tracked as a separate workstream).
 
 ## Output artefacts
 
-- `docs/prompts/python-inventory.md` — artefact matrix and high-risk highlights.
-- `docs/prompts/python-instructions-alignment-plan.md` — workstreams, batches, and final enforcement report.
+- `docs/prompts/python-inventory.md` - artefact matrix and high-risk highlights.
+- `docs/prompts/python-instructions-alignment-plan.md` - workstreams, batches, and final enforcement report.
 - Source changes across `src/app/clients/`, `src/app/core/logging.py`, `pyproject.toml`, and `tests/conftest.py` implementing the five workstreams.
 
 ## Validation evidence
 
-- `make lint` — zero errors, zero warnings.
-- `make test` — all unit and integration suites green.
-- `uv run mypy src tests` — clean.
-- `uv lock --check` — no drift.
+- `make lint` - zero errors, zero warnings.
+- `make test` - all unit and integration suites green.
+- `uv run mypy src tests` - clean.
+- `uv lock --check` - no drift.
 - Every finding closed in the plan with a back-reference to the implementing commit.
 
 ## Final assistant response

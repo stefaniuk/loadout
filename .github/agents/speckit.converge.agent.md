@@ -46,6 +46,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
     Wait for the result of the hook command before proceeding to the Goal.
     ```
+
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
 
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
@@ -62,7 +63,7 @@ of remaining work as a new, traceable task** at the bottom of `tasks.md` so that
 `/speckit.implement` has run on the current `tasks.md`, and after `/speckit.tasks` has produced a complete `tasks.md`.
 
 This is **not** a diff tool and does **not** track changes. It assesses the present state
-of the code relative to the feature's artifacts — no git, no branch comparison, no history.
+of the code relative to the feature's artifacts - no git, no branch comparison, no history.
 
 ## Operating Constraints
 
@@ -72,7 +73,7 @@ of the code relative to the feature's artifacts — no git, no branch comparison
 - modify `spec.md` or `plan.md` in any way;
 - rewrite, renumber, reorder, or delete any existing task (including tasks from a prior
   Convergence phase);
-- modify, create, or delete any application code — completing the appended tasks is the
+- modify, create, or delete any application code - completing the appended tasks is the
   job of `/speckit.implement`.
 
 When the codebase already satisfies everything, the command MUST leave `tasks.md`
@@ -93,10 +94,10 @@ Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-tas
 - PLAN = FEATURE_DIR/plan.md
 - TASKS = FEATURE_DIR/tasks.md
 - CONSTITUTION = `.specify/memory/constitution.md` (if present)
-If `spec.md`, `plan.md`, or `tasks.md` is missing, STOP with a clear, actionable message naming the
-prerequisite command to run (`/speckit.specify` for a missing spec, `/speckit.plan` for a missing plan,
-`/speckit.tasks` for missing tasks). Do not produce partial output.
-For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+  If `spec.md`, `plan.md`, or `tasks.md` is missing, STOP with a clear, actionable message naming the
+  prerequisite command to run (`/speckit.specify` for a missing spec, `/speckit.plan` for a missing plan,
+  `/speckit.tasks` for missing tasks). Do not produce partial output.
+  For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 ### 2. Load Artifacts (Progressive Disclosure)
 
@@ -105,7 +106,7 @@ Load only the minimal necessary context from each artifact:
 **From spec.md:**
 
 - Functional Requirements (FR-###)
-- Success Criteria (SC-###) — include only items requiring buildable work; exclude
+- Success Criteria (SC-###) - include only items requiring buildable work; exclude
   post-launch outcome metrics and business KPIs
 - User Stories and their Acceptance Scenarios
 - Edge Cases (if present)
@@ -135,7 +136,7 @@ Create an internal model (do not echo raw artifacts):
   impose buildable obligations.
 - **Code-scope map**: from the file paths named in `plan.md` and `tasks.md`, plus a keyword
   search for the concepts each requirement describes, derive the set of source files and
-  components in scope for assessment. Bound the assessment to these — do **not** infer
+  components in scope for assessment. Bound the assessment to these - do **not** infer
   scope beyond what the artifacts define.
 
 ### 4. Assess the Codebase and Classify Findings
@@ -149,7 +150,7 @@ For each item in the intent inventory, inspect the current code in scope and pro
 - **`contradicts`**: the code does something that conflicts with stated intent or a
   constitution MUST principle.
 - **`unrequested`**: the code contains work not called for by the spec, plan, or tasks
-  (surfaced for awareness — converge does **not** delete code, it only appends a task to
+  (surfaced for awareness - converge does **not** delete code, it only appends a task to
   review/justify or remove it).
 
 Each `Finding` records: a stable id, the `source-ref` it traces to, the `gap-type`, a
@@ -177,15 +178,15 @@ Before appending anything, output a compact, severity-graded summary (no file wr
 
 ## Convergence Findings
 
-| ID | Gap Type | Severity | Source | Evidence | Remaining Work |
-|----|----------|----------|--------|----------|----------------|
-| F1 | missing  | HIGH     | FR-008 | Example: no append-only guard detected in path/to/module.py when writing tasks.md | Add append-only enforcement |
+| ID  | Gap Type | Severity | Source | Evidence                                                                          | Remaining Work              |
+| --- | -------- | -------- | ------ | --------------------------------------------------------------------------------- | --------------------------- |
+| F1  | missing  | HIGH     | FR-008 | Example: no append-only guard detected in path/to/module.py when writing tasks.md | Add append-only enforcement |
 
 **Summary metrics:**
 
 - Requirements / acceptance criteria checked
 - Plan decisions checked
-- Constitution principles checked (or "skipped — template")
+- Constitution principles checked (or "skipped - template")
 - Findings by gap type (missing / partial / contradicts / unrequested)
 - Findings by severity
 
@@ -212,13 +213,14 @@ Append to the **end** of `tasks.md`, per the append contract:
 
    Constitution-violation tasks MUST be emitted first and described as
    `CRITICAL`.
+
 4. Never reuse or renumber existing IDs. If a prior Convergence phase exists, add a new,
-   separately-numbered one below it — do not touch the old one.
+   separately-numbered one below it - do not touch the old one.
 
 **If there are no actionable findings** (`converged` outcome):
 
-- Do **not** modify `tasks.md` at all — no empty phase header.
-- Report: **"✅ Converged — the implementation satisfies the spec, plan, and tasks."**
+- Do **not** modify `tasks.md` at all - no empty phase header.
+- Report: **"✅ Converged - the implementation satisfies the spec, plan, and tasks."**
 - Include the summary counts of what was checked.
 
 ### 8. Provide Next Actions (Handoff)
@@ -264,6 +266,7 @@ After producing the result, check if `.specify/extensions.yml` exists in the pro
     Executing: `/{command}`
     EXECUTE_COMMAND: {command}
     ```
+
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
 
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently

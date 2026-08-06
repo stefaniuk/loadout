@@ -1,4 +1,4 @@
-# Example 01 — Scaffold a new Django project with the standard layout
+# Example 01 - Scaffold a new Django project with the standard layout
 
 ## Scenario metadata
 
@@ -23,7 +23,7 @@
 - Listed repository root: `Makefile`, `scripts/init.mk`, `.tool-versions`, `.editorconfig` already present.
 - Confirmed `uv` and `python 3.13` declared in `.tool-versions`.
 - Read `.github/instructions/templates/pyproject.toml` as the starting point for the new `pyproject.toml`.
-- No existing `src/`, `manage.py`, or `tests/` — clean greenfield.
+- No existing `src/`, `manage.py`, or `tests/` - clean greenfield.
 
 ## Execution
 
@@ -65,4 +65,4 @@
 
 - Celery deliberately omitted; revisit once the first asynchronous workload is identified.
 - PostgreSQL connection pooling is left to the deployment runtime; document the chosen approach in an ADR before going to production.
-- Container image build is out of scope for this skill — combine with the `repository-template` Docker capability when ready.
+- Container image build is out of scope for this skill - combine with the `repository-template` Docker capability when ready.

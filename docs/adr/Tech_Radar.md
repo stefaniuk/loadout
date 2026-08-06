@@ -43,8 +43,3 @@
 Note: The `+` libraries (`rich`, `chalk`, `fatih/color`) provide colourful, well-formatted CLI output including styled `--help` text, progress bars, and terminal colours. They support TTY detection, `NO_COLOR`, and `--color=auto|always|never` flags.
 
 Note: Selecting any default tool above still requires an ADR that compares and assesses at least two or three popular alternatives using the [ADR template](./ADR-nnn_Any_Decision_Record_Template.md).
-
----
-
-> **Version**: 1.3.6
-> **Last Amended**: 2026-02-28

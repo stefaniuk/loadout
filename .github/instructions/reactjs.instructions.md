@@ -16,7 +16,7 @@ They must remain applicable to:
 
 For general language and tooling guidance, defer to:
 
-- [typescript.instructions.md](./typescript.instructions.md) — strict typing, quality gates, testing tiers
+- [typescript.instructions.md](./typescript.instructions.md) - strict typing, quality gates, testing tiers
 
 This file covers **only** what that file does not: React component design, hooks patterns, state management, and UI-specific concerns.
 
@@ -72,7 +72,7 @@ This section exists so humans and AI assistants can reliably apply the most impo
 
 - [RJS-HK-001] Call hooks **only at the top level** of a component or custom hook; never inside loops, conditions, or nested functions.
 - [RJS-HK-002] Provide **exhaustive dependency arrays**; enable `react-hooks/exhaustive-deps` ESLint rule and treat violations as errors.
-- [RJS-HK-003] If a dependency causes unwanted re-runs, fix the root cause (memoize the value, hoist it, or rethink the effect) — do not suppress the lint rule.
+- [RJS-HK-003] If a dependency causes unwanted re-runs, fix the root cause (memoize the value, hoist it, or rethink the effect) - do not suppress the lint rule.
 
 ### 2.2 Effects
 
@@ -102,7 +102,7 @@ This section exists so humans and AI assistants can reliably apply the most impo
 
 - [RJS-STM-001] Default to the **simplest tool** that meets the requirement; escalate only when criteria are met.
 - [RJS-STM-002] Use `useReducer` when state transitions are **> 3 distinct actions** or when next state depends on previous state in complex ways.
-- [RJS-STM-003] Avoid `useContext` for frequently changing values (for example cursor position) — it triggers re-renders of all consumers.
+- [RJS-STM-003] Avoid `useContext` for frequently changing values (for example cursor position) - it triggers re-renders of all consumers.
 
 ### 3.2 Context usage
 
@@ -219,8 +219,3 @@ Before shipping React code, verify:
 - [RJS-CHK-008] Tests cover user behaviour, not implementation
 - [RJS-CHK-009] No anti-patterns from §11 are present
 - [RJS-CHK-010] TypeScript code follows [typescript.instructions.md](./typescript.instructions.md)
-
----
-
-> **Version**: 1.2.0
-> **Last Amended**: 2026-01-17

@@ -1,9 +1,9 @@
-# Example 01 — Add the Core Make System and Pre-commit Hooks to a new repository
+# Example 01 - Add the Core Make System and Pre-commit Hooks to a new repository
 
 ## Scenario metadata
 
 - **Skill**: repository-template
-- **Scenario**: Adopt the foundational capabilities of the template — Core Make System and Pre-commit Hooks — into an otherwise empty repository so that subsequent capabilities (secret scanning, markdown linting, etc.) can be layered on cleanly.
+- **Scenario**: Adopt the foundational capabilities of the template - Core Make System and Pre-commit Hooks - into an otherwise empty repository so that subsequent capabilities (secret scanning, markdown linting, etc.) can be layered on cleanly.
 - **Repository context**: A freshly initialised Git repository with only a `README.md` and a `LICENCE.md`. No `Makefile`, no `scripts/`, no `.tool-versions`.
 - **User goal**: Get a working `make help`, a `config::` target, and pre-commit hooks installed with the canonical hook set.
 - **Invocation**: `Use the repository-template skill to add the Core Make System and Pre-commit Hooks capabilities`
@@ -16,7 +16,7 @@
 
 - Two capabilities requested: `Core Make System` (capability 1) and `Pre-commit Hooks` (capability 2).
 - Critical Integration Rule honoured: Core Make System is a prerequisite for Pre-commit Hooks, so it is adopted first.
-- Active context detected by `git remote get-url origin` — repository is a downstream consumer, so source files come from `.github/skills/repository-template/assets/` in the prompt catalogue.
+- Active context detected by `git remote get-url origin` - repository is a downstream consumer, so source files come from `.github/skills/repository-template/assets/` in the prompt catalogue.
 
 ## Context gathering
 
@@ -42,13 +42,13 @@
 
 ## Output artefacts
 
-- `Makefile` — project-specific target file with `include scripts/init.mk` and a `config::` extension.
-- `scripts/init.mk` — verbatim copy of the upstream file (do not edit).
-- `scripts/config/pre-commit.yaml` — hook definitions.
-- `scripts/quality/{scan-secrets,check-file-format,check-markdown-format,check-markdown-links}.sh` — hook wrappers.
-- `scripts/config/{gitleaks.toml,.gitleaksignore,editorconfig-checker.json,markdownlint.yaml,.markdownlintignore,lychee.toml}` — tool configs.
-- `.tool-versions` — pins `pre-commit 4.5.1`.
-- `.git/hooks/pre-commit` — installed by `make githooks-config`.
+- `Makefile` - project-specific target file with `include scripts/init.mk` and a `config::` extension.
+- `scripts/init.mk` - verbatim copy of the upstream file (do not edit).
+- `scripts/config/pre-commit.yaml` - hook definitions.
+- `scripts/quality/{scan-secrets,check-file-format,check-markdown-format,check-markdown-links}.sh` - hook wrappers.
+- `scripts/config/{gitleaks.toml,.gitleaksignore,editorconfig-checker.json,markdownlint.yaml,.markdownlintignore,lychee.toml}` - tool configs.
+- `.tool-versions` - pins `pre-commit 4.5.1`.
+- `.git/hooks/pre-commit` - installed by `make githooks-config`.
 
 ## Validation evidence
 
@@ -60,7 +60,7 @@
 
 ## Final assistant response
 
-> Adopted the Core Make System and Pre-commit Hooks capabilities. `make help` now lists the standard categorised targets, and pre-commit is installed at `.git/hooks/pre-commit` with the canonical hook set (secret scan, file format, markdown format, markdown links). The repository is ready for the next capability — Secret Scanning (Gitleaks) configuration is already in place, so you can enable it via pre-commit immediately, or layer additional capabilities (Docker, Markdown linting tuning, CI/CD) on top.
+> Adopted the Core Make System and Pre-commit Hooks capabilities. `make help` now lists the standard categorised targets, and pre-commit is installed at `.git/hooks/pre-commit` with the canonical hook set (secret scan, file format, markdown format, markdown links). The repository is ready for the next capability - Secret Scanning (Gitleaks) configuration is already in place, so you can enable it via pre-commit immediately, or layer additional capabilities (Docker, Markdown linting tuning, CI/CD) on top.
 
 ## Notes and follow-ups
 

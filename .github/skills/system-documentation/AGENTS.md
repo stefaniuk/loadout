@@ -53,7 +53,7 @@ None.
 
 ## References
 
-- [SKILL.md](SKILL.md) — the skill workflow.
-- [root AGENTS.md](../../../AGENTS.md) — canonical baseline.
-- [constitution](../../../.specify/memory/constitution.md) — highest
+- [SKILL.md](SKILL.md) - the skill workflow.
+- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.
+- [constitution](../../../.specify/memory/constitution.md) - highest
   authority.

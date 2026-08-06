@@ -27,7 +27,7 @@ If the review type is not in this table, inform the user and list the supported 
 
 For all review types:
 
-1. Read the [constitution](../../../.specify/memory/constitution.md) — it has the highest authority.
+1. Read the [constitution](../../../.specify/memory/constitution.md) - it has the highest authority.
 2. Enumerate available artefacts in the `specs/` directory of the current feature.
 3. Read the spec set in feature order: `spec.md` → `plan.md` → `tasks.md`.
 4. Read any relevant ADRs in `docs/adr/`.
@@ -52,7 +52,7 @@ This review is positioned within the spec-driven development pipeline:
 
 1. Honour the constitution as the highest authority.
 2. Base all findings on evidence from the codebase and spec artefacts.
-3. Do not guess — use **Unknown from code — {action}** for missing information.
+3. Do not guess - use **Unknown from code - {action}** for missing information.
 4. Keep recommendations specific, deterministic, minimal, and ready to implement.
 
 ## Objectives by Type
@@ -101,9 +101,9 @@ Headline objectives:
 - Produce a structured report matching the review type's objectives.
 - Use concrete evidence links for every finding.
 - Reference constitution rules and spec requirements by identifier.
-- Keep recommendations actionable — each should be implementable without further clarification.
+- Keep recommendations actionable - each should be implementable without further clarification.
 - Prioritise findings by severity: blockers first, then warnings, then suggestions.
 
 ## Examples
 
-- [example-01-happy-path.md](./examples/example-01-happy-path.md) — a `code`-type review of a freshly implemented feature, showing the behaviour inventory, discrepancy register, and proposed resolutions.
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) - a `code`-type review of a freshly implemented feature, showing the behaviour inventory, discrepancy register, and proposed resolutions.

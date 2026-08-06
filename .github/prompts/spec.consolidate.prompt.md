@@ -1,6 +1,6 @@
 ---
 agent: agent
-argument-hint: "Optional: step (spec, data-model, research, quickstart, contracts, checklists, all) and baseline (working-tree, HEAD, default-branch) — defaults to all on the working tree"
+argument-hint: "Optional: step (spec, data-model, research, quickstart, contracts, checklists, all) and baseline (working-tree, HEAD, default-branch) - defaults to all on the working tree"
 description: Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline while excluding plan.md and tasks.md from the final output.
 ---
 

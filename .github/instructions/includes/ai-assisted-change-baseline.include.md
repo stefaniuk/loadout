@@ -16,8 +16,3 @@ Use this shared baseline for AI-assisted changes across instruction sets. Indivi
 - [AI-BASE-QLT-001] Ensure behaviour matches the specification and is deterministic and testable.
 - [AI-BASE-QLT-002] Run the required quality gates for the domain and iterate until clean.
 - [AI-BASE-GOV-001] If deviation is required, propose an ADR/decision record with rationale and expiry.
-
----
-
-> **Version**: 1.0.1
-> **Last Amended**: 2026-01-17

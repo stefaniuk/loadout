@@ -8,9 +8,9 @@ This guide walks new users and contributors through every supported installation
 
 Three paths are supported. Pick the one that matches your goal:
 
-- **Full clone** — contribute to the library or experiment with every artefact locally. Start at [First setup](#first-setup).
-- **Plugin install** — get skills, agents, and hooks in VS Code without managing files in your repo. See [Plugin installation path](#plugin-installation-path).
-- **Selective copy** — pull only a subset of prompts, instructions, or templates into a target repository. See [Selective install](#selective-install).
+- **Full clone** - contribute to the library or experiment with every artefact locally. Start at [First setup](#first-setup).
+- **Plugin install** - get skills, agents, and hooks in VS Code without managing files in your repo. See [Plugin installation path](#plugin-installation-path).
+- **Selective copy** - pull only a subset of prompts, instructions, or templates into a target repository. See [Selective install](#selective-install).
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ make config
 make lint && make test
 ```
 
-`make config` is idempotent — it can be re-run safely after pulling updates.
+`make config` is idempotent - it can be re-run safely after pulling updates.
 
 ## First run + expected output
 
@@ -91,11 +91,11 @@ These per-tech flags correspond to the language packs documented in [docs/conven
 
 Additional flags:
 
-- `clean=true` — remove previously applied artefacts before copying.
-- `revert=true` — undo a previous apply in the target repo.
-- `subset=<csv>` — restrict the copy to named categories (see below).
+- `clean=true` - remove previously applied artefacts before copying.
+- `revert=true` - undo a previous apply in the target repo.
+- `subset=<csv>` - restrict the copy to named categories (see below).
 
-Example — apply only the Python and Terraform packs to a target:
+Example - apply only the Python and Terraform packs to a target:
 
 ```bash
 make apply dest=/path/to/target python=true terraform=true
@@ -129,7 +129,7 @@ make apply dest=/path/to/target subset=instructions python=true
 
 #### Recommended profiles
 
-The repository is split into a default **core** plugin pack and an optional **speckit** sub-pack — see [conventions.md#plugin-packs](conventions.md#plugin-packs). Three common install profiles:
+The repository is split into a default **core** plugin pack and an optional **speckit** sub-pack - see [conventions.md#plugin-packs](conventions.md#plugin-packs). Three common install profiles:
 
 | Profile                | Command                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------- |
@@ -156,9 +156,9 @@ make count-tokens args=".github/instructions .specify"
 
 The report shows:
 
-- **Tokens** — per-file token counts.
-- **No IDs** — counts with identifiers like `[ID-<prefix>-NNN]` stripped.
-- **Usage %** — context-window usage against a 200K baseline.
+- **Tokens** - per-file token counts.
+- **No IDs** - counts with identifiers like `[ID-<prefix>-NNN]` stripped.
+- **Usage %** - context-window usage against a 200K baseline.
 
 ## Contributor setup and quality gates
 
@@ -182,8 +182,8 @@ make test   # Apply pipeline and script tests
 ### Quick checklist
 
 1. **Raise an issue or PR** describing the planned changes.
-2. **Keep artefacts in sync** — specs, plans, tasks, and docs must align.
-3. **Run quality gates** — `make lint && make test` must pass before opening a PR.
+2. **Keep artefacts in sync** - specs, plans, tasks, and docs must align.
+3. **Run quality gates** - `make lint && make test` must pass before opening a PR.
 4. **Follow the constitution** in `.specify/memory/constitution.md` and the cross-agent rules in [AGENTS.md](../AGENTS.md).
 
 See [.github/contributing.md](../.github/contributing.md) for the full contributor guide.

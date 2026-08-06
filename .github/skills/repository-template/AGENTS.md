@@ -24,5 +24,5 @@ None.
 
 ## References
 
-- [SKILL.md](SKILL.md) — the skill's task workflow and capability catalogue.
-- [root AGENTS.md](../../../AGENTS.md) — canonical baseline.
+- [SKILL.md](SKILL.md) - the skill's task workflow and capability catalogue.
+- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.

@@ -29,7 +29,7 @@
 
 ## Context 🧭
 
-Go tools need a standard TUI (Text User Interface) framework for building interactive, full-screen terminal applications. This goes beyond CLI argument parsing (covered by ADR-003f with `cobra` + `fatih/color`) — a TUI framework provides layout management, interactive widgets, event handling, and visual theming within the terminal.
+Go tools need a standard TUI (Text User Interface) framework for building interactive, full-screen terminal applications. This goes beyond CLI argument parsing (covered by ADR-003f with `cobra` + `fatih/color`); a TUI framework provides layout management, interactive widgets, event handling, and visual theming within the terminal.
 
 Visual styling, richness of output, and end-user usability are the highest-priority criteria. The chosen framework must produce polished, modern-looking terminal interfaces with minimal effort.
 
@@ -56,7 +56,7 @@ Weighted criteria use a 1–5 scale (higher is more important). Scores use ⭐ (
 
 | Criteria               | Weight | Rationale                                    |
 | ---------------------- | ------ | -------------------------------------------- |
-| Visual styling/theming | 5      | Highest priority — polished, modern look     |
+| Visual styling/theming | 5      | Highest priority: polished, modern look      |
 | Widget richness        | 5      | Core need for interactive applications       |
 | End-user usability     | 5      | Keyboard, mouse, focus management            |
 | Developer experience   | 4      | API clarity, docs, testing, idiomatic Go     |
@@ -67,7 +67,7 @@ Weighted criteria use a 1–5 scale (higher is more important). Scores use ⭐ (
 
 #### Option A: Bubble Tea + Lip Gloss (Selected) ✅
 
-Use the [Charm](https://charm.sh/) ecosystem — [`Bubble Tea`](https://github.com/charmbracelet/bubbletea) (v1.3.10, 39.4k ⭐, 139 contributors, MIT) as the TUI framework, [`Lip Gloss`](https://github.com/charmbracelet/lipgloss) (v1.1.0, 10.5k ⭐, 39 contributors, MIT) for styling, [`Bubbles`](https://github.com/charmbracelet/bubbles) (v1.0.0, 7.8k ⭐, 91 contributors, MIT) for pre-built components, and [`Huh`](https://github.com/charmbracelet/huh) (v0.8.0, 6.5k ⭐, 53 contributors, MIT) for interactive forms.
+Use the [Charm](https://charm.sh/) ecosystem: [`Bubble Tea`](https://github.com/charmbracelet/bubbletea) (v1.3.10, 39.4k ⭐, 139 contributors, MIT) as the TUI framework, [`Lip Gloss`](https://github.com/charmbracelet/lipgloss) (v1.1.0, 10.5k ⭐, 39 contributors, MIT) for styling, [`Bubbles`](https://github.com/charmbracelet/bubbles) (v1.0.0, 7.8k ⭐, 91 contributors, MIT) for pre-built components, and [`Huh`](https://github.com/charmbracelet/huh) (v0.8.0, 6.5k ⭐, 53 contributors, MIT) for interactive forms.
 
 **Top criteria**: Visual styling/theming, Widget richness
 
@@ -83,12 +83,12 @@ Bubble Tea is a Go framework based on The Elm Architecture (Model-Update-View), 
 | Developer experience    | 4      | ⭐⭐⭐ Elm Architecture, composable models, excellent docs, tutorials, debug logging, idiomatic Go                |
 | Ecosystem/maintenance   | 2      | ⭐⭐⭐ 39.4k stars, 139 contributors, 70 releases, active Discord, 18.1k dependents, Bubbles v1.0.0 just released |
 | Dependency footprint    | 2      | ⭐⭐ Multiple packages (bubbletea, lipgloss, bubbles, huh); moderate footprint but all from same maintainer       |
-| Effort                  |        | S — excellent documentation, tutorials, and examples; Elm Architecture is intuitive                               |
+| Effort                  |        | S: excellent documentation, tutorials, and examples; Elm Architecture is intuitive                                |
 | Weighted score (max 69) |        | 67                                                                                                                |
 
 #### Option B: tview
 
-Use [`tview`](https://github.com/rivo/tview) (v0.42.0, 13.5k ⭐, 102 contributors, MIT) — a terminal UI library with rich, interactive widgets built on top of tcell.
+Use [`tview`](https://github.com/rivo/tview) (v0.42.0, 13.5k ⭐, 102 contributors, MIT): a terminal UI library with rich, interactive widgets built on top of tcell.
 
 **Top criteria**: Visual styling/theming, Widget richness
 
@@ -104,14 +104,14 @@ tview provides the most comprehensive built-in widget set of any single Go TUI l
 | Developer experience    | 4      | ⭐⭐ Callback-based API, good docs (pkg.go.dev + wiki), no built-in testing framework                     |
 | Ecosystem/maintenance   | 2      | ⭐⭐ 13.5k stars, 102 contributors, 5.8k dependents; primarily single-maintainer                          |
 | Dependency footprint    | 2      | ⭐⭐⭐ Single package + tcell; lightweight                                                                |
-| Effort                  |        | S — straightforward widget-based API; good documentation and examples                                     |
+| Effort                  |        | S: straightforward widget-based API; good documentation and examples                                      |
 | Weighted score (max 69) |        | 53                                                                                                        |
 
 **Why not chosen**: Styling is tag-based and less expressive than Lip Gloss's CSS-like approach. The visual output is functional but lacks the modern polish that Lip Gloss delivers out of the box. Primarily maintained by a single person, which poses a bus-factor risk. The callback-based API is more imperative and less composable than Bubble Tea's Elm Architecture. No built-in theming engine (Charm, Dracula, etc.) or accessibility mode.
 
 #### Option C: termui
 
-Use [`termui`](https://github.com/gizak/termui) (v3.1.0, 13.5k ⭐, 48 contributors, MIT) — a cross-platform terminal dashboard and widget library built on termbox-go.
+Use [`termui`](https://github.com/gizak/termui) (v3.1.0, 13.5k ⭐, 48 contributors, MIT): a cross-platform terminal dashboard and widget library built on termbox-go.
 
 **Top criteria**: Visual styling/theming, Widget richness
 
@@ -127,14 +127,14 @@ termui is a dashboard-focused library providing visualisation widgets: BarChart,
 | Developer experience    | 4      | ⭐ Outdated API, built on deprecated termbox-go, Go 1.15 in go.mod, no testing framework                 |
 | Ecosystem/maintenance   | 2      | ⭐ Last release 7 years ago, maintainer flagged low availability, 48 contributors, 482 dependents        |
 | Dependency footprint    | 2      | ⭐⭐ Built on deprecated termbox-go; moderate footprint                                                  |
-| Effort                  |        | M — reasonable for dashboards; limited for interactive TUI applications                                  |
+| Effort                  |        | M: reasonable for dashboards; limited for interactive TUI applications                                   |
 | Weighted score (max 69) |        | 29                                                                                                       |
 
-**Why not chosen**: Built on `termbox-go`, which is deprecated. Last release was 7 years ago. The maintainer has publicly acknowledged limited availability. The `go.mod` declares Go 1.15 compatibility — far behind the current Go toolchain. Designed for dashboards and data visualisation, not interactive TUI applications with rich input handling. Lacks modern styling, theming, form inputs, and accessibility.
+**Why not chosen**: Built on `termbox-go`, which is deprecated. Last release was 7 years ago. The maintainer has publicly acknowledged limited availability. The `go.mod` declares Go 1.15 compatibility, far behind the current Go toolchain. Designed for dashboards and data visualisation, not interactive TUI applications with rich input handling. Lacks modern styling, theming, form inputs, and accessibility.
 
 #### Option D: gocui
 
-Use [`gocui`](https://github.com/jroimartin/gocui) (no semver releases, 10.5k ⭐, 20 contributors, BSD-3-Clause) — a minimalist Go package for creating console user interfaces.
+Use [`gocui`](https://github.com/jroimartin/gocui) (no semver releases, 10.5k ⭐, 20 contributors, BSD-3-Clause): a minimalist Go package for creating console user interfaces.
 
 **Top criteria**: Visual styling/theming, Widget richness
 
@@ -150,33 +150,33 @@ gocui provides a minimalist view-based system where "views" act as windows in th
 | Developer experience    | 4      | ⭐ Minimal API but requires building everything from scratch; documentation is sparse      |
 | Ecosystem/maintenance   | 2      | ⭐ Effectively abandoned for 9 years; 20 contributors; no semver releases; 1.1k dependents |
 | Dependency footprint    | 2      | ⭐⭐⭐ Lightweight; minimal dependencies                                                   |
-| Effort                  |        | L — everything must be built from scratch on top of the minimal view system                |
+| Effort                  |        | L: everything must be built from scratch on top of the minimal view system                 |
 | Weighted score (max 69) |        | 27                                                                                         |
 
-**Why not chosen**: Effectively abandoned — no meaningful development for 9 years. Provides only a bare-bones view system with no pre-built widgets, theming, or styling. Building a polished TUI would require implementing every widget from scratch. The 10.5k star count reflects historical popularity, not current viability. No semver releases, no accessibility support, and only 20 contributors.
+**Why not chosen**: Effectively abandoned: no meaningful development for 9 years. Provides only a bare-bones view system with no pre-built widgets, theming, or styling. Building a polished TUI would require implementing every widget from scratch. The 10.5k star count reflects historical popularity, not current viability. No semver releases, no accessibility support, and only 20 contributors.
 
 #### Option E: tcell
 
-Use [`tcell`](https://github.com/gdamore/tcell) (v3.1.2, 5.1k ⭐, 106 contributors, Apache-2.0) — a cell-based terminal package providing low-level screen, keyboard, mouse, and colour handling.
+Use [`tcell`](https://github.com/gdamore/tcell) (v3.1.2, 5.1k ⭐, 106 contributors, Apache-2.0): a cell-based terminal package providing low-level screen, keyboard, mouse, and colour handling.
 
 **Top criteria**: Visual styling/theming, Widget richness
 
 **Weighted option score**: 1.7 / 5.0
 
-tcell is a low-level terminal abstraction layer (not a TUI framework) that provides screen management, 24-bit colour, mouse tracking, bracketed paste, wide character support, and cross-platform compatibility (POSIX, Windows, WASM, Plan 9). It is very actively maintained (v3.1.2 released 3 weeks ago, 55 releases total) and serves as the foundation for `tview` and other higher-level frameworks. However, it provides no widgets, no layout system, and no styling abstractions — it operates at the cell (character) level.
+tcell is a low-level terminal abstraction layer (not a TUI framework) that provides screen management, 24-bit colour, mouse tracking, bracketed paste, wide character support, and cross-platform compatibility (POSIX, Windows, WASM, Plan 9). It is very actively maintained (v3.1.2 released 3 weeks ago, 55 releases total) and serves as the foundation for `tview` and other higher-level frameworks. However, it provides no widgets, no layout system, and no styling abstractions; it operates at the cell (character) level.
 
 | Criteria                | Weight | Score/Notes                                                                                                 |
 | ----------------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
-| Visual styling/theming  | 5      | ⭐ 24-bit colour, style attributes; no layout or styling engine — raw cell-based rendering                  |
+| Visual styling/theming  | 5      | ⭐ 24-bit colour, style attributes; no layout or styling engine: raw cell-based rendering                   |
 | Widget richness         | 5      | ⭐ No widgets whatsoever; provides screen, keyboard, and mouse primitives only                              |
-| End-user usability      | 5      | ⭐ Rich keyboard/mouse/paste support; but no UX patterns — everything must be hand-built                    |
+| End-user usability      | 5      | ⭐ Rich keyboard/mouse/paste support; but no UX patterns: everything must be hand-built                     |
 | Developer experience    | 4      | ⭐⭐ Well-documented low-level API, actively maintained, v3 with modern features; but very verbose          |
 | Ecosystem/maintenance   | 2      | ⭐⭐⭐ Very active (55 releases, 3-week-old release), 106 contributors, 8.4k dependents, commercial support |
 | Dependency footprint    | 2      | ⭐⭐⭐ Pure Go, no CGO, very lean                                                                           |
-| Effort                  |        | XL — building a TUI from tcell alone requires implementing an entire widget/layout system                   |
+| Effort                  |        | XL: building a TUI from tcell alone requires implementing an entire widget/layout system                    |
 | Weighted score (max 69) |        | 27                                                                                                          |
 
-**Why not chosen**: tcell is a terminal abstraction layer, not a TUI framework. It provides no widgets, no layout engine, and no styling system. Using tcell directly to build polished TUI applications would require implementing an entire framework on top of it — effectively recreating what tview or Bubble Tea already provide. Included here for completeness as it is the foundation underlying tview and is frequently encountered in Go TUI discussions.
+**Why not chosen**: tcell is a terminal abstraction layer, not a TUI framework. It provides no widgets, no layout engine, and no styling system. Using tcell directly to build polished TUI applications would require implementing an entire framework on top of it, effectively recreating what tview or Bubble Tea already provide. Included here for completeness as it is the foundation underlying tview and is frequently encountered in Go TUI discussions.
 
 ### Outcome 🏁
 
@@ -184,7 +184,7 @@ Adopt `Bubble Tea` + `Lip Gloss` (with `Bubbles` and `Huh`) as the default TUI f
 
 ### Rationale 🧠
 
-Using the weighted criteria, Bubble Tea + Lip Gloss scores 67/69 — well ahead of the next option (tview at 53). The gap is largest in the three highest-weighted criteria (visual styling, widget richness, end-user usability), which aligns directly with the stated priorities.
+Using the weighted criteria, Bubble Tea + Lip Gloss scores 67/69, well ahead of the next option (tview at 53). The gap is largest in the three highest-weighted criteria (visual styling, widget richness, end-user usability), which aligns directly with the stated priorities.
 
 The Charm ecosystem is the de facto standard for building modern terminal applications in Go. Bubble Tea's Elm Architecture provides a clean, composable, and testable approach that aligns with Go's preference for explicit, functional patterns. Lip Gloss's CSS-like styling API delivers rich visual output with minimal code: true colour, adaptive colours (automatic light/dark detection), multiple border styles, padding, margins, alignment, and layout composition. Bubbles provides production-ready components that cover the most common TUI patterns, and Huh adds themed interactive forms with first-class accessibility.
 
@@ -224,9 +224,9 @@ This decision becomes irrelevant if TUI applications are no longer needed, or if
 ## Notes 🔗
 
 - Tech Radar: `./Tech_Radar.md`
-- Related: ADR-003f (CLI argument parsing — `cobra` + `fatih/color`)
-- Related: ADR-001g (Python TUI framework — `textual`)
-- Related: ADR-002g (TypeScript TUI framework — `ink`)
+- Related: ADR-003f (CLI argument parsing: `cobra` + `fatih/color`)
+- Related: ADR-001g (Python TUI framework: `textual`)
+- Related: ADR-002g (TypeScript TUI framework: `ink`)
 - Bubble Tea: [github.com/charmbracelet/bubbletea](https://github.com/charmbracelet/bubbletea)
 - Lip Gloss: [github.com/charmbracelet/lipgloss](https://github.com/charmbracelet/lipgloss)
 - Bubbles: [github.com/charmbracelet/bubbles](https://github.com/charmbracelet/bubbles)
@@ -241,8 +241,3 @@ This decision becomes irrelevant if TUI applications are no longer needed, or if
 ## Tags 🏷️
 
 `#usability #interfaces #maintainability #accessibility`
-
----
-
-> **Version**: 1.0.0
-> **Last Amended**: 2026-02-14

@@ -52,33 +52,33 @@ For every step:
 
 Each step has a dedicated companion document with the full per-step workflow (Discovery sub-steps A/B/C, sub-steps 1–8, template snippets, evidence rules, and operating principles). Follow the companion document for the step being executed.
 
-**Step 01 — Repository Map**: Classify directories, detect project type (monorepo vs single), read context docs. Output: single flat file documenting repository structure and conventions. See [step-01-repository-map.md](step-01-repository-map.md) for the full workflow.
+**Step 01 - Repository Map**: Classify directories, detect project type (monorepo vs single), read context docs. Output: single flat file documenting repository structure and conventions. See [step-01-repository-map.md](step-01-repository-map.md) for the full workflow.
 
-**Step 02 — Component Catalogue**: Identify explicit component boundaries (package.json, go.mod, Cargo.toml) and implicit boundaries (runtime/API surface). Output: up to 12 component files documenting purpose, interfaces, and dependencies. See [step-02-component-catalogue.md](step-02-component-catalogue.md) for the full workflow, including the per-component template covering identity, interfaces, data, cross-cutting concerns, and evidence.
+**Step 02 - Component Catalogue**: Identify explicit component boundaries (package.json, go.mod, Cargo.toml) and implicit boundaries (runtime/API surface). Output: up to 12 component files documenting purpose, interfaces, and dependencies. See [step-02-component-catalogue.md](step-02-component-catalogue.md) for the full workflow, including the per-component template covering identity, interfaces, data, cross-cutting concerns, and evidence.
 
-**Step 03 — Runtime Flows**: Map orchestration/routing points and workflow semantics. Include Mermaid sequence diagrams and `flowchart LR` data lineage diagrams. Output: up to 16 flow files documenting request paths and data flows. See [step-03-runtime-flows.md](step-03-runtime-flows.md) for the full workflow and diagram templates.
+**Step 03 - Runtime Flows**: Map orchestration/routing points and workflow semantics. Include Mermaid sequence diagrams and `flowchart LR` data lineage diagrams. Output: up to 16 flow files documenting request paths and data flows. See [step-03-runtime-flows.md](step-03-runtime-flows.md) for the full workflow and diagram templates.
 
-**Step 04 — Domain Analysis**: Extract domain model signals, candidate terms, and bounded context boundaries. Output: up to 5 domain analysis files covering ubiquitous language, aggregates, integration patterns, and a context map. See [step-04-domain-analysis.md](step-04-domain-analysis.md) for the full workflow.
+**Step 04 - Domain Analysis**: Extract domain model signals, candidate terms, and bounded context boundaries. Output: up to 5 domain analysis files covering ubiquitous language, aggregates, integration patterns, and a context map. See [step-04-domain-analysis.md](step-04-domain-analysis.md) for the full workflow.
 
-**Step 05 — C4 Model**: Confirm diagram candidates in code, produce LikeC4 DSL files at context, container, and component levels. Output: `.c4` files following LikeC4 syntax. See [step-05-c4-model.md](step-05-c4-model.md) for the full workflow, including workspace layout, view definitions, styling guidance, and DSL skeletons.
+**Step 05 - C4 Model**: Confirm diagram candidates in code, produce LikeC4 DSL files at context, container, and component levels. Output: `.c4` files following LikeC4 syntax. See [step-05-c4-model.md](step-05-c4-model.md) for the full workflow, including workspace layout, view definitions, styling guidance, and DSL skeletons.
 
-**Step 06 — Infrastructure Diagram**: Perform Terraform/IaC recon, classify resources, map environment overlays. Output: per-cloud-provider `.drawio` source plus committed `.drawio.svg` exports, with an evidence README. See [step-06-infrastructure-diagram.md](step-06-infrastructure-diagram.md) for the full workflow, layout conventions, and required elements.
+**Step 06 - Infrastructure Diagram**: Perform Terraform/IaC recon, classify resources, map environment overlays. Output: per-cloud-provider `.drawio` source plus committed `.drawio.svg` exports, with an evidence README. See [step-06-infrastructure-diagram.md](step-06-infrastructure-diagram.md) for the full workflow, layout conventions, and required elements.
 
 ### Common Steps
 
 After producing the output for any step:
 
 1. Validate all evidence links resolve to real files and line ranges.
-2. Use **Unknown from code — {action}** for anything that cannot be determined from the codebase.
+2. Use **Unknown from code - {action}** for anything that cannot be determined from the codebase.
 3. Update the `docs/prompt-reports/README.md` index to include the new artefact.
 
 ## Output Requirements
 
 - Use concrete evidence links for every claim.
 - Maintain ASCII-only text unless the repository already contains Unicode.
-- When information is missing, record **Unknown from code — {suggested action}** instead of guessing.
+- When information is missing, record **Unknown from code - {suggested action}** instead of guessing.
 - Prefix file path links with `/` for absolute repository paths.
 
 ## Examples
 
-- [example-01-happy-path.md](./examples/example-01-happy-path.md) — full end-to-end run of `step all` on a small FastAPI service, producing every artefact from the repository map through to the AWS infrastructure diagram.
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) - full end-to-end run of `step all` on a small FastAPI service, producing every artefact from the repository map through to the AWS infrastructure diagram.

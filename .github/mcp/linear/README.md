@@ -11,7 +11,7 @@ OAuth only. The `mcp-remote` helper opens a browser tab on first connection, per
 
 ## Least privilege
 
-- Request the `read` scope by default — sufficient for triage, status reporting, and "what is assigned to me" workflows.
+- Request the `read` scope by default - sufficient for triage, status reporting, and "what is assigned to me" workflows.
 - Only widen to write scopes (`issues:write`, `comments:write`, etc.) when the workflow genuinely needs to create or update Linear records.
 - Re-evaluate scope on every workspace handoff; revoke the OAuth grant from Linear settings when no longer needed.
 

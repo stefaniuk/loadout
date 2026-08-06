@@ -84,8 +84,3 @@ Standard severity levels in descending order of verbosity:
 - [OBS-TST-001] Add regression tests (unit/integration) that assert the presence of key fields for representative success and failure cases.
 - [OBS-TST-002] Lint or schema-validate structured logs where tooling exists (for example JSON schema, OpenTelemetry log schemas).
 - [OBS-TST-003] Document log schemas/runbooks alongside the service so operators know how to search and interpret events.
-
----
-
-> **Version**: 1.3.0
-> **Last Amended**: 2026-01-20

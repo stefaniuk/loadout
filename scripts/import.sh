@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Import changed prompt files from a destination repository back to this source.
-# This is the inverse of apply.sh — it pulls improvements made in a project back.
+# This is the inverse of apply.sh - it pulls improvements made in a project back.
 #
 # Usage:
 #   $ [options] ./scripts/import.sh <source-directory>
@@ -66,7 +66,7 @@ function main() {
 
 # ==============================================================================
 
-# Normalise a path — expand ~ and resolve relative paths.
+# Normalise a path - expand ~ and resolve relative paths.
 # Arguments:
 #   $1=[path]
 function normalise-path() {

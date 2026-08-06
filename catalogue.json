@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-05-17T17:41:06Z",
-  "sourceRevision": "f9b2ed2",
+  "generatedAt": "2026-07-31T06:38:55Z",
+  "sourceRevision": "de425f3",
   "counts": {
     "instruction": 14,
-    "prompt": 38,
-    "agent": 13,
+    "prompt": 39,
+    "agent": 14,
     "skill": 8,
     "hook": 2,
-    "total": 75,
+    "total": 77,
     "packs": 12,
     "byPack": {
       "core": 54,
-      "speckit": 21
+      "speckit": 23
     }
   },
   "artefacts": [
@@ -22,9 +22,7 @@
       "name": "docker",
       "description": "Dockerfile Engineering Instructions (container image development)",
       "applyTo": "{**/Dockerfile,**/Dockerfile.*,**/compose.yaml,**/compose.*.yaml,**/docker-compose.yaml,**/docker-compose.*.yaml}",
-      "tags": [
-        "docker"
-      ],
+      "tags": ["docker"],
       "metadata": {},
       "pack": "core"
     },
@@ -35,9 +33,7 @@
       "name": "go",
       "description": "Go Engineering Instructions (CLI + API, framework-agnostic)",
       "applyTo": "**/*.go",
-      "tags": [
-        "go"
-      ],
+      "tags": ["go"],
       "metadata": {},
       "pack": "core"
     },
@@ -48,9 +44,7 @@
       "name": "likec4",
       "description": "LikeC4 DSL Instructions (architecture-as-code diagrams)",
       "applyTo": "**/*.{likec4,c4}",
-      "tags": [
-        "likec4"
-      ],
+      "tags": ["likec4"],
       "metadata": {},
       "pack": "core"
     },
@@ -61,9 +55,7 @@
       "name": "makefile",
       "description": "Makefile Engineering Instructions (developer experience, CI-aligned)",
       "applyTo": "{Makefile,**/Makefile,**/*.mk}",
-      "tags": [
-        "makefile"
-      ],
+      "tags": ["makefile"],
       "metadata": {},
       "pack": "core"
     },
@@ -74,9 +66,7 @@
       "name": "playwright-python",
       "description": "Playwright Python Test Generation Instructions",
       "applyTo": "**/*.py",
-      "tags": [
-        "playwright-python"
-      ],
+      "tags": ["playwright-python"],
       "metadata": {},
       "pack": "core"
     },
@@ -87,9 +77,7 @@
       "name": "playwright-typescript",
       "description": "Playwright TypeScript Test Generation Instructions",
       "applyTo": "**/*.{ts,tsx}",
-      "tags": [
-        "playwright-typescript"
-      ],
+      "tags": ["playwright-typescript"],
       "metadata": {},
       "pack": "core"
     },
@@ -100,9 +88,7 @@
       "name": "python",
       "description": "Python Engineering Instructions (CLI + API, framework-agnostic)",
       "applyTo": "**/*.py",
-      "tags": [
-        "python"
-      ],
+      "tags": ["python"],
       "metadata": {},
       "pack": "core"
     },
@@ -113,9 +99,7 @@
       "name": "reactjs",
       "description": "ReactJS Engineering Instructions",
       "applyTo": "**/*.{jsx,tsx,js,ts}",
-      "tags": [
-        "reactjs"
-      ],
+      "tags": ["reactjs"],
       "metadata": {},
       "pack": "core"
     },
@@ -126,9 +110,7 @@
       "name": "readme",
       "description": "README Engineering Instructions",
       "applyTo": "**/README.md",
-      "tags": [
-        "readme"
-      ],
+      "tags": ["readme"],
       "metadata": {},
       "pack": "core"
     },
@@ -139,9 +121,7 @@
       "name": "rust",
       "description": "Rust Engineering Instructions",
       "applyTo": "**/*.rs",
-      "tags": [
-        "rust"
-      ],
+      "tags": ["rust"],
       "metadata": {},
       "pack": "core"
     },
@@ -152,9 +132,7 @@
       "name": "shell",
       "description": "Shell Script Engineering Instructions (Bash, CLI wrappers, automation)",
       "applyTo": "**/*.{sh,bash,zsh}",
-      "tags": [
-        "shell"
-      ],
+      "tags": ["shell"],
       "metadata": {},
       "pack": "core"
     },
@@ -165,9 +143,7 @@
       "name": "tauri",
       "description": "Tauri Engineering Instructions",
       "applyTo": "**/*.{rs,ts,tsx,js,jsx}",
-      "tags": [
-        "tauri"
-      ],
+      "tags": ["tauri"],
       "metadata": {},
       "pack": "core"
     },
@@ -178,9 +154,7 @@
       "name": "terraform",
       "description": "Terraform Engineering Instructions (AWS)",
       "applyTo": "**/*.tf",
-      "tags": [
-        "terraform"
-      ],
+      "tags": ["terraform"],
       "metadata": {},
       "pack": "core"
     },
@@ -191,9 +165,7 @@
       "name": "typescript",
       "description": "TypeScript Engineering Instructions (CLI + API + UI, framework-agnostic)",
       "applyTo": "**/*.{js,ts,tsx}",
-      "tags": [
-        "typescript"
-      ],
+      "tags": ["typescript"],
       "metadata": {},
       "pack": "core"
     },
@@ -204,9 +176,7 @@
       "name": "architecture.01-repository-map",
       "description": "Build a repository map to document architecture, technology stack, and repo-level conventions (evidence-first)",
       "applyTo": null,
-      "tags": [
-        "architecture"
-      ],
+      "tags": ["architecture"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths or scope for the repository-map step"
@@ -220,9 +190,7 @@
       "name": "architecture.02-component-catalogue",
       "description": "Create component-level summaries (responsibilities, interfaces, data, and extension points)",
       "applyTo": null,
-      "tags": [
-        "architecture"
-      ],
+      "tags": ["architecture"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths or scope for the component-catalogue step"
@@ -236,9 +204,7 @@
       "name": "architecture.03-runtime-flows",
       "description": "Document key runtime flows with diagrams (trigger → orchestration → data lineage), evidence-first",
       "applyTo": null,
-      "tags": [
-        "architecture"
-      ],
+      "tags": ["architecture"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths or scope for the runtime-flows step"
@@ -252,9 +218,7 @@
       "name": "architecture.04-domain-analysis",
       "description": "Domain analysis (DDD) to document bounded contexts, language, events, and context map (evidence-first)",
       "applyTo": null,
-      "tags": [
-        "architecture"
-      ],
+      "tags": ["architecture"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths or scope for the domain-analysis step"
@@ -268,9 +232,7 @@
       "name": "architecture.05-c4-model",
       "description": "Produce C4 model diagrams (Context, Container, Component) in LikeC4 format (https://likec4.dev/, evidence-first, consistent naming)",
       "applyTo": null,
-      "tags": [
-        "architecture"
-      ],
+      "tags": ["architecture"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths or scope for the c4-model step"
@@ -284,9 +246,7 @@
       "name": "architecture.06-infrastructure-diagram",
       "description": "Produce AWS/Azure infrastructure diagram from Terraform (evidence-first, consistent with C4 container naming)",
       "applyTo": null,
-      "tags": [
-        "architecture"
-      ],
+      "tags": ["architecture"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths or scope for the infrastructure-diagram step"
@@ -300,9 +260,7 @@
       "name": "dev.implement-cli-args-parsing",
       "description": "Evaluate and enforce specific CLI argument parsing discipline across the codebase",
       "applyTo": null,
-      "tags": [
-        "dev"
-      ],
+      "tags": ["dev"],
       "metadata": {
         "agent": null,
         "argumentHint": null
@@ -316,9 +274,7 @@
       "name": "dev.implement-commands",
       "description": "Evaluate and enforce specific development commands discipline across the codebase",
       "applyTo": null,
-      "tags": [
-        "dev"
-      ],
+      "tags": ["dev"],
       "metadata": {
         "agent": null,
         "argumentHint": null
@@ -332,9 +288,7 @@
       "name": "dev.implement-logging",
       "description": "Evaluate and enforce specific logging discipline across the codebase",
       "applyTo": null,
-      "tags": [
-        "dev"
-      ],
+      "tags": ["dev"],
       "metadata": {
         "agent": null,
         "argumentHint": null
@@ -348,9 +302,7 @@
       "name": "enforce.docker",
       "description": "Enforce repository-wide compliance with docker.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -364,9 +316,7 @@
       "name": "enforce.go",
       "description": "Enforce repository-wide compliance with go.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -380,9 +330,7 @@
       "name": "enforce.makefile",
       "description": "Enforce repository-wide compliance with makefile.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -396,9 +344,7 @@
       "name": "enforce.playwright-python",
       "description": "Enforce repository-wide compliance with playwright-python.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -412,9 +358,7 @@
       "name": "enforce.playwright-typescript",
       "description": "Enforce repository-wide compliance with playwright-typescript.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -428,9 +372,7 @@
       "name": "enforce.python",
       "description": "Enforce repository-wide compliance with python.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -444,9 +386,7 @@
       "name": "enforce.reactjs",
       "description": "Enforce repository-wide compliance with reactjs.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -460,9 +400,7 @@
       "name": "enforce.rust",
       "description": "Enforce repository-wide compliance with rust.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -476,9 +414,7 @@
       "name": "enforce.shell",
       "description": "Enforce repository-wide compliance with shell.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -492,9 +428,7 @@
       "name": "enforce.tauri",
       "description": "Enforce repository-wide compliance with tauri.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -508,9 +442,7 @@
       "name": "enforce.terraform",
       "description": "Enforce repository-wide compliance with terraform.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -524,9 +456,7 @@
       "name": "enforce.typescript",
       "description": "Enforce repository-wide compliance with typescript.instructions.md",
       "applyTo": null,
-      "tags": [
-        "enforce"
-      ],
+      "tags": ["enforce"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: target paths/files to audit (defaults to whole repository)"
@@ -540,9 +470,7 @@
       "name": "review.speckit-code",
       "description": "Review the implementation against the entire spec-driven development documentation set (including the constitution) for compliance; detect and explain drift among code↔spec↔plan↔tasks - provide prioritised, actionable recommendations (including refactoring) to bring all artefacts into alignment",
       "applyTo": null,
-      "tags": [
-        "review"
-      ],
+      "tags": ["review"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: scope of code to review (defaults to whole repository)"
@@ -556,9 +484,7 @@
       "name": "review.speckit-documentation",
       "description": "Review the entire spec-driven development documentation set (including the constitution) for consistency, cohesion, coherence, and traceability; identify issues - provide prioritised, actionable, tech-aligned recommendations to bring all artefacts into alignment",
       "applyTo": null,
-      "tags": [
-        "review"
-      ],
+      "tags": ["review"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: documentation artefact to review (defaults to spec/plan/tasks set)"
@@ -572,9 +498,7 @@
       "name": "review.speckit-test",
       "description": "Review the test automation implementation against the specification and the desired test pyramid shape; detect and explain misalignment - prioritise unit tests, identify high-value gaps and brittle tests, and provide actionable recommendations (including refactoring) to improve behavioural confidence",
       "applyTo": null,
-      "tags": [
-        "review"
-      ],
+      "tags": ["review"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: test scope to review (defaults to whole test suite)"
@@ -588,12 +512,10 @@
       "name": "spec.consolidate",
       "description": "Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline while excluding plan.md and tasks.md from the final output.",
       "applyTo": null,
-      "tags": [
-        "spec"
-      ],
+      "tags": ["spec"],
       "metadata": {
         "agent": "agent",
-        "argumentHint": "Optional: step (spec, data-model, research, quickstart, contracts, checklists, all) and baseline (working-tree, HEAD, default-branch) — defaults to all on the working tree"
+        "argumentHint": "Optional: step (spec, data-model, research, quickstart, contracts, checklists, all) and baseline (working-tree, HEAD, default-branch) - defaults to all on the working tree"
       },
       "pack": "core"
     },
@@ -604,9 +526,7 @@
       "name": "speckit.analyze",
       "description": "Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
         "agent": "speckit.analyze",
         "argumentHint": null
@@ -620,9 +540,7 @@
       "name": "speckit.checklist",
       "description": "Generate a custom checklist for the current feature based on user requirements.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
         "agent": "speckit.checklist",
         "argumentHint": null
@@ -636,9 +554,7 @@
       "name": "speckit.clarify",
       "description": "Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
         "agent": "speckit.clarify",
         "argumentHint": null
@@ -650,13 +566,25 @@
       "type": "prompt",
       "path": ".github/prompts/speckit.constitution.prompt.md",
       "name": "speckit.constitution",
-      "description": "Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.",
+      "description": "Create or update the project constitution from interactive or provided principle inputs.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
         "agent": "speckit.constitution",
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "prompt:.github/prompts/speckit.converge.prompt.md",
+      "type": "prompt",
+      "path": ".github/prompts/speckit.converge.prompt.md",
+      "name": "speckit.converge",
+      "description": "Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it.",
+      "applyTo": null,
+      "tags": ["speckit"],
+      "metadata": {
+        "agent": "speckit.converge",
         "argumentHint": null
       },
       "pack": "speckit"
@@ -668,9 +596,7 @@
       "name": "speckit.implement",
       "description": "Execute the implementation plan by processing and executing all tasks defined in tasks.md",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
         "agent": "speckit.implement",
         "argumentHint": null
@@ -684,9 +610,7 @@
       "name": "speckit.plan",
       "description": "Execute the implementation planning workflow using the plan template to generate design artifacts.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
         "agent": "speckit.plan",
         "argumentHint": null
@@ -700,9 +624,7 @@
       "name": "speckit.specify",
       "description": "Create or update the feature specification from a natural language feature description.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
         "agent": "speckit.specify",
         "argumentHint": null
@@ -716,9 +638,7 @@
       "name": "speckit.tasks",
       "description": "Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
         "agent": "speckit.tasks",
         "argumentHint": null
@@ -732,9 +652,7 @@
       "name": "speckit.taskstoissues",
       "description": "Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
         "agent": "speckit.taskstoissues",
         "argumentHint": null
@@ -748,9 +666,7 @@
       "name": "util.doc-system",
       "description": "Establish, synchronise, audit, or review the repository documentation system by running the system-documentation skill.",
       "applyTo": null,
-      "tags": [
-        "util"
-      ],
+      "tags": ["util"],
       "metadata": {
         "agent": "agent",
         "argumentHint": "Optional: step (foundation, architecture, reference, explanation, how-to, tutorials, operations, audience-indexes, governance, all), mode (establish, sync, audit, pre-pr-review), and scope (path, feature dir, or changed files)"
@@ -764,9 +680,7 @@
       "name": "util.gh-pr-content",
       "description": "Create pull request content from the current branch changes",
       "applyTo": null,
-      "tags": [
-        "util"
-      ],
+      "tags": ["util"],
       "metadata": {
         "agent": null,
         "argumentHint": null
@@ -780,9 +694,7 @@
       "name": "util.gh-pr-review",
       "description": "Generate pull request review using architecture overview context",
       "applyTo": null,
-      "tags": [
-        "util"
-      ],
+      "tags": ["util"],
       "metadata": {
         "agent": null,
         "argumentHint": null
@@ -796,9 +708,7 @@
       "name": "util.git-commit-message",
       "description": "Generate conventional commit message and description from the current changes diff",
       "applyTo": null,
-      "tags": [
-        "util"
-      ],
+      "tags": ["util"],
       "metadata": {
         "agent": null,
         "argumentHint": null
@@ -812,16 +722,11 @@
       "name": "implementer",
       "description": "Execute an approved plan, make the necessary code changes, and run the project's quality gates.",
       "applyTo": null,
-      "tags": [
-        "implementer",
-        "personas"
-      ],
+      "tags": ["implementer", "personas"],
       "metadata": {
         "argumentHint": "Pass the planner's brief or a direct change request",
         "tools": [],
-        "handoffAgents": [
-          "reviewer"
-        ]
+        "handoffAgents": ["reviewer"]
       },
       "pack": "core"
     },
@@ -832,10 +737,7 @@
       "name": "planner",
       "description": "Turn a user goal into an actionable execution plan with acceptance criteria and a risk list.",
       "applyTo": null,
-      "tags": [
-        "personas",
-        "planner"
-      ],
+      "tags": ["personas", "planner"],
       "metadata": {
         "argumentHint": "Describe the goal, constraints, and any non-goals",
         "tools": [
@@ -845,9 +747,7 @@
           "read_file",
           "semantic_search"
         ],
-        "handoffAgents": [
-          "implementer"
-        ]
+        "handoffAgents": ["implementer"]
       },
       "pack": "core"
     },
@@ -858,10 +758,7 @@
       "name": "release-manager",
       "description": "Final readiness check, changelog draft, and rollout/rollback notes before human approval.",
       "applyTo": null,
-      "tags": [
-        "personas",
-        "release-manager"
-      ],
+      "tags": ["personas", "release-manager"],
       "metadata": {
         "argumentHint": "Pass the approved commit range or PR",
         "tools": [
@@ -871,9 +768,7 @@
           "read_file",
           "semantic_search"
         ],
-        "handoffAgents": [
-          "implementer"
-        ]
+        "handoffAgents": ["implementer"]
       },
       "pack": "core"
     },
@@ -884,10 +779,7 @@
       "name": "reviewer",
       "description": "Perform a strict code review with a bugs/regressions/tests-first mindset and enforce governance.",
       "applyTo": null,
-      "tags": [
-        "personas",
-        "reviewer"
-      ],
+      "tags": ["personas", "reviewer"],
       "metadata": {
         "argumentHint": "Pass the diff range or PR identifier",
         "tools": [
@@ -898,10 +790,7 @@
           "run_in_terminal",
           "semantic_search"
         ],
-        "handoffAgents": [
-          "implementer",
-          "release-manager"
-        ]
+        "handoffAgents": ["implementer", "release-manager"]
       },
       "pack": "core"
     },
@@ -912,22 +801,11 @@
       "name": "speckit.analyze",
       "description": "Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
-        "argumentHint": "Optional: additional context for the analyze step",
-        "tools": [
-          "file_search",
-          "grep_search",
-          "list_dir",
-          "read_file",
-          "search",
-          "semantic_search"
-        ],
-        "handoffAgents": [
-          "speckit.implement"
-        ]
+        "argumentHint": null,
+        "tools": [],
+        "handoffAgents": []
       },
       "pack": "speckit"
     },
@@ -938,15 +816,11 @@
       "name": "speckit.checklist",
       "description": "Generate a custom checklist for the current feature based on user requirements.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
-        "argumentHint": "Optional: additional context for the checklist step",
+        "argumentHint": null,
         "tools": [],
-        "handoffAgents": [
-          "speckit.implement"
-        ]
+        "handoffAgents": []
       },
       "pack": "speckit"
     },
@@ -957,23 +831,11 @@
       "name": "speckit.clarify",
       "description": "Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
-        "argumentHint": "Optional: additional context for the clarify step",
-        "tools": [
-          "file_search",
-          "grep_search",
-          "list_dir",
-          "read_file",
-          "search",
-          "semantic_search",
-          "vscode/askQuestions"
-        ],
-        "handoffAgents": [
-          "speckit.plan"
-        ]
+        "argumentHint": null,
+        "tools": [],
+        "handoffAgents": ["speckit.plan"]
       },
       "pack": "speckit"
     },
@@ -982,17 +844,28 @@
       "type": "agent",
       "path": ".github/agents/speckit.constitution.agent.md",
       "name": "speckit.constitution",
-      "description": "Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.",
+      "description": "Create or update the project constitution from interactive or provided principle inputs.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
-        "argumentHint": "Optional: additional context for the constitution step",
+        "argumentHint": null,
         "tools": [],
-        "handoffAgents": [
-          "speckit.specify"
-        ]
+        "handoffAgents": ["speckit.specify"]
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "agent:.github/agents/speckit.converge.agent.md",
+      "type": "agent",
+      "path": ".github/agents/speckit.converge.agent.md",
+      "name": "speckit.converge",
+      "description": "Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it.",
+      "applyTo": null,
+      "tags": ["speckit"],
+      "metadata": {
+        "argumentHint": null,
+        "tools": [],
+        "handoffAgents": []
       },
       "pack": "speckit"
     },
@@ -1003,15 +876,11 @@
       "name": "speckit.implement",
       "description": "Execute the implementation plan by processing and executing all tasks defined in tasks.md",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
-        "argumentHint": "Optional: additional context for the implement step",
+        "argumentHint": null,
         "tools": [],
-        "handoffAgents": [
-          "speckit.checklist"
-        ]
+        "handoffAgents": []
       },
       "pack": "speckit"
     },
@@ -1022,16 +891,11 @@
       "name": "speckit.plan",
       "description": "Execute the implementation planning workflow using the plan template to generate design artifacts.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
-        "argumentHint": "Optional: additional context for the plan step",
+        "argumentHint": null,
         "tools": [],
-        "handoffAgents": [
-          "speckit.tasks",
-          "speckit.checklist"
-        ]
+        "handoffAgents": ["speckit.tasks", "speckit.checklist"]
       },
       "pack": "speckit"
     },
@@ -1042,24 +906,11 @@
       "name": "speckit.specify",
       "description": "Create or update the feature specification from a natural language feature description.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
-        "argumentHint": "Optional: additional context for the specify step",
-        "tools": [
-          "fetch_webpage",
-          "file_search",
-          "grep_search",
-          "list_dir",
-          "read_file",
-          "search",
-          "semantic_search"
-        ],
-        "handoffAgents": [
-          "speckit.plan",
-          "speckit.clarify"
-        ]
+        "argumentHint": null,
+        "tools": [],
+        "handoffAgents": ["speckit.plan", "speckit.clarify"]
       },
       "pack": "speckit"
     },
@@ -1070,16 +921,11 @@
       "name": "speckit.tasks",
       "description": "Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
-        "argumentHint": "Optional: additional context for the tasks step",
+        "argumentHint": null,
         "tools": [],
-        "handoffAgents": [
-          "speckit.analyze",
-          "speckit.implement"
-        ]
+        "handoffAgents": ["speckit.analyze", "speckit.implement"]
       },
       "pack": "speckit"
     },
@@ -1090,17 +936,14 @@
       "name": "speckit.taskstoissues",
       "description": "Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.",
       "applyTo": null,
-      "tags": [
-        "speckit"
-      ],
+      "tags": ["speckit"],
       "metadata": {
-        "argumentHint": "Optional: additional context for the taskstoissues step",
+        "argumentHint": null,
         "tools": [
-          "github/issue_write"
+          "github/github-mcp-server/issue_write",
+          "github/github-mcp-server/list_issues"
         ],
-        "handoffAgents": [
-          "speckit.implement"
-        ]
+        "handoffAgents": []
       },
       "pack": "speckit"
     },
@@ -1111,9 +954,7 @@
       "name": "architecture-docs",
       "description": "Generate architecture documentation for a repository, producing structured artefacts from repository maps to C4 models and infrastructure diagrams.",
       "applyTo": null,
-      "tags": [
-        "architecture-docs"
-      ],
+      "tags": ["architecture-docs"],
       "metadata": {
         "version": "1.0.0",
         "license": "MIT",
@@ -1129,9 +970,7 @@
       "name": "code-review",
       "description": "Run a structured Spec Kit review focused on code compliance, documentation quality, or test coverage, positioned within the spec-driven development pipeline.",
       "applyTo": null,
-      "tags": [
-        "code-review"
-      ],
+      "tags": ["code-review"],
       "metadata": {
         "version": "1.0.0",
         "license": "MIT",
@@ -1147,9 +986,7 @@
       "name": "django-project",
       "description": "Scaffold and evolve Django projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.",
       "applyTo": null,
-      "tags": [
-        "django-project"
-      ],
+      "tags": ["django-project"],
       "metadata": {
         "version": "1.0.0",
         "license": "MIT",
@@ -1165,9 +1002,7 @@
       "name": "enforcement-audit",
       "description": "Run a compliance audit against a technology instruction file, detecting discrepancies, planning workstreams, implementing fixes, and validating quality gates.",
       "applyTo": null,
-      "tags": [
-        "enforcement-audit"
-      ],
+      "tags": ["enforcement-audit"],
       "metadata": {
         "version": "1.0.0",
         "license": "MIT",
@@ -1183,9 +1018,7 @@
       "name": "fastapi-project",
       "description": "Scaffold and evolve FastAPI projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.",
       "applyTo": null,
-      "tags": [
-        "fastapi-project"
-      ],
+      "tags": ["fastapi-project"],
       "metadata": {
         "version": "1.0.0",
         "license": "MIT",
@@ -1201,9 +1034,7 @@
       "name": "repository-template",
       "description": "Create code repository from template, or/and update it in parts from the content of the template that contains example of use of tools like make, pre-commit git hooks, Docker, and quality checks.",
       "applyTo": null,
-      "tags": [
-        "repository-template"
-      ],
+      "tags": ["repository-template"],
       "metadata": {
         "version": "1.0.0",
         "license": "MIT",
@@ -1219,9 +1050,7 @@
       "name": "spec-consolidation",
       "description": "Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline, excluding plan.md and tasks.md from the final output.",
       "applyTo": null,
-      "tags": [
-        "spec-consolidation"
-      ],
+      "tags": ["spec-consolidation"],
       "metadata": {
         "version": "1.2.0",
         "license": "MIT",
@@ -1237,11 +1066,9 @@
       "name": "system-documentation",
       "description": "Establish, synchronise, audit, and review an opinionated repository documentation system across entrypoints, architecture, reference, explanation, tutorials, how-to guides, operations, audience indexes, and governance/lifecycle artefacts.",
       "applyTo": null,
-      "tags": [
-        "system-documentation"
-      ],
+      "tags": ["system-documentation"],
       "metadata": {
-        "version": "1.2.0",
+        "version": "1.4.0",
         "license": "MIT",
         "allowedTools": [],
         "argumentHint": "Optional: step (foundation, architecture, reference, explanation, how-to, tutorials, operations, audience-indexes, governance, all), mode (establish, sync, audit, pre-pr-review), and scope (path, feature dir, or changed files)"

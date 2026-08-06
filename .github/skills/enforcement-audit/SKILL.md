@@ -38,7 +38,7 @@ Before starting the audit:
 
 1. Read the [constitution](../../../.specify/memory/constitution.md) for non-negotiable rules, if you have not done already.
 2. Read the instruction file for the resolved technology (from the table above, located in `.github/instructions/`).
-3. Note the reference identifiers (e.g. `[PY-QR-001]`) — you must assess compliance against each of them.
+3. Note the reference identifiers (e.g. `[PY-QR-001]`) - you must assess compliance against each of them.
 4. Read the [architecture overview instructions](../../instructions/includes/architecture-baseline.include.md) and adopt the approach for gathering supporting evidence.
 
 ## Goal
@@ -57,7 +57,7 @@ Enumerate every artefact of the resolved technology in the repository, detect an
 
 1. Re-read the relevant sections of the instruction file for the features present.
 2. Note any repository ADRs or docs that explicitly override defaults; if none exist, assume the instructions are fully binding.
-3. Summarise any uncertainties as **Unknown from code — verify {topic} with maintainers** before proceeding.
+3. Summarise any uncertainties as **Unknown from code - verify {topic} with maintainers** before proceeding.
 
 ## Steps
 
@@ -72,8 +72,8 @@ Enumerate every artefact of the resolved technology in the repository, detect an
 
 1. For each artefact and file, scan for violations of the instruction tags.
 2. Assess each artefact and file against compliance of each reference identifier from the instruction file.
-3. Capture findings with precise evidence links, formatted as `- Evidence: [path/to/file](path/to/file#L10-L40) — violates [{PREFIX}-XXX-NNN] because ...` (using the rule prefix from the table).
-4. Record unknowns explicitly using **Unknown from code — {action}**.
+3. Capture findings with precise evidence links, formatted as `- Evidence: [path/to/file](path/to/file#L10-L40) - violates [{PREFIX}-XXX-NNN] because ...` (using the rule prefix from the table).
+4. Record unknowns explicitly using **Unknown from code - {action}**.
 
 ### 3) Plan refactoring and rework
 
@@ -106,8 +106,8 @@ Enumerate every artefact of the resolved technology in the repository, detect an
 - Keep activities broken into the steps above; do not skip steps even if the code appears compliant.
 - Prefer automation (scripts, linters) over manual spot checks where feasible.
 - Maintain ASCII-only text unless the repository already contains Unicode in the touched files.
-- When information is missing, record **Unknown from code — {suggested action}** instead of guessing.
+- When information is missing, record **Unknown from code - {suggested action}** instead of guessing.
 
 ## Examples
 
-- [example-01-happy-path.md](./examples/example-01-happy-path.md) — a full `python` audit producing the inventory and alignment plan, implementing fixes across five workstreams, and validating with `make lint` and `make test`.
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) - a full `python` audit producing the inventory and alignment plan, implementing fixes across five workstreams, and validating with `make lint` and `make test`.

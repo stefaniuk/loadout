@@ -89,7 +89,7 @@ Apply the following independent rules in order; stop at the first match.
 
 Before starting any step:
 
-1. Read the [constitution](../../../.specify/memory/constitution.md) — highest
+1. Read the [constitution](../../../.specify/memory/constitution.md) - highest
    authority.
 2. Read the [root AGENTS.md](../../../AGENTS.md) and
    [.github/copilot-instructions.md](../../copilot-instructions.md).
@@ -168,7 +168,7 @@ Before starting any step:
     behind as a temporary state.
 12. **Mark unknowns.** Where intent cannot be recovered from specs or the
     selected baseline,
-    write `Unknown from code — {suggested action}` rather than guessing.
+    write `Unknown from code - {suggested action}` rather than guessing.
 13. **Non-destructive.** Never delete or rewrite the source `specs/NNN-*/`
     directories. Archival is an operator decision documented in the final
     summary message.
@@ -201,25 +201,25 @@ Each step has a dedicated companion document with detailed instructions, a
 template, and a Definition of Done. Follow the companion for the step being
 executed.
 
-- **Step 01 — Spec.** See [step-01-spec.md](step-01-spec.md). Produces the
+- **Step 01 - Spec.** See [step-01-spec.md](step-01-spec.md). Produces the
   single `specs/product/spec.md` by merging every `spec.md`, deduplicating
   requirements, assigning stable identifiers (`REQ-PRD-NNN`), and aligning
   ubiquitous language across modules.
-- **Step 02 — Data Model.** See [step-02-data-model.md](step-02-data-model.md).
+- **Step 02 - Data Model.** See [step-02-data-model.md](step-02-data-model.md).
   Produces `specs/product/data-model.md` by unifying entities, schemas, and
   invariants across features.
-- **Step 03 — Research.** See [step-03-research.md](step-03-research.md).
+- **Step 03 - Research.** See [step-03-research.md](step-03-research.md).
   Produces `specs/product/research.md` containing decisions, alternatives, and
   trade-offs. Cross-links to ADRs; surfaces spec/code drift discovered during
   consolidation.
-- **Step 04 — Quickstart.** See [step-04-quickstart.md](step-04-quickstart.md).
+- **Step 04 - Quickstart.** See [step-04-quickstart.md](step-04-quickstart.md).
   Produces `specs/product/quickstart.md` as a single operator on-ramp covering
   every shipped CLI and library entry point.
-- **Step 05 — Contracts.** See [step-05-contracts.md](step-05-contracts.md).
+- **Step 05 - Contracts.** See [step-05-contracts.md](step-05-contracts.md).
   Produces `specs/product/contracts/` by merging schema files, CLI contracts,
   API contracts, and inline normative contract sections where standalone
   source contract files are missing or incomplete.
-- **Step 06 — Checklists.** See [step-06-checklists.md](step-06-checklists.md).
+- **Step 06 - Checklists.** See [step-06-checklists.md](step-06-checklists.md).
   Produces `specs/product/checklists/` by deduplicating review checklists.
 
 ### Common Closing Steps
@@ -295,5 +295,5 @@ After producing the output for any step:
 
 - Editing or deleting any `specs/NNN-*/` directory.
 - Generating new ADRs (use the standard ADR workflow if needed).
-- Producing a new plan or tasks file — these are intentionally excluded from
+- Producing a new plan or tasks file - these are intentionally excluded from
   the final product set.

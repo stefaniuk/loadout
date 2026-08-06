@@ -8,7 +8,7 @@ set -euo pipefail
 # Usage:
 #   $ ./install.test.sh
 #
-# Tests operate in local/dry-run mode only — no remote clones.
+# Tests operate in local/dry-run mode only - no remote clones.
 
 # ==============================================================================
 

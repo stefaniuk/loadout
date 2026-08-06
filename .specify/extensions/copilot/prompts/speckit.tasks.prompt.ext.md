@@ -63,8 +63,3 @@ Before marking `tasks.md` as complete, verify:
 - [ ] AI Assistant executes every Show & Tell step during implementation
 - [ ] Every Show & Tell step has explicit expected output/state and clear pass/fail criteria
 - [ ] No phase or user story is marked complete if any Show & Tell step has not passed
-
----
-
-> **Version**: 1.6.2
-> **Last Amended**: 2026-05-17

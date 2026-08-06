@@ -60,9 +60,9 @@ Every `docs/how-to/<task>.md` should, when practical, include:
 User-facing or contributor-facing troubleshooting belongs under
 `docs/how-to/troubleshooting/` as goal-oriented recovery procedures. Operator
 incident response and safety-sensitive recovery belong in
-`docs/operations/runbooks/` instead — see
+`docs/operations/runbooks/` instead - see
 [step-07-operations.md](step-07-operations.md). Version-specific upgrade
-procedures belong with the governance/lifecycle artefacts — see
+procedures belong with the governance/lifecycle artefacts - see
 [step-09-governance-lifecycle.md](step-09-governance-lifecycle.md).
 
 ## Definition of Done

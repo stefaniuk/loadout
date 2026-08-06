@@ -1,4 +1,4 @@
-# Example 01 — Scaffold a new FastAPI project with the standard layout
+# Example 01 - Scaffold a new FastAPI project with the standard layout
 
 ## Scenario metadata
 
@@ -23,7 +23,7 @@
 - Listed repository root: `Makefile`, `scripts/init.mk`, `.tool-versions`, `.editorconfig` already present.
 - Confirmed `uv` and `python 3.13` declared in `.tool-versions`.
 - Read `.github/instructions/templates/pyproject.toml` as the starting point for the new `pyproject.toml`.
-- No existing `src/app/`, `tests/`, or ASGI entrypoint — clean greenfield.
+- No existing `src/app/`, `tests/`, or ASGI entrypoint - clean greenfield.
 
 ## Execution
 
@@ -65,4 +65,4 @@
 
 - Background jobs were deliberately omitted; revisit when the first asynchronous workload is identified.
 - Database connection pooling parameters should be tuned per deployment target before going live.
-- Container image build is out of scope here — combine with the `repository-template` Docker capability when ready.
+- Container image build is out of scope here - combine with the `repository-template` Docker capability when ready.

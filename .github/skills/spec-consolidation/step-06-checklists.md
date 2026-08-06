@@ -1,4 +1,4 @@
-# Step 06 — Consolidated Checklists
+# Step 06 - Consolidated Checklists
 
 **Output:** `specs/product/checklists/` (optional)
 **Dependencies:** steps 01–05 plus source feature checklists.

@@ -1,4 +1,4 @@
-# Step 03 — Runtime Flows
+# Step 03 - Runtime Flows
 
 Document key runtime flows with diagrams (trigger → orchestration → data lineage), evidence-first.
 
@@ -56,7 +56,7 @@ Search for and open the files that define or register:
    - At least one **scheduled** flow (cron/job) if schedulers exist
 4. Each selected flow must either:
    - Map to real code/config with evidence, or
-   - Be recorded as **Unknown from code — {action to locate/confirm}**
+   - Be recorded as **Unknown from code - {action to locate/confirm}**
 
 ### 2) Create one document per flow (consistent naming and scope)
 
@@ -126,7 +126,7 @@ Capture a brief, evidence-based view of how data moves through the flow.
 
 If any item cannot be supported by code/config, record:
 
-- **Unknown from code — {suggested action}**
+- **Unknown from code - {suggested action}**
 
 #### 2E. Reliability and failure behaviour (only if evidenced)
 
@@ -149,14 +149,14 @@ If any item cannot be supported by code/config, record:
   - File paths (URLs must be prefixed with `/` so links resolve correctly)
   - Symbols and/or config keys (routes, handlers, consumer names, schedule strings, env vars)
 - If anything is unclear or not supported, record:
-  - **Unknown from code — {action to confirm}**
+  - **Unknown from code - {action to confirm}**
 
 ### 3) Keep unknowns visible (no guessing)
 
 1. If a step is implied but not evidenced (e.g. "sends email"), record:
-   - **Unknown from code — locate integration client / call site**
+   - **Unknown from code - locate integration client / call site**
 2. If a diagram participant is assumed but not found, record:
-   - **Unknown from code — verify component exists / find wiring**
+   - **Unknown from code - verify component exists / find wiring**
 
 ### 4) Write concisely, then iterate
 
@@ -261,5 +261,5 @@ flowchart LR
 ## Evidence
 
 - Evidence: [path/to/file](/path/to/file#L75-L140) - {handler/function/route/topic/schedule/config key}
-- Evidence: Unknown from code — {suggested action}
+- Evidence: Unknown from code - {suggested action}
 ````

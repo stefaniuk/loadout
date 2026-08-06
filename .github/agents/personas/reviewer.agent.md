@@ -52,7 +52,7 @@ Review the diff with a bugs-, regressions-, and tests-first mindset; verify beha
 
 - A blocking finding requires an ADR or other governance change.
 - The diff cannot be reproduced or the quality gates fail in the reviewer's environment for unrelated reasons.
-- The third cycle of the implementer↔reviewer loop is reached — escalate to a human (see iteration cap).
+- The third cycle of the implementer↔reviewer loop is reached - escalate to a human (see iteration cap).
 
 ## Iteration cap
 

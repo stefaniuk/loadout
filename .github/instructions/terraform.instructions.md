@@ -73,7 +73,7 @@ Follow the shared [local-first developer experience baseline](./includes/local-f
 
 Provide repository-standard commands so an engineer can do the following quickly:
 
-- [TF-LCL-001] Bootstrap tooling: `make deps` (or equivalent) — installs/validates Terraform and companion tooling.
+- [TF-LCL-001] Bootstrap tooling: `make deps` (or equivalent) - installs/validates Terraform and companion tooling.
 - [TF-LCL-002] Format: `make format` (must run `terraform fmt -recursive`).
 - [TF-LCL-003] Validate: `make validate` (must run `terraform validate` with the correct module/stack context).
 - [TF-LCL-004] Plan: `make plan` (must run `terraform plan` against the correct environment inputs).
@@ -220,7 +220,7 @@ Define and document how configuration is provided, and apply it consistently.
 - [TF-CFG-007] Avoid hard-coded values; expose configuration via variables with sensible defaults (and descriptions) so environments stay consistent.
 - [TF-CFG-008] Document every variable and output with `description` and `type` so intent is discoverable and tooling-friendly.
 - [TF-CFG-009] Use data sources to look up pre-existing infrastructure instead of duplicating configuration; avoid data sources for resources defined in the same stack (pass outputs instead).
-- [TF-CFG-010] Remove unused or redundant data sources—they slow plans/applies and mask real dependencies.
+- [TF-CFG-010] Remove unused or redundant data sources-they slow plans/applies and mask real dependencies.
 - [TF-CFG-011] Use `locals {}` for repeated derived values to keep naming consistent and avoid divergent literals.
 
 ---
@@ -325,10 +325,10 @@ State safety notes:
 
 Adopt a predictable layout. For example:
 
-- `modules/` — reusable modules
-- `environments/` (or `stacks/`) — per-environment compositions
-- `policies/` — policy-as-code (if used)
-- `docs/` — diagrams, runbooks, decisions, and operational notes
+- `modules/` - reusable modules
+- `environments/` (or `stacks/`) - per-environment compositions
+- `policies/` - policy-as-code (if used)
+- `docs/` - diagrams, runbooks, decisions, and operational notes
 
 Rules:
 
@@ -457,9 +457,9 @@ Resilience is an explicit requirement, not an afterthought.
 
 - 14.1 Golden signals and SLO discipline
 - 14.2 Standard telemetry baseline (CloudWatch logs, metrics, alarms, dashboards)
-- 14.3 Logging — structured, centralised, retention-controlled
-- 14.4 Metrics — actionable signals, cardinality rules
-- 14.5 Distributed tracing — end-to-end visibility
+- 14.3 Logging - structured, centralised, retention-controlled
+- 14.4 Metrics - actionable signals, cardinality rules
+- 14.5 Distributed tracing - end-to-end visibility
 - 14.6 Service-specific expectations (API Gateway, Lambda, ECS, RDS, DynamoDB, SQS, S3, VPC)
 - 14.7 Security and audit observability (CloudTrail, Config, GuardDuty)
 - 14.8–14.9 Alerting, runbooks, operational documentation
@@ -517,7 +517,7 @@ Logging must be intentional, queryable, and safe.
 **Operational rules:**
 
 - [TF-OBS-020] Prefer structured logs (JSON) for application logs; avoid free-text-only logs.
-  - [TF-OBS-020a] Application logs emitted by Lambda functions, ECS containers, and similar compute must follow the [Structured Logging Baseline](./includes/observability-baseline.include.md) field requirements — this is an infrastructure concern because log retention, parsing, and alerting depend on consistent schemas.
+  - [TF-OBS-020a] Application logs emitted by Lambda functions, ECS containers, and similar compute must follow the [Structured Logging Baseline](./includes/observability-baseline.include.md) field requirements - this is an infrastructure concern because log retention, parsing, and alerting depend on consistent schemas.
 - [TF-OBS-021] Ensure logs include correlation identifiers consistently (request id / trace id / account id / region).
 - [TF-OBS-022] Use CloudWatch Logs Insights-friendly fields and stable event names.
 
@@ -769,23 +769,18 @@ Per [constitution.md §3.5](../../.specify/memory/constitution.md#35-ai-assisted
 
 These patterns cause recurring issues in Terraform codebases. Avoid them unless an ADR documents a justified exception.
 
-- [TF-ANT-001] **Hardcoded ARNs/account IDs** — use variables or data sources; breaks portability across environments.
-- [TF-ANT-002] **`count` with complex conditionals** — prefer `for_each` for clarity and stable resource keys; `count` index shifts cause recreations.
-- [TF-ANT-003] **Inline policies instead of managed policies** — harder to audit, reuse, and track in IAM; prefer `aws_iam_policy` resources.
-- [TF-ANT-004] **`depends_on` for data dependencies** — usually indicates missing explicit references; fix the graph instead.
-- [TF-ANT-005] **`ignore_changes` as a permanent workaround** — masks drift; document with ADR + expiry and plan removal.
-- [TF-ANT-006] **Floating provider versions** — determinism risk; pin explicitly in `required_providers` and commit `.terraform.lock.hcl`.
-- [TF-ANT-007] **State in local backend for shared environments** — blocks collaboration and breaks CI; use remote backend with locking.
-- [TF-ANT-008] **Secrets in `.tfvars` or variable defaults** — leaks to state, logs, and version control; use Secrets Manager/SSM references.
-- [TF-ANT-009] **Wide IAM wildcards (`*` resource + `*` action)** — least privilege violation; scope to specific resources and actions.
-- [TF-ANT-010] **Mega-modules (>300 lines, multiple concerns)** — hard to test, review, and reuse; split by responsibility.
-- [TF-ANT-011] **Copying resources instead of extracting modules** — drift risk and maintenance burden; extract and version shared patterns.
-- [TF-ANT-012] **Missing `description` on variables/outputs** — poor discoverability; always document intent and constraints.
-- [TF-ANT-013] **`terraform apply -auto-approve` in production** — bypasses review; use CI approvals and plan artefacts.
-- [TF-ANT-014] **Unencrypted state bucket** — compliance and security risk; enable SSE-KMS and versioning.
-- [TF-ANT-015] **Log groups without explicit retention** — cost bloat and compliance risk; set `retention_in_days` on every `aws_cloudwatch_log_group`.
-
----
-
-> **Version**: 1.5.1
-> **Last Amended**: 2026-01-17
+- [TF-ANT-001] **Hardcoded ARNs/account IDs** - use variables or data sources; breaks portability across environments.
+- [TF-ANT-002] **`count` with complex conditionals** - prefer `for_each` for clarity and stable resource keys; `count` index shifts cause recreations.
+- [TF-ANT-003] **Inline policies instead of managed policies** - harder to audit, reuse, and track in IAM; prefer `aws_iam_policy` resources.
+- [TF-ANT-004] **`depends_on` for data dependencies** - usually indicates missing explicit references; fix the graph instead.
+- [TF-ANT-005] **`ignore_changes` as a permanent workaround** - masks drift; document with ADR + expiry and plan removal.
+- [TF-ANT-006] **Floating provider versions** - determinism risk; pin explicitly in `required_providers` and commit `.terraform.lock.hcl`.
+- [TF-ANT-007] **State in local backend for shared environments** - blocks collaboration and breaks CI; use remote backend with locking.
+- [TF-ANT-008] **Secrets in `.tfvars` or variable defaults** - leaks to state, logs, and version control; use Secrets Manager/SSM references.
+- [TF-ANT-009] **Wide IAM wildcards (`*` resource + `*` action)** - least privilege violation; scope to specific resources and actions.
+- [TF-ANT-010] **Mega-modules (>300 lines, multiple concerns)** - hard to test, review, and reuse; split by responsibility.
+- [TF-ANT-011] **Copying resources instead of extracting modules** - drift risk and maintenance burden; extract and version shared patterns.
+- [TF-ANT-012] **Missing `description` on variables/outputs** - poor discoverability; always document intent and constraints.
+- [TF-ANT-013] **`terraform apply -auto-approve` in production** - bypasses review; use CI approvals and plan artefacts.
+- [TF-ANT-014] **Unencrypted state bucket** - compliance and security risk; enable SSE-KMS and versioning.
+- [TF-ANT-015] **Log groups without explicit retention** - cost bloat and compliance risk; set `retention_in_days` on every `aws_cloudwatch_log_group`.

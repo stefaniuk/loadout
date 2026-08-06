@@ -37,9 +37,9 @@ Confirm the change is releasable, draft the changelog, and capture rollout and r
 
 ## Stop conditions
 
-- A blocking release defect is discovered after the first return-to-implementer cycle — escalate to a human.
-- Rollback is not feasible for the proposed change — escalate to a human to confirm acceptance of the risk.
-- Any action requires destructive or irreversible commands — these are always reserved for the human approver.
+- A blocking release defect is discovered after the first return-to-implementer cycle - escalate to a human.
+- Rollback is not feasible for the proposed change - escalate to a human to confirm acceptance of the risk.
+- Any action requires destructive or irreversible commands - these are always reserved for the human approver.
 
 ## Iteration cap
 

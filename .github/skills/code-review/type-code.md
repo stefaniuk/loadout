@@ -1,4 +1,4 @@
-# Code Review — Code Type
+# Code Review - Code Type
 
 Full workflow for the **code** review type: review the implementation against the entire spec-driven development documentation set (including the constitution) for compliance; detect and explain drift among code↔spec↔plan↔tasks; provide prioritised, actionable recommendations (including refactoring) to bring all artefacts into alignment.
 
@@ -174,9 +174,9 @@ If no issues are found, state explicitly:
 
 For every **Code Without Specification** item, present the decision explicitly:
 
-- **Option A — Align code to spec** (revise/remove implementation)
-- **Option B — Align spec/plan to code** (only if behaviour is intentional and constitution-compliant)
-- **Option C — Request missing evidence** (list what is required to decide)
+- **Option A - Align code to spec** (revise/remove implementation)
+- **Option B - Align spec/plan to code** (only if behaviour is intentional and constitution-compliant)
+- **Option C - Request missing evidence** (list what is required to decide)
 
 Do **not** default to Option A or B. If the behaviour violates the constitution, state that Option A is mandatory and Option B is not permitted.
 

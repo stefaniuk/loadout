@@ -8,9 +8,9 @@ Use this shared baseline for the **canonical CLI contract** (exit codes and stre
 
 ## 1. Exit codes (non-negotiable) 🚦
 
-- [CLI-EXIT-001] `0` — successful completion.
-- [CLI-EXIT-002] `1` — general operational failure (unexpected error, dependency failure) when no more specific code exists.
-- [CLI-EXIT-003] `2` — usage error (invalid flags/args, missing required input, mutually exclusive options).
+- [CLI-EXIT-001] `0` - successful completion.
+- [CLI-EXIT-002] `1` - general operational failure (unexpected error, dependency failure) when no more specific code exists.
+- [CLI-EXIT-003] `2` - usage error (invalid flags/args, missing required input, mutually exclusive options).
 - [CLI-EXIT-004] Reserve additional non-zero codes **only** when automation depends on them; document the mapping (code, meaning, user-facing hint) and add regression tests.
 - [CLI-EXIT-005] Exit with the **first failure cause**; do not mask distinct failures behind the same code unless explicitly documented.
 - [CLI-EXIT-006] Tests covering CLI boundaries must assert the relevant exit codes.
@@ -65,8 +65,3 @@ Use this shared baseline for the **canonical CLI contract** (exit codes and stre
 - [CLI-CLD-002] Honour platform-imposed timeouts by surfacing `--timeout` flags and by writing periodic progress logs to `stderr` so that CloudWatch / Stackdriver shows activity.
 - [CLI-CLD-003] Emit structured logs that comply with the shared observability baseline so that managed log routers can parse request IDs, correlation IDs, and severity levels.
 - [CLI-CLD-004] Do not require interactive authentication flows; support token injection (`AWS_PROFILE`, `AZURE_TENANT_ID`, etc.) or credential files suitable for automation.
-
----
-
-> **Version**: 1.2.3
-> **Last Amended**: 2026-02-09

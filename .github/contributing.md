@@ -229,7 +229,7 @@ Copy-paste starters for each artefact type. Each block follows the same shape: *
 
 **When to choose this artefact.** You need language/framework/tool rules that VS Code auto-applies to matching files (e.g. all `**/*.py`). Rules must be order-independent and additive. See the [artefact decision matrix](../docs/architecture.md) for borderline cases.
 
-**Minimal starter template** — save as `.github/instructions/<technology>.instructions.md`:
+**Minimal starter template** - save as `.github/instructions/<technology>.instructions.md`:
 
 ````markdown
 ---
@@ -283,7 +283,7 @@ These instructions define the default engineering approach for <scope>. They are
 
 **When to choose this artefact.** You have a **single repeatable task** (review, generate, refactor, audit) invoked on demand via `/<prompt-name>`. If it needs templates, multi-file assets, or branching logic, prefer a Skill instead. See [docs/architecture.md](../docs/architecture.md).
 
-**Minimal starter template** — save as `.github/prompts/<prefix>.<action>.prompt.md`:
+**Minimal starter template** - save as `.github/prompts/<prefix>.<action>.prompt.md`:
 
 ````markdown
 ---
@@ -304,7 +304,7 @@ $ARGUMENTS
 
 ## Steps
 
-1. <First action — be specific.>
+1. <First action - be specific.>
 2. <Second action.>
 3. <Validation / output.>
 
@@ -331,7 +331,7 @@ $ARGUMENTS
 
 - Prompt drifts into instruction-territory (rules that should live in `.github/instructions/`)
 - Vague "improve this code" steps without success criteria
-- Missing `description` — prompt is then invisible in the Copilot picker
+- Missing `description` - prompt is then invisible in the Copilot picker
 
 <a id="quickstart-agents"></a>
 
@@ -339,7 +339,7 @@ $ARGUMENTS
 
 **When to choose this artefact.** You're building a **multi-step workflow with handoffs** to other agents (typical Spec Kit pattern: specify → plan → tasks → implement). For one-shot work, a Prompt is enough. See [docs/architecture.md](../docs/architecture.md).
 
-**Minimal starter template** — save as `.github/agents/<namespace>.<action>.agent.md`:
+**Minimal starter template** - save as `.github/agents/<namespace>.<action>.agent.md`:
 
 ````markdown
 ---
@@ -382,7 +382,7 @@ handoffs:
 **Pre-PR validation checklist.**
 
 - [ ] Agent has a single, named responsibility
-- [ ] `tools` list is minimal — no `[*]` or unused tools
+- [ ] `tools` list is minimal - no `[*]` or unused tools
 - [ ] All `handoffs.agent` targets exist in `.github/agents/`
 - [ ] Listed in `.github/agents/README.md`
 - [ ] `make lint && make test` pass
@@ -399,13 +399,13 @@ handoffs:
 
 **When to choose this artefact.** You're packaging a **capability + supporting assets** (templates, examples, datasets, scripts) that an agent or prompt can invoke. If you only need text guidance, a Prompt is lighter. See [docs/architecture.md](../docs/architecture.md).
 
-**Minimal starter structure** — create `.github/skills/<skill-name>/`:
+**Minimal starter structure** - create `.github/skills/<skill-name>/`:
 
 ```text
 .github/skills/<skill-name>/
-├── SKILL.md           # Required — the skill definition
-├── templates/         # Optional — copy-pasteable templates
-└── examples/          # Optional — worked examples
+├── SKILL.md           # Required - the skill definition
+├── templates/         # Optional - copy-pasteable templates
+└── examples/          # Optional - worked examples
 ```
 
 **Minimal `SKILL.md` template:**
@@ -424,7 +424,7 @@ allowed-tools: []
 
 ## When to Use
 
-<Trigger conditions — how an agent decides to invoke this skill.>
+<Trigger conditions - how an agent decides to invoke this skill.>
 
 ## Inputs
 
@@ -441,8 +441,8 @@ allowed-tools: []
 
 ## Assets
 
-- `templates/<file>` — <purpose>
-- `examples/<file>` — <purpose>
+- `templates/<file>` - <purpose>
+- `examples/<file>` - <purpose>
 
 ```
 
@@ -469,9 +469,9 @@ allowed-tools: []
 
 ### 🪝 Hooks Quickstart
 
-**When to choose this artefact.** You need to **automate the inner feedback loop** — run a script on `SessionStart`, after every edit (`PostToolUse`), or block the agent from finishing (`Stop`). See [docs/architecture.md](../docs/architecture.md) and the existing [`hooks.json`](../hooks.json).
+**When to choose this artefact.** You need to **automate the inner feedback loop** - run a script on `SessionStart`, after every edit (`PostToolUse`), or block the agent from finishing (`Stop`). See [docs/architecture.md](../docs/architecture.md) and the existing [`hooks.json`](../hooks.json).
 
-**Minimal starter template** — add to the root [`hooks.json`](../hooks.json):
+**Minimal starter template** - add to the root [`hooks.json`](../hooks.json):
 
 ```jsonc
 {
@@ -487,7 +487,7 @@ allowed-tools: []
 }
 ```
 
-And the script — save as `scripts/hooks/<your-script>.sh`, `chmod +x`:
+And the script - save as `scripts/hooks/<your-script>.sh`, `chmod +x`:
 
 ```bash
 #!/usr/bin/env bash
@@ -522,7 +522,7 @@ make lint
 
 VS Code Copilot merges every instruction file whose `applyTo` glob matches the current file. The full precedence rules live in [docs/conventions.md](../docs/conventions.md#instruction-precedence-and-merge-semantics). Practical rules of thumb:
 
-- **Write order-independent rules.** Never assume file A loads before file B — both apply simultaneously.
+- **Write order-independent rules.** Never assume file A loads before file B - both apply simultaneously.
 - **Scope `applyTo` tightly.** A narrow glob (`src/api/**/*.py`) wins fewer conflicts than `**/*.py`.
 - **Avoid contradictions across files.** If two files target the same path, their rules must be additive. Resolve conflicts by merging or splitting `applyTo`.
 - **Verify the loaded set in VS Code.** Open a target file → run _Developer: Show Language Server Output_ or check the Copilot diagnostics panel to confirm which instruction files were actually applied.
@@ -536,19 +536,19 @@ VS Code Copilot merges every instruction file whose `applyTo` glob matches the c
 
 ### For Prompts
 
-1. **Start with context** — explain what the prompt does and when to use it
-2. **Be specific** — vague instructions produce vague results
-3. **Include examples** — show expected inputs and outputs
-4. **Define success criteria** — what does "done" look like?
-5. **Handle edge cases** — what should happen with invalid input?
+1. **Start with context** - explain what the prompt does and when to use it
+2. **Be specific** - vague instructions produce vague results
+3. **Include examples** - show expected inputs and outputs
+4. **Define success criteria** - what does "done" look like?
+5. **Handle edge cases** - what should happen with invalid input?
 
 ### For Instructions
 
-1. **Use unique identifiers** — every rule gets a tag like `[PY-QR-001]`
-2. **Group logically** — organise by concern (quality, security, testing)
-3. **Explain why** — rationale helps AI and humans apply rules correctly
-4. **Link to constitution** — reference relevant sections
-5. **Provide quick reference** — summarise critical rules at the top
+1. **Use unique identifiers** - every rule gets a tag like `[PY-QR-001]`
+2. **Group logically** - organise by concern (quality, security, testing)
+3. **Explain why** - rationale helps AI and humans apply rules correctly
+4. **Link to constitution** - reference relevant sections
+5. **Provide quick reference** - summarise critical rules at the top
 
 ### Identifier Format
 
@@ -563,10 +563,10 @@ Examples:
 
 ### For Agents
 
-1. **Single responsibility** — one agent, one job
-2. **Clear activation** — explain how to invoke the agent
-3. **Define scope** — what the agent will and won't do
-4. **Specify outputs** — what artefacts the agent produces
+1. **Single responsibility** - one agent, one job
+2. **Clear activation** - explain how to invoke the agent
+3. **Define scope** - what the agent will and won't do
+4. **Specify outputs** - what artefacts the agent produces
 
 ---
 
@@ -584,12 +584,12 @@ make lint && make test
 
 ### Content Checklist
 
-- [ ] **British English** — colour, behaviour, organisation (not color, behavior, organization)
-- [ ] **Simple language** — avoid jargon where possible
-- [ ] **Consistent formatting** — follow existing patterns
-- [ ] **No sensitive data** — no credentials, tokens, or personal information
-- [ ] **Tested** — verify prompts produce expected results
-- [ ] **Documented** — include usage examples
+- [ ] **British English** - colour, behaviour, organisation (not color, behavior, organization)
+- [ ] **Simple language** - avoid jargon where possible
+- [ ] **Consistent formatting** - follow existing patterns
+- [ ] **No sensitive data** - no credentials, tokens, or personal information
+- [ ] **Tested** - verify prompts produce expected results
+- [ ] **Documented** - include usage examples
 
 ### Identifier Requirements
 
@@ -644,10 +644,10 @@ docs(readme): update quick start section
 
 Include:
 
-- **What** — summary of changes
-- **Why** — motivation and context
-- **How** — implementation approach
-- **Testing** — how you verified the changes work
+- **What** - summary of changes
+- **Why** - motivation and context
+- **How** - implementation approach
+- **Testing** - how you verified the changes work
 
 ### 5. Review Process
 

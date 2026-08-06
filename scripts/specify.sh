@@ -380,28 +380,13 @@ function patch-file() {
 
   local upstream_content
   local extension_content
-  local extension_body
-  local extension_footer
   local patched_content
 
   upstream_content=$(cat "$upstream_file")
   extension_content=$(cat "$ext_file")
 
-  # Separate extension body from footer (footer starts with --- followed by version block)
-  extension_body=$(extract-extension-body "$extension_content")
-  extension_footer=$(extract-extension-footer "$extension_content")
-
-  # Strip any existing footer from upstream content to avoid duplicates
-  local upstream_body
-  upstream_body=$(extract-extension-body "$upstream_content")
-
-  # Inject extension body at the configured location
-  patched_content=$(inject-extension "$upstream_body" "$extension_body" "$injection_point")
-
-  # Append footer at the very end if present
-  if [[ -n "$extension_footer" ]]; then
-    patched_content=$(append-footer "$patched_content" "$extension_footer")
-  fi
+  # Inject extension at the configured location
+  patched_content=$(inject-extension "$upstream_content" "$extension_content" "$injection_point")
 
   echo "$patched_content" > "$target_file"
 
@@ -663,139 +648,6 @@ function inject-prepend() {
   local extension_content="$2"
 
   echo "${extension_content}"$'\n'$'\n'"${upstream_content}"
-
-  return 0
-}
-
-# Extract the body of an extension file (everything before the footer).
-# The footer is identified by a line containing only "---" followed by
-# (optional blank lines and) lines starting with "> **Version**:".
-# Arguments:
-#   $1=[extension content]
-# Returns:
-#   Extension body without footer (via stdout)
-function extract-extension-body() {
-  local content="$1"
-  local result=""
-  local footer_start_line=""
-  local lines=()
-
-  # Read content into array
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    lines+=("$line")
-  done <<< "$content"
-
-  local total_lines=${#lines[@]}
-
-  # Scan backwards to find footer pattern: --- followed by (optional blank lines and) Version
-  local i=$((total_lines - 1))
-  while [[ $i -ge 0 ]]; do
-    local line="${lines[$i]}"
-    if [[ "$line" == "---" ]]; then
-      # Skip blank lines after --- to find the first non-blank line
-      local next_idx=$((i + 1))
-      while [[ $next_idx -lt $total_lines ]] && [[ -z "${lines[$next_idx]}" ]]; do
-        ((next_idx++))
-      done
-      if [[ $next_idx -lt $total_lines ]]; then
-        local next_line="${lines[$next_idx]}"
-        if [[ "$next_line" =~ ^\>\ \*\*Version\*\*: ]]; then
-          footer_start_line=$i
-          break
-        fi
-      fi
-    fi
-    ((i--))
-  done
-
-  # Output body (everything before footer)
-  if [[ -n "$footer_start_line" ]]; then
-    # Remove trailing blank lines before footer
-    local end_idx=$((footer_start_line - 1))
-    while [[ $end_idx -ge 0 ]] && [[ -z "${lines[$end_idx]}" ]]; do
-      ((end_idx--))
-    done
-    for ((j = 0; j <= end_idx; j++)); do
-      result+="${lines[$j]}"$'\n'
-    done
-  else
-    # No footer found, return entire content
-    result="$content"$'\n'
-  fi
-
-  # Remove trailing newline
-  result="${result%$'\n'}"
-  echo "$result"
-
-  return 0
-}
-
-# Extract the footer from an extension file.
-# The footer is identified by a line containing only "---" followed by
-# (optional blank lines and) lines starting with "> **Version**:".
-# Arguments:
-#   $1=[extension content]
-# Returns:
-#   Footer content (via stdout), empty if no footer found
-function extract-extension-footer() {
-  local content="$1"
-  local result=""
-  local footer_start_line=""
-  local lines=()
-
-  # Read content into array
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    lines+=("$line")
-  done <<< "$content"
-
-  local total_lines=${#lines[@]}
-
-  # Scan backwards to find footer pattern: --- followed by (optional blank lines and) Version
-  local i=$((total_lines - 1))
-  while [[ $i -ge 0 ]]; do
-    local line="${lines[$i]}"
-    if [[ "$line" == "---" ]]; then
-      # Skip blank lines after --- to find the first non-blank line
-      local next_idx=$((i + 1))
-      while [[ $next_idx -lt $total_lines ]] && [[ -z "${lines[$next_idx]}" ]]; do
-        ((next_idx++))
-      done
-      if [[ $next_idx -lt $total_lines ]]; then
-        local next_line="${lines[$next_idx]}"
-        if [[ "$next_line" =~ ^\>\ \*\*Version\*\*: ]]; then
-          footer_start_line=$i
-          break
-        fi
-      fi
-    fi
-    ((i--))
-  done
-
-  # Output footer if found
-  if [[ -n "$footer_start_line" ]]; then
-    for ((j = footer_start_line; j < total_lines; j++)); do
-      result+="${lines[$j]}"$'\n'
-    done
-  fi
-
-  # Remove trailing newline
-  result="${result%$'\n'}"
-  echo "$result"
-
-  return 0
-}
-
-# Append footer to the end of patched content.
-# Arguments:
-#   $1=[patched content]
-#   $2=[footer content]
-# Returns:
-#   Content with footer appended (via stdout)
-function append-footer() {
-  local content="$1"
-  local footer="$2"
-
-  echo "${content}"$'\n'$'\n'"${footer}"
 
   return 0
 }

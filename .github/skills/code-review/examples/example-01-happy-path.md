@@ -1,4 +1,4 @@
-# Example 01 — Code review after implementing a feature spec
+# Example 01 - Code review after implementing a feature spec
 
 ## Scenario metadata
 
@@ -20,7 +20,7 @@
 
 ## Context gathering
 
-- Read `.specify/memory/constitution.md` — highest authority.
+- Read `.specify/memory/constitution.md` - highest authority.
 - Enumerated `specs/004-create-order/`: `spec.md`, `plan.md`, `tasks.md`, plus `contracts/orders.openapi.yaml`.
 - Read `spec.md` → `plan.md` → `tasks.md` in order to build the behaviour inventory.
 - Read relevant ADRs: `docs/adr/ADR-001a_Python_Dependency_Management.md`, `ADR-001d_Python_Testing_Tooling.md`.
@@ -28,15 +28,15 @@
 
 ## Execution
 
-1. **Constitution compliance pass** — checked TDD discipline, ADR coverage for the new outbound payment client, and the mandatory quality-gate sequence. Severity assigned per rule.
-2. **Specification coverage pass** — traced every `REQ-NNN` in `spec.md` to one or more functions or routes; flagged requirements without a corresponding implementation site.
-3. **Discrepancy detection** — inverted the trace to find implementation behaviours absent from the spec (e.g. an idempotency header handled in code but never specified).
-4. **Plan/tasks alignment** — compared `plan.md` decisions against the actual import graph and module boundaries; checked that every task in `tasks.md` has a Red → Green → Refactor footprint in git history.
+1. **Constitution compliance pass** - checked TDD discipline, ADR coverage for the new outbound payment client, and the mandatory quality-gate sequence. Severity assigned per rule.
+2. **Specification coverage pass** - traced every `REQ-NNN` in `spec.md` to one or more functions or routes; flagged requirements without a corresponding implementation site.
+3. **Discrepancy detection** - inverted the trace to find implementation behaviours absent from the spec (e.g. an idempotency header handled in code but never specified).
+4. **Plan/tasks alignment** - compared `plan.md` decisions against the actual import graph and module boundaries; checked that every task in `tasks.md` has a Red → Green → Refactor footprint in git history.
 5. **Authored the structured report** following the six-part output in `type-code.md`, including Proposed Resolutions A/B/C for each material finding.
 
 ## Output artefacts
 
-- `specs/004-create-order/reviews/code-review-report.md` — the structured report containing:
+- `specs/004-create-order/reviews/code-review-report.md` - the structured report containing:
   - Executive summary with finding counts by severity.
   - Constitution compliance section (one `critical`, two `minor` findings).
   - Specification coverage matrix (`REQ-006` partially implemented).
@@ -49,12 +49,12 @@
 - Every finding cites a concrete file and line range (`src/app/services/orders.py#L42-L58`).
 - Constitution rules referenced by stable identifier (e.g. `CONST-TDD-01`).
 - Spec requirements referenced by `REQ-NNN`.
-- No `Unknown from code` items remain — three were initially recorded and resolved by re-reading `contracts/orders.openapi.yaml`.
+- No `Unknown from code` items remain - three were initially recorded and resolved by re-reading `contracts/orders.openapi.yaml`.
 - `make lint` re-run on the report file to confirm markdownlint cleanliness.
 
 ## Final assistant response
 
-> Code review complete. Report written to `specs/004-create-order/reviews/code-review-report.md`. One `critical` finding (missing idempotency requirement in spec), two `minor` findings (logging field naming and a missing timeout on the payment client). `REQ-006` is partially implemented and needs either a code addition or a spec narrowing — Decision Checklist provided. Ready for the `test` review next.
+> Code review complete. Report written to `specs/004-create-order/reviews/code-review-report.md`. One `critical` finding (missing idempotency requirement in spec), two `minor` findings (logging field naming and a missing timeout on the payment client). `REQ-006` is partially implemented and needs either a code addition or a spec narrowing - Decision Checklist provided. Ready for the `test` review next.
 
 ## Notes and follow-ups
 

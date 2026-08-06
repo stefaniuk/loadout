@@ -13,9 +13,9 @@ description: Generate pull request review using architecture overview context
 
 Act as a senior peer reviewer for the pull request that merges this branch into `main`. Produce a focused, constructive, evidence-based review whose primary job is to:
 
-1. **Verify intent vs implementation** — does the code do what the PR title/description and commit messages claim, no more and no less?
-2. **Surface merge-blockers first** — correctness, safety, security, contract, and data-integrity issues.
-3. **Coach, don't nitpick** — every finding is actionable, prioritised, and evidence-backed; lower-severity items are suggestions, not demands.
+1. **Verify intent vs implementation** - does the code do what the PR title/description and commit messages claim, no more and no less?
+2. **Surface merge-blockers first** - correctness, safety, security, contract, and data-integrity issues.
+3. **Coach, don't nitpick** - every finding is actionable, prioritised, and evidence-backed; lower-severity items are suggestions, not demands.
 
 The reviewer's deliverable is a Markdown report saved under `docs/prompt-reports/gh-pr-review-YYYYMMDD-<slug>.report.md` (where `<slug>` is `pr-<number>` when a PR is known, otherwise the sanitised branch name; this prevents collisions when several PRs are reviewed on the same day) and an overall verdict (Approve / Request changes / Comment).
 
@@ -116,7 +116,7 @@ Read the intent file once and extract:
 
 - The PR's stated **scope** (title + body bullet points or first commit body).
 - Any linked issues or specs (e.g. `Closes #123`, `Refs ADR-007`).
-- **Draft status** — drafts almost always conclude with a **Comment** verdict (coaching tone); ready-for-review PRs may be approved or blocked.
+- **Draft status** - drafts almost always conclude with a **Comment** verdict (coaching tone); ready-for-review PRs may be approved or blocked.
 
 When the fallback path runs, the intent is necessarily weaker; mark the review header with `Intent source: commit log (no PR metadata)` so readers can calibrate trust in the intent-vs-implementation lens.
 
@@ -222,25 +222,25 @@ A high-quality review covers what changed; it does not pad with "No findings in 
 
 For each rubric category (2A–2K), mark one of:
 
-- **In scope** — the diff materially touches this area; review it.
-- **Out of scope** — the diff does not touch this area; do not list it in the report.
-- **Spot-check** — touched only incidentally; check briefly and only report if something stands out.
+- **In scope** - the diff materially touches this area; review it.
+- **Out of scope** - the diff does not touch this area; do not list it in the report.
+- **Spot-check** - touched only incidentally; check briefly and only report if something stands out.
 
 **Adaptive form.** Count the changed files: `git diff --name-only main...HEAD | wc -l`.
 
-- **≥ 10 files** — write the full triage table (one row per category) in the review's "Scope & approach" section so readers can see what was looked at and what was not.
-- **< 10 files** — skip the table; state in-scope categories as a single sentence (e.g. "In scope: 2A correctness, 2B tests, 2J build/CI."). Out-of-scope categories are silently omitted.
+- **≥ 10 files** - write the full triage table (one row per category) in the review's "Scope & approach" section so readers can see what was looked at and what was not.
+- **< 10 files** - skip the table; state in-scope categories as a single sentence (e.g. "In scope: 2A correctness, 2B tests, 2J build/CI."). Out-of-scope categories are silently omitted.
 
 For incremental reviews (§C), only re-triage areas whose files changed since the prior review.
 
-### E. Quality signals — rely on existing evidence
+### E. Quality signals - rely on existing evidence
 
 Reviewers verify; they do not normally rerun expensive gates.
 
-1. Check the PR / branch commits for evidence that gates already ran (commit messages, hook-recorded artefacts, and especially `gh pr checks` — if all required checks are green within the last commit window, record that and **do not rerun local gates**).
+1. Check the PR / branch commits for evidence that gates already ran (commit messages, hook-recorded artefacts, and especially `gh pr checks` - if all required checks are green within the last commit window, record that and **do not rerun local gates**).
 2. Spot-check one or two changed files with the cheapest gate (e.g. `git --no-pager grep`, `make lint -- <path>` if supported) when the diff suggests a concrete risk.
 3. Only rerun a full local `make lint` / `make test` when CI evidence is missing or stale **and** the diff size justifies it.
-4. Record what you did — and what you deliberately did not run — under **Verification evidence** in the review.
+4. Record what you did - and what you deliberately did not run - under **Verification evidence** in the review.
 
 ---
 
@@ -345,7 +345,7 @@ Calibration rules:
 - If a finding cannot be tied to a constitution rule, instruction file, or concrete risk, demote it.
 - Do not raise Must-fix without citing evidence of failure mode or rule violation.
 - Resist the temptation to upgrade severity to force a response.
-- **Findings ceiling.** Aim for at most **8 combined Must-fix + Should-fix** items per review. If more candidates exist, the diff almost certainly has a small number of root causes — group related items under one finding by theme (e.g. "missing input validation across new endpoints") rather than enumerating each occurrence. Beyond the ceiling, prefer 🟢 Nice-to-have or 📌 Follow-ups.
+- **Findings ceiling.** Aim for at most **8 combined Must-fix + Should-fix** items per review. If more candidates exist, the diff almost certainly has a small number of root causes - group related items under one finding by theme (e.g. "missing input validation across new endpoints") rather than enumerating each occurrence. Beyond the ceiling, prefer 🟢 Nice-to-have or 📌 Follow-ups.
 
 ### 4) Finding template (use for every significant item)
 
@@ -362,7 +362,7 @@ Use this snippet for each finding so authors can scan and act quickly. The outer
 
 **Rule** (optional, omit the heading if not applicable)
 
-- `{rule-id}` — e.g. `PY-QG-001` from [python.instructions.md](../instructions/python.instructions.md), or `SH-HDR-001` from [shell.instructions.md](../instructions/shell.instructions.md), or a constitution clause path.
+- `{rule-id}` - e.g. `PY-QG-001` from [python.instructions.md](../instructions/python.instructions.md), or `SH-HDR-001` from [shell.instructions.md](../instructions/shell.instructions.md), or a constitution clause path.
 
 **Snippet**
 
@@ -380,9 +380,9 @@ Do not use **Unknown from code** inside a finding; if evidence is missing, raise
 
 ### 5) Write or update the review file (required)
 
-- Path: `$_review_file` as derived in §A — `docs/prompt-reports/gh-pr-review-YYYYMMDD-<slug>.report.md` where `<slug>` is `pr-<n>` when a PR number is known, otherwise the sanitised branch name. This keeps same-day reviews of different PRs from colliding.
+- Path: `$_review_file` as derived in §A - `docs/prompt-reports/gh-pr-review-YYYYMMDD-<slug>.report.md` where `<slug>` is `pr-<n>` when a PR number is known, otherwise the sanitised branch name. This keeps same-day reviews of different PRs from colliding.
 - New file: write the full review using the structure in §6.
-- Existing file (incremental review): append `## Review update – YYYY-MM-DD hh:mm:ss UTC` containing only the delta — newly changed areas, ✅ Resolved (with evidence), 🔴 Still open, 🆕 New. Do not overwrite earlier sections.
+- Existing file (incremental review): append `## Review update – YYYY-MM-DD hh:mm:ss UTC` containing only the delta - newly changed areas, ✅ Resolved (with evidence), 🔴 Still open, 🆕 New. Do not overwrite earlier sections.
 - End the file with the overall verdict (§7) and a `Generated:` footer.
 
 ---
@@ -390,15 +390,15 @@ Do not use **Unknown from code** inside a finding; if evidence is missing, raise
 ## 6) Review output structure 📄
 
 ```markdown
-# PR Review — {pr title or branch name} — YYYY-MM-DD
+# PR Review - {pr title or branch name} - YYYY-MM-DD
 
 **Branch:** `{branch}` → `main` &nbsp;|&nbsp; **Commits:** {n} &nbsp;|&nbsp; **Stated intent:** {one-line summary from PR / log}
 
 ## Scope & approach
 
-- **Scope summary** — either a full triage table (categories 2A–2K marked In scope / Out of scope / Spot-check, with one-line rationale) for PRs with ≥ 10 changed files, or a one-sentence inline list of in-scope categories for smaller PRs (see §D for the rule).
-- **Verification evidence** — what gates already ran, what was spot-checked, what was deliberately not rerun.
-- **Intent vs implementation** — explicit gap statement (none / drift / creep / shortfall).
+- **Scope summary** - either a full triage table (categories 2A–2K marked In scope / Out of scope / Spot-check, with one-line rationale) for PRs with ≥ 10 changed files, or a one-sentence inline list of in-scope categories for smaller PRs (see §D for the rule).
+- **Verification evidence** - what gates already ran, what was spot-checked, what was deliberately not rerun.
+- **Intent vs implementation** - explicit gap statement (none / drift / creep / shortfall).
 
 ## Findings
 
@@ -428,7 +428,7 @@ Do not use **Unknown from code** inside a finding; if evidence is missing, raise
 
 ## Verdict
 
-{Approve / Request changes / Comment} — {one-paragraph rationale}
+{Approve / Request changes / Comment} - {one-paragraph rationale}
 
 ---
 
@@ -441,9 +441,9 @@ Omit empty severity sections entirely; do not write "No findings" placeholders.
 
 Decide one of three outcomes and state it explicitly:
 
-- **Approve** — no Must-fix; Should-fix items (if any) are minor or already acknowledged.
-- **Request changes** — at least one Must-fix, or a Should-fix that materially undermines the PR's stated intent. Reserve this verdict for ready-for-review PRs with concrete blockers; do not use it on drafts.
-- **Comment** — open questions need author response before a verdict can be issued; or the PR is a draft. **Draft PRs almost always conclude with Comment**: the review is coaching, not gating, regardless of finding severity.
+- **Approve** - no Must-fix; Should-fix items (if any) are minor or already acknowledged.
+- **Request changes** - at least one Must-fix, or a Should-fix that materially undermines the PR's stated intent. Reserve this verdict for ready-for-review PRs with concrete blockers; do not use it on drafts.
+- **Comment** - open questions need author response before a verdict can be issued; or the PR is a draft. **Draft PRs almost always conclude with Comment**: the review is coaching, not gating, regardless of finding severity.
 
 The verdict must be consistent with the findings: do not approve while listing Must-fix items, and do not request changes on a draft.
 
@@ -456,8 +456,3 @@ The verdict must be consistent with the findings: do not approve while listing M
 - Every finding cites evidence; omit categories with no findings.
 - Use the same component names as in `component-*.md` when those files exist; otherwise use directory/module names from the diff.
 - Do not invent rules, files, or behaviours; if evidence is missing, use **❓ Question**.
-
----
-
-> **Version**: 1.6.0
-> **Last Amended**: 2026-05-17

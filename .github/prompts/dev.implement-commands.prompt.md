@@ -69,15 +69,15 @@ After changes to Makefiles or scripts, run `make lint` and `make test` (or the r
 
 Each repository **must** provide these public targets with clear descriptions and categories:
 
-- `env` — create or manage language/runtime environments (for example asdf, venv, node).
-- `deps` — install dependencies from lock files.
-- `build` — build or package artefacts.
-- `format` — apply formatters (may call multiple tools).
-- `lint` — run the full lint suite, **including the required quality checks** below.
-- `typecheck` — run static type checks.
-- `test` — run the fast test suite (typically unit tests).
-- `clean` — remove build artefacts and temporary files.
-- `config` — configure the development environment and install tooling (calls `_install-dependencies`).
+- `env` - create or manage language/runtime environments (for example asdf, venv, node).
+- `deps` - install dependencies from lock files.
+- `build` - build or package artefacts.
+- `format` - apply formatters (may call multiple tools).
+- `lint` - run the full lint suite, **including the required quality checks** below.
+- `typecheck` - run static type checks.
+- `test` - run the fast test suite (typically unit tests).
+- `clean` - remove build artefacts and temporary files.
+- `config` - configure the development environment and install tooling (calls `_install-dependencies`).
 
 If a target is not applicable, document why and provide a no-op target that exits successfully with a clear message.
 
@@ -85,10 +85,10 @@ If a target is not applicable, document why and provide a no-op target that exit
 
 At minimum, the lint suite must include these targets (or equivalent scripts) and `make lint` must invoke them:
 
-- `lint-file-format` — file format checks (EditorConfig or equivalent).
-- `lint-markdown-format` — markdown linting.
-- `lint-markdown-links` — markdown internal link checks.
-- `scan-secrets` — secret scanning.
+- `lint-file-format` - file format checks (EditorConfig or equivalent).
+- `lint-markdown-format` - markdown linting.
+- `lint-markdown-links` - markdown internal link checks.
+- `scan-secrets` - secret scanning.
 
 ### Makefile structure and UX 📖
 
@@ -145,8 +145,3 @@ At minimum, the lint suite must include these targets (or equivalent scripts) an
    - [ ] CI/CD alignment
    - [ ] Documentation and discoverability
    - [ ] Testing expectations
-
----
-
-> **Version**: 1.0.1
-> **Last Amended**: 2026-02-08

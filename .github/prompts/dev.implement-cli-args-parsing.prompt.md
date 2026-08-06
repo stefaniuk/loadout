@@ -190,8 +190,3 @@ Use it for context and evaluate each CLI against the CLI Contract Baseline:
    - [ ] Wrappers and shared libraries
    - [ ] Cloud and serverless workloads
    - [ ] Testing expectations
-
----
-
-> **Version**: 1.0.4
-> **Last Amended**: 2026-02-09

@@ -59,7 +59,7 @@ Every runbook should, when practical, include:
 Safety-sensitive upgrade procedures (breaking releases, data migrations,
 required operator action) belong under `docs/operations/runbooks/` and must
 be linked from `CHANGELOG.md`. Version-agnostic upgrade recipes for end users
-belong under `docs/how-to/`. The governance step coordinates both — see
+belong under `docs/how-to/`. The governance step coordinates both - see
 [step-09-governance-lifecycle.md](step-09-governance-lifecycle.md).
 
 ## Definition of Done

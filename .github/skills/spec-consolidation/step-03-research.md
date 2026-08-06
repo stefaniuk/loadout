@@ -1,4 +1,4 @@
-# Step 03 — Consolidated Research and Reconciliation
+# Step 03 - Consolidated Research and Reconciliation
 
 **Output:** `specs/product/research.md`
 **Dependencies:** step 01 (`specs/product/spec.md`).
@@ -53,7 +53,7 @@ capturing every divergence found while consolidating the spec and data model.
 
 - **Drift 001**: Spec says X; code does Y. Evidence: …. Resolution: ….
 
-## Appendix — Source Mapping
+## Appendix - Source Mapping
 ```
 
 ## Definition of Done

@@ -1,4 +1,4 @@
-# Step 06 — Infrastructure Diagram
+# Step 06 - Infrastructure Diagram
 
 Author cloud infrastructure diagrams in `draw.io` (one diagram per cloud provider), evidence-first.
 
@@ -31,7 +31,7 @@ Look for IaC and deployment artefacts:
 4. Azure Bicep / ARM templates
 5. Pulumi
 6. Serverless framework / SAM
-7. Docker Compose (typically dev/test only — note as such)
+7. Docker Compose (typically dev/test only - note as such)
 8. CI/CD deployment workflows
 
 Identify which cloud provider(s) are used. Common signals:
@@ -73,9 +73,9 @@ Do not invent icons or substitute generic shapes when an official one exists.
 3. **Group by network** (VPC/VNet/Project network) at the next level.
 4. **Group by availability zone / subnet** where it materially affects the architecture.
 5. Place **external actors and external systems** outside the cloud boundary.
-6. Place **identity providers** outside the cloud boundary unless they are cloud-native (e.g. AWS IAM Identity Center / Entra ID — these may be inside).
+6. Place **identity providers** outside the cloud boundary unless they are cloud-native (e.g. AWS IAM Identity Center / Entra ID - these may be inside).
 7. Use **clear left-to-right** or **top-to-bottom** flow. Pick one and stick to it.
-8. Use **swimlanes** if the architecture spans multiple environments shown side-by-side (avoid if a single diagram becomes too dense — split instead).
+8. Use **swimlanes** if the architecture spans multiple environments shown side-by-side (avoid if a single diagram becomes too dense - split instead).
 
 ### 4) Required elements (only if evidenced)
 
@@ -86,7 +86,7 @@ Model:
 - **Databases** (managed SQL/NoSQL/data warehouses)
 - **Messaging** (queues, topics, event buses, streaming)
 - **Networking** (load balancers, API gateways, CDNs, DNS, private endpoints, peering)
-- **Security** (WAF, secrets manager, KMS, IAM/RBAC boundaries — at high level)
+- **Security** (WAF, secrets manager, KMS, IAM/RBAC boundaries - at high level)
 - **Observability** (metrics/logs/tracing services in use)
 - **External SaaS** (third-party services this infrastructure depends on)
 
@@ -131,7 +131,7 @@ In `docs/prompt-reports/infrastructure/README.md`:
    - Deployment workflows that provision/update these resources
    - Config keys / parameter files that supply environment-specific values
 2. Where a resource is implied (e.g. "DNS is managed externally") but not in IaC, record:
-   - **Unknown from code — confirm with platform team / external doc**
+   - **Unknown from code - confirm with platform team / external doc**
 
 ### 8) Update the architecture index
 
@@ -143,18 +143,18 @@ Update `docs/prompt-reports/README.md` with an **Infrastructure** section that:
 
 ## Operating principles (must follow)
 
-- **Evidence first** — every resource and connection on the diagram must trace back to IaC or deployment configuration.
-- **Official icons** — use the cloud provider's official shape library; do not substitute.
-- **One provider per diagram** — keep diagrams focused; if multiple clouds are involved, produce one diagram each plus a small inter-cloud overview if needed.
-- **High-level, not exhaustive** — show architecturally significant resources; do not draw every IAM policy or every subnet unless they matter to the architecture.
-- **Names match IaC** — use resource names that match the IaC so reviewers can grep.
-- **Commit both source and SVG** — `.drawio` for editing, `.drawio.svg` for in-browser rendering.
+- **Evidence first** - every resource and connection on the diagram must trace back to IaC or deployment configuration.
+- **Official icons** - use the cloud provider's official shape library; do not substitute.
+- **One provider per diagram** - keep diagrams focused; if multiple clouds are involved, produce one diagram each plus a small inter-cloud overview if needed.
+- **High-level, not exhaustive** - show architecturally significant resources; do not draw every IAM policy or every subnet unless they matter to the architecture.
+- **Names match IaC** - use resource names that match the IaC so reviewers can grep.
+- **Commit both source and SVG** - `.drawio` for editing, `.drawio.svg` for in-browser rendering.
 
 ## Common pitfalls (avoid)
 
-- Drawing logical components (from the C4 Component view) on the infrastructure diagram — that's the wrong altitude
+- Drawing logical components (from the C4 Component view) on the infrastructure diagram - that's the wrong altitude
 - Mixing providers in a single diagram
-- Showing every subnet, every NAT gateway, every route table — keep it readable
+- Showing every subnet, every NAT gateway, every route table - keep it readable
 - Inventing managed services that the code does not actually use
 - Forgetting to export and commit the SVG (diagram becomes invisible in the browser)
-- Letting the diagram drift silently from IaC — update it whenever the IaC changes materially
+- Letting the diagram drift silently from IaC - update it whenever the IaC changes materially

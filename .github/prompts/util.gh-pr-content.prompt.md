@@ -17,10 +17,10 @@ Craft a diff-driven pull request title and body, ready to copy/paste, that compa
 
 A PR description covers **everything between `main` and `HEAD`**, including any staged or unstaged work that will land in the next commit on this branch. Evidence precedence is:
 
-1. **Commit subjects + bodies** (`git log main..HEAD`) — primary narrative; the branch authors already wrote it.
-2. **Diff overview** (`git diff --stat main...HEAD`, `--dirstat`) — structural scope and folder distribution.
-3. **Top-N per-file diffs**, capped, with explicit truncation markers — for the largest or most behaviour-bearing changes.
-4. **Staged / unstaged working-tree changes** — included as "pending in this branch but not yet committed" and called out separately in the description.
+1. **Commit subjects + bodies** (`git log main..HEAD`) - primary narrative; the branch authors already wrote it.
+2. **Diff overview** (`git diff --stat main...HEAD`, `--dirstat`) - structural scope and folder distribution.
+3. **Top-N per-file diffs**, capped, with explicit truncation markers - for the largest or most behaviour-bearing changes.
+4. **Staged / unstaged working-tree changes** - included as "pending in this branch but not yet committed" and called out separately in the description.
 
 Never expand the full `git diff main...HEAD` into the report; it does not scale beyond a handful of commits and is rarely the cheapest evidence.
 
@@ -58,7 +58,7 @@ if ! git show-ref --verify --quiet refs/heads/main; then
   git fetch origin main:main >> "$_report" 2>&1 || true
 fi
 
-# Cheap context — always run.
+# Cheap context - always run.
 for cmd in \
   "git rev-parse --abbrev-ref HEAD" \
   "git status -sb" \
@@ -73,7 +73,7 @@ for cmd in \
 done
 
 # Top-N per-file diffs vs main, capped, with truncation markers. Default 20
-# files, 400 lines each — both overridable via env. Files are picked by
+# files, 400 lines each - both overridable via env. Files are picked by
 # absolute change size (insertions + deletions).
 _top_n=${TOP_N_FILES:-20}
 _per_file_cap=${PER_FILE_CAP:-400}
@@ -140,7 +140,7 @@ printf '\nReport → %s (%s bytes, %s lines)\n' \
 After the script completes, **read `$_report`** (the per-PR or per-branch, per-day file written above) as the authoritative evidence. The report is bounded by design; a single read is sufficient and you must not re-run `git diff main...HEAD` for full content.
 
 1. Confirm branch/PR target from `git rev-parse --abbrev-ref HEAD` and `git status -sb`.
-2. Use the commit log block as the primary narrative — commits are already grouped, dated, and authored. Group them into change themes for the Description.
+2. Use the commit log block as the primary narrative - commits are already grouped, dated, and authored. Group them into change themes for the Description.
 3. Use the stat and dirstat blocks for scope and folder distribution; reference them in the Description bullets.
 4. Use the top-N per-file diffs to verify what the commit subjects claim. If a file you need was not in the top-N, request only that file with `git --no-pager diff main...HEAD -- <path>`. If a per-file capture was truncated (look for `[...truncated: N more lines...]`), either rerun with `PER_FILE_CAP=<n>` or request that one file unbounded. Never re-expand the whole branch diff.
 5. If both committed-vs-main _and_ working-tree pending blocks are empty, stop and report **"No diff vs main – nothing to raise."**
@@ -255,8 +255,3 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
 ```
 
 Add additional sections (for example "Testing", "Follow-ups") **only** if the template explicitly gains them in future revisions, and keep the order consistent with the template file.
-
----
-
-> **Version**: 1.3.0
-> **Last Amended**: 2026-05-17

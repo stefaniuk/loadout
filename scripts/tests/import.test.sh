@@ -294,10 +294,10 @@ function test-import-new-false-does-not-import-new-files() {
   track-repo-file-state "${new_file}"
   echo "# Brand new prompt" > "${dest}/${new_file}"
 
-  # Act — force=true but new=false (default)
+  # Act - force=true but new=false (default)
   force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
 
-  # Assert — new file should NOT have been imported
+  # Assert - new file should NOT have been imported
   [[ ! -f "${REPO_ROOT}/${new_file}" ]] || return 1
 
   return 0

@@ -12,6 +12,14 @@ Read and adhere to the [constitution](/.specify/memory/constitution.md) at all t
 
 - Use British English
 - Keep language simple
+- Do not use em dashes (-) use commas, colons, or separate sentences instead
+- Avoid semicolons in prose. Prefer shorter sentences or commas
+- Write short sentences. Aim for one idea per sentence
+- Prefer active voice over passive ("the tool creates" not "the file is created")
+- Write "for example" not "e.g.", "that is" not "i.e.", "and so on" not "etc."
+- Cut filler phrases: use "to" not "in order to", drop "it should be noted that" and "the fact that"
+- Use verbs, not noun forms: "we decided" not "we made a decision", "apply" not "perform the application of"
+- Put the most important information first in a sentence, not after qualifiers
 
 ## Toolchain version
 
@@ -48,11 +56,23 @@ For any technology or language choice, consult the [Tech Radar](/docs/adr/Tech_R
 - Ensure tests are always listed before implementation tasks
 - Use property-based testing (PBT) where applicable to maximise coverage and edge case validation
 
+## Repository tooling
+
+When you identify missing development capabilities (linting, CI/CD, Docker support, pre-commit hooks, and so on), consult the [repository-template skill](/.github/skills/repository-template/SKILL.md) for standardised implementations.
+
+## Implementation discipline
+
+- Do not invent requirements, widen scope, or introduce behaviour not present in the specification. Agent output is draft until validated.
+- Given identical inputs and environment, produce identical outputs. No hidden or implicit state. Side effects must be explicit and documented.
+- Silent failure is forbidden. Errors must be captured, classified, and surfaced.
+- Accidental complexity is a defect. If something cannot be explained clearly, it is not ready to exist.
+- If code and specification diverge, explicitly choose one path: fix the implementation to match the specification, or amend the specification with rationale. Never silently legitimise accidental behaviour.
+
 ## Quality gates (mandatory)
 
 After any source code change:
 
 1. The repository's canonical local quality gates must pass before the task is complete
 2. In environments where hooks or other automation enforce those gates, rely on that enforcement rather than manually duplicating the same commands after every edit
-3. If a gate fails, fix all errors and warnings — including those in files you did not modify when they block the gate
+3. If a gate fails, fix all errors and warnings - including those in files you did not modify when they block the gate
 4. Manually rerun the relevant gate only when diagnosing a failure, recovering from unavailable automation, or when the user explicitly asks for the output

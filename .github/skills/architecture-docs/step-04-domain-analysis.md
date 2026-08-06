@@ -1,4 +1,4 @@
-# Step 04 — Domain Analysis
+# Step 04 - Domain Analysis
 
 Document domains, bounded contexts, and integration patterns (DDD-style, evidence-first).
 
@@ -33,7 +33,7 @@ Look for evidence of bounded contexts in the codebase:
 5. **Schema ownership** in datastores (which tables/collections belong to which module).
 6. **Event names and topics** that indicate domain events (`OrderPlaced`, `PaymentCaptured`, etc.).
 
-If domain boundaries are not explicit, record them as **Unknown from code — propose tentative boundaries based on {evidence}**.
+If domain boundaries are not explicit, record them as **Unknown from code - propose tentative boundaries based on {evidence}**.
 
 ## Steps
 
@@ -72,7 +72,7 @@ A short glossary of domain terms used in the codebase:
 
 - Term | Definition | Where used (evidence link)
 
-Only include terms that are present in code/config — do not invent terms.
+Only include terms that are present in code/config - do not invent terms.
 
 #### 2C. Aggregates and entities
 
@@ -132,7 +132,7 @@ For each integration, capture:
 
 - File paths (URLs must be prefixed with `/`)
 - Symbols, schemas, event names, config keys
-- **Unknown from code — {suggested action}** where evidence is missing
+- **Unknown from code - {suggested action}** where evidence is missing
 
 ### 3) Build a context map
 
@@ -156,9 +156,9 @@ Update `docs/prompt-reports/README.md` with a **Domain Analysis** section linkin
 ### 5) Keep unknowns visible (no guessing)
 
 - If a domain boundary is implied but not evidenced, record:
-  - **Unknown from code — verify boundary / propose for review**
+  - **Unknown from code - verify boundary / propose for review**
 - If an integration is implied but not evidenced, record:
-  - **Unknown from code — locate client/adapter/contract**
+  - **Unknown from code - locate client/adapter/contract**
 
 ## Template snippet per domain
 
@@ -221,5 +221,5 @@ Update `docs/prompt-reports/README.md` with a **Domain Analysis** section linkin
 ## Evidence
 
 - Evidence: [path](/path#L10-L40) - {symbol/schema/event}
-- Evidence: Unknown from code — {suggested action}
+- Evidence: Unknown from code - {suggested action}
 ```

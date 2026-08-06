@@ -68,14 +68,14 @@ Follow the shared [local-first developer experience baseline](./includes/local-f
 
 Provide repository-standard commands so an engineer can do the following quickly:
 
-- [PY-LCL-001] Bootstrap: `make deps` — installs tooling and dependencies, and prepares a usable local environment
+- [PY-LCL-001] Bootstrap: `make deps` - installs tooling and dependencies, and prepares a usable local environment
 - [PY-LCL-002] Format: `make format`
 - [PY-LCL-003] Lint: `make lint`
-- [PY-LCL-004] Type-check: `make typecheck` — runs mypy (or the repository-approved static type checker) as a blocking gate
-- [PY-LCL-005] Test (fast lane): `make test` — must run quickly (aim: < 10 seconds, provide another make target for slower tests) and deterministically
-- [PY-LCL-006] Full suite: `make test-all` — includes integration/e2e tiers
-- [PY-LCL-007] Run CLI locally: `make run` — runs with safe defaults (**no cloud dependencies by default**)
-- [PY-LCL-008] Run API locally: `make up` / `make down` — starts/stops local dependency stack (if applicable)
+- [PY-LCL-004] Type-check: `make typecheck` - runs mypy (or the repository-approved static type checker) as a blocking gate
+- [PY-LCL-005] Test (fast lane): `make test` - must run quickly (aim: < 10 seconds, provide another make target for slower tests) and deterministically
+- [PY-LCL-006] Full suite: `make test-all` - includes integration/e2e tiers
+- [PY-LCL-007] Run CLI locally: `make run` - runs with safe defaults (**no cloud dependencies by default**)
+- [PY-LCL-008] Run API locally: `make up` / `make down` - starts/stops local dependency stack (if applicable)
 
 ### 2.2 Reproducible toolchain (avoid "works on my machine")
 
@@ -113,7 +113,7 @@ Provide a `pre-commit` configuration that runs the same checks as CI in a fast, 
 
 - [PY-LCL-016] formatting (Ruff)
 - [PY-LCL-017] linting (Ruff)
-- [PY-LCL-018] type checks (mypy); run at least on changed files — this is the primary safety net for AI-generated code
+- [PY-LCL-018] type checks (mypy); run at least on changed files - this is the primary safety net for AI-generated code
 - [PY-LCL-019] secret scanning (for example gitleaks)
 
 ### 2.4 OCI images for parity and zero-setup (strongly recommended)
@@ -247,8 +247,8 @@ Python projects have contracts, even when they are "just code"; treat every boun
 
 **Section summary (key subsections):**
 
-- 5.1 CLI command structure and semantics — subcommands and composition
-- 5.2 HTTP behaviour rules — methods, status codes, retries, pagination
+- 5.1 CLI command structure and semantics - subcommands and composition
+- 5.2 HTTP behaviour rules - methods, status codes, retries, pagination
 
 ### 5.1 CLI command structure and semantics (applies to CLIs)
 
@@ -321,7 +321,7 @@ Python projects have contracts, even when they are "just code"; treat every boun
 
 ## 6. Static typing (mandatory safety net) 🛡️
 
-Python is dynamically typed at runtime, but **static typing via type hints is mandatory** for this project. Type hints combined with static analysis (mypy) form the critical safety net — especially when AI-assisted tools generate or modify code.
+Python is dynamically typed at runtime, but **static typing via type hints is mandatory** for this project. Type hints combined with static analysis (mypy) form the critical safety net - especially when AI-assisted tools generate or modify code.
 
 ### 6.1 Why typing is non-negotiable
 
@@ -334,20 +334,20 @@ Per [PEP 484](https://peps.python.org/pep-0484/), type hints make code a **share
 ### 6.2 Type hint requirements
 
 - [PY-TYP-004] **All public APIs must be typed**: every public function, method, and class must have complete type annotations for parameters and return values.
-- [PY-TYP-005] **Data models must be typed**: use `dataclasses`, `TypedDict`, Pydantic models, or attrs — never untyped dicts for structured data at boundaries.
+- [PY-TYP-005] **Data models must be typed**: use `dataclasses`, `TypedDict`, Pydantic models, or attrs - never untyped dicts for structured data at boundaries.
 - [PY-TYP-006] **Internal code should be typed**: type hints are strongly recommended throughout; the more code is typed, the more value static analysis provides.
 - [PY-TYP-007] **Prefer modern syntax**: use built-in generics (`list[str]`, `dict[str, int]`) instead of `typing.List`, `typing.Dict` for Python 3.9+. Use `X | Y` union syntax for Python 3.10+.
 
 ### 6.3 Static analysis enforcement
 
-- [PY-TYP-008] **Run mypy (or equivalent) in CI**: type checking must be a **blocking gate** — code with type errors must not merge.
+- [PY-TYP-008] **Run mypy (or equivalent) in CI**: type checking must be a **blocking gate** - code with type errors must not merge.
 - [PY-TYP-009] **Use strict mode where feasible**: enable `--strict` or incrementally adopt strict flags (`--disallow-untyped-defs`, `--disallow-any-generics`, `--warn-return-any`).
 - [PY-TYP-010] **Pre-commit hooks must include type checks**: run mypy on at least changed files to catch issues before push.
 
 ### 6.4 Escape hatches (use sparingly)
 
 - [PY-TYP-011] **Avoid `Any`**: using `Any` defeats the purpose of typing. Prefer `object`, `Unknown` (via `typing_extensions`), protocol types, or properly constrained generics. Every use of `Any` must be justified with a comment.
-- [PY-TYP-012] **`# type: ignore` requires explanation**: never silence type errors without a reason comment (e.g., `# type: ignore[arg-type] — third-party stub is incorrect`). Treat these as technical debt to be resolved.
+- [PY-TYP-012] **`# type: ignore` requires explanation**: never silence type errors without a reason comment (e.g., `# type: ignore[arg-type] - third-party stub is incorrect`). Treat these as technical debt to be resolved.
 
 ### 6.5 Third-party library typing
 
@@ -497,9 +497,9 @@ Observability is non-negotiable.
 
 **Section summary (key subsections):**
 
-- 11.0 Minimum baseline — the bar that applies everywhere
-- 11.1–11.2 Correlation IDs — CLI run identity and API request identity
-- 11.3 Logging rules — structured logs, what to include, what never to log
+- 11.0 Minimum baseline - the bar that applies everywhere
+- 11.1–11.2 Correlation IDs - CLI run identity and API request identity
+- 11.3 Logging rules - structured logs, what to include, what never to log
 - 11.4–11.5 Request lifecycle and dependency visibility
 - 11.6–11.7 Distributed tracing and metrics
 - 11.8–11.11 Error capture, runbooks, audit logs, Lambda notes
@@ -707,8 +707,8 @@ When running in AWS Lambda:
 
 **Section summary (key subsections):**
 
-- 12.1 CLI security rules — secrets, file paths, remote calls
-- 12.2 API security rules — core rules, AuthN, AuthZ, service-to-service, secrets, headers, testing
+- 12.1 CLI security rules - secrets, file paths, remote calls
+- 12.2 API security rules - core rules, AuthN, AuthZ, service-to-service, secrets, headers, testing
 
 ### 12.1 CLI security rules (applies to CLIs)
 
@@ -1103,27 +1103,22 @@ Per [constitution.md §3.5](../../.specify/memory/constitution.md#35-ai-assisted
 
 These patterns cause recurring issues in Python codebases. Avoid them unless an ADR documents a justified exception.
 
-- [PY-ANT-001] **Bare `except:` or `except Exception`** — swallows all errors including `KeyboardInterrupt` and `SystemExit`. Catch specific exceptions; if broad handling is needed, log and re-raise or use `except Exception as e:` with explicit handling.
-- [PY-ANT-002] **Mutable default arguments** (`def f(items=[])`) — the list is shared across calls. Use `None` and initialise inside the function.
-- [PY-ANT-003] **Using `assert` for runtime validation** — assertions are stripped in optimised builds (`python -O`). Use explicit `if`/`raise` for input validation.
-- [PY-ANT-004] **Global mutable state for request/CLI context** — breaks thread safety and testability. Pass context explicitly or use framework-provided request-scoped storage.
-- [PY-ANT-005] **Logging inside tight loops without sampling** — floods logs and degrades performance. Log aggregates or sample.
-- [PY-ANT-006] **Hardcoded `time.sleep()` for retries** — no backoff, no jitter, no limit. Use a retry library with exponential backoff (e.g. `tenacity`).
-- [PY-ANT-007] **Mixing `print()` with structured logging** — breaks log aggregation and stream semantics. Use the logging framework consistently.
-- [PY-ANT-008] **Importing entire modules when only one symbol is needed** — pollutes namespace and increases coupling. Prefer `from module import symbol`.
-- [PY-ANT-009] **Catching exceptions only to re-raise unchanged** — adds noise without value. Let exceptions propagate unless you add context or handle them.
-- [PY-ANT-010] **Using `os.path` when `pathlib` is clearer** — `pathlib.Path` is more readable, safer, and cross-platform. Prefer it for new code.
-- [PY-ANT-011] **Nested `try`/`except` blocks** — hard to follow; flatten or extract to helper functions.
-- [PY-ANT-012] **Magic numbers and strings** — define named constants or enums for clarity and searchability.
-- [PY-ANT-013] **Long parameter lists (>5 positional)** — consider a dataclass, TypedDict, or Pydantic model to group related parameters.
-- [PY-ANT-014] **Shadowing built-ins** (`id`, `type`, `list`, `dict`, `input`, `open`) — causes subtle bugs. Choose distinct names.
-- [PY-ANT-015] **Ignoring return values of I/O or validation calls** — silent failures. Check or log outcomes explicitly.
-- [PY-ANT-016] **Using `Any` to silence type errors** — defeats the purpose of typing; use `object`, `Unknown`, protocol types, or properly constrained generics instead. Every `Any` must be justified and documented.
-- [PY-ANT-017] **Untyped public APIs** — public functions/classes without type hints are forbidden; they break the contract between humans, frameworks, and AI.
-- [PY-ANT-018] **`# type: ignore` without explanation** — silencing type errors hides bugs; always include a reason comment (for example `# type: ignore[arg-type] — third-party stub is wrong`).
-- [PY-ANT-019] **Mixing typed and untyped code at boundaries** — if a module is typed, keep it fully typed; partial typing creates false confidence.
-
----
-
-> **Version**: 1.7.0
-> **Last Amended**: 2026-01-20
+- [PY-ANT-001] **Bare `except:` or `except Exception`** - swallows all errors including `KeyboardInterrupt` and `SystemExit`. Catch specific exceptions; if broad handling is needed, log and re-raise or use `except Exception as e:` with explicit handling.
+- [PY-ANT-002] **Mutable default arguments** (`def f(items=[])`) - the list is shared across calls. Use `None` and initialise inside the function.
+- [PY-ANT-003] **Using `assert` for runtime validation** - assertions are stripped in optimised builds (`python -O`). Use explicit `if`/`raise` for input validation.
+- [PY-ANT-004] **Global mutable state for request/CLI context** - breaks thread safety and testability. Pass context explicitly or use framework-provided request-scoped storage.
+- [PY-ANT-005] **Logging inside tight loops without sampling** - floods logs and degrades performance. Log aggregates or sample.
+- [PY-ANT-006] **Hardcoded `time.sleep()` for retries** - no backoff, no jitter, no limit. Use a retry library with exponential backoff (e.g. `tenacity`).
+- [PY-ANT-007] **Mixing `print()` with structured logging** - breaks log aggregation and stream semantics. Use the logging framework consistently.
+- [PY-ANT-008] **Importing entire modules when only one symbol is needed** - pollutes namespace and increases coupling. Prefer `from module import symbol`.
+- [PY-ANT-009] **Catching exceptions only to re-raise unchanged** - adds noise without value. Let exceptions propagate unless you add context or handle them.
+- [PY-ANT-010] **Using `os.path` when `pathlib` is clearer** - `pathlib.Path` is more readable, safer, and cross-platform. Prefer it for new code.
+- [PY-ANT-011] **Nested `try`/`except` blocks** - hard to follow; flatten or extract to helper functions.
+- [PY-ANT-012] **Magic numbers and strings** - define named constants or enums for clarity and searchability.
+- [PY-ANT-013] **Long parameter lists (>5 positional)** - consider a dataclass, TypedDict, or Pydantic model to group related parameters.
+- [PY-ANT-014] **Shadowing built-ins** (`id`, `type`, `list`, `dict`, `input`, `open`) - causes subtle bugs. Choose distinct names.
+- [PY-ANT-015] **Ignoring return values of I/O or validation calls** - silent failures. Check or log outcomes explicitly.
+- [PY-ANT-016] **Using `Any` to silence type errors** - defeats the purpose of typing; use `object`, `Unknown`, protocol types, or properly constrained generics instead. Every `Any` must be justified and documented.
+- [PY-ANT-017] **Untyped public APIs** - public functions/classes without type hints are forbidden; they break the contract between humans, frameworks, and AI.
+- [PY-ANT-018] **`# type: ignore` without explanation** - silencing type errors hides bugs; always include a reason comment (for example `# type: ignore[arg-type] - third-party stub is wrong`).
+- [PY-ANT-019] **Mixing typed and untyped code at boundaries** - if a module is typed, keep it fully typed; partial typing creates false confidence.

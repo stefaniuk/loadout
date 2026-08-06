@@ -1,4 +1,4 @@
-# Step 02 — Consolidated Data Model
+# Step 02 - Consolidated Data Model
 
 **Output:** `specs/product/data-model.md`
 **Dependencies:** step 01 (`specs/product/spec.md`).
@@ -38,7 +38,7 @@ against the actual types defined in the selected baseline implementation.
 5. Cite the implementing source file and line range for every attribute that
    exists in the selected baseline.
 6. Flag attributes documented in old specs but absent in code as
-   `Unknown from code — confirm intent` and route them to `research.md`.
+   `Unknown from code - confirm intent` and route them to `research.md`.
 
 ## Template (skeleton)
 
@@ -63,7 +63,7 @@ against the actual types defined in the selected baseline implementation.
 
 ## Schema Contracts (link to specs/product/contracts/)
 
-## Appendix — Identifier Mapping
+## Appendix - Identifier Mapping
 ```
 
 ## Definition of Done

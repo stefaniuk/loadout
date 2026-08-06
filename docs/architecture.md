@@ -35,12 +35,12 @@ The prompt library is organised into six customisation layers. Each layer builds
 
 Each layer in detail:
 
-- **Layer 0 — Governance.** The project constitution, ADRs, and cross-agent `AGENTS.md` set non-negotiable rules. Every other layer must honour them. Changes here are infrequent and reviewed deliberately.
-- **Layer 1 — Instructions.** Coding standards scoped by file glob (for example `**/*.py`, `**/Dockerfile`). Copilot loads them automatically when relevant files are open, so they shape every suggestion. Shared baselines live in `.github/instructions/includes/`.
-- **Layer 2 — Prompts.** One-off, copy-runnable tasks (documentation reviews, enforcement passes, utility commands). They reference instructions and agents but are invoked explicitly.
-- **Layer 3 — Agents.** Persistent personas with tool restrictions and handoff chains. Spec-kit ceremonies (`speckit.specify`, `speckit.plan`, `speckit.tasks`, `speckit.implement`) live here.
-- **Layer 4 — Skills.** Reusable multi-step capabilities bundled with helper scripts and resources. Examples: `architecture-docs`, `enforcement-audit`, `code-review`.
-- **Layer 5 — Hooks.** Deterministic automation that runs without an LLM in the loop: lint, format, link checks, and quality gates wired into the agent environment.
+- **Layer 0 - Governance.** The project constitution, ADRs, and cross-agent `AGENTS.md` set non-negotiable rules. Every other layer must honour them. Changes here are infrequent and reviewed deliberately.
+- **Layer 1 - Instructions.** Coding standards scoped by file glob (for example `**/*.py`, `**/Dockerfile`). Copilot loads them automatically when relevant files are open, so they shape every suggestion. Shared baselines live in `.github/instructions/includes/`.
+- **Layer 2 - Prompts.** One-off, copy-runnable tasks (documentation reviews, enforcement passes, utility commands). They reference instructions and agents but are invoked explicitly.
+- **Layer 3 - Agents.** Persistent personas with tool restrictions and handoff chains. Spec-kit ceremonies (`speckit.specify`, `speckit.plan`, `speckit.tasks`, `speckit.implement`) live here.
+- **Layer 4 - Skills.** Reusable multi-step capabilities bundled with helper scripts and resources. Examples: `architecture-docs`, `enforcement-audit`, `code-review`.
+- **Layer 5 - Hooks.** Deterministic automation that runs without an LLM in the loop: lint, format, link checks, and quality gates wired into the agent environment.
 
 ## Artefact type decision matrix
 
@@ -56,7 +56,7 @@ Each layer in detail:
 
 ```mermaid
 flowchart TD
-  q1{"Deterministic gate — no LLM in the loop?"} -- Yes --> hook["Hook<br/>.github/hooks/*.json<br/>+ scripts/hooks/*.sh"]
+  q1{"Deterministic gate - no LLM in the loop?"} -- Yes --> hook["Hook<br/>.github/hooks/*.json<br/>+ scripts/hooks/*.sh"]
   q1 -- No --> q2{"Always-on standard scoped by file type?"}
   q2 -- Yes --> instr["Instructions<br/>.github/instructions/&lt;tech&gt;.instructions.md"]
   q2 -- No --> q3{"Reusable multi-step capability<br/>bundled with scripts or assets?"}
@@ -72,7 +72,7 @@ flowchart TD
   class hook,instr,skill,agent,prompt terminal;
 ```
 
-Start at the top and walk down — the first matching branch wins. When more than one branch could plausibly apply, prefer the higher (leftmost in the answer order) branch, because hooks, instructions, and skills compose better than ad-hoc prompts. For per-artefact quickstarts (frontmatter, naming, validation steps), see [.github/contributing.md](../.github/contributing.md).
+Start at the top and walk down - the first matching branch wins. When more than one branch could plausibly apply, prefer the higher (leftmost in the answer order) branch, because hooks, instructions, and skills compose better than ad-hoc prompts. For per-artefact quickstarts (frontmatter, naming, validation steps), see [.github/contributing.md](../.github/contributing.md).
 
 ## Spec-kit lifecycle
 
@@ -82,9 +82,11 @@ The spec-kit lifecycle follows a structured flow that progresses through specifi
 2. **Ground** it in a specification using agents like `/speckit.specify`.
 3. **Plan** the implementation with `/speckit.plan`.
 4. **Generate tasks** with `/speckit.tasks`.
-5. **Implement** with `/speckit.implement`.
-6. **Review** with governance gates (`/review.speckit-documentation`, `/review.speckit-code`, `/review.speckit-test`).
-7. **Automate** every validation step with `make lint` and `make test`.
+5. **Review documentation** with `/review.speckit-documentation`.
+6. **Implement** with `/speckit.implement`.
+7. **Converge** with `/speckit.converge` to verify completeness and gap remaining work.
+8. **Review** with governance gates (`/review.speckit-code`, `/review.speckit-test`).
+9. **Automate** every validation step with `make lint` and `make test`.
 
 ```mermaid
 flowchart TD
@@ -112,7 +114,10 @@ flowchart TD
   reviewDocs -.- reviewDocsNote["💡 Example (run+1): Validate #file:deployment.md checklist, confirm each item is documented, apply sensible defaults where missing or request clarification"]
   reviewDocs --> implement["/speckit.implement"]
   implement -.- implementNote["💡 Example (run N-times): Phase X, use subagents for each task to keep the main context window as small as possible"]
-  implement --> reviewCode["/review.speckit-code"]
+  implement --> anythingUnbuilt{Anything unbuilt?}
+  anythingUnbuilt -- Yes --> converge["/speckit.converge"]
+  converge --> tasks
+  anythingUnbuilt -- No --> reviewCode["/review.speckit-code"]
   reviewCode --> reviewTest["/review.speckit-test"]
 
   classDef source fill:#dbeafe,stroke:#1d4ed8,color:#0f172a,stroke-width:1px;
@@ -123,8 +128,8 @@ flowchart TD
   classDef note fill:#f5f5f4,stroke:#a8a29e,color:#57534e,stroke-width:1px,stroke-dasharray:3;
 
   class constitution source;
-  class specify,plan,tasks,implement action;
-  class needClarification,domainCoverage,consistency question;
+  class specify,plan,tasks,implement,converge action;
+  class needClarification,domainCoverage,consistency,anythingUnbuilt question;
   class clarify,checklist,analyze review;
   class reviewDocs,reviewCode,reviewTest docReview;
   class specifyNote,checklistNote,planNote,planNote2,tasksNote,implementNote,reviewDocsNote note;
@@ -145,37 +150,37 @@ Governance gates are explicit checkpoints between lifecycle stages. Each gate bl
 
 Why the gates matter:
 
-- **Deterministic flow** — each gate blocks the next phase until findings are resolved.
-- **Auditability** — checklist evidence supports compliance reviews.
-- **Scalability** — repeatable tasks scale across dozens of teams.
-- **Fewer regressions** — integration issues surface early.
-- **Better onboarding** — contributors learn the lifecycle from `tasks.md`.
+- **Deterministic flow** - each gate blocks the next phase until findings are resolved.
+- **Auditability** - checklist evidence supports compliance reviews.
+- **Scalability** - repeatable tasks scale across dozens of teams.
+- **Fewer regressions** - integration issues surface early.
+- **Better onboarding** - contributors learn the lifecycle from `tasks.md`.
 
 ## Subagent workers and lifecycle hooks
 
 The agent catalogue distinguishes two roles:
 
-- **Coordinators** drive a lifecycle stage end-to-end, write artefacts, and are user-invocable through their slash command. Examples: `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`, plus the personas `implementer`, `reviewer`, `release-manager`.
+- **Coordinators** drive a lifecycle stage end-to-end, write artefacts, and are user-invocable through their slash command. Examples: `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`, `/speckit.converge`, plus the personas `implementer`, `reviewer`, `release-manager`.
 - **Workers** are read-only or single-writer agents that a coordinator delegates to for a bounded analysis. They are marked with `subagent: true` in their frontmatter; some additionally set `user-invocable: false` so they only run when explicitly handed off to.
 
 Agents currently marked as subagent workers:
 
-- [`speckit.analyze`](../.github/agents/speckit.analyze.agent.md) — `subagent: true`, `user-invocable: false`. Non-destructive cross-artefact consistency check; should only be reached through the spec-kit pipeline.
-- [`speckit.checklist`](../.github/agents/speckit.checklist.agent.md) — `subagent: true` (no `user-invocable` override). Appends checklist files (single-writer). Useful directly as well as via handoff, so it remains user-invocable.
-- [`personas/planner`](../.github/agents/personas/planner.agent.md) — `subagent: true`, `user-invocable: false`. Explicitly read-only planner persona; runs as a worker for an orchestrating implementer or human-driven workflow.
+- [`speckit.analyze`](../.github/agents/speckit.analyze.agent.md) - `subagent: true`, `user-invocable: false`. Non-destructive cross-artefact consistency check; should only be reached through the spec-kit pipeline.
+- [`speckit.checklist`](../.github/agents/speckit.checklist.agent.md) - `subagent: true` (no `user-invocable` override). Appends checklist files (single-writer). Useful directly as well as via handoff, so it remains user-invocable.
+- [`personas/planner`](../.github/agents/personas/planner.agent.md) - `subagent: true`, `user-invocable: false`. Explicitly read-only planner persona; runs as a worker for an orchestrating implementer or human-driven workflow.
 
 Coordinators such as `speckit.clarify`, `personas/implementer`, `personas/reviewer`, and `personas/release-manager` are **not** marked as subagents: they own writes, decisions, or rollout gates and remain user-invocable.
 
 The repository ships two lifecycle hooks that align with this worker/coordinator split:
 
-- `SubagentStart` — [`scripts/hooks/subagent-start-context.sh`](../scripts/hooks/subagent-start-context.sh). Injects an `additionalContext` envelope identifying the worker and the most recently modified feature dir.
-- `SubagentStop` — [`scripts/hooks/subagent-stop-log.sh`](../scripts/hooks/subagent-stop-log.sh). Records a one-line JSON event when the worker stops; never blocks completion.
+- `SubagentStart` - [`scripts/hooks/subagent-start-context.sh`](../scripts/hooks/subagent-start-context.sh). Injects an `additionalContext` envelope identifying the worker and the most recently modified feature dir.
+- `SubagentStop` - [`scripts/hooks/subagent-stop-log.sh`](../scripts/hooks/subagent-stop-log.sh). Records a one-line JSON event when the worker stops; never blocks completion.
 
 Both hooks append structured records to `${COPILOT_PROMPT_LOG_DIR:-~/.local/state/copilot-prompts}/subagent-events.jsonl`, which gives a chronological trail of every subagent invocation alongside the existing `hooks.log` and daily prompt logs. The scripts also honour an explicit `LOG_DIR` override so the test harness can redirect output to a tempdir. They are registered in both [`hooks.json`](../hooks.json) (distributable copy) and [`.github/hooks/quality-gates.json`](../.github/hooks/quality-gates.json) (in-repo copy).
 
 **Guardrails.** Workers are constrained to read-only tool sets or to a single-writer responsibility; coordinators are the only agents that orchestrate handoffs and trigger the `Stop` quality gate. This keeps the blast radius of a subagent invocation small and auditable.
 
-**Discovery caveat.** VS Code's agent loader may not recurse into subdirectories — see the discovery note in [`.github/agents/personas/README.md`](../.github/agents/personas/README.md). The `subagent` marker is informational metadata that the repository's own tooling reads; it does not change how VS Code resolves the file at runtime.
+**Discovery caveat.** VS Code's agent loader may not recurse into subdirectories - see the discovery note in [`.github/agents/personas/README.md`](../.github/agents/personas/README.md). The `subagent` marker is informational metadata that the repository's own tooling reads; it does not change how VS Code resolves the file at runtime.
 
 ## Commit conventions per lifecycle stage
 
@@ -192,13 +197,14 @@ Each spec-kit stage produces artefacts worth committing. The table maps every co
 |   7   | Tasks revised after consistency analysis (`/speckit.analyze` → `/speckit.tasks`)         | `docs(tasks): align tasks after consistency analysis`  |
 |   8   | Documentation review passed (`/review.speckit-documentation`)                            | `docs(review): pass documentation review gate`         |
 |   9   | Implementation completed (`/speckit.implement`, per phase)                               | `feat(feature): implement phase N`                     |
-|  10   | Code review passed (`/review.speckit-code`)                                              | `refactor(review): address code review findings`       |
-|  11   | Test review passed (`/review.speckit-test`)                                              | `test(review): address test review findings`           |
+|  10   | Convergence gap-fill after implementation (`/speckit.converge` → `/speckit.tasks`)       | `docs(tasks): append unbuilt work after convergence`   |
+|  11   | Code review passed (`/review.speckit-code`)                                              | `refactor(review): address code review findings`       |
+|  12   | Test review passed (`/review.speckit-test`)                                              | `test(review): address test review findings`           |
 
 Commit conventions explained:
 
-- **Loops produce incremental commits.** Each pass through a clarify, checklist, or analyse loop can warrant its own commit when it changes artefacts materially. The table shows the "exit" commit — the one that locks in the stable artefact.
-- **Multi-phase implementation.** Replace `phase N` with a descriptive label and `feature` with the feature name, for example `feat(checkout): implement phase 1 — data model`, `feat(checkout): implement phase 2 — API layer`.
+- **Loops produce incremental commits.** Each pass through a clarify, checklist, analyse, or converge loop can warrant its own commit when it changes artefacts materially. The table shows the "exit" commit - the one that locks in the stable artefact.
+- **Multi-phase implementation.** Replace `phase N` with a descriptive label and `feature` with the feature name, for example `feat(checkout): implement phase 1 - data model`, `feat(checkout): implement phase 2 - API layer`.
 - **Clean review gates.** If a review gate passes without triggering changes, fold it into the preceding commit. If it triggers fixes, use `refactor(review):` for code or `test(review):` for tests.
 - **Scoping convention.** Every commit carries a scope: governance artefacts use `constitution`, `spec`, `plan`, `tasks`, or `review`; implementation commits use the feature name as the scope.
 

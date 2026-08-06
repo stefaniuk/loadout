@@ -15,7 +15,7 @@ If a fragment can be expressed as a one-line instruction, or is already encapsul
 
 - Filename: `<topic>.include.md` (no leading underscore; matches [instructions/includes/](../../instructions/includes/)).
 - Reference syntax: plain Markdown relative link, e.g. `See [quality-gates.include.md](includes/quality-gates.include.md) for the standard procedure.`
-- Do **not** use `#file:` syntax — the repo standard is plain links.
+- Do **not** use `#file:` syntax - the repo standard is plain links.
 - Frontmatter: mirror the shape used in [instructions/includes/quality-gates-baseline.include.md](../../instructions/includes/quality-gates-baseline.include.md).
 - Identifier scheme: every normative rule carries a unique tag (e.g. `[PROMPT-INC-<topic>-NNN]`).
 - Keep each include under ~60 lines; split if it grows larger.

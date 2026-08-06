@@ -15,7 +15,7 @@
 - **Mandatory context order.** Read spec artefacts in feature order: `spec.md` → `plan.md` → `tasks.md` → implementation (and tests for the `test` mode). Skipping or reordering this sequence is not permitted.
 - **Pipeline position.** Reviews run after `/speckit.tasks` and before `/speckit.implement` (for `documentation`), and after implementation but before merge (for `code` and `test`). Documentation review precedes code review; code review precedes test review.
 - **Evidence-first findings.** Every finding must cite the offending `path/to/file#L10-L40` plus the constitution rule or spec/requirement identifier it violates. Speculative or stylistic comments unsupported by evidence are out of scope.
-- **Mark unknowns explicitly.** Use `Unknown from code — {suggested action}` for missing information rather than guessing.
+- **Mark unknowns explicitly.** Use `Unknown from code - {suggested action}` for missing information rather than guessing.
 - **Severity discipline.** Prioritise output as blockers → warnings → suggestions; each item must be specific, deterministic, and ready to implement without further clarification.
 
 ## Deviations from root AGENTS.md
@@ -24,5 +24,5 @@ None.
 
 ## References
 
-- [SKILL.md](SKILL.md) — the skill's task workflow and per-type companion documents.
-- [root AGENTS.md](../../../AGENTS.md) — canonical baseline.
+- [SKILL.md](SKILL.md) - the skill's task workflow and per-type companion documents.
+- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.

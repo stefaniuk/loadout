@@ -1,4 +1,4 @@
-# Example 01 — Bootstrap architecture documentation for a new service
+# Example 01 - Bootstrap architecture documentation for a new service
 
 ## Scenario metadata
 
@@ -27,22 +27,22 @@
 
 ## Execution
 
-1. **Step 01 — Repository Map**: classified directories (`src/app/`, `tests/`, `infra/aws/`, `scripts/`), detected a single-project layout, and captured tooling provenance from `pyproject.toml` and `Makefile`.
-2. **Step 02 — Component Catalogue**: identified three components — `app-api` (FastAPI service), `app-worker` (Arq background worker), and `infra-aws` (Terraform stack) — and authored one file per component.
-3. **Step 03 — Runtime Flows**: documented the inbound request flow for `POST /v1/orders`, the worker job lifecycle, and the readiness probe with Mermaid `sequenceDiagram` and `flowchart LR` diagrams.
-4. **Step 04 — Domain Analysis**: extracted ubiquitous terms (`Order`, `Customer`, `Payment`), drafted bounded contexts, and produced a context map showing the single context plus its outbound integrations.
-5. **Step 05 — C4 Model**: wrote LikeC4 DSL files for context, container, and component levels, including styling and a deployment view tied to the AWS environment.
-6. **Step 06 — Infrastructure Diagram**: parsed Terraform under `infra/aws/`, classified resources by tier (compute, data, network), exported `.drawio` source plus `.drawio.svg`, and wrote an evidence README.
+1. **Step 01 - Repository Map**: classified directories (`src/app/`, `tests/`, `infra/aws/`, `scripts/`), detected a single-project layout, and captured tooling provenance from `pyproject.toml` and `Makefile`.
+2. **Step 02 - Component Catalogue**: identified three components - `app-api` (FastAPI service), `app-worker` (Arq background worker), and `infra-aws` (Terraform stack) - and authored one file per component.
+3. **Step 03 - Runtime Flows**: documented the inbound request flow for `POST /v1/orders`, the worker job lifecycle, and the readiness probe with Mermaid `sequenceDiagram` and `flowchart LR` diagrams.
+4. **Step 04 - Domain Analysis**: extracted ubiquitous terms (`Order`, `Customer`, `Payment`), drafted bounded contexts, and produced a context map showing the single context plus its outbound integrations.
+5. **Step 05 - C4 Model**: wrote LikeC4 DSL files for context, container, and component levels, including styling and a deployment view tied to the AWS environment.
+6. **Step 06 - Infrastructure Diagram**: parsed Terraform under `infra/aws/`, classified resources by tier (compute, data, network), exported `.drawio` source plus `.drawio.svg`, and wrote an evidence README.
 
 ## Output artefacts
 
-- `docs/prompt-reports/repository-map.md` — classified directory inventory with evidence links.
-- `docs/prompt-reports/component-app-api.md`, `component-app-worker.md`, `component-infra-aws.md` — per-component catalogue entries.
-- `docs/prompt-reports/runtime-flow-create-order.md`, `runtime-flow-worker-job.md`, `runtime-flow-readiness.md` — runtime flow narratives with diagrams.
-- `docs/prompt-reports/domain-ubiquitous-language.md`, `domain-aggregates.md`, `domain-context-map.md` — domain analysis set.
-- `docs/prompt-reports/workspace.c4`, `views.c4`, `styles.c4` — LikeC4 DSL files covering context/container/component/deployment.
-- `docs/prompt-reports/cloud-infrastructure-aws.drawio`, `cloud-infrastructure-aws.drawio.svg`, `cloud-infrastructure-README.md` — infrastructure diagram and evidence trail.
-- `docs/prompt-reports/README.md` — refreshed index linking every artefact above.
+- `docs/prompt-reports/repository-map.md` - classified directory inventory with evidence links.
+- `docs/prompt-reports/component-app-api.md`, `component-app-worker.md`, `component-infra-aws.md` - per-component catalogue entries.
+- `docs/prompt-reports/runtime-flow-create-order.md`, `runtime-flow-worker-job.md`, `runtime-flow-readiness.md` - runtime flow narratives with diagrams.
+- `docs/prompt-reports/domain-ubiquitous-language.md`, `domain-aggregates.md`, `domain-context-map.md` - domain analysis set.
+- `docs/prompt-reports/workspace.c4`, `views.c4`, `styles.c4` - LikeC4 DSL files covering context/container/component/deployment.
+- `docs/prompt-reports/cloud-infrastructure-aws.drawio`, `cloud-infrastructure-aws.drawio.svg`, `cloud-infrastructure-README.md` - infrastructure diagram and evidence trail.
+- `docs/prompt-reports/README.md` - refreshed index linking every artefact above.
 
 ## Validation evidence
 
@@ -53,7 +53,7 @@
 
 ## Final assistant response
 
-> Generated the full six-step architecture pack under `docs/prompt-reports/`. The index `README.md` lists 14 new artefacts including three components, three runtime flows, three domain documents, a LikeC4 workspace, and the AWS infrastructure diagram. One follow-up was recorded: confirm the worker autoscaling policy with the platform team — see `component-app-worker.md`.
+> Generated the full six-step architecture pack under `docs/prompt-reports/`. The index `README.md` lists 14 new artefacts including three components, three runtime flows, three domain documents, a LikeC4 workspace, and the AWS infrastructure diagram. One follow-up was recorded: confirm the worker autoscaling policy with the platform team - see `component-app-worker.md`.
 
 ## Notes and follow-ups
 

@@ -134,7 +134,7 @@ def gen_agents():
                 for h in handoffs:
                     if isinstance(h, dict) and h.get("agent"):
                         agents.append(str(h["agent"]))
-            handoff_str = ", ".join(agents) if agents else "—"
+            handoff_str = ", ".join(agents) if agents else "-"
             rel_path = f.relative_to(folder).as_posix()
             out.append(
                 f"| [{rel_path}]({rel_path}) | {esc(desc)} | {esc(handoff_str)} |"
@@ -157,7 +157,7 @@ def gen_agents():
         count += len(groups.get("", []))
 
     out.append(
-        "`Handoffs` column lists the `agent:` field of each entry in the file's `handoffs:` block, comma-separated. Show `—` if no handoffs declared."
+        "`Handoffs` column lists the `agent:` field of each entry in the file's `handoffs:` block, comma-separated. Show `-` if no handoffs declared."
     )
     (folder / "README.md").write_text("\n".join(out).rstrip() + "\n", encoding="utf-8")
     return count
@@ -187,16 +187,16 @@ def gen_instructions():
         fm = load_frontmatter(f)
         desc = short_desc(fm.get("description", ""))
         apply_to = fm.get("applyTo", "")
-        apply_str = f"`{apply_to}`" if apply_to else "—"
+        apply_str = f"`{apply_to}`" if apply_to else "-"
         out.append(f"| [{f.name}]({f.name}) | {esc(apply_str)} | {esc(desc)} |")
         count += 1
     out.append("")
     out.append("## Subdirectories\n")
     out.append(
-        "- [`includes/`](includes/) — shared instruction fragments referenced via markdown file links."
+        "- [`includes/`](includes/) - shared instruction fragments referenced via markdown file links."
     )
     out.append(
-        "- [`templates/`](templates/) — instruction-pack templates used when scaffolding new languages."
+        "- [`templates/`](templates/) - instruction-pack templates used when scaffolding new languages."
     )
     (folder / "README.md").write_text("\n".join(out).rstrip() + "\n", encoding="utf-8")
     return count
@@ -218,9 +218,9 @@ def gen_skills():
     for f in files:
         fm = load_frontmatter(f)
         name = fm.get("name") or f.parent.name
-        version = str(fm.get("version", "—"))
+        version = str(fm.get("version", "-"))
         desc = short_desc(fm.get("description", ""))
-        hint = fm.get("argument-hint", "") or "—"
+        hint = fm.get("argument-hint", "") or "-"
         rel = f"{f.parent.name}/SKILL.md"
         out.append(
             f"| [{name}]({rel}) | {esc(version)} | {esc(desc)} | {esc(str(hint))} |"

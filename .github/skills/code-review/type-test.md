@@ -1,4 +1,4 @@
-# Code Review — Test Type
+# Code Review - Test Type
 
 Full workflow for the **test** review type: review the test automation implementation against the specification and the desired test pyramid shape; detect and explain misalignment; prioritise unit tests, identify high-value gaps and brittle tests, and provide actionable recommendations (including refactoring) to improve behavioural confidence.
 
@@ -58,7 +58,7 @@ Before performing any analysis:
 - Prioritise downward confidence flow: strengthen unit and contract tests before suggesting new end-to-end coverage, and justify any remaining higher-level additions.
 - Trace every recommendation to specification identifiers, implementation entrypoints, and affected test files via workspace-relative Markdown links so downstream automation can act deterministically.
 - Reject flakiness: tests must control time, randomness, external services, and environment state; flag any case where determinism is missing and prescribe how to restore it.
-- Keep scope tight: propose only the minimal additional tests or refactors required to satisfy existing requirements and constitution rules — never widen scope or invent behaviour.
+- Keep scope tight: propose only the minimal additional tests or refactors required to satisfy existing requirements and constitution rules - never widen scope or invent behaviour.
 
 ## Objectives
 
@@ -112,7 +112,7 @@ Refactoring may include (but is not limited to):
 - Improving determinism and isolation
 - Reclassifying tests (unit ↔ integration) when the current category is wrong
 
-Refactoring must not change the intended behaviour — only clarity, maintainability, and confidence.
+Refactoring must not change the intended behaviour - only clarity, maintainability, and confidence.
 
 ## Test Quality Rules (Mandatory)
 
@@ -233,9 +233,9 @@ For each, provide:
 
 Categorise each recommendation as:
 
-- **High value** — strong risk reduction or core behaviour
-- **Medium value** — improves robustness and confidence
-- **Low value** — optional or defensive
+- **High value** - strong risk reduction or core behaviour
+- **Medium value** - improves robustness and confidence
+- **Low value** - optional or defensive
 
 Provide a short ordered list.
 

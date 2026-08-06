@@ -16,9 +16,9 @@ They must remain applicable to:
 
 For general language guidance, defer to:
 
-- [rust.instructions.md](./rust.instructions.md) — Rust idioms, error handling, patterns
-- [reactjs.instructions.md](./reactjs.instructions.md) — React component design, hooks, state
-- [typescript.instructions.md](./typescript.instructions.md) — TypeScript strictness, typing patterns
+- [rust.instructions.md](./rust.instructions.md) - Rust idioms, error handling, patterns
+- [reactjs.instructions.md](./reactjs.instructions.md) - React component design, hooks, state
+- [typescript.instructions.md](./typescript.instructions.md) - TypeScript strictness, typing patterns
 
 This file covers **only** what those files do not: the Tauri security model, IPC design, capability configuration, and desktop-specific integration concerns.
 
@@ -111,10 +111,10 @@ This section exists so humans and AI assistants can reliably apply the most impo
 ## 5. Error contract (Rust ↔ UI) ⚠️
 
 - [TAU-ERR-001] Define a stable `AppError` type with:
-  - `code` — stable machine-readable identifier (for example `FS_PERMISSION_DENIED`)
-  - `message` — user-safe explanation
-  - `details` — optional developer context
-  - `context` — optional path / `op_id` / job reference
+  - `code` - stable machine-readable identifier (for example `FS_PERMISSION_DENIED`)
+  - `message` - user-safe explanation
+  - `details` - optional developer context
+  - `context` - optional path / `op_id` / job reference
 - [TAU-ERR-002] UI must display only `message` by default; `details` is for logs/debug.
 - [TAU-ERR-003] Commands must return `Result<T, AppError>`; never panic for user-triggered conditions (per [RS-ERR-001]).
 
@@ -171,8 +171,3 @@ Before shipping a Tauri application, verify:
 - [TAU-CHK-007] Updates are signed (if updater is enabled)
 - [TAU-CHK-008] Rust code follows [rust.instructions.md](./rust.instructions.md)
 - [TAU-CHK-009] React/TS code follows [reactjs.instructions.md](./reactjs.instructions.md) and [typescript.instructions.md](./typescript.instructions.md)
-
----
-
-> **Version**: 1.1.0
-> **Last Amended**: 2026-01-11

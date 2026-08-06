@@ -4,7 +4,7 @@
 
 General-purpose, non-speckit agent roles for teams that want a lightweight planner → implementer → reviewer → release-manager flow without adopting the full spec-kit ceremony.
 
-All personas inherit governance from the [root AGENTS.md](../../../AGENTS.md) and [.github/copilot-instructions.md](../../copilot-instructions.md) — including British English, mandatory TDD, the `make lint && make test` quality gates, and ADR discipline.
+All personas inherit governance from the [root AGENTS.md](../../../AGENTS.md) and [.github/copilot-instructions.md](../../copilot-instructions.md) - including British English, mandatory TDD, the `make lint && make test` quality gates, and ADR discipline.
 
 ## Handoff choreography
 
@@ -39,7 +39,7 @@ Any persona that cannot make progress within its cap stops and requests human in
 
 ## Discovery note
 
-[`plugin.json`](../../../plugin.json) registers `.github/agents/` as the agents path. VS Code's agent loader may not recurse into subdirectories — behaviour at the time of writing is not formally documented. If the personas are not picked up automatically, either:
+[`plugin.json`](../../../plugin.json) registers `.github/agents/` as the agents path. VS Code's agent loader may not recurse into subdirectories - behaviour at the time of writing is not formally documented. If the personas are not picked up automatically, either:
 
 - flatten the persona files into `.github/agents/` (rename to keep the role unambiguous, for example `persona.planner.agent.md`); or
 - extend `plugin.json` once the loader gains explicit nested-path support.
@@ -48,4 +48,4 @@ The repository's own discovery scripts (`apply.sh`, `import.sh`, the catalogue a
 
 ## Subagent markings
 
-The [`planner.agent.md`](planner.agent.md) persona is marked with `subagent: true` and `user-invocable: false` in its frontmatter. It is intended to run as a read-only worker handed off from an orchestrating implementer or a human-driven workflow, not invoked directly. The other personas (`implementer`, `reviewer`, `release-manager`) remain coordinators — they own writes, decisions, or rollout gates — and stay user-invocable. See [`docs/architecture.md`](../../../docs/architecture.md) section "Subagent workers and lifecycle hooks" for the broader pattern and the matching `SubagentStart` / `SubagentStop` hooks.
+The [`planner.agent.md`](planner.agent.md) persona is marked with `subagent: true` and `user-invocable: false` in its frontmatter. It is intended to run as a read-only worker handed off from an orchestrating implementer or a human-driven workflow, not invoked directly. The other personas (`implementer`, `reviewer`, `release-manager`) remain coordinators - they own writes, decisions, or rollout gates - and stay user-invocable. See [`docs/architecture.md`](../../../docs/architecture.md) section "Subagent workers and lifecycle hooks" for the broader pattern and the matching `SubagentStart` / `SubagentStop` hooks.

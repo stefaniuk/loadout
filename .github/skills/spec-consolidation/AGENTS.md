@@ -20,7 +20,7 @@
   scheduling content from `plan.md` or `tasks.md`. You may inspect `plan.md`
   narrowly for architecture boundaries, technical rationale, and trace links
   when that context is missing elsewhere. If a behavioural requirement is only
-  expressed in `plan.md` or `tasks.md`, treat it as `Unknown from code —
+  expressed in `plan.md` or `tasks.md`, treat it as `Unknown from code -
 confirm intent with operator` and surface it in `research.md`
   reconciliation notes.
 - **Explore once, then stay local.** For medium or large repos, prefer one
@@ -63,6 +63,6 @@ None.
 
 ## References
 
-- [SKILL.md](SKILL.md) — the skill's task workflow.
-- [root AGENTS.md](../../../AGENTS.md) — canonical baseline.
-- [constitution](../../../.specify/memory/constitution.md) — highest authority.
+- [SKILL.md](SKILL.md) - the skill's task workflow.
+- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.
+- [constitution](../../../.specify/memory/constitution.md) - highest authority.

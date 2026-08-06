@@ -1,4 +1,4 @@
-# Step 05 — Consolidated Contracts
+# Step 05 - Consolidated Contracts
 
 **Output:** `specs/product/contracts/`
 **Dependencies:** steps 01–02.

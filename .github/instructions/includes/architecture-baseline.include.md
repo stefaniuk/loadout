@@ -73,8 +73,3 @@ Use this shared baseline for producing and maintaining architecture overview doc
 - [CBO-NAV-001] Treat `docs/prompt-reports/README.md` as the canonical landing page.
 - [CBO-NAV-002] Link every `component-*.md`, `runtime-flow-*.md` and `domain-*` document from the README.
 - [CBO-NAV-003] Maintain an **Unknowns / to verify** section in the README for follow-up work.
-
----
-
-> **Version**: 1.3.2
-> **Last Amended**: 2026-01-17

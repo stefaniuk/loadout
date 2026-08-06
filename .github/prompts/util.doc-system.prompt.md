@@ -80,12 +80,12 @@ Report using this skeleton; omit phase sections that did not run.
 ### Resolved invocation
 - step / mode / scope / phase (single or combined)
 
-### Phase 1 — <mode>
+### Phase 1 - <mode>
 - Canonical files created or updated
 - Validation gates executed and their exit codes (documentation-scoped only)
 - Unresolved drift by class and canonical target
 
-### Phase 2 — audit (or pre-pr-review)
+### Phase 2 - audit (or pre-pr-review)
 - Findings grouped by canonical target file, with severity and class
 - Totals by severity and by class
 - Overall verdict
@@ -95,6 +95,3 @@ Report using this skeleton; omit phase sections that did not run.
 Treat [SKILL.md](../skills/system-documentation/SKILL.md) and
 [AGENTS.md](../skills/system-documentation/AGENTS.md) as the canonical source
 of behaviour for this prompt.
-
-> **Version**: 4.3.0
-> **Last Amended**: 2026-05-17

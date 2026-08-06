@@ -17,7 +17,7 @@
 - **Cumulative artefacts.** On re-runs, parse the existing inventory and alignment plan paths from the table and extend them; do not regenerate from scratch or duplicate entries.
 - **Output contract.** Produce a structured remediation list per finding capturing severity, file, line range, rule identifier, and proposed fix; group fixes into workstreams with explicit order of execution.
 - **Quality gates after each batch.** Run `make lint` and `make test` after every implementation batch and iterate until both pass with zero errors and zero warnings before moving on.
-- **Mark unknowns explicitly.** Record `Unknown from code — verify {topic} with maintainers` rather than assuming; unresolved unknowns must be tracked as explicit follow-ups in the plan file.
+- **Mark unknowns explicitly.** Record `Unknown from code - verify {topic} with maintainers` rather than assuming; unresolved unknowns must be tracked as explicit follow-ups in the plan file.
 
 ## Deviations from root AGENTS.md
 
@@ -25,5 +25,5 @@ None.
 
 ## References
 
-- [SKILL.md](SKILL.md) — the skill's task workflow and technology resolution table.
-- [root AGENTS.md](../../../AGENTS.md) — canonical baseline.
+- [SKILL.md](SKILL.md) - the skill's task workflow and technology resolution table.
+- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.

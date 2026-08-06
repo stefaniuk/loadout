@@ -1,4 +1,4 @@
-# Step 01 — Repository Map
+# Step 01 - Repository Map
 
 Build a repository map that documents architecture, technology stack, and repo-level conventions (evidence-first).
 
@@ -31,7 +31,7 @@ If not set, auto-detect from code/config. Do **not** guess.
 3. Run `make clean` (if present), followed by `scc .` from the repository root to capture a lines-of-code breakdown by language.
    - Store the raw output in `docs/prompt-reports/loc-report.txt`.
    - Summarise the top languages (by lines) in `repository-map.md` under a short **Size and language mix** section.
-   - If `scc` is not available, record **Unknown from code — install scc or provide equivalent LOC output** and continue.
+   - If `scc` is not available, record **Unknown from code - install scc or provide equivalent LOC output** and continue.
 
 ### B. Detect project type and architecture pattern (repo-level, evidence-first)
 
@@ -46,14 +46,14 @@ If not set, auto-detect from code/config. Do **not** guess.
    - Dependency direction (imports, layering, package boundaries)
    - Composition roots / DI wiring / router registrations
    - Communication mechanisms (HTTP, events/queues, schedules, CLI)
-3. If `${PROJECT_TYPE}` or `${ARCHITECTURE_PATTERN}` are set (not Auto-detect), validate they match the evidence; otherwise record drift as **Unknown from code — reconcile config vs implementation**.
+3. If `${PROJECT_TYPE}` or `${ARCHITECTURE_PATTERN}` are set (not Auto-detect), validate they match the evidence; otherwise record drift as **Unknown from code - reconcile config vs implementation**.
 
 ### C. Read context documents (non-authoritative)
 
 1. Identify key context files such as:
    - `README*`, `doc*/**`, `adr/**`, `spec*/**`, `*.md`
 2. Read them for hints and vocabulary only.
-3. Do **not** treat them as authoritative unless confirmed by code/config. If an item is only present in docs, record it as **Unknown from code — verify**.
+3. Do **not** treat them as authoritative unless confirmed by code/config. If an item is only present in docs, record it as **Unknown from code - verify**.
 
 ## Steps
 
@@ -156,7 +156,7 @@ If not set, auto-detect from code/config. Do **not** guess.
    - File path links (URLs must be prefixed with `/` so links resolve correctly)
    - Symbols (function/class names) and/or config keys (env vars, YAML keys)
 2. When a required artefact cannot be found, record:
-   - **Unknown from code — {action to confirm}**
+   - **Unknown from code - {action to confirm}**
 
 ## Output format
 
@@ -170,5 +170,5 @@ Use the following snippet inside `repository-map.md`:
 ### Evidence
 
 - Evidence: [path/to/file](/path/to/file#L10-L32) - {symbol or config key}
-- Evidence: Unknown from code — {suggested action}
+- Evidence: Unknown from code - {suggested action}
 ```

@@ -73,7 +73,7 @@ function main() {
     return 0
   fi
 
-  # Both gates passed — allow completion
+  # Both gates passed - allow completion
   echo '{}'
 
   return 0

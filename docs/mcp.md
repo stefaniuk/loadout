@@ -5,14 +5,14 @@ This repository ships optional MCP server stubs as **workspace-distributed examp
 ## Purpose
 
 - Provide vetted, opinionated starting points for popular MCP servers (GitHub, Linear, Atlassian Confluence) with least-privilege defaults baked in.
-- Keep the agent's tool surface minimal by default — every workspace opts in deliberately.
+- Keep the agent's tool surface minimal by default - every workspace opts in deliberately.
 - Document the security posture (auth modes, scopes, rotation) alongside each example so reviewers can approve servers with full context.
 
 ## When to use
 
 - **Opt-in per workspace.** Copy the stubs only into workspaces that genuinely need them.
 - **Never auto-bundled.** The pack ships under `.example` filenames precisely so that VS Code does not auto-load the configuration. You must rename or copy the file deliberately.
-- Prefer the smallest viable set of servers for the task at hand — each enabled server expands the agent's blast radius.
+- Prefer the smallest viable set of servers for the task at hand - each enabled server expands the agent's blast radius.
 
 ## Trust model
 
@@ -24,12 +24,12 @@ VS Code surfaces an explicit trust confirmation the first time a workspace MCP s
 
 Before approving an MCP server in a new workspace, confirm:
 
-1. **Origin verified** — the server URL or command matches the upstream documented in this repository's per-server README.
-2. **Config reviewed** — read the `url`, `command`, `args`, `headers`, and any `env` entries before clicking _Allow_. Reject anything you cannot explain.
-3. **Copied from `.example`** — prefer copying `.vscode/mcp.json.example` to `.vscode/mcp.json` so the canonical least-privilege defaults are preserved.
-4. **Secrets via `inputs`** — every credential is sourced from an `inputs` entry with `password: true`; no secret material is inlined.
-5. **Trust reset on changes** — when `mcp.json` changes (especially `url`, `command`, or `headers`), reset VS Code's trust for the server so the prompt reappears.
-6. **Sandboxing enabled** — for stdio servers, run them under available platform sandboxing (containers, `firejail`, macOS App Sandbox) where feasible.
+1. **Origin verified** - the server URL or command matches the upstream documented in this repository's per-server README.
+2. **Config reviewed** - read the `url`, `command`, `args`, `headers`, and any `env` entries before clicking _Allow_. Reject anything you cannot explain.
+3. **Copied from `.example`** - prefer copying `.vscode/mcp.json.example` to `.vscode/mcp.json` so the canonical least-privilege defaults are preserved.
+4. **Secrets via `inputs`** - every credential is sourced from an `inputs` entry with `password: true`; no secret material is inlined.
+5. **Trust reset on changes** - when `mcp.json` changes (especially `url`, `command`, or `headers`), reset VS Code's trust for the server so the prompt reappears.
+6. **Sandboxing enabled** - for stdio servers, run them under available platform sandboxing (containers, `firejail`, macOS App Sandbox) where feasible.
 
 ## Secret handling
 

@@ -1,4 +1,4 @@
-# Step 01 — Consolidated Specification
+# Step 01 - Consolidated Specification
 
 **Output:** `specs/product/spec.md`
 **Dependencies:** none.
@@ -88,9 +88,9 @@ for a shipped-only view.
 
 ## Acceptance Criteria (capability-level)
 
-## Appendix A — Identifier Mapping
+## Appendix A - Identifier Mapping
 
-## Appendix B — Source Reconciliation Notes (pointer to research.md)
+## Appendix B - Source Reconciliation Notes (pointer to research.md)
 ```
 
 ## Definition of Done

@@ -66,7 +66,7 @@ PACK_ADR = {
 
 # Plugin-pack classification (see docs/conventions.md#plugin-packs).
 # Artefacts belong to either the optional `speckit` pack or the default `core`
-# pack. The split is documentation-only — plugin.json installs both together;
+# pack. The split is documentation-only - plugin.json installs both together;
 # selective install is via `make apply subset=…`.
 SPECKIT_PACK = "speckit"
 CORE_PACK = "core"
@@ -383,10 +383,10 @@ def source_revision() -> str | None:
 
 def esc(value) -> str:
     if value is None:
-        return "—"
+        return "-"
     s = str(value).strip()
     if not s:
-        return "—"
+        return "-"
     # Collapse whitespace + escape pipe and newline for table cells.
     s = " ".join(s.split())
     s = s.replace("|", "\\|")
@@ -396,7 +396,7 @@ def esc(value) -> str:
 
 def code(value) -> str:
     if value is None or value == "":
-        return "—"
+        return "-"
     return f"`{value}`"
 
 
@@ -488,7 +488,7 @@ def _render_prompts(records: list[dict]) -> list[str]:
     ]
     for r in records:
         meta = r.get("metadata", {})
-        tags = ", ".join(r.get("tags", [])) or "—"
+        tags = ", ".join(r.get("tags", [])) or "-"
         out.append(
             f"| {esc(r['name'])} | {_link(r)} | {code(meta.get('agent'))} "
             f"| {esc(r.get('pack'))} | {esc(tags)} | {esc(r['description'])} |"
@@ -503,8 +503,8 @@ def _render_agents(records: list[dict]) -> list[str]:
     ]
     for r in records:
         meta = r.get("metadata", {})
-        handoffs = ", ".join(meta.get("handoffAgents") or []) or "—"
-        tools = ", ".join(meta.get("tools") or []) or "—"
+        handoffs = ", ".join(meta.get("handoffAgents") or []) or "-"
+        tools = ", ".join(meta.get("tools") or []) or "-"
         out.append(
             f"| {esc(r['name'])} | {_link(r)} | {esc(r.get('pack'))} "
             f"| {esc(handoffs)} | {esc(tools)} | {esc(r['description'])} |"
@@ -519,7 +519,7 @@ def _render_skills(records: list[dict]) -> list[str]:
     ]
     for r in records:
         meta = r.get("metadata", {})
-        allowed = ", ".join(meta.get("allowedTools") or []) or "—"
+        allowed = ", ".join(meta.get("allowedTools") or []) or "-"
         out.append(
             f"| {esc(r['name'])} | {_link(r)} | {esc(meta.get('version'))} | {esc(allowed)} | {esc(r['description'])} |"
         )
@@ -530,14 +530,14 @@ def _render_hooks(records: list[dict]) -> list[str]:
     out = ["| Path | Events | Description |", "| ---- | ------ | ----------- |"]
     for r in records:
         meta = r.get("metadata", {})
-        events = ", ".join(meta.get("events") or []) or "—"
+        events = ", ".join(meta.get("events") or []) or "-"
         out.append(f"| {_link(r)} | {esc(events)} | {esc(r['description'])} |")
     return out
 
 
 def _path_link(path: str | None) -> str:
     if not path:
-        return "—"
+        return "-"
     return f"[{path}](../{path})"
 
 
@@ -546,7 +546,7 @@ def _render_packs(packs: list[dict], foundation: list[dict]) -> list[str]:
     out.append("## Language packs")
     out.append("")
     out.append(
-        "Composable units keyed by tech slug — see [conventions.md](conventions.md#language-packs)."
+        "Composable units keyed by tech slug - see [conventions.md](conventions.md#language-packs)."
     )
     out.append("")
     if not packs:
@@ -560,8 +560,8 @@ def _render_packs(packs: list[dict], foundation: list[dict]) -> list[str]:
             "| ------- | ----- | ----------- | -------------- | ------ | ----------- | -------- |"
         )
         for p in packs:
-            skills = ", ".join(_path_link(s) for s in p.get("skills") or []) or "—"
-            adr = p.get("adrCluster") or "—"
+            skills = ", ".join(_path_link(s) for s in p.get("skills") or []) or "-"
+            adr = p.get("adrCluster") or "-"
             complete = "✓" if p.get("complete") else "✗"
             out.append(
                 f"| `{p['id']}` | {p['class']} | {_path_link(p.get('instruction'))} "
@@ -572,7 +572,7 @@ def _render_packs(packs: list[dict], foundation: list[dict]) -> list[str]:
     out.append("## Foundation packs")
     out.append("")
     out.append(
-        "Instruction-only artefacts without an enforce prompt — see [conventions.md](conventions.md#foundation-packs-orphan-policy)."
+        "Instruction-only artefacts without an enforce prompt - see [conventions.md](conventions.md#foundation-packs-orphan-policy)."
     )
     out.append("")
     if not foundation:

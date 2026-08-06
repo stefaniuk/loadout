@@ -62,7 +62,7 @@ set -euo pipefail
 #   - .gitignore content (managed section with begin/end markers)
 #
 # Opt-in only (requires explicit subset token):
-#   - MCP example pack (.vscode/mcp.json.example, .github/mcp/, docs/mcp.md) — subset=mcp
+#   - MCP example pack (.vscode/mcp.json.example, .github/mcp/, docs/mcp.md) - subset=mcp
 #
 # Exit codes:
 #   0 - All files copied successfully
@@ -127,7 +127,7 @@ ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "play
 # Valid subset selector tokens (closed set).
 SUBSET_VALID_TOKENS=("agents" "hooks" "instructions" "prompts" "skills" "specify" "docs" "project" "speckit" "mcp" "all")
 
-# Subset category flags — populated by parse-subset. Default (no subset) enables all.
+# Subset category flags - populated by parse-subset. Default (no subset) enables all.
 SUBSET_AGENTS=true
 SUBSET_HOOKS=true
 SUBSET_INSTRUCTIONS=true
@@ -142,7 +142,7 @@ SUBSET_SPECKIT=true
 SUBSET_MCP=false
 # True only when subset was explicitly set (used to gate observability messages).
 SUBSET_EXPLICIT=false
-# Narrowing flags — true when subset contains 'speckit' but not the broader category.
+# Narrowing flags - true when subset contains 'speckit' but not the broader category.
 SPECKIT_NARROW_AGENTS=false
 SPECKIT_NARROW_PROMPTS=false
 
@@ -331,7 +331,7 @@ function get-tech-skill() {
 
 # Parse the optional `subset` env var and populate SUBSET_* and
 # SPECKIT_NARROW_* flags. An empty/unset `subset` preserves the default
-# behaviour (all flags true, SUBSET_EXPLICIT=false). Validation is strict —
+# behaviour (all flags true, SUBSET_EXPLICIT=false). Validation is strict -
 # the first invalid token aborts with exit code 1.
 function parse-subset() {
 
@@ -357,7 +357,7 @@ function parse-subset() {
 
   local -a tokens=()
   local token lc trimmed valid match
-  # Use a space-delimited string for membership tracking (bash 3.2 compatible —
+  # Use a space-delimited string for membership tracking (bash 3.2 compatible -
   # no associative arrays).
   local seen=" "
 

@@ -284,8 +284,3 @@ Before shipping Rust code, verify:
 - [RS-CHK-010] Code passes `cargo fmt`, `cargo clippy`, `cargo test`, `cargo doc`
 - [RS-CHK-011] Structured logs follow the [Observability Logging Baseline](./includes/observability-baseline.include.md)
 - [RS-CHK-012] CLI binaries follow the [CLI Contract](./includes/cli-contract-baseline.include.md) for exit codes and streams
-
----
-
-> **Version**: 1.4.0
-> **Last Amended**: 2026-01-20

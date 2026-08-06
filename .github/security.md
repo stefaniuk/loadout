@@ -11,7 +11,7 @@ This repository follows semantic versioning. Only the latest minor release recei
 
 ## Reporting a vulnerability
 
-If you believe you have found a security vulnerability in this repository — for example a prompt or agent definition that could be abused, or a script that could exfiltrate data — please **do not** open a public issue.
+If you believe you have found a security vulnerability in this repository - for example a prompt or agent definition that could be abused, or a script that could exfiltrate data - please **do not** open a public issue.
 
 Instead, use GitHub's private vulnerability reporting:
 

@@ -5,7 +5,7 @@ description: Generate conventional commit message and description from the curre
 **Mandatory preparation:**
 
 - Ensure the repository has the `main` branch locally (fetch it only if missing). `main` is used **only** for branch-naming context and tone, not as commit evidence.
-- Read language/tooling instructions that apply to the files actually staged or modified in the working tree (for example [python.instructions.md](../instructions/python.instructions.md), [typescript.instructions.md](../instructions/typescript.instructions.md), [makefile.instructions.md](../instructions/makefile.instructions.md), etc.). Do **not** load instructions for files that are only in already-committed history — they are out of scope.
+- Read language/tooling instructions that apply to the files actually staged or modified in the working tree (for example [python.instructions.md](../instructions/python.instructions.md), [typescript.instructions.md](../instructions/typescript.instructions.md), [makefile.instructions.md](../instructions/makefile.instructions.md), etc.). Do **not** load instructions for files that are only in already-committed history - they are out of scope.
 
 ## Goal 🎯
 
@@ -19,9 +19,9 @@ Produce three copy-ready outputs that describe the **next commit** the user is a
 
 The commit message describes **the next commit**, so the authoritative evidence is, in order of precedence:
 
-1. **Staged changes** (`git diff --cached`) — primary evidence whenever they exist.
-2. **Unstaged working-tree changes** (`git diff`) — used only when nothing is staged; the output must note that nothing is staged yet.
-3. **Branch-wide diff** (`main...HEAD`) — used **only** when there are no staged or unstaged changes at all, in which case the output must state explicitly that it summarises the branch history rather than a new commit.
+1. **Staged changes** (`git diff --cached`) - primary evidence whenever they exist.
+2. **Unstaged working-tree changes** (`git diff`) - used only when nothing is staged; the output must note that nothing is staged yet.
+3. **Branch-wide diff** (`main...HEAD`) - used **only** when there are no staged or unstaged changes at all, in which case the output must state explicitly that it summarises the branch history rather than a new commit.
 
 The branch-wide diff (`main...HEAD`) is otherwise **context only**: stat + recent commit subjects, used to evaluate the current branch name and mirror tone. Never use it as the source of truth for the commit summary, and never expand it into a full per-line diff.
 
@@ -46,7 +46,7 @@ if ! git show-ref --verify --quiet refs/heads/main; then
   git fetch origin main:main >> "$_report" 2>&1 || true
 fi
 
-# Cheap context — always run.
+# Cheap context - always run.
 for cmd in \
   "git rev-parse --abbrev-ref HEAD" \
   "git status -sb" \
@@ -94,7 +94,7 @@ elif [ -n "$_unstaged" ]; then
     _capture unstaged "$f" --unified=3
   done
 else
-  printf '\n>>> no staged or unstaged changes — falling back to branch summary only\n' >> "$_report"
+  printf '\n>>> no staged or unstaged changes - falling back to branch summary only\n' >> "$_report"
 fi
 
 printf '\nReport → %s (%s bytes, %s lines)\n' \
@@ -202,8 +202,3 @@ Return content exactly in this shape for easy copy/paste:
 - Do not invent scopes, behaviours, or tests; rely solely on repository evidence.
 - Do not expand the full branch diff; the bounded report is sufficient.
 - Ensure the final output matches the template exactly so it is ready to copy/paste.
-
----
-
-> **Version**: 1.5.0
-> **Last Amended**: 2026-05-17

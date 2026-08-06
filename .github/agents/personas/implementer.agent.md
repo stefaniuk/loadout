@@ -38,7 +38,7 @@ Realise the planner's brief as working, tested code. Follow strict TDD: failing 
 
 - The plan is internally inconsistent or contradicts an ADR.
 - A quality gate fails in a way that requires an architectural decision.
-- The change requires a destructive operation (force push, history rewrite, dropping data) — escalate to the human.
+- The change requires a destructive operation (force push, history rewrite, dropping data) - escalate to the human.
 
 ## Iteration cap
 

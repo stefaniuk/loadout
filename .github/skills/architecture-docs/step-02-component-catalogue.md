@@ -1,4 +1,4 @@
-# Step 02 — Component Catalogue
+# Step 02 - Component Catalogue
 
 Create component-level summaries (responsibilities, interfaces, data, and extension points).
 
@@ -111,7 +111,7 @@ Include a brief, evidence-based view of how data moves through (or is produced/c
 
 If any item cannot be supported by code/config, record:
 
-- **Unknown from code — {suggested action}**
+- **Unknown from code - {suggested action}**
 
 Add evidence bullets for each of the above categories, for example:
 
@@ -157,14 +157,14 @@ Document component-specific implementation details only. If a concern is identic
   - File paths (URLs must be prefixed with `/` so links resolve correctly)
   - Symbols and/or config keys
 - If a field cannot be supported by code/config, record:
-  - **Unknown from code — {action to confirm}**
+  - **Unknown from code - {action to confirm}**
 
 ### 3) Keep unknowns visible (no guessing)
 
 1. If the component is referenced in docs but not found in code, record:
-   - **Unknown from code — verify existence / locate entry point**
+   - **Unknown from code - verify existence / locate entry point**
 2. If a dependency is implied but not evidenced, record:
-   - **Unknown from code — locate client initialisation / env var / IaC resource**
+   - **Unknown from code - locate client initialisation / env var / IaC resource**
 
 ### 4) Write concisely, then iterate
 
@@ -251,5 +251,5 @@ Update `docs/prompt-reports/README.md` with a **Component Catalogue** section li
 ## Evidence
 
 - Evidence: [path/to/file](/path/to/file#L20-L58) - {symbol or config key}
-- Evidence: Unknown from code — {suggested action}
+- Evidence: Unknown from code - {suggested action}
 ```
