@@ -72,6 +72,8 @@ function main() {
     echo "==> Patching complete."
   fi
 
+  emit-commit-message
+
   return 0
 }
 
@@ -175,6 +177,20 @@ function is-version-older() {
 
   # Equal
   return 1
+}
+
+# Print a suggested conventional commit message using the installed version.
+function emit-commit-message() {
+  local version=""
+  if [[ -f "$VERSION_FILE" ]]; then
+    version=$(<"$VERSION_FILE")
+  fi
+  if [[ -z "$version" ]]; then
+    return 0
+  fi
+  echo "==> Suggested commit message:"
+  echo "    build(speckit): upgrade to spec-kit ${version}"
+  return 0
 }
 
 # Sync description from agent files into corresponding prompt files.
