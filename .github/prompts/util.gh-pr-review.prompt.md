@@ -43,166 +43,39 @@ The reviewer's deliverable is a Markdown report saved under `docs/prompt-reports
 
 The stated intent is the yardstick for the entire review. Capture it once, up front. The script supports an explicit PR via `PR_REF` (number or branch) so the agent does not need to be checked out on the head branch, and caps the captured body via `INTENT_BODY_CAP` to keep the ingestion cost bounded on long PR descriptions.
 
+### B. Capture a bounded diff evidence report
+
+Same pattern as the PR-content prompt: commit log (primary narrative), structural stat, dirstat, top-N per-file capped diffs.
+
+Run the combined evidence script **once** from the repository root. It produces both the intent file and the diff report:
+
 ```bash
-_date=$(date -u +%Y%m%d)
-_pr_ref=${PR_REF:-}
-_intent_body_cap=${INTENT_BODY_CAP:-400}
-
-# Derive slug once: PR number if known, otherwise sanitised branch name.
-_pr_num=$( (command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1 \
-            && gh pr view ${_pr_ref:+"$_pr_ref"} --json number --jq .number) 2>/dev/null || true )
-if [ -n "$_pr_num" ]; then
-  _slug="pr-$_pr_num"
-else
-  _slug=$(git rev-parse --abbrev-ref HEAD | tr '/' '-' | tr -cd 'A-Za-z0-9_-')
-fi
-
-_intent_file="docs/prompt-reports/gh-pr-review-intent-$_date-$_slug.report.txt"
-_review_file="docs/prompt-reports/gh-pr-review-$_date-$_slug.report.md"
-mkdir -p "$(dirname "$_intent_file")"
-: > "$_intent_file"
-
-_truncate_body() {
-  awk -v cap="$_intent_body_cap" '
-    { lines++; if (lines <= cap) print; }
-    END {
-      if (lines > cap) {
-        printf "\n[...truncated: %d more lines of intent body; rerun with INTENT_BODY_CAP=%d for full content...]\n", lines - cap, lines
-      }
-    }'
-}
-
-_gh_ok=0
-if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  if gh pr view ${_pr_ref:+"$_pr_ref"} \
-       --json number,title,body,headRefName,baseRefName,author,isDraft,state,labels,url \
-       --jq '"#" + (.number|tostring) + "  " + .title + "\n" +
-             "branch: " + .headRefName + " -> " + .baseRefName + "\n" +
-             "author: " + (.author.login // "?") + "   draft: " + (.isDraft|tostring) + "   state: " + .state + "\n" +
-             "url:    " + .url + "\n" +
-             "labels: " + (.labels | map(.name) | join(", ")) + "\n" +
-             "\n--- body ---\n" + (.body // "")' \
-       2>>"$_intent_file" \
-     | _truncate_body >> "$_intent_file"; then
-    _gh_ok=1
-    printf '\n>>> source: gh pr view %s\n' "${_pr_ref:-(current branch)}" >> "$_intent_file"
-  fi
-fi
-
-if [ "$_gh_ok" -eq 0 ]; then
-  printf '\n>>> gh unavailable or PR not found; using working-tree fallback\n' >> "$_intent_file"
-  printf '\n--- branch ---\n' >> "$_intent_file"
-  git rev-parse --abbrev-ref HEAD >> "$_intent_file" 2>&1
-  printf '\n--- first commit body (often the headline intent) ---\n' >> "$_intent_file"
-  git log --no-merges --reverse main..HEAD --pretty=format:'%h%n%s%n%n%b%n---' -n 1 \
-    | _truncate_body >> "$_intent_file"
-  printf '\n--- subsequent commit subjects ---\n' >> "$_intent_file"
-  git log --no-merges --reverse main..HEAD --skip=1 --pretty=format:'%h %s' \
-    >> "$_intent_file" 2>&1
-  for _f in CHANGELOG.md docs/CHANGELOG.md .github/pull_request_template.md; do
-    if [ -f "$_f" ]; then
-      printf '\n--- %s (capped at %s lines) ---\n' "$_f" "$_intent_body_cap" >> "$_intent_file"
-      _truncate_body < "$_f" >> "$_intent_file"
-    fi
-  done
-fi
-
-# Review output filename was derived above as $_review_file using the same _date/_slug.
-printf '\nIntent → %s (%s bytes)\nReview file → %s\n' \
-  "$_intent_file" "$(wc -c < "$_intent_file")" "$_review_file"
+bash scripts/quality/gh-pr-review-evidence.sh
 ```
+
+To override defaults (explicit PR, cap sizes):
+
+```bash
+PR_REF=123 TOP_N_FILES=30 PER_FILE_CAP=600 INTENT_BODY_CAP=600 bash scripts/quality/gh-pr-review-evidence.sh
+```
+
+The script outputs paths for:
+
+- `docs/prompt-reports/gh-pr-review-intent-YYYYMMDD-<slug>.report.txt` (intent)
+- `docs/prompt-reports/gh-pr-review-diff-YYYYMMDD-<slug>.report.txt` (diff evidence)
+- `docs/prompt-reports/gh-pr-review-YYYYMMDD-<slug>.report.md` (review output target)
 
 Read the intent file once and extract:
 
 - The PR's stated **scope** (title + body bullet points or first commit body).
-- Any linked issues or specs (e.g. `Closes #123`, `Refs ADR-007`).
-- **Draft status** - drafts almost always conclude with a **Comment** verdict (coaching tone); ready-for-review PRs may be approved or blocked.
+- Any linked issues or specs (for example `Closes #123`, `Refs ADR-007`).
+- **Draft status**: drafts almost always conclude with a **Comment** verdict (coaching tone). Ready-for-review PRs may be approved or blocked.
 
-When the fallback path runs, the intent is necessarily weaker; mark the review header with `Intent source: commit log (no PR metadata)` so readers can calibrate trust in the intent-vs-implementation lens.
+When the fallback path runs, the intent is necessarily weaker. Mark the review header with `Intent source: commit log (no PR metadata)` so readers can calibrate trust in the intent-vs-implementation lens.
 
-### B. Capture a bounded diff evidence report
+Read the diff report once. If a file you need to scrutinise was not in the top-N or got truncated (look for the `[...truncated: N more lines for <file>...]` marker), pull only that file with `git --no-pager diff main...HEAD -- <path>` or rerun with `PER_FILE_CAP=<n>`. Do not expand the whole branch diff.
 
-Same pattern as the PR-content prompt: commit log (primary narrative), structural stat, dirstat, top-N per-file capped diffs. Run **once**. Computes `_date`/`_slug` independently so this block remains runnable in isolation.
-
-```bash
-_date=$(date -u +%Y%m%d)
-_pr_ref=${PR_REF:-}
-_pr_num=$( (command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1 \
-            && gh pr view ${_pr_ref:+"$_pr_ref"} --json number --jq .number) 2>/dev/null || true )
-if [ -n "$_pr_num" ]; then
-  _slug="pr-$_pr_num"
-else
-  _slug=$(git rev-parse --abbrev-ref HEAD | tr '/' '-' | tr -cd 'A-Za-z0-9_-')
-fi
-_report="docs/prompt-reports/gh-pr-review-diff-$_date-$_slug.report.txt"
-mkdir -p "$(dirname "$_report")"
-: > "$_report"
-
-if ! git check-ignore -q "$_report" 2>/dev/null; then
-  printf '\n>>> WARNING: %s is not gitignored; add it to .gitignore.\n' "$_report" >> "$_report"
-fi
-
-if ! git show-ref --verify --quiet refs/heads/main; then
-  printf '\n>>> %s\n' "git fetch origin main:main" >> "$_report"
-  git fetch origin main:main >> "$_report" 2>&1 || true
-fi
-
-for cmd in \
-  "git rev-parse --abbrev-ref HEAD" \
-  "git status -sb" \
-  "git rev-list --no-merges --count main..HEAD" \
-  "git log --no-merges --reverse main..HEAD --pretty=format:'%h %an %ad %s%n%b%n---' --date=short" \
-  "git diff --stat main...HEAD" \
-  "git diff --dirstat=files,1 main...HEAD" \
-  "git diff --cached --stat" \
-  "git diff --stat"; do
-    printf '\n>>> %s\n' "$cmd" >> "$_report"
-    eval "$cmd" >> "$_report" 2>&1
-done
-
-_top_n=${TOP_N_FILES:-20}
-_per_file_cap=${PER_FILE_CAP:-400}
-
-_top_files=$(
-  git diff --numstat main...HEAD \
-    | awk '$1 != "-" && $2 != "-" { print ($1 + $2), $3 }' \
-    | sort -rn \
-    | head -n "$_top_n" \
-    | awk '{ $1=""; sub(/^ /, ""); print }'
-)
-
-_capture() { # args: <label> <path> <git-diff-args...>
-  local label=$1 path=$2; shift 2
-  printf '\n--- %s: %s ---\n' "$label" "$path" >> "$_report"
-  git --no-pager diff "$@" -- "$path" \
-    | awk -v cap="$_per_file_cap" -v file="$path" '
-        { lines++; if (lines <= cap) print; }
-        END {
-          if (lines > cap) {
-            printf "\n[...truncated: %d more lines for %s; rerun with PER_FILE_CAP=%d or `git --no-pager diff main...HEAD -- %s` for full content...]\n",
-              lines - cap, file, lines, file
-          }
-        }' >> "$_report"
-}
-
-if [ -n "$_top_files" ]; then
-  printf '\n>>> top %s files vs main by change size (per file, capped %s lines each)\n' \
-    "$_top_n" "$_per_file_cap" >> "$_report"
-  printf '%s\n' "$_top_files" | while IFS= read -r f; do
-    [ -z "$f" ] && continue
-    _capture "branch-vs-main" "$f" main...HEAD --unified=3
-  done
-else
-  printf '\n>>> no committed differences between main and HEAD\n' >> "$_report"
-fi
-
-printf '\nReport → %s (%s bytes, %s lines)\n' \
-  "$_report" "$(wc -c < "$_report")" "$(wc -l < "$_report")"
-```
-
-Read the report once. If a file you need to scrutinise was not in the top-N or got truncated (look for the `[...truncated: N more lines for <file>...]` marker), pull only that file with `git --no-pager diff main...HEAD -- <path>` or rerun with `PER_FILE_CAP=<n>`. Do not expand the whole branch diff.
-
-If the report shows no `main...HEAD` differences, output **"No diff vs main – nothing to review."** and stop.
+If the report shows no `main...HEAD` differences, output **"No diff vs main, nothing to review."** and stop.
 
 ### C. Detect prior reviews and scope the work
 

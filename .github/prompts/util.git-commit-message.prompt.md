@@ -31,74 +31,16 @@ The branch-wide diff (`main...HEAD`) is otherwise **context only**: stat + recen
 
 ### A. Capture a bounded evidence report
 
-Run the labelled batch below **once** from the repository root. It writes a small, capped report to `docs/prompt-reports/git-commit-message-diff-YYYYMMDD-<slug>.report.txt` (where `<slug>` is the sanitised current branch name, so per-branch runs do not overwrite each other). Per-file diffs are capped to keep large changes from blowing up the context.
+Run the evidence script **once** from the repository root. It writes a bounded report to `docs/prompt-reports/git-commit-message-diff-YYYYMMDD-<slug>.report.txt` (where `<slug>` is the sanitised current branch name, so per-branch runs do not overwrite each other). Per-file diffs are capped to keep large changes from blowing up the context.
 
 ```bash
-_date=$(date -u +%Y%m%d)
-_slug=$(git rev-parse --abbrev-ref HEAD | tr '/' '-' | tr -cd 'A-Za-z0-9_-')
-_report="docs/prompt-reports/git-commit-message-diff-$_date-$_slug.report.txt"
-mkdir -p "$(dirname "$_report")"
-: > "$_report"
+bash scripts/quality/git-commit-evidence.sh
+```
 
-# Make sure main ref exists locally (for branch naming + tone only).
-if ! git show-ref --verify --quiet refs/heads/main; then
-  printf '\n>>> %s\n' "git fetch origin main:main" >> "$_report"
-  git fetch origin main:main >> "$_report" 2>&1 || true
-fi
+To increase the per-file line cap (default 400):
 
-# Cheap context - always run.
-for cmd in \
-  "git rev-parse --abbrev-ref HEAD" \
-  "git status -sb" \
-  "git log -5 --oneline" \
-  "git diff --cached --stat" \
-  "git diff --stat" \
-  "git diff --stat main...HEAD"; do
-    printf '\n>>> %s\n' "$cmd" >> "$_report"
-    eval "$cmd" >> "$_report" 2>&1
-done
-
-# Primary evidence: staged content (capped per file). Falls back to unstaged
-# if nothing is staged. Branch diff is NEVER expanded here.
-_staged=$(git diff --cached --name-only)
-_unstaged=$(git diff --name-only)
-_per_file_cap=${PER_FILE_CAP:-400}
-
-# Capture one file's diff, capped at $_per_file_cap lines, appending an
-# explicit truncation marker so the agent knows when to drill in. Uses awk
-# instead of `head` to avoid SIGPIPE on the upstream git process.
-_capture() { # args: <label> <path> <git-diff-args...>
-  local label=$1 path=$2; shift 2
-  printf '\n--- %s: %s ---\n' "$label" "$path" >> "$_report"
-  git --no-pager diff "$@" -- "$path" \
-    | awk -v cap="$_per_file_cap" -v file="$path" '
-        { lines++; if (lines <= cap) print; }
-        END {
-          if (lines > cap) {
-            printf "\n[...truncated: %d more lines for %s; rerun with PER_FILE_CAP=%d or `git --no-pager diff -- %s` for full content...]\n",
-              lines - cap, file, lines, file
-          }
-        }' >> "$_report"
-}
-
-if [ -n "$_staged" ]; then
-  printf '\n>>> staged content (per file, capped %s lines each)\n' "$_per_file_cap" >> "$_report"
-  printf '%s\n' "$_staged" | while IFS= read -r f; do
-    [ -z "$f" ] && continue
-    _capture staged "$f" --cached --unified=3
-  done
-elif [ -n "$_unstaged" ]; then
-  printf '\n>>> unstaged content (no staged changes; per file, capped %s lines each)\n' "$_per_file_cap" >> "$_report"
-  printf '%s\n' "$_unstaged" | while IFS= read -r f; do
-    [ -z "$f" ] && continue
-    _capture unstaged "$f" --unified=3
-  done
-else
-  printf '\n>>> no staged or unstaged changes - falling back to branch summary only\n' >> "$_report"
-fi
-
-printf '\nReport → %s (%s bytes, %s lines)\n' \
-  "$_report" "$(wc -c < "$_report")" "$(wc -l < "$_report")"
+```bash
+PER_FILE_CAP=800 bash scripts/quality/git-commit-evidence.sh
 ```
 
 After the script completes, **read `$_report`** (the per-branch, per-day file written above) as the authoritative evidence. The report is bounded by design; a single read is sufficient and you must not re-run `git diff main...HEAD` for full content.
