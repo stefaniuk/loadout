@@ -80,6 +80,7 @@ count-tokens: # Count LLM tokens for key instruction packs; optional: args=[file
 		)
 
 clean:: # Remove project-specific generated files (main) @Operations
+	rm -f docs/prompt-reports/*.{md,txt}
 	rm -rf .github/skills/repository-template/assets
 	find . \( \
 		-name ".coverage" -o \
