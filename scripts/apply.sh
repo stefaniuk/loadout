@@ -52,7 +52,7 @@ set -euo pipefail
 #   - scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
 #   - pull_request_template.md (if not already present)
 #   - constitution.md
-#   - .specify/scripts/bash
+#   - .specify/scripts/python
 #   - .specify/templates
 #   - ADR-nnn_Any_Decision_Record_Template.md
 #   - Tech_Radar.md
@@ -91,7 +91,7 @@ AGENTS_MD_FILE="${REPO_ROOT}/AGENTS.md"
 HOOK_SCRIPTS_DIR="${REPO_ROOT}/scripts/hooks"
 
 SPECIFY_MEMORY="${REPO_ROOT}/.specify/memory"
-SPECIFY_SCRIPTS_BASH="${REPO_ROOT}/.specify/scripts/bash"
+SPECIFY_SCRIPTS_PYTHON="${REPO_ROOT}/.specify/scripts/python"
 SPECIFY_TEMPLATES="${REPO_ROOT}/.specify/templates"
 
 PULL_REQUEST_TEMPLATE="${REPO_ROOT}/.github/pull_request_template.md"
@@ -497,7 +497,7 @@ function copy-shared-resources() {
 
   if [[ "${SUBSET_SPECIFY}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
     copy-specify-memory "${destination}"
-    copy-specify-scripts-bash "${destination}"
+    copy-specify-scripts-python "${destination}"
     copy-specify-templates "${destination}"
   else
     subset-skip "specify"
@@ -1028,16 +1028,16 @@ function copy-specify-memory() {
   return 0
 }
 
-# Copy .specify/scripts/bash directory to the destination.
+# Copy .specify/scripts/python directory to the destination.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
-function copy-specify-scripts-bash() {
+function copy-specify-scripts-python() {
 
-  local dest="$1/.specify/scripts/bash"
+  local dest="$1/.specify/scripts/python"
   mkdir -p "${dest}"
 
-  print-info "Copying .specify/scripts/bash to ${dest}"
-  cp -R "${SPECIFY_SCRIPTS_BASH}/". "${dest}/"
+  print-info "Copying .specify/scripts/python to ${dest}"
+  cp -R "${SPECIFY_SCRIPTS_PYTHON}/". "${dest}/"
 }
 
 # Copy .specify/templates directory to the destination.
@@ -1197,7 +1197,7 @@ function update-vscode-settings() {
     "speckit.implement": true
   },
   "chat.tools.terminal.autoApprove": {
-    ".specify/scripts/bash/": true
+    ".specify/scripts/python/": true
   }
 }
 EOF
@@ -1221,7 +1221,7 @@ EOF
     "speckit.implement": true
   },
   "chat.tools.terminal.autoApprove": {
-    ".specify/scripts/bash/": true
+    ".specify/scripts/python/": true
   }
 EOF
 

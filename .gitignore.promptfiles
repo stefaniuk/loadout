@@ -34,8 +34,8 @@
 # Constitution
 .specify/memory/constitution.md
 
-# Bash scripts
-.specify/scripts/bash/
+# Python scripts
+.specify/scripts/python/
 
 # Templates
 .specify/templates/

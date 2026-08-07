@@ -205,7 +205,7 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/.github/pull_request_template.md" ]] || return 1
   # Shared resources
   [[ -d "${d}/.specify/memory" ]] || return 1
-  [[ -d "${d}/.specify/scripts/bash" ]] || return 1
+  [[ -d "${d}/.specify/scripts/python" ]] || return 1
   [[ -d "${d}/.specify/templates" ]] || return 1
   [[ -f "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" ]] || return 1
   [[ -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
