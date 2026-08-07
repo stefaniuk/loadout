@@ -18,15 +18,34 @@ lint-markdown-links: # Check markdown links @Quality
 lint-shell: # Check shell scripts @Quality
 	$(MAKE) check-shell-lint
 
+lint-customisations: # Validate customisation artefact frontmatter and naming @Quality
+	./scripts/quality/validate-customisations.sh
+
+lint-mcp: # Validate .vscode/mcp.json.example syntax @Quality
+	./scripts/quality/check-mcp-json.sh
+
 lint: # Run linter to check code style and errors @Quality
 	$(MAKE) lint-file-format
 	$(MAKE) lint-markdown-format
 	$(MAKE) lint-markdown-links
 	$(MAKE) lint-shell
+	$(MAKE) lint-customisations
+	$(MAKE) lint-mcp
 
-test: # Run all tests @Testing
+test: # Run fast local test suite (apply + subagent-hooks + install). Slower tests run in CI via `test-all` @Testing
 	bash ./scripts/tests/apply.test.sh && echo "apply: ok"
+	bash ./scripts/tests/subagent-hooks.test.sh && echo "subagent-hooks: ok"
+	$(MAKE) test-install
+
+test-import: # Run import wrapper tests (slower; included in `test-all` and CI) @Testing
 	bash ./scripts/tests/import.test.sh && echo "import: ok"
+
+test-all: # Run the whole test suite (fast + import); used by the CI/CD workflow @Testing
+	$(MAKE) test
+	$(MAKE) test-import
+
+test-install: # Run install/uninstall wrapper tests @Testing
+	bash ./scripts/tests/install.test.sh && echo "install: ok"
 
 clone-rt: # Clone the repository template into .github/skills/repository-template @Operations
 	.github/skills/repository-template/scripts/git-clone-repository-template.sh
@@ -34,13 +53,17 @@ clone-rt: # Clone the repository template into .github/skills/repository-templat
 specify: # Fetch upstream spec-kit and apply local extensions @Operations
 	./scripts/specify.sh
 
-apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean|revert=[true|false], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright|django|fastapi=[true] @Operations
+apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean|revert=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright|django|fastapi=[true] @Operations
 	$(if $(dest),,$(error dest is required. Usage: make apply dest=/path/to/destination))
 	./scripts/apply.sh "$(dest)"
 
 import: # Import changed prompt files from a destination repository; mandatory: dest=[path]; optional: force|new=[true] @Operations
 	$(if $(dest),,$(error dest is required. Usage: make import dest=/path/to/destination))
 	./scripts/import.sh "$(dest)"
+
+catalogue: # Generate artefact catalogue (catalogue.json + docs/catalogue.md) @Operations
+	./scripts/quality/generate-folder-indexes.py
+	./scripts/quality/generate-catalogue.sh
 
 count-tokens: # Count LLM tokens for key instruction packs; optional: args=[files/options] @Operations
 	uv run --with tiktoken python scripts/count-tokens.py \
@@ -57,6 +80,7 @@ count-tokens: # Count LLM tokens for key instruction packs; optional: args=[file
 		)
 
 clean:: # Remove project-specific generated files (main) @Operations
+	rm -f docs/prompt-reports/*.{md,txt}
 	rm -rf .github/skills/repository-template/assets
 	find . \( \
 		-name ".coverage" -o \
@@ -73,6 +97,7 @@ config:: # Configure development environment (main) @Configuration
 
 ${VERBOSE}.SILENT: \
 	apply \
+	catalogue \
 	clean \
 	clone-rt \
 	config \
@@ -80,9 +105,13 @@ ${VERBOSE}.SILENT: \
 	format \
 	import \
 	lint \
+	lint-customisations \
 	lint-file-format \
 	lint-markdown-format \
 	lint-markdown-links \
+	lint-mcp \
 	lint-shell \
 	specify \
 	test \
+	test-all \
+	test-import \

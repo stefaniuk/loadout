@@ -26,8 +26,3 @@ Use this shared baseline for Playwright test guidance that is language-agnostic.
 - [PW-BASE-ANT-003] Hardcoded URLs in tests instead of configured base URLs.
 - [PW-BASE-ANT-004] Always-on screenshots/videos in CI.
 - [PW-BASE-ANT-005] Giant test functions that are hard to debug; split or use steps/helpers.
-
----
-
-> **Version**: 1.0.1
-> **Last Amended**: 2026-01-17

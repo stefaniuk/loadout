@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.{ts,tsx}"
+description: "Playwright TypeScript Test Generation Instructions"
 ---
 
 # Playwright TypeScript Test Generation Instructions 🎭
@@ -177,15 +178,10 @@ E2E tests are prone to flakiness. Apply these rules to improve reliability.
 These patterns cause recurring issues in Playwright TypeScript tests. Avoid them unless an ADR documents a justified exception.
 
 - [PW-TS-ANT-006] Follow the shared [Playwright baseline](./includes/playwright-baseline.include.md) for common anti-patterns (assertions, shared state, URLs, and CI artefacts).
-- [PW-TS-ANT-001] **`page.waitForTimeout()` instead of auto-wait** — Playwright waits automatically; explicit waits cause flakiness and slow tests.
-- [PW-TS-ANT-002] **Missing `await` on assertions** — causes silent failures; always `await expect(...)`.
-- [PW-TS-ANT-003] **Hardcoded timeouts to fix flakiness** — masks underlying issues; fix the root cause instead.
-- [PW-TS-ANT-004] **CSS/XPath when role-based locators exist** — brittle and less accessible; prefer `getByRole`, `getByLabel`.
-- [PW-TS-ANT-005] **`{ force: true }` click without justification** — hides real interactivity issues; document why it's necessary.
-- [PW-TS-ANT-008] **Overly broad locators** — causes strict mode violations; be specific enough to match exactly one element.
-- [PW-TS-ANT-011] **`try/catch` to suppress test failures** — masks bugs; let tests fail and fix the underlying issue.
-
----
-
-> **Version**: 1.1.1
-> **Last Amended**: 2026-01-17
+- [PW-TS-ANT-001] **`page.waitForTimeout()` instead of auto-wait** - Playwright waits automatically; explicit waits cause flakiness and slow tests.
+- [PW-TS-ANT-002] **Missing `await` on assertions** - causes silent failures; always `await expect(...)`.
+- [PW-TS-ANT-003] **Hardcoded timeouts to fix flakiness** - masks underlying issues; fix the root cause instead.
+- [PW-TS-ANT-004] **CSS/XPath when role-based locators exist** - brittle and less accessible; prefer `getByRole`, `getByLabel`.
+- [PW-TS-ANT-005] **`{ force: true }` click without justification** - hides real interactivity issues; document why it's necessary.
+- [PW-TS-ANT-008] **Overly broad locators** - causes strict mode violations; be specific enough to match exactly one element.
+- [PW-TS-ANT-011] **`try/catch` to suppress test failures** - masks bugs; let tests fail and fix the underlying issue.

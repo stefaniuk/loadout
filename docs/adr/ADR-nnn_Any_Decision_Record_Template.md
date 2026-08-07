@@ -31,7 +31,7 @@ Describe the context and the problem statement. Is there a relationship to other
 
 Note that environmental limitations or restrictions (for example accepted technology standards, commonly recognised patterns, engineering and architecture principles, organisational policies, and governance) may narrow the options. This must be explicitly documented. This is a point-in-time decision, recorded so it can be understood, justified, and revisited when needed.
 
-Note that any technology choice — including languages, frameworks, libraries, and tooling — must be aligned with and work well alongside the [Tech Radar](./Tech_Radar.md). The Tech Radar defines the default tools for each language stack; deviations require explicit justification within this ADR.
+Note that any technology choice, including languages, frameworks, libraries, and tooling, must be aligned with and work well alongside the [Tech Radar](./Tech_Radar.md). The Tech Radar defines the default tools for each language stack; deviations require explicit justification within this ADR.
 
 ## Decision ✅
 
@@ -51,7 +51,7 @@ Consider a comprehensive set of alternative options. Always use weighted scoring
 
 **Top criteria**: {Criterion 1, Criterion 2}
 
-**Weighted option score**: {0.0 — 5.0} (define the formula; use weights)
+**Weighted option score**: {0.0 to 5.0} (define the formula; use weights)
 
 Summarise the core idea behind the selected option, including how it works at a high level and any critical constraints or prerequisites.
 
@@ -62,13 +62,13 @@ Summarise the core idea behind the selected option, including how it works at a 
 | Criterion 3        | {1-5}  | ⭐⭐⭐ {reasoning for score}                  |
 | Criterion 4        | {1-5}  | ⭐⭐ {reasoning for score}                    |
 | Effort             | {1-5}  | {T-shirt size or estimate with justification} |
-| Total score        |        | {0.0 — 5.0}                                   |
+| Total score        |        | {0.0 to 5.0}                                  |
 
 #### Option B: {Descriptive name}
 
 **Top criteria**: {Criterion 1, Criterion 2}
 
-**Weighted option score**: {0.0 — 5.0} (define the formula; use weights)
+**Weighted option score**: {0.0 to 5.0} (define the formula; use weights)
 
 Describe the second viable option, including the mechanisms involved and notable strengths/weaknesses.
 
@@ -79,7 +79,7 @@ Describe the second viable option, including the mechanisms involved and notable
 | Criterion 3        | {1-5}  | ⭐ {reasoning for score}                      |
 | Criterion 4        | {1-5}  | ⭐⭐⭐ {reasoning for score}                  |
 | Effort             | {1-5}  | {T-shirt size or estimate with justification} |
-| Total score        |        | {0.0 — 5.0}                                   |
+| Total score        |        | {0.0 to 5.0}                                  |
 
 **Why not chosen**: Capture the concrete reasons this option was rejected. Reference measurable risks, constraints, or trade-offs evidenced in the codebase or architecture.
 
@@ -87,7 +87,7 @@ Describe the second viable option, including the mechanisms involved and notable
 
 **Top criteria**: {Criterion 1, Criterion 2}
 
-**Weighted option score**: {0.0 — 5.0} (define the formula; use weights)
+**Weighted option score**: {0.0 to 5.0} (define the formula; use weights)
 
 Describe the third option (or more if needed) with enough detail for readers to evaluate it at a glance.
 
@@ -98,7 +98,7 @@ Describe the third option (or more if needed) with enough detail for readers to 
 | Criterion 3        | {1-5}  | ⭐ {reasoning for score}                      |
 | Criterion 4        | {1-5}  | ⭐⭐ {reasoning for score}                    |
 | Effort             | {1-5}  | {T-shirt size or estimate with justification} |
-| Total score        |        | {0.0 — 5.0}                                   |
+| Total score        |        | {0.0 to 5.0}                                  |
 
 **Why not chosen**: Explain the specific drawbacks, blockers, or context conflicts that ruled out this option.
 
@@ -146,8 +146,3 @@ If the decision is tactical, sub-optimal, or misaligned with strategic direction
 Use tags to link related ADRs by cross-cutting concern and quality attribute. Prefer a small, consistent set.
 
 `#availability|#reliability|#resilience|#recoverability|#scalability|#performance|#latency|#throughput|#efficiency|#cost|#security|#privacy|#compliance|#auditability|#observability|#operability|#maintainability|#testability|#deployability|#portability|#interoperability|#compatibility|#usability|#accessibility|#simplicity|#modularity|#extensibility|#data-integrity|#data-quality|#data-retention|#data-lineage|#idempotency|#consistency|…`
-
----
-
-> **Version**: 1.5.1
-> **Last Amended**: 2026-02-14

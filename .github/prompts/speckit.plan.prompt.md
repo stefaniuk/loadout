@@ -1,5 +1,6 @@
 ---
 agent: speckit.plan
+description: Execute the implementation planning workflow using the plan template to generate design artifacts.
 ---
 
 You **MUST** adhere to the following mandatory requirements when creating a development plan.
@@ -53,8 +54,3 @@ Before marking `plan.md` as complete, verify:
 - [ ] Show & Tell subsections are placed at the end of each phase or user story
 - [ ] Show & Tell steps are specific enough for AI Assistant to execute and validate without ambiguity
 - [ ] Show & Tell steps define explicit expected outcomes and pass/fail criteria
-
----
-
-> **Version**: 1.6.1
-> **Last Amended**: 2026-03-01

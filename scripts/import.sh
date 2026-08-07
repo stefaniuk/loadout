@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Import changed prompt files from a destination repository back to this source.
-# This is the inverse of apply.sh — it pulls improvements made in a project back.
+# This is the inverse of apply.sh - it pulls improvements made in a project back.
 #
 # Usage:
 #   $ [options] ./scripts/import.sh <source-directory>
@@ -66,7 +66,7 @@ function main() {
 
 # ==============================================================================
 
-# Normalise a path — expand ~ and resolve relative paths.
+# Normalise a path - expand ~ and resolve relative paths.
 # Arguments:
 #   $1=[path]
 function normalise-path() {
@@ -125,7 +125,8 @@ function collect-copilot-changes() {
   local source_dir="$1"
 
   compare-file "${source_dir}" ".github/copilot-instructions.md"
-  compare-directory-files "${source_dir}" ".github/agents" "*.md"
+  compare-directory-recursive "${source_dir}" ".github/agents"
+  compare-directory-files "${source_dir}" ".github/hooks" "*.json"
   compare-directory-files "${source_dir}" ".github/instructions" "*.instructions.md"
   compare-directory-recursive "${source_dir}" ".github/instructions/includes"
   compare-directory-files "${source_dir}" ".github/instructions/templates" "*"
@@ -143,12 +144,14 @@ function collect-shared-changes() {
 
   local source_dir="$1"
 
+  compare-file "${source_dir}" "AGENTS.md"
   compare-file "${source_dir}" ".specify/memory/constitution.md"
   compare-directory-recursive "${source_dir}" ".specify/scripts/bash"
   compare-directory-recursive "${source_dir}" ".specify/templates"
   compare-file "${source_dir}" "docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
   compare-file "${source_dir}" "docs/adr/Tech_Radar.md"
   compare-directory-recursive "${source_dir}" "docs/prompts"
+  compare-directory-files "${source_dir}" "scripts/hooks" "*.sh"
 
   return 0
 }
@@ -359,7 +362,7 @@ function copy-file-to-repo() {
   repo_dir=$(dirname "${repo_file}")
 
   mkdir -p "${repo_dir}"
-  cp "${src_file}" "${repo_file}"
+  cp -p "${src_file}" "${repo_file}"
   print-info "Copied ${rel_path}"
 
   return 0

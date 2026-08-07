@@ -1,0 +1,37 @@
+{
+  "name": "awesome-copilot-promptfiles",
+  "displayName": "Awesome Copilot Promptfiles",
+  "description": "Spec-driven development toolkit with enforcement audits, architecture documentation, code review, and repository scaffolding",
+  "version": "1.0.0",
+  "license": "MIT",
+  "homepage": "https://github.com/stefaniuk/awesome-copilot-promptfiles",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stefaniuk/awesome-copilot-promptfiles.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stefaniuk/awesome-copilot-promptfiles/issues"
+  },
+  "keywords": [
+    "copilot",
+    "vscode",
+    "spec-kit",
+    "spec-driven-development",
+    "agents",
+    "skills",
+    "prompts",
+    "instructions",
+    "hooks",
+    "governance",
+    "code-review",
+    "architecture",
+    "enforcement"
+  ],
+  "author": {
+    "name": "Daniel Stefaniuk",
+    "url": "https://github.com/stefaniuk"
+  },
+  "skills": ".github/skills/",
+  "agents": ".github/agents/",
+  "hooks": "hooks.json"
+}

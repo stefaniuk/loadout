@@ -7,4 +7,4 @@ runs:
       shell: bash
       run: |
         export BRANCH_NAME=origin/${{ github.event.repository.default_branch }}
-        make check-shell-lint
+        FORCE_USE_DOCKER=true make check-shell-lint

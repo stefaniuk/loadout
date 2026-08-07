@@ -1,6 +1,10 @@
 ---
 name: django-project
 description: Scaffold and evolve Django projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.
+argument-hint: "Describe the Django project action: scaffold, add capability, or evolve an existing project"
+license: MIT
+version: 1.0.0
+allowed-tools: []
 ---
 
 # Django Project Skill 🧩
@@ -11,7 +15,7 @@ This skill scaffolds new Django projects or upgrades existing ones with a produc
 
 Mandatory reads (must be loaded before using this skill):
 
-- [Python instructions](../../instructions/python.instructions.md) — use its identifiers when describing compliance.
+- [Python instructions](../../instructions/python.instructions.md) - use its identifiers when describing compliance.
 - [Local-first dev baseline](../../instructions/includes/local-first-dev-baseline.include.md)
 - [Quality gates baseline](../../instructions/includes/quality-gates-baseline.include.md)
 - [Observability logging baseline](../../instructions/includes/observability-baseline.include.md)
@@ -153,5 +157,6 @@ When information is missing, record **Unknown from code – {suggested action}**
 
 ---
 
-> **Version**: 1.0.0
-> **Last Amended**: 2026-01-18
+## Examples 📚
+
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) - scaffolding a new `orders` Django project with PostgreSQL, structured logging, request-ID middleware, and health endpoints, ending with all quality gates green.

@@ -4,49 +4,5 @@
       "name": "Repository",
       "path": ".",
     },
-    {
-      "name": "Copilot: Agents",
-      "path": ".github/agents/",
-    },
-    {
-      "name": "Copilot: Instructions",
-      "path": ".github/instructions/",
-    },
-    {
-      "name": "Copilot: Prompts",
-      "path": ".github/prompts/",
-    },
-    {
-      "name": "Copilot: Skills",
-      "path": ".github/skills/",
-    },
-    {
-      "name": "Spec-kit: Constitution",
-      "path": ".specify/memory/",
-    },
-    {
-      "name": "Spec-kit: Specification",
-      "path": "./specs",
-    },
-    {
-      "name": "Docs: ADRs",
-      "path": "./docs/adr",
-    },
-    {
-      "name": "Docs: Architecture",
-      "path": "./docs/architecture",
-    },
-    {
-      "name": "Docs: Prompts",
-      "path": "./docs/prompts",
-    },
-    {
-      "name": "Docs: Other",
-      "path": "./docs/",
-    },
-    {
-      "name": "Code: Scripts",
-      "path": "./scripts/",
-    },
   ],
 }

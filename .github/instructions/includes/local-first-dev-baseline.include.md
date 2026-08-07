@@ -26,8 +26,3 @@ Use this shared baseline for local-first developer experience expectations. Doma
 ## 4. Environment checks 🩺
 
 - [LCL-BASE-ENV-001] Where supported, provide a single "doctor" or environment-check command that surfaces actionable fixes.
-
----
-
-> **Version**: 1.0.2
-> **Last Amended**: 2026-01-20

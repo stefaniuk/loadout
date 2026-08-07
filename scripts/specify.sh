@@ -32,6 +32,8 @@ MANIFEST_FILE="${EXTENSIONS_DIR}/manifest.yaml"
 TARGET_AGENTS="${REPO_ROOT}/.github/agents"
 TARGET_PROMPTS="${REPO_ROOT}/.github/prompts"
 TARGET_TEMPLATES="${REPO_ROOT}/.specify/templates"
+TARGET_SCRIPTS="${REPO_ROOT}/.specify/scripts/python"
+VERSION_FILE="${REPO_ROOT}/.specify/.speckit-version"
 
 # Global variable for temp directory (used by trap)
 TEMP_DIR=""
@@ -50,16 +52,27 @@ function main() {
 
   fetch-upstream-files "$TEMP_DIR"
 
+  echo "==> Saving spec-kit version..."
+  save-speckit-version
+
   echo "==> Applying local extensions..."
   patch-category "$TEMP_DIR" "copilot" "agents" ".github/agents" "${TARGET_AGENTS}" "speckit.*.agent.md"
   patch-category "$TEMP_DIR" "copilot" "prompts" ".github/prompts" "${TARGET_PROMPTS}" "speckit.*.prompt.md"
   patch-category "$TEMP_DIR" "" "templates" ".specify/templates" "${TARGET_TEMPLATES}" "*-template.md"
+
+  echo "==> Copying spec-kit scripts (Python)..."
+  copy-scripts "$TEMP_DIR"
+
+  echo "==> Syncing prompt descriptions from agents..."
+  sync-prompt-descriptions
 
   if is-arg-true "$dry_run"; then
     echo "==> Dry run complete. No files were modified."
   else
     echo "==> Patching complete."
   fi
+
+  emit-commit-message
 
   return 0
 }
@@ -88,6 +101,184 @@ function cleanup-temp-directory() {
   return 0
 }
 
+# Detect and save the installed spec-kit CLI version to the version file.
+# Warns if the installed version is older than the latest GitHub release.
+function save-speckit-version() {
+  local dry_run=${dry_run:-false}
+  local version_output
+  version_output=$(specify --version 2>/dev/null || echo "")
+  local version="${version_output#specify }"
+
+  if [[ -z "$version" ]]; then
+    echo "    Warning: Could not detect spec-kit version"
+    return 0
+  fi
+
+  echo "    Installed: ${version}"
+  check-speckit-latest "$version"
+
+  if ! is-arg-true "$dry_run"; then
+    echo "$version" > "$VERSION_FILE"
+  fi
+
+  return 0
+}
+
+# Compare the installed version against the latest GitHub release.
+# Emits a warning if the installed version is behind.
+# Arguments:
+#   $1=[installed version string, e.g. "0.14.2"]
+function check-speckit-latest() {
+  local installed="$1"
+  local latest
+
+  # Fetch latest release tag from GitHub (silent, best-effort)
+  latest=$(curl -fsSL \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/repos/github/spec-kit/releases/latest" 2>/dev/null \
+    | grep -m1 '"tag_name"' | sed 's/.*"v\?\([^"]*\)".*/\1/')
+
+  if [[ -z "$latest" ]]; then
+    return 0
+  fi
+
+  if [[ "$installed" == "$latest" ]]; then
+    echo "    Latest:    ${latest} (up to date)"
+  elif is-version-older "$installed" "$latest"; then
+    echo "    Latest:    ${latest}"
+    echo "    WARNING: Installed spec-kit ${installed} is behind latest ${latest}."
+    echo "             Run: specify self upgrade"
+  else
+    echo "    Latest:    ${latest} (up to date)"
+  fi
+
+  return 0
+}
+
+# Compare two semver strings. Returns 0 (true) if $1 < $2.
+# Arguments:
+#   $1=[version a]
+#   $2=[version b]
+function is-version-older() {
+  local IFS='.'
+  # shellcheck disable=SC2206
+  local a=($1) b=($2)
+  local i
+
+  for i in 0 1 2; do
+    local ai="${a[$i]:-0}"
+    local bi="${b[$i]:-0}"
+    if (( ai < bi )); then
+      return 0
+    elif (( ai > bi )); then
+      return 1
+    fi
+  done
+
+  # Equal
+  return 1
+}
+
+# Print a suggested conventional commit message using the installed version.
+function emit-commit-message() {
+  local version=""
+  if [[ -f "$VERSION_FILE" ]]; then
+    version=$(<"$VERSION_FILE")
+  fi
+  if [[ -z "$version" ]]; then
+    return 0
+  fi
+  echo "==> Suggested commit message:"
+  echo "    build(speckit): upgrade to spec-kit ${version}"
+  return 0
+}
+
+# Sync description from agent files into corresponding prompt files.
+# Prompt files that delegate via `agent:` need a `description:` field
+# to satisfy the customisation linter.
+function sync-prompt-descriptions() {
+  local dry_run=${dry_run:-false}
+  local prompt_file
+
+  for prompt_file in "${TARGET_PROMPTS}"/speckit.*.prompt.md; do
+    [[ -f "$prompt_file" ]] || continue
+
+    local filename
+    filename=$(basename "$prompt_file")
+    local agent_name="${filename%.prompt.md}"
+    local agent_file="${TARGET_AGENTS}/${agent_name}.agent.md"
+
+    # Skip if prompt already has a description
+    if grep -q '^description:' "$prompt_file" 2>/dev/null; then
+      continue
+    fi
+
+    # Extract description from corresponding agent file
+    if [[ ! -f "$agent_file" ]]; then
+      continue
+    fi
+
+    local description
+    description=$(sed -n '/^---$/,/^---$/{ /^description:/{ s/^description: *//; p; q; } }' "$agent_file")
+
+    if [[ -z "$description" ]]; then
+      continue
+    fi
+
+    echo "    ${filename}: added description"
+
+    if ! is-arg-true "$dry_run"; then
+      # Insert description: line after agent: line in frontmatter
+      sed -i'' -e "/^agent: ${agent_name}$/a\\
+description: ${description}" "$prompt_file"
+    fi
+  done
+
+  return 0
+}
+
+# Copy Python scripts from the upstream init output, removing any
+# legacy bash scripts directory.
+# Arguments:
+#   $1=[path to temporary directory]
+function copy-scripts() {
+  local temp_dir="$1"
+  local source_dir="${temp_dir}/.specify/scripts/python"
+  local bash_dir="${REPO_ROOT}/.specify/scripts/bash"
+  local dry_run=${dry_run:-false}
+
+  if [[ ! -d "$source_dir" ]]; then
+    echo "    Warning: Python scripts directory not found: ${source_dir}"
+    return 0
+  fi
+
+  # Remove legacy bash scripts
+  if [[ -d "$bash_dir" ]]; then
+    echo "    Removing legacy bash scripts"
+    if ! is-arg-true "$dry_run"; then
+      rm -rf "$bash_dir"
+    fi
+  fi
+
+  # Copy Python scripts
+  if ! is-arg-true "$dry_run"; then
+    mkdir -p "$TARGET_SCRIPTS"
+  fi
+
+  local file
+  for file in "${source_dir}"/*.py; do
+    [[ -f "$file" ]] || continue
+    local filename
+    filename=$(basename "$file")
+    echo "    Copying: ${filename}"
+    if ! is-arg-true "$dry_run"; then
+      cp "$file" "${TARGET_SCRIPTS}/${filename}"
+    fi
+  done
+
+  return 0
+}
+
 # Fetch upstream spec-kit files using the specify CLI.
 # Runs specify init for copilot so that all upstream artifacts are
 # available for patching.
@@ -99,10 +290,9 @@ function fetch-upstream-files() {
   (
     cd "$temp_dir"
     specify init \
-      --ai copilot \
-      --script sh \
+      --integration copilot \
+      --script py \
       --ignore-agent-tools \
-      --no-git \
       --here \
       --force \
       > /dev/null 2>&1
@@ -206,28 +396,13 @@ function patch-file() {
 
   local upstream_content
   local extension_content
-  local extension_body
-  local extension_footer
   local patched_content
 
   upstream_content=$(cat "$upstream_file")
   extension_content=$(cat "$ext_file")
 
-  # Separate extension body from footer (footer starts with --- followed by version block)
-  extension_body=$(extract-extension-body "$extension_content")
-  extension_footer=$(extract-extension-footer "$extension_content")
-
-  # Strip any existing footer from upstream content to avoid duplicates
-  local upstream_body
-  upstream_body=$(extract-extension-body "$upstream_content")
-
-  # Inject extension body at the configured location
-  patched_content=$(inject-extension "$upstream_body" "$extension_body" "$injection_point")
-
-  # Append footer at the very end if present
-  if [[ -n "$extension_footer" ]]; then
-    patched_content=$(append-footer "$patched_content" "$extension_footer")
-  fi
+  # Inject extension at the configured location
+  patched_content=$(inject-extension "$upstream_content" "$extension_content" "$injection_point")
 
   echo "$patched_content" > "$target_file"
 
@@ -489,139 +664,6 @@ function inject-prepend() {
   local extension_content="$2"
 
   echo "${extension_content}"$'\n'$'\n'"${upstream_content}"
-
-  return 0
-}
-
-# Extract the body of an extension file (everything before the footer).
-# The footer is identified by a line containing only "---" followed by
-# (optional blank lines and) lines starting with "> **Version**:".
-# Arguments:
-#   $1=[extension content]
-# Returns:
-#   Extension body without footer (via stdout)
-function extract-extension-body() {
-  local content="$1"
-  local result=""
-  local footer_start_line=""
-  local lines=()
-
-  # Read content into array
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    lines+=("$line")
-  done <<< "$content"
-
-  local total_lines=${#lines[@]}
-
-  # Scan backwards to find footer pattern: --- followed by (optional blank lines and) Version
-  local i=$((total_lines - 1))
-  while [[ $i -ge 0 ]]; do
-    local line="${lines[$i]}"
-    if [[ "$line" == "---" ]]; then
-      # Skip blank lines after --- to find the first non-blank line
-      local next_idx=$((i + 1))
-      while [[ $next_idx -lt $total_lines ]] && [[ -z "${lines[$next_idx]}" ]]; do
-        ((next_idx++))
-      done
-      if [[ $next_idx -lt $total_lines ]]; then
-        local next_line="${lines[$next_idx]}"
-        if [[ "$next_line" =~ ^\>\ \*\*Version\*\*: ]]; then
-          footer_start_line=$i
-          break
-        fi
-      fi
-    fi
-    ((i--))
-  done
-
-  # Output body (everything before footer)
-  if [[ -n "$footer_start_line" ]]; then
-    # Remove trailing blank lines before footer
-    local end_idx=$((footer_start_line - 1))
-    while [[ $end_idx -ge 0 ]] && [[ -z "${lines[$end_idx]}" ]]; do
-      ((end_idx--))
-    done
-    for ((j = 0; j <= end_idx; j++)); do
-      result+="${lines[$j]}"$'\n'
-    done
-  else
-    # No footer found, return entire content
-    result="$content"$'\n'
-  fi
-
-  # Remove trailing newline
-  result="${result%$'\n'}"
-  echo "$result"
-
-  return 0
-}
-
-# Extract the footer from an extension file.
-# The footer is identified by a line containing only "---" followed by
-# (optional blank lines and) lines starting with "> **Version**:".
-# Arguments:
-#   $1=[extension content]
-# Returns:
-#   Footer content (via stdout), empty if no footer found
-function extract-extension-footer() {
-  local content="$1"
-  local result=""
-  local footer_start_line=""
-  local lines=()
-
-  # Read content into array
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    lines+=("$line")
-  done <<< "$content"
-
-  local total_lines=${#lines[@]}
-
-  # Scan backwards to find footer pattern: --- followed by (optional blank lines and) Version
-  local i=$((total_lines - 1))
-  while [[ $i -ge 0 ]]; do
-    local line="${lines[$i]}"
-    if [[ "$line" == "---" ]]; then
-      # Skip blank lines after --- to find the first non-blank line
-      local next_idx=$((i + 1))
-      while [[ $next_idx -lt $total_lines ]] && [[ -z "${lines[$next_idx]}" ]]; do
-        ((next_idx++))
-      done
-      if [[ $next_idx -lt $total_lines ]]; then
-        local next_line="${lines[$next_idx]}"
-        if [[ "$next_line" =~ ^\>\ \*\*Version\*\*: ]]; then
-          footer_start_line=$i
-          break
-        fi
-      fi
-    fi
-    ((i--))
-  done
-
-  # Output footer if found
-  if [[ -n "$footer_start_line" ]]; then
-    for ((j = footer_start_line; j < total_lines; j++)); do
-      result+="${lines[$j]}"$'\n'
-    done
-  fi
-
-  # Remove trailing newline
-  result="${result%$'\n'}"
-  echo "$result"
-
-  return 0
-}
-
-# Append footer to the end of patched content.
-# Arguments:
-#   $1=[patched content]
-#   $2=[footer content]
-# Returns:
-#   Content with footer appended (via stdout)
-function append-footer() {
-  local content="$1"
-  local footer="$2"
-
-  echo "${content}"$'\n'$'\n'"${footer}"
 
   return 0
 }

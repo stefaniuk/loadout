@@ -1,6 +1,10 @@
 ---
 name: fastapi-project
 description: Scaffold and evolve FastAPI projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.
+argument-hint: "Describe the FastAPI project action: scaffold, add capability, or evolve an existing project"
+license: MIT
+version: 1.0.0
+allowed-tools: []
 ---
 
 # FastAPI Project Skill 🧩
@@ -11,7 +15,7 @@ This skill scaffolds new FastAPI projects or upgrades existing ones with a produ
 
 Mandatory reads (must be loaded before using this skill):
 
-- [Python instructions](../../instructions/python.instructions.md) — use its identifiers when describing compliance.
+- [Python instructions](../../instructions/python.instructions.md) - use its identifiers when describing compliance.
 - [Local-first dev baseline](../../instructions/includes/local-first-dev-baseline.include.md)
 - [Quality gates baseline](../../instructions/includes/quality-gates-baseline.include.md)
 - [Observability logging baseline](../../instructions/includes/observability-baseline.include.md)
@@ -154,5 +158,6 @@ When information is missing, record **Unknown from code – {suggested action}**
 
 ---
 
-> **Version**: 1.0.0
-> **Last Amended**: 2026-01-18
+## Examples 📚
+
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) - scaffolding the `payments-api` FastAPI service with `pydantic-settings`, structured logging, `/healthz` and `/readyz` endpoints, and an `httpx.AsyncClient` factory with explicit timeouts.

@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.{js,ts,tsx}"
+description: "TypeScript Engineering Instructions (CLI + API + UI, framework-agnostic)"
 ---
 
 # TypeScript Engineering Instructions (CLI + API + UI, framework-agnostic) 🟦
@@ -71,13 +72,13 @@ Follow the shared [local-first developer experience baseline](./includes/local-f
 
 Provide repository-standard commands so an engineer can do the following quickly:
 
-- [TS-LCL-001] Bootstrap: `make deps` — installs tooling and dependencies, and prepares a usable local environment
+- [TS-LCL-001] Bootstrap: `make deps` - installs tooling and dependencies, and prepares a usable local environment
 - [TS-LCL-002] Format: `make format`
 - [TS-LCL-003] Lint: `make lint`
 - [TS-LCL-004] Type-check: `make typecheck`
-- [TS-LCL-005] Test (fast lane): `make test` — must run quickly (aim: < 10 seconds for unit-only; provide another target for slower tests) and deterministically
-- [TS-LCL-006] Full suite: `make test-all` — includes integration/e2e tiers where applicable
-- [TS-LCL-007] Run (dev): `make run` — runs with safe defaults (**no cloud dependencies by default**)
+- [TS-LCL-005] Test (fast lane): `make test` - must run quickly (aim: < 10 seconds for unit-only; provide another target for slower tests) and deterministically
+- [TS-LCL-006] Full suite: `make test-all` - includes integration/e2e tiers where applicable
+- [TS-LCL-007] Run (dev): `make run` - runs with safe defaults (**no cloud dependencies by default**)
 
 ### 2.2 Reproducible toolchain (avoid "works on my machine")
 
@@ -319,11 +320,11 @@ TypeScript projects have contracts, even when they are "just code"; treat every 
 
 **Section summary (key subsections):**
 
-- 7.1 Runtime determinism — stable, repeatable outputs
-- 7.2 Async correctness — promise handling, timeouts, cancellation
-- 7.3 Boundary correctness — input validation and domain conversion
-- 7.4 CLI behaviour rules — subcommands, exit codes, stdout/stderr
-- 7.5 HTTP behaviour rules — methods, status codes, retries, pagination
+- 7.1 Runtime determinism - stable, repeatable outputs
+- 7.2 Async correctness - promise handling, timeouts, cancellation
+- 7.3 Boundary correctness - input validation and domain conversion
+- 7.4 CLI behaviour rules - subcommands, exit codes, stdout/stderr
+- 7.5 HTTP behaviour rules - methods, status codes, retries, pagination
 
 ### 7.1 Runtime determinism
 
@@ -502,13 +503,13 @@ If the system depends on external services (cloud APIs, databases, third-party s
 
 **Section summary (key subsections):**
 
-- 11.1 Fail explicitly — silent failure forbidden
-- 11.2 Error shape — consistent machine-parseable structure
-- 11.3 Logging exceptions — once, with context
-- 11.3a Error classification — validation, domain, auth, not-found, conflicts, dependency
-- 11.4 CLI error semantics — exit codes, error formatting
-- 11.5 API error semantics — HTTP status codes, response structure
-- 11.6 Debugging modes — verbose/debug flags
+- 11.1 Fail explicitly - silent failure forbidden
+- 11.2 Error shape - consistent machine-parseable structure
+- 11.3 Logging exceptions - once, with context
+- 11.3a Error classification - validation, domain, auth, not-found, conflicts, dependency
+- 11.4 CLI error semantics - exit codes, error formatting
+- 11.5 API error semantics - HTTP status codes, response structure
+- 11.6 Debugging modes - verbose/debug flags
 
 ### 11.1 Fail explicitly, not silently (non-negotiable)
 
@@ -578,11 +579,11 @@ Observability is non-negotiable.
 
 **Section summary (key subsections):**
 
-- 12.1 Correlation and tracing — request identity and propagation
-- 12.2 Logging — structured logs, what to include, what never to log
-- 12.3 Metrics — golden signals and cardinality rules
-- 12.4 Runbooks — actionable error references
-- 12.5 Browser/UI observability — RUM, errors, and cross-tier correlation
+- 12.1 Correlation and tracing - request identity and propagation
+- 12.2 Logging - structured logs, what to include, what never to log
+- 12.3 Metrics - golden signals and cardinality rules
+- 12.4 Runbooks - actionable error references
+- 12.5 Browser/UI observability - RUM, errors, and cross-tier correlation
 
 ### 12.1 Correlation and tracing
 
@@ -632,10 +633,10 @@ Observability is non-negotiable.
 
 **Section summary (key subsections):**
 
-- 13.1 Dependencies and supply chain — minimal deps, scanning, lock files
-- 13.2 Secrets — never commit, inject at runtime
-- 13.3 Web security — HTTPS, headers, CORS
-- 13.4 Content handling — CSP, sanitisation
+- 13.1 Dependencies and supply chain - minimal deps, scanning, lock files
+- 13.2 Secrets - never commit, inject at runtime
+- 13.3 Web security - HTTPS, headers, CORS
+- 13.4 Content handling - CSP, sanitisation
 
 ### 13.1 Dependencies and supply chain
 
@@ -1014,8 +1015,3 @@ This section defines a **framework-agnostic** baseline for building maintainable
 - [TS-ANT-013] **Do not** rely on wall-clock sleeps in tests; use fake timers or polling with timeouts.
 - [TS-ANT-014] **Do not** hit real cloud/network in unit tests by default.
 - [TS-ANT-015] **Do not** store access tokens in `localStorage` without documented threat-model acceptance.
-
----
-
-> **Version**: 1.6.0
-> **Last Amended**: 2026-01-20

@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.go"
+description: "Go Engineering Instructions (CLI + API, framework-agnostic)"
 ---
 
 # Go Engineering Instructions (CLI + API, framework-agnostic) 🐹
@@ -67,14 +68,14 @@ Follow the shared [local-first developer experience baseline](./includes/local-f
 
 Provide repository-standard commands so an engineer can do the following quickly:
 
-- [GO-LCL-001] Bootstrap: `make deps` — installs tooling and dependencies, and prepares a usable local environment
+- [GO-LCL-001] Bootstrap: `make deps` - installs tooling and dependencies, and prepares a usable local environment
 - [GO-LCL-002] Format: `make format`
 - [GO-LCL-003] Lint: `make lint`
-- [GO-LCL-004] Static analysis: `make staticcheck` — runs staticcheck as a blocking gate
-- [GO-LCL-005] Test (fast lane): `make test` — must run quickly (aim: < 10 seconds, provide another make target for slower tests) and deterministically
-- [GO-LCL-006] Full suite: `make test-all` — includes integration/e2e tiers
-- [GO-LCL-007] Run CLI locally: `make run` — runs with safe defaults (**no cloud dependencies by default**)
-- [GO-LCL-008] Run API locally: `make up` / `make down` — starts/stops local dependency stack (if applicable)
+- [GO-LCL-004] Static analysis: `make staticcheck` - runs staticcheck as a blocking gate
+- [GO-LCL-005] Test (fast lane): `make test` - must run quickly (aim: < 10 seconds, provide another make target for slower tests) and deterministically
+- [GO-LCL-006] Full suite: `make test-all` - includes integration/e2e tiers
+- [GO-LCL-007] Run CLI locally: `make run` - runs with safe defaults (**no cloud dependencies by default**)
+- [GO-LCL-008] Run API locally: `make up` / `make down` - starts/stops local dependency stack (if applicable)
 
 ### 2.2 Reproducible toolchain (avoid "works on my machine")
 
@@ -264,7 +265,7 @@ Go interfaces are powerful but easily misused. These rules prevent interface pol
 
 - [GO-INT-007] Embed interfaces in structs sparingly. When you do:
   - [GO-INT-007a] Document which methods the outer type is expected to override
-  - [GO-INT-007b] Never embed interfaces in public API structs—it exposes internal details
+  - [GO-INT-007b] Never embed interfaces in public API structs-it exposes internal details
   - [GO-INT-007c] Prefer explicit delegation over embedding when behaviour is complex
 
 ---
@@ -278,7 +279,7 @@ Go's explicit error handling is a strength. These rules maximise its value.
 - [GO-ERR-001] **Never ignore returned errors.** Use `_ = fn()` only when the function documents that errors are informational and safe to ignore, and comment the reason.
 - [GO-ERR-002] **Wrap errors with context** using `fmt.Errorf("context: %w", err)`. The `%w` verb allows `errors.Is()` and `errors.As()` to work through the chain.
 - [GO-ERR-003] Use `%v` instead of `%w` when you intentionally want to **break the error chain** (for example to hide internal details from external callers).
-- [GO-ERR-004] **Error strings should not be capitalised or end with punctuation** — they often appear mid-sentence in logs.
+- [GO-ERR-004] **Error strings should not be capitalised or end with punctuation** - they often appear mid-sentence in logs.
 
 ### 6.2 Sentinel errors and custom types
 
@@ -300,11 +301,11 @@ Go's explicit error handling is a strength. These rules maximise its value.
   }
   ```
 
-- [GO-ERR-007] Check errors with `errors.Is()` for sentinel errors and `errors.As()` for typed errors — never compare error strings.
+- [GO-ERR-007] Check errors with `errors.Is()` for sentinel errors and `errors.As()` for typed errors - never compare error strings.
 
 ### 6.3 Error handling patterns (reduce boilerplate)
 
-- [GO-ERR-008] **Errors are values** — leverage this by creating stateful error writers or builders when you have repetitive error-checking patterns:
+- [GO-ERR-008] **Errors are values** - leverage this by creating stateful error writers or builders when you have repetitive error-checking patterns:
 
   ```go
   type errWriter struct {
@@ -367,7 +368,7 @@ Go's concurrency model is powerful but has subtle pitfalls. These rules ensure c
 ### 7.4 Atomic operations
 
 - [GO-CONC-013] Use `sync/atomic` for simple counters and flags. Prefer `atomic.Int64`, `atomic.Bool` (Go 1.19+) over raw `atomic.AddInt64`.
-- [GO-CONC-014] Do not use atomics when the operation requires reading and writing multiple fields — use a mutex instead.
+- [GO-CONC-014] Do not use atomics when the operation requires reading and writing multiple fields - use a mutex instead.
 
 ### 7.5 Avoiding data races
 
@@ -447,7 +448,7 @@ Understanding Go's memory model enables significant performance improvements.
 
 - [GO-LOG-004] Use appropriate log levels: `Debug` for development, `Info` for operational events, `Warn` for recoverable issues, `Error` for failures.
 - [GO-LOG-005] In production, use `slog.NewJSONHandler` for machine-parseable logs. Use `slog.NewTextHandler` for human-readable development logs.
-- [GO-LOG-006] **Never log secrets, tokens, passwords, or PII** — use redaction helpers if needed.
+- [GO-LOG-006] **Never log secrets, tokens, passwords, or PII** - use redaction helpers if needed.
 - [GO-LOG-007] Use `slog.LogValuer` interface to customise how types are logged (for example to redact sensitive fields).
 
 ---
@@ -543,7 +544,7 @@ Per [constitution.md §7](../../.specify/memory/constitution.md#7-code-quality-g
 
 - [GO-CODE-001] **Package by domain, not by layer.** Prefer `user/`, `order/`, `payment/` over `models/`, `controllers/`, `services/`.
 - [GO-CODE-002] Keep packages cohesive. If a package has many unrelated responsibilities, split it.
-- [GO-CODE-003] Avoid package names like `util`, `common`, `helpers`, `misc` — they become dumping grounds.
+- [GO-CODE-003] Avoid package names like `util`, `common`, `helpers`, `misc` - they become dumping grounds.
 - [GO-CODE-004] Use `internal/` for code that should not be imported by other modules.
 
 ### 11.2 Enforcing architectural boundaries with linter rules
@@ -593,7 +594,7 @@ When a specification or architecture decision imposes import-direction or depend
   // Good
   func Retry(attempts int, delay time.Duration) error
 
-  // Bad — is this seconds? milliseconds?
+  // Bad - is this seconds? milliseconds?
   func Retry(attempts int, delay int) error
   ```
 
@@ -675,7 +676,7 @@ Go 1.22+ introduced improved `ServeMux` patterns.
 
 - [GO-GEN-001] Use generics for **container types and utility functions** operating on language-defined types (slices, maps, channels).
 - [GO-GEN-002] Use generics when you find yourself writing **identical code for different types**.
-- [GO-GEN-003] **Do not use generics to replace interface parameters** — if method behaviour differs per type, interfaces are correct.
+- [GO-GEN-003] **Do not use generics to replace interface parameters** - if method behaviour differs per type, interfaces are correct.
 - [GO-GEN-004] For generic data structures needing comparison, prefer passing a comparator function over requiring a method:
 
   ```go
@@ -835,23 +836,18 @@ Follow the shared [observability baseline](./includes/observability-baseline.inc
 
 These patterns cause recurring issues in Go codebases. Avoid them unless an ADR documents a justified exception.
 
-- [GO-ANT-001] **Ignoring errors** — every error must be handled or explicitly ignored with `_ =` and a comment.
-- [GO-ANT-002] **Naked goroutines** — goroutines without lifecycle management leak resources. Use errgroup or explicit shutdown.
-- [GO-ANT-003] **init() abuse** — `init()` runs implicitly, making code hard to test and reason about. Prefer explicit initialisation.
-- [GO-ANT-004] **Global mutable state** — avoid package-level variables that can be modified. Use dependency injection.
-- [GO-ANT-005] **Interface pollution** — defining interfaces you don't need or interfaces with too many methods.
-- [GO-ANT-006] **Returning interfaces** — return concrete types; let consumers define interfaces.
-- [GO-ANT-007] **Using `panic` for error handling** — panic is for unrecoverable situations, not control flow.
-- [GO-ANT-008] **Nil channel operations** — sending to or receiving from a nil channel blocks forever. Initialise channels before use.
-- [GO-ANT-009] **Copying sync types** — `sync.Mutex`, `sync.WaitGroup`, etc. must not be copied. Pass by pointer.
-- [GO-ANT-010] **Empty slice vs. nil slice confusion** — `var s []int` is nil, `s := []int{}` is empty but non-nil. Be explicit about which you mean.
-- [GO-ANT-011] **Using `time.Sleep` for synchronisation** — use channels or sync primitives for coordination, not sleep.
-- [GO-ANT-012] **Shadow declarations** — redeclaring variables in inner scopes (especially `err`) causes subtle bugs. Use `golangci-lint` with `govet` shadow check.
-- [GO-ANT-013] **Embedding exported types in exported structs** — promotes all embedded methods, breaking encapsulation. Prefer explicit delegation.
-- [GO-ANT-014] **Using reflection when generics suffice** — reflection is slower, harder to read, and not type-safe. Use generics when type flexibility is needed.
-- [GO-ANT-015] **Comparing structs containing slices/maps directly** — use `reflect.DeepEqual` or custom comparison; direct comparison fails to compile or compares pointers.
-
----
-
-> **Version**: 1.1.0
-> **Last Amended**: 2026-04-26
+- [GO-ANT-001] **Ignoring errors** - every error must be handled or explicitly ignored with `_ =` and a comment.
+- [GO-ANT-002] **Naked goroutines** - goroutines without lifecycle management leak resources. Use errgroup or explicit shutdown.
+- [GO-ANT-003] **init() abuse** - `init()` runs implicitly, making code hard to test and reason about. Prefer explicit initialisation.
+- [GO-ANT-004] **Global mutable state** - avoid package-level variables that can be modified. Use dependency injection.
+- [GO-ANT-005] **Interface pollution** - defining interfaces you don't need or interfaces with too many methods.
+- [GO-ANT-006] **Returning interfaces** - return concrete types; let consumers define interfaces.
+- [GO-ANT-007] **Using `panic` for error handling** - panic is for unrecoverable situations, not control flow.
+- [GO-ANT-008] **Nil channel operations** - sending to or receiving from a nil channel blocks forever. Initialise channels before use.
+- [GO-ANT-009] **Copying sync types** - `sync.Mutex`, `sync.WaitGroup`, etc. must not be copied. Pass by pointer.
+- [GO-ANT-010] **Empty slice vs. nil slice confusion** - `var s []int` is nil, `s := []int{}` is empty but non-nil. Be explicit about which you mean.
+- [GO-ANT-011] **Using `time.Sleep` for synchronisation** - use channels or sync primitives for coordination, not sleep.
+- [GO-ANT-012] **Shadow declarations** - redeclaring variables in inner scopes (especially `err`) causes subtle bugs. Use `golangci-lint` with `govet` shadow check.
+- [GO-ANT-013] **Embedding exported types in exported structs** - promotes all embedded methods, breaking encapsulation. Prefer explicit delegation.
+- [GO-ANT-014] **Using reflection when generics suffice** - reflection is slower, harder to read, and not type-safe. Use generics when type flexibility is needed.
+- [GO-ANT-015] **Comparing structs containing slices/maps directly** - use `reflect.DeepEqual` or custom comparison; direct comparison fails to compile or compares pointers.

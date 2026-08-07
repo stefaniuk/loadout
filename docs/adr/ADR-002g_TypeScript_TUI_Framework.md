@@ -29,7 +29,7 @@
 
 ## Context 🧭
 
-TypeScript tools need a standard TUI (Text User Interface) framework for building interactive, full-screen terminal applications. This goes beyond CLI argument parsing (covered by ADR-002f with `commander` + `chalk`) — a TUI framework provides layout management, interactive widgets, event handling, and visual theming within the terminal.
+TypeScript tools need a standard TUI (Text User Interface) framework for building interactive, full-screen terminal applications. This goes beyond CLI argument parsing (covered by ADR-002f with `commander` + `chalk`); a TUI framework provides layout management, interactive widgets, event handling, and visual theming within the terminal.
 
 Visual styling, richness of output, and end-user usability are the highest-priority criteria. The chosen framework must produce polished, modern-looking terminal interfaces with minimal effort.
 
@@ -56,7 +56,7 @@ Weighted criteria use a 1–5 scale (higher is more important). Scores use ⭐ (
 
 | Criteria               | Weight | Rationale                                    |
 | ---------------------- | ------ | -------------------------------------------- |
-| Visual styling/theming | 5      | Highest priority — polished, modern look     |
+| Visual styling/theming | 5      | Highest priority: polished, modern look      |
 | Widget richness        | 5      | Core need for interactive applications       |
 | End-user usability     | 5      | Keyboard, focus management, accessibility    |
 | Developer experience   | 4      | API clarity, docs, type safety, testing      |
@@ -67,7 +67,7 @@ Weighted criteria use a 1–5 scale (higher is more important). Scores use ⭐ (
 
 #### Option A: Ink (Selected) ✅
 
-Use [`Ink`](https://github.com/vadimdemedes/ink) (v6.7.0, 34.9k ⭐, 160 contributors, MIT) — a React-based framework for building CLI applications with components, using Yoga for Flexbox layout.
+Use [`Ink`](https://github.com/vadimdemedes/ink) (v6.7.0, 34.9k ⭐, 160 contributors, MIT): a React-based framework for building CLI applications with components, using Yoga for Flexbox layout.
 
 **Top criteria**: Visual styling/theming, Widget richness
 
@@ -83,12 +83,12 @@ Ink uses React's component model and hooks to build terminal UIs. It provides Fl
 | Developer experience    | 4      | ⭐⭐⭐ React paradigm, hooks API, ink-testing-library, TypeScript 99.8%, Devtools support |
 | Ecosystem/maintenance   | 2      | ⭐⭐⭐ 34.9k stars, 160 contributors, 2.28M weekly downloads, 93.2k dependents            |
 | Dependency footprint    | 2      | ⭐⭐ React, Yoga (Flexbox), chalk; moderate footprint (~418kB)                            |
-| Effort                  |        | S — familiar React paradigm; excellent documentation                                      |
+| Effort                  |        | S: familiar React paradigm; excellent documentation                                       |
 | Weighted score (max 69) |        | 67                                                                                        |
 
 #### Option B: blessed
 
-Use [`blessed`](https://github.com/chjj/blessed) (v0.1.81, 11.8k ⭐, 12 contributors, MIT) — a curses-like library with a high-level terminal interface API, reimplementing ncurses in pure JavaScript.
+Use [`blessed`](https://github.com/chjj/blessed) (v0.1.81, 11.8k ⭐, 12 contributors, MIT): a curses-like library with a high-level terminal interface API, reimplementing ncurses in pure JavaScript.
 
 **Top criteria**: Visual styling/theming, Widget richness
 
@@ -104,14 +104,14 @@ Blessed provides the most comprehensive native widget set of any Node.js termina
 | Developer experience    | 4      | ⭐ Plain JavaScript, types via DT, callback-based API, no testing framework, 11y old |
 | Ecosystem/maintenance   | 2      | ⭐ Abandoned for 11 years, 12 contributors, no active development                    |
 | Dependency footprint    | 2      | ⭐⭐⭐ Zero dependencies; fully self-contained                                       |
-| Effort                  |        | L — older API patterns; no TypeScript; significant integration effort                |
+| Effort                  |        | L: older API patterns; no TypeScript; significant integration effort                 |
 | Weighted score (max 69) |        | 47                                                                                   |
 
 **Why not chosen**: Abandoned for 11 years with no maintenance or security patches. Plain JavaScript with no native TypeScript types. Callback-based API is outdated. Despite an impressive widget set, adopting an unmaintained library with known stale issues poses unacceptable long-term risk.
 
 #### Option C: terminal-kit
 
-Use [`terminal-kit`](https://github.com/cronvel/terminal-kit) (v3.1.3, 3.3k ⭐, 19 contributors, MIT) — a full terminal library with 256/24-bit colours, key and mouse handling, input fields, progress bars, screen buffers, and a document model.
+Use [`terminal-kit`](https://github.com/cronvel/terminal-kit) (v3.1.3, 3.3k ⭐, 19 contributors, MIT): a full terminal library with 256/24-bit colours, key and mouse handling, input fields, progress bars, screen buffers, and a document model.
 
 **Top criteria**: Visual styling/theming, Widget richness
 
@@ -127,20 +127,20 @@ terminal-kit provides a broad feature set including styled text output, input fi
 | Developer experience    | 4      | ⭐ JavaScript only, no native types, older API style, limited testing support             |
 | Ecosystem/maintenance   | 2      | ⭐⭐ 3.3k stars, 19 contributors; last feature work ~2 years ago                          |
 | Dependency footprint    | 2      | ⭐⭐ Some dependencies (string-kit and related packages)                                  |
-| Effort                  |        | M — reasonable API but no TypeScript support increases integration cost                   |
+| Effort                  |        | M: reasonable API but no TypeScript support increases integration cost                    |
 | Weighted score (max 69) |        | 42                                                                                        |
 
-**Why not chosen**: No TypeScript types — a non-starter for the existing strict TypeScript stack. Small contributor base and slowing development pace. The widget set, whilst decent, lacks the depth and ecosystem breadth of Ink. API patterns are older and do not align with modern TypeScript idioms.
+**Why not chosen**: No TypeScript types, a non-starter for the existing strict TypeScript stack. Small contributor base and slowing development pace. The widget set, whilst decent, lacks the depth and ecosystem breadth of Ink. API patterns are older and do not align with modern TypeScript idioms.
 
 #### Option D: @clack/prompts
 
-Use [`@clack/prompts`](https://github.com/bombshell-dev/clack) (v1.0.1, 7.4k ⭐, 42 contributors, MIT) — opinionated, pre-styled interactive prompt components for JavaScript CLIs, built on `@clack/core`.
+Use [`@clack/prompts`](https://github.com/bombshell-dev/clack) (v1.0.1, 7.4k ⭐, 42 contributors, MIT): opinionated, pre-styled interactive prompt components for JavaScript CLIs, built on `@clack/core`.
 
 **Top criteria**: Visual styling/theming, End-user usability
 
 **Weighted option score**: 3.9 / 5.0
 
-@clack/prompts provides beautifully styled, minimal CLI prompt components including text, confirm, select, multiselect (with grouping), spinner, progress, logs, streaming output, and task runners. It is 100% TypeScript with built-in type declarations, uses modern tooling (pnpm, biome, vitest), and was recently released as v1.0.0. However, it is designed for interactive prompt flows, not full-screen TUI applications — it lacks layout management, persistent UI elements, widget composition, and screen rendering capabilities.
+@clack/prompts provides beautifully styled, minimal CLI prompt components including text, confirm, select, multiselect (with grouping), spinner, progress, logs, streaming output, and task runners. It is 100% TypeScript with built-in type declarations, uses modern tooling (pnpm, biome, vitest), and was recently released as v1.0.0. However, it is designed for interactive prompt flows, not full-screen TUI applications; it lacks layout management, persistent UI elements, widget composition, and screen rendering capabilities.
 
 | Criteria                | Weight | Score/Notes                                                                                     |
 | ----------------------- | ------ | ----------------------------------------------------------------------------------------------- |
@@ -150,20 +150,20 @@ Use [`@clack/prompts`](https://github.com/bombshell-dev/clack) (v1.0.1, 7.4k ⭐
 | Developer experience    | 4      | ⭐⭐⭐ 100% TypeScript, clean API, built-in types, modern tooling (pnpm, biome, vitest)         |
 | Ecosystem/maintenance   | 2      | ⭐⭐⭐ 7.4k stars, 42 contributors, v1 just released, 5M weekly downloads, active development   |
 | Dependency footprint    | 2      | ⭐⭐⭐ 3 dependencies, 240kB unpacked, "80% smaller than alternatives"                          |
-| Effort                  |        | S — simple API for prompts; not applicable for full-screen TUI development                      |
+| Effort                  |        | S: simple API for prompts; not applicable for full-screen TUI development                       |
 | Weighted score (max 69) |        | 54                                                                                              |
 
 **Why not chosen**: Designed for interactive prompt flows, not full-screen TUI applications. Lacks layout management, persistent screen rendering, widget composition, and the structural capabilities needed for building rich terminal applications. Excellent for CLI wizards and setup prompts but fundamentally different from a TUI framework.
 
 #### Option E: prompts
 
-Use [`prompts`](https://github.com/terkelg/prompts) (v2.4.2, 9.2k ⭐, 71 contributors, MIT) — lightweight, beautiful, and user-friendly interactive prompts.
+Use [`prompts`](https://github.com/terkelg/prompts) (v2.4.2, 9.2k ⭐, 71 contributors, MIT): lightweight, beautiful, and user-friendly interactive prompts.
 
 **Top criteria**: Visual styling/theming, End-user usability
 
 **Weighted option score**: 2.6 / 5.0
 
-prompts provides 12 prompt types (text, password, number, confirm, list, toggle, select, multiselect, autocomplete, autocompleteMultiselect, date, invisible) with a simple promise-based API. It is lightweight (2 dependencies, 187kB) and has enormous adoption (37M weekly downloads, 15.8M dependents). However, it is written in JavaScript with types only via DefinitelyTyped, has not been published in four years, and — like @clack/prompts — is an interactive prompt library, not a full-screen TUI framework.
+prompts provides 12 prompt types (text, password, number, confirm, list, toggle, select, multiselect, autocomplete, autocompleteMultiselect, date, invisible) with a simple promise-based API. It is lightweight (2 dependencies, 187kB) and has enormous adoption (37M weekly downloads, 15.8M dependents). However, it is written in JavaScript with types only via DefinitelyTyped, has not been published in four years, and, like @clack/prompts, is an interactive prompt library, not a full-screen TUI framework.
 
 | Criteria                | Weight | Score/Notes                                                                                |
 | ----------------------- | ------ | ------------------------------------------------------------------------------------------ |
@@ -173,10 +173,10 @@ prompts provides 12 prompt types (text, password, number, confirm, list, toggle,
 | Developer experience    | 4      | ⭐⭐ Types via DefinitelyTyped, simple API, testable via inject(); JavaScript-only         |
 | Ecosystem/maintenance   | 2      | ⭐ Last publish 4 years ago; development appears stalled; 37M downloads is legacy momentum |
 | Dependency footprint    | 2      | ⭐⭐⭐ 2 dependencies, 187kB; very lightweight                                             |
-| Effort                  |        | S — simple API; not applicable for full-screen TUI development                             |
+| Effort                  |        | S: simple API; not applicable for full-screen TUI development                              |
 | Weighted score (max 69) |        | 36                                                                                         |
 
-**Why not chosen**: Development has stalled — last published four years ago. JavaScript-only with external types. Like @clack/prompts, this is a prompt library, not a full-screen TUI framework. Its high download count reflects legacy adoption rather than active preference for new projects.
+**Why not chosen**: Development has stalled; last published four years ago. JavaScript-only with external types. Like @clack/prompts, this is a prompt library, not a full-screen TUI framework. Its high download count reflects legacy adoption rather than active preference for new projects.
 
 ### Outcome 🏁
 
@@ -184,7 +184,7 @@ Adopt `Ink` as the default TUI framework for TypeScript. This decision is revers
 
 ### Rationale 🧠
 
-Using the weighted criteria, Ink scores 67/69 — well ahead of the next option (@clack/prompts at 54, blessed at 47). The gap is largest in the three highest-weighted criteria (visual styling, widget richness, end-user usability), which aligns directly with the stated priorities.
+Using the weighted criteria, Ink scores 67/69, well ahead of the next option (@clack/prompts at 54, blessed at 47). The gap is largest in the three highest-weighted criteria (visual styling, widget richness, end-user usability), which aligns directly with the stated priorities.
 
 Ink is the de facto standard for building terminal applications in the TypeScript/Node.js ecosystem. Its React-based component model is familiar to most TypeScript developers, and its Flexbox layout system (via Yoga) provides powerful, predictable positioning. The rich ecosystem of community components (ink-text-input, ink-spinner, ink-select-input, ink-table, ink-progress-bar, etc.) means most common TUI patterns are available as drop-in modules. Its adoption by major CLI tools (Claude Code, Gemini CLI, GitHub Copilot CLI, Shopify CLI, Prisma, Cloudflare Wrangler) validates its production-readiness and longevity.
 
@@ -220,8 +220,8 @@ This decision becomes irrelevant if TUI applications are no longer needed, or if
 ## Notes 🔗
 
 - Tech Radar: `./Tech_Radar.md`
-- Related: ADR-002f (CLI argument parsing — `commander` + `chalk`)
-- Related: ADR-001g (Python TUI framework — `textual`)
+- Related: ADR-002f (CLI argument parsing: `commander` + `chalk`)
+- Related: ADR-001g (Python TUI framework: `textual`)
 - Ink documentation: [github.com/vadimdemedes/ink](https://github.com/vadimdemedes/ink)
 - Ink npm: [npmjs.com/package/ink](https://www.npmjs.com/package/ink)
 - Community components: [github.com/vadimdemedes/ink#community](https://github.com/vadimdemedes/ink#community)
@@ -234,8 +234,3 @@ This decision becomes irrelevant if TUI applications are no longer needed, or if
 ## Tags 🏷️
 
 `#usability #interfaces #maintainability #accessibility`
-
----
-
-> **Version**: 1.0.0
-> **Last Amended**: 2026-06-15

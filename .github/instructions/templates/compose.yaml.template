@@ -23,7 +23,7 @@
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# Project name (optional — defaults to directory name)
+# Project name (optional - defaults to directory name)
 # -----------------------------------------------------------------------------
 name: myproject
 
@@ -72,7 +72,7 @@ services:
       # Non-sensitive config
       APP_ENV: development
       LOG_LEVEL: DEBUG
-      # Database connection — use service name as hostname
+      # Database connection - use service name as hostname
       DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_NAME: myproject
@@ -125,7 +125,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: development
-      # API connection — use service name as hostname
+      # API connection - use service name as hostname
       API_URL: http://api:8000
     volumes:
       # Development: bind mount for hot reload (exclude node_modules)
@@ -161,7 +161,7 @@ services:
           path: ./webapp/package-lock.json
 
   # ---------------------------------------------------------------------------
-  # Debug tools: pgAdmin (optional — only starts with --profile debug)
+  # Debug tools: pgAdmin (optional - only starts with --profile debug)
   # ---------------------------------------------------------------------------
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -185,7 +185,7 @@ services:
         condition: service_healthy
 
 # -----------------------------------------------------------------------------
-# Secrets — loaded from local files (never commit secret values)
+# Secrets - loaded from local files (never commit secret values)
 # -----------------------------------------------------------------------------
 secrets:
   db_user:
@@ -196,7 +196,7 @@ secrets:
     file: ./secrets/pgadmin_password.txt
 
 # -----------------------------------------------------------------------------
-# Volumes — named volumes for data persistence
+# Volumes - named volumes for data persistence
 # -----------------------------------------------------------------------------
 volumes:
   db_data:
@@ -205,7 +205,7 @@ volumes:
     name: ${COMPOSE_PROJECT_NAME:-myproject}_pgadmin_data
 
 # -----------------------------------------------------------------------------
-# Networks — isolate backend from frontend
+# Networks - isolate backend from frontend
 # -----------------------------------------------------------------------------
 networks:
   # Backend network: db and api only

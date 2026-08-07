@@ -15,6 +15,7 @@ set -euo pipefail
 
 TEMP_DIR=""
 REPO_ROOT=""
+SHARED_APPLY_SRC=""
 TRACKED_REPO_FILES=()
 
 function main() {
@@ -29,21 +30,14 @@ function main() {
     test-import-empty-source-fails \
     test-import-nonexistent-source-fails \
     test-import-dry-run-shows-no-changes-for-fresh-apply \
-    test-import-dry-run-detects-modified-instruction \
-    test-import-dry-run-detects-new-file-in-destination \
-    test-import-dry-run-detects-new-singleton-file \
-    test-import-force-copies-changed-file-back \
+    test-import-dry-run-detects-modifications-across-tracked-types \
+    test-import-dry-run-detects-new-files \
+    test-import-force-copies-changed-files-back \
     test-import-force-does-not-copy-unchanged-file \
     test-import-new-true-imports-new-files \
     test-import-new-false-does-not-import-new-files \
-    test-import-detects-nested-file-in-recursive-tree \
     test-import-ignores-generated-skill-assets \
-    test-import-detects-modified-agent \
-    test-import-detects-modified-prompt \
-    test-import-detects-modified-shared-resource \
-    test-import-force-copies-multiple-changed-files \
-    test-import-dry-run-reports-changed-count \
-    test-import-dry-run-reports-new-count \
+    test-import-detects-and-round-trips-singletons-and-hooks \
   )
   local status=0
   for test in "${tests[@]}"; do
@@ -63,6 +57,10 @@ function main() {
 function test-import-suite-setup() {
 
   TEMP_DIR=$(mktemp -d)
+  # Pre-build a single shared apply destination; individual tests fast-copy
+  # it rather than re-running apply.sh, which dominates wall time.
+  SHARED_APPLY_SRC="${TEMP_DIR}/_shared_apply"
+  ./scripts/apply.sh "${SHARED_APPLY_SRC}" > /dev/null 2>&1
 
   return 0
 }
@@ -162,12 +160,12 @@ function restore-tracked-repo-files() {
   return 0
 }
 
-# Helper: apply assets to a temp destination and return the path.
+# Helper: provide a fresh destination by cloning the shared apply cache.
+# This is ~5x faster than re-running apply.sh per test.
 function helper-apply-copilot() {
 
   local dest="${TEMP_DIR}/$1"
-  mkdir -p "${dest}"
-  ./scripts/apply.sh "${dest}" > /dev/null 2>&1
+  cp -R "${SHARED_APPLY_SRC}" "${dest}"
   echo "${dest}"
 
   return 0
@@ -188,78 +186,6 @@ function test-import-dry-run-shows-no-changes-for-fresh-apply() {
   # Assert
   # No changed or new files after a fresh apply
   echo "${output}" | grep -q "No changes detected" || return 1
-
-  return 0
-}
-
-function test-import-dry-run-detects-modified-instruction() {
-
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "detect-modified")
-  echo "# Modified content" >> "${dest}/.github/instructions/shell.instructions.md"
-
-  # Act
-  local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
-
-  # Assert
-  echo "${output}" | grep -q "shell.instructions.md" || return 1
-
-  return 0
-}
-
-function test-import-dry-run-detects-new-file-in-destination() {
-
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "detect-new")
-  echo "# New prompt" > "${dest}/.github/prompts/enforce.custom.prompt.md"
-
-  # Act
-  local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
-
-  # Assert
-  echo "${output}" | grep -q "enforce.custom.prompt.md" || return 1
-
-  return 0
-}
-
-function test-import-dry-run-detects-new-singleton-file() {
-
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "detect-new-singleton")
-  track-repo-file-state ".github/copilot-instructions.md"
-  rm -f "${REPO_ROOT}/.github/copilot-instructions.md"
-  echo "# New singleton copy" >> "${dest}/.github/copilot-instructions.md"
-
-  # Act
-  local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
-
-  # Assert
-  echo "${output}" | grep -q ".github/copilot-instructions.md" || return 1
-
-  return 0
-}
-
-function test-import-force-copies-changed-file-back() {
-
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "force-copy")
-  track-repo-file-state ".github/instructions/shell.instructions.md"
-  local marker
-  marker="# IMPORT-TEST-MARKER-$(date +%s)"
-  echo "${marker}" >> "${dest}/.github/instructions/shell.instructions.md"
-
-  # Act
-  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
-
-  # Assert
-  grep -q "IMPORT-TEST-MARKER" "${REPO_ROOT}/.github/instructions/shell.instructions.md" || return 1
 
   return 0
 }
@@ -297,25 +223,6 @@ function test-import-new-true-imports-new-files() {
 
   # Assert
   [[ -f "${REPO_ROOT}/${new_file}" ]] || return 1
-
-  return 0
-}
-
-function test-import-detects-nested-file-in-recursive-tree() {
-
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "nested-recursive")
-  local nested_dir=".github/instructions/includes/sub"
-  mkdir -p "${dest}/${nested_dir}"
-  echo "# Nested include" > "${dest}/${nested_dir}/nested.md"
-
-  # Act
-  local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
-
-  # Assert — nested file should appear as new
-  echo "${output}" | grep -q "nested.md" || return 1
 
   return 0
 }
@@ -387,120 +294,123 @@ function test-import-new-false-does-not-import-new-files() {
   track-repo-file-state "${new_file}"
   echo "# Brand new prompt" > "${dest}/${new_file}"
 
-  # Act — force=true but new=false (default)
+  # Act - force=true but new=false (default)
   force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
 
-  # Assert — new file should NOT have been imported
+  # Assert - new file should NOT have been imported
   [[ ! -f "${REPO_ROOT}/${new_file}" ]] || return 1
 
   return 0
 }
 
-function test-import-detects-modified-agent() {
+# Consolidated: detect modifications across instruction, agent, prompt and
+# shared-resource files in one dry-run import, and validate the changed-count
+# summary.
+function test-import-dry-run-detects-modifications-across-tracked-types() {
 
-  # Arrange
   local dest
-  dest=$(helper-apply-copilot "detect-agent")
+  dest=$(helper-apply-copilot "detect-modifications")
+  echo "# Modified instruction" >> "${dest}/.github/instructions/shell.instructions.md"
   echo "# Modified agent" >> "${dest}/.github/agents/speckit.plan.agent.md"
-
-  # Act
-  local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
-
-  # Assert
-  echo "${output}" | grep -q "speckit.plan.agent.md" || return 1
-
-  return 0
-}
-
-function test-import-detects-modified-prompt() {
-
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "detect-prompt")
   echo "# Modified prompt" >> "${dest}/.github/prompts/enforce.shell.prompt.md"
-
-  # Act
-  local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
-
-  # Assert
-  echo "${output}" | grep -q "enforce.shell.prompt.md" || return 1
-
-  return 0
-}
-
-function test-import-detects-modified-shared-resource() {
-
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "detect-shared")
   echo "# Modified constitution" >> "${dest}/.specify/memory/constitution.md"
 
-  # Act
   local output
   output=$(./scripts/import.sh "${dest}" 2>&1)
 
-  # Assert
+  echo "${output}" | grep -q "shell.instructions.md" || return 1
+  echo "${output}" | grep -q "speckit.plan.agent.md" || return 1
+  echo "${output}" | grep -q "enforce.shell.prompt.md" || return 1
   echo "${output}" | grep -q "constitution.md" || return 1
+  echo "${output}" | grep -q "Changed files (4)" || return 1
 
   return 0
 }
 
-function test-import-force-copies-multiple-changed-files() {
+# Consolidated: detect new files (top-level, nested, and singleton) and
+# validate the new-files summary count.
+function test-import-dry-run-detects-new-files() {
 
-  # Arrange
   local dest
-  dest=$(helper-apply-copilot "force-multi")
+  dest=$(helper-apply-copilot "detect-new-files")
+  # Top-level new prompt
+  echo "# New prompt" > "${dest}/.github/prompts/enforce.custom.prompt.md"
+  # Nested new file inside includes/
+  local nested_dir=".github/instructions/includes/sub"
+  mkdir -p "${dest}/${nested_dir}"
+  echo "# Nested include" > "${dest}/${nested_dir}/nested.md"
+  # Singleton file that is missing from REPO_ROOT
+  track-repo-file-state ".github/copilot-instructions.md"
+  rm -f "${REPO_ROOT}/.github/copilot-instructions.md"
+  echo "# New singleton copy" >> "${dest}/.github/copilot-instructions.md"
+
+  local output
+  output=$(./scripts/import.sh "${dest}" 2>&1)
+
+  echo "${output}" | grep -q "enforce.custom.prompt.md" || return 1
+  echo "${output}" | grep -q "nested.md" || return 1
+  echo "${output}" | grep -q ".github/copilot-instructions.md" || return 1
+  echo "${output}" | grep -q "New files in destination (3)" || return 1
+
+  return 0
+}
+
+# Consolidated: force=true must round-trip changes for one or more files.
+function test-import-force-copies-changed-files-back() {
+
+  local dest
+  dest=$(helper-apply-copilot "force-copy")
   track-repo-file-state ".github/instructions/shell.instructions.md"
   track-repo-file-state ".github/instructions/docker.instructions.md"
   local marker
-  marker="MULTI-IMPORT-MARKER-$(date +%s)"
-  echo "${marker}" >> "${dest}/.github/instructions/shell.instructions.md"
-  echo "${marker}" >> "${dest}/.github/instructions/docker.instructions.md"
+  marker="IMPORT-TEST-MARKER-$(date +%s)"
+  echo "# ${marker}" >> "${dest}/.github/instructions/shell.instructions.md"
+  echo "# ${marker}" >> "${dest}/.github/instructions/docker.instructions.md"
 
-  # Act
   force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
 
-  # Assert — both files should have the marker
-  grep -q "MULTI-IMPORT-MARKER" "${REPO_ROOT}/.github/instructions/shell.instructions.md" || return 1
-  grep -q "MULTI-IMPORT-MARKER" "${REPO_ROOT}/.github/instructions/docker.instructions.md" || return 1
+  grep -q "${marker}" "${REPO_ROOT}/.github/instructions/shell.instructions.md" || return 1
+  grep -q "${marker}" "${REPO_ROOT}/.github/instructions/docker.instructions.md" || return 1
 
   return 0
 }
 
-function test-import-dry-run-reports-changed-count() {
+# Consolidated: AGENTS.md, hook config and hook scripts must all be detected
+# in one dry-run and round-trip in one force run; hook scripts keep their
+# executable bit.
+function test-import-detects-and-round-trips-singletons-and-hooks() {
 
-  # Arrange
   local dest
-  dest=$(helper-apply-copilot "count-changed")
-  echo "# Modified 1" >> "${dest}/.github/instructions/shell.instructions.md"
-  echo "# Modified 2" >> "${dest}/.github/instructions/docker.instructions.md"
+  dest=$(helper-apply-copilot "singletons-and-hooks")
+  track-repo-file-state "AGENTS.md"
+  track-repo-file-state ".github/hooks/quality-gates.json"
+  track-repo-file-state "scripts/hooks/post-edit-lint.sh"
+  track-repo-file-state "scripts/hooks/stop-gate.sh"
 
-  # Act
+  local marker
+  marker="SINGLETON-HOOK-MARKER-$(date +%s)"
+  echo "# ${marker}" >> "${dest}/AGENTS.md"
+  printf '\n' >> "${dest}/.github/hooks/quality-gates.json"
+  echo "# ${marker}" >> "${dest}/scripts/hooks/post-edit-lint.sh"
+  echo "# ${marker}" >> "${dest}/scripts/hooks/stop-gate.sh"
+
+  # Dry-run detection covers all four paths
   local output
   output=$(./scripts/import.sh "${dest}" 2>&1)
+  echo "${output}" | grep -qE "(^|[[:space:]])AGENTS\.md" || return 1
+  echo "${output}" | grep -q "quality-gates.json" || return 1
+  echo "${output}" | grep -q "post-edit-lint.sh" || return 1
+  echo "${output}" | grep -q "stop-gate.sh" || return 1
 
-  # Assert — should report count of changed files
-  echo "${output}" | grep -q "Changed files (2)" || return 1
-
-  return 0
-}
-
-function test-import-dry-run-reports-new-count() {
-
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "count-new")
-  echo "# New 1" > "${dest}/.github/prompts/enforce.new1.prompt.md"
-  echo "# New 2" > "${dest}/.github/prompts/enforce.new2.prompt.md"
-
-  # Act
-  local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
-
-  # Assert — should report count of new files
-  echo "${output}" | grep -q "New files in destination (2)" || return 1
+  # Force import round-trips the changes
+  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+  grep -q "${marker}" "${REPO_ROOT}/AGENTS.md" || return 1
+  diff -q "${dest}/.github/hooks/quality-gates.json" "${REPO_ROOT}/.github/hooks/quality-gates.json" > /dev/null 2>&1 || return 1
+  grep -q "${marker}" "${REPO_ROOT}/scripts/hooks/post-edit-lint.sh" || return 1
+  grep -q "${marker}" "${REPO_ROOT}/scripts/hooks/stop-gate.sh" || return 1
+  # Executable bits preserved
+  [[ -x "${REPO_ROOT}/scripts/hooks/post-edit-lint.sh" ]] || return 1
+  [[ -x "${REPO_ROOT}/scripts/hooks/stop-gate.sh" ]] || return 1
 
   return 0
 }

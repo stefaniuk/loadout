@@ -13,6 +13,14 @@ set -euo pipefail
 # Options:
 #   clean=true              # Remove destination .github/{agents,instructions,prompts,skills} before copying, default is 'false'
 #   revert=true             # Remove all promptfiles-managed artifacts from destination and exit, default is 'false'
+#   subset=<csv>            # Restrict copy to named categories (comma-separated). Valid tokens:
+#                           #   agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, mcp, all
+#                           # Omitted or 'all' preserves the default full-copy behaviour byte-for-byte.
+#                           # The 'speckit' token narrows agents/prompts copy functions to speckit.* and
+#                           # review.speckit-* files only when used WITHOUT 'agents'/'prompts' respectively.
+#                           # The 'mcp' token is opt-in only: MCP assets are NOT copied by default and NOT
+#                           # included by 'all'. They are copied only when 'mcp' is named explicitly in the
+#                           # subset csv (e.g. subset=all,mcp or subset=mcp).
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
 # Technology switches (default is 'false' for all, set to 'true' to include):
@@ -37,18 +45,24 @@ set -euo pipefail
 #   - Utility prompts (util.*)
 #   - Shared includes (baselines)
 #   - Default templates (Makefile, Dockerfile, compose.yaml, shell-script)
-#   - repository-template skill
+#   - Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
 #   - copilot-instructions.md
+#   - AGENTS.md (cross-agent baseline at destination root)
+#   - .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
+#   - scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
 #   - pull_request_template.md (if not already present)
 #   - constitution.md
-#   - .specify/scripts/bash
+#   - .specify/scripts/python
 #   - .specify/templates
 #   - ADR-nnn_Any_Decision_Record_Template.md
 #   - Tech_Radar.md
-#   - docs/architecture/
+#   - docs/prompt-reports/
 #   - docs/prompts/
 #   - project.code-workspace (if not already present)
 #   - .gitignore content (managed section with begin/end markers)
+#
+# Opt-in only (requires explicit subset token):
+#   - MCP example pack (.vscode/mcp.json.example, .github/mcp/, docs/mcp.md) - subset=mcp
 #
 # Exit codes:
 #   0 - All files copied successfully
@@ -68,20 +82,26 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 COPILOT_AGENTS_DIR="${REPO_ROOT}/.github/agents"
+COPILOT_HOOKS_DIR="${REPO_ROOT}/.github/hooks"
 COPILOT_INSTRUCTIONS_DIR="${REPO_ROOT}/.github/instructions"
 COPILOT_PROMPTS_DIR="${REPO_ROOT}/.github/prompts"
 COPILOT_SKILLS_DIR="${REPO_ROOT}/.github/skills"
 COPILOT_INSTRUCTIONS_MD_FILE="${REPO_ROOT}/.github/copilot-instructions.md"
+AGENTS_MD_FILE="${REPO_ROOT}/AGENTS.md"
+HOOK_SCRIPTS_DIR="${REPO_ROOT}/scripts/hooks"
 
 SPECIFY_MEMORY="${REPO_ROOT}/.specify/memory"
-SPECIFY_SCRIPTS_BASH="${REPO_ROOT}/.specify/scripts/bash"
+SPECIFY_SCRIPTS_PYTHON="${REPO_ROOT}/.specify/scripts/python"
 SPECIFY_TEMPLATES="${REPO_ROOT}/.specify/templates"
 
 PULL_REQUEST_TEMPLATE="${REPO_ROOT}/.github/pull_request_template.md"
 ADR_TEMPLATE="${REPO_ROOT}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
 ADR_TECH_RADAR="${REPO_ROOT}/docs/adr/Tech_Radar.md"
-DOCS_ARCHITECTURE="${REPO_ROOT}/docs/architecture"
+DOCS_ARCHITECTURE="${REPO_ROOT}/docs/prompt-reports"
 DOCS_PROMPTS="${REPO_ROOT}/docs/prompts"
+MCP_VSCODE_EXAMPLE="${REPO_ROOT}/.vscode/mcp.json.example"
+MCP_GITHUB_DIR="${REPO_ROOT}/.github/mcp"
+MCP_DOC="${REPO_ROOT}/docs/mcp.md"
 WORKSPACE_FILE="${REPO_ROOT}/project.code-workspace"
 GITIGNORE_PROMPTFILES="${REPO_ROOT}/.gitignore.promptfiles"
 
@@ -93,16 +113,38 @@ GITIGNORE_END_MARKER="# <<< promptfiles-copilot managed content - DO NOT EDIT AB
 DEFAULT_INSTRUCTIONS=("docker" "makefile" "readme" "shell")
 
 # Default prompt patterns (glue layer and spec-kit)
-DEFAULT_PROMPT_PATTERNS=("architecture.*" "dev.implement-*" "enforce.docker" "enforce.makefile" "enforce.shell" "review.speckit-*" "speckit.*" "util.*")
+DEFAULT_PROMPT_PATTERNS=("architecture.*" "dev.implement-*" "enforce.docker" "enforce.makefile" "enforce.shell" "review.speckit-*" "spec.*" "speckit.*" "util.*")
 
 # Default templates (glue layer)
 DEFAULT_TEMPLATES=("Makefile.template" "Dockerfile.template" "compose.yaml.template" "shell-script.template.sh")
 
 # Default skills
-DEFAULT_SKILLS=("repository-template")
+DEFAULT_SKILLS=("repository-template" "enforcement-audit" "architecture-docs" "code-review" "spec-consolidation" "system-documentation")
 
 # All technology switches (for iteration)
 ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "playwright" "django" "fastapi")
+
+# Valid subset selector tokens (closed set).
+SUBSET_VALID_TOKENS=("agents" "hooks" "instructions" "prompts" "skills" "specify" "docs" "project" "speckit" "mcp" "all")
+
+# Subset category flags - populated by parse-subset. Default (no subset) enables all.
+SUBSET_AGENTS=true
+SUBSET_HOOKS=true
+SUBSET_INSTRUCTIONS=true
+SUBSET_PROMPTS=true
+SUBSET_SKILLS=true
+SUBSET_SPECIFY=true
+SUBSET_DOCS=true
+SUBSET_PROJECT=true
+SUBSET_SPECKIT=true
+# MCP is opt-in only: NOT copied by default and NOT enabled by 'all'. It is
+# included only when the subset csv explicitly contains 'mcp'.
+SUBSET_MCP=false
+# True only when subset was explicitly set (used to gate observability messages).
+SUBSET_EXPLICIT=false
+# Narrowing flags - true when subset contains 'speckit' but not the broader category.
+SPECKIT_NARROW_AGENTS=false
+SPECKIT_NARROW_PROMPTS=false
 
 # ==============================================================================
 
@@ -138,6 +180,8 @@ function main() {
       print-error "playwright=true requires either python=true or typescript=true to be set"
     fi
   fi
+
+  parse-subset
 
   local destination
   destination=$(normalise-destination-path "$1")
@@ -285,7 +329,114 @@ function get-tech-skill() {
   esac
 }
 
-# ==============================================================================
+# Parse the optional `subset` env var and populate SUBSET_* and
+# SPECKIT_NARROW_* flags. An empty/unset `subset` preserves the default
+# behaviour (all flags true, SUBSET_EXPLICIT=false). Validation is strict -
+# the first invalid token aborts with exit code 1.
+function parse-subset() {
+
+  local raw="${subset:-}"
+
+  if [[ -z "${raw// /}" ]]; then
+    return 0
+  fi
+
+  SUBSET_EXPLICIT=true
+
+  # All flags default to false when subset is explicit; tokens turn them on.
+  SUBSET_AGENTS=false
+  SUBSET_HOOKS=false
+  SUBSET_INSTRUCTIONS=false
+  SUBSET_PROMPTS=false
+  SUBSET_SKILLS=false
+  SUBSET_SPECIFY=false
+  SUBSET_DOCS=false
+  SUBSET_PROJECT=false
+  SUBSET_SPECKIT=false
+  SUBSET_MCP=false
+
+  local -a tokens=()
+  local token lc trimmed valid match
+  # Use a space-delimited string for membership tracking (bash 3.2 compatible -
+  # no associative arrays).
+  local seen=" "
+
+  IFS=',' read -r -a tokens <<< "${raw}"
+  for token in "${tokens[@]}"; do
+    # Trim leading/trailing whitespace
+    trimmed="${token#"${token%%[![:space:]]*}"}"
+    trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+    [[ -z "${trimmed}" ]] && continue
+    # Lowercase
+    lc="$(printf '%s' "${trimmed}" | tr '[:upper:]' '[:lower:]')"
+    # Dedupe
+    if [[ "${seen}" == *" ${lc} "* ]]; then
+      continue
+    fi
+    # Validate against the closed set
+    valid=false
+    for match in "${SUBSET_VALID_TOKENS[@]}"; do
+      if [[ "${lc}" == "${match}" ]]; then
+        valid=true
+        break
+      fi
+    done
+    if [[ "${valid}" != "true" ]]; then
+      echo "[apply] ERROR: invalid subset value '${lc}'. Valid values: agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, mcp, all." >&2
+      exit 1
+    fi
+    seen="${seen}${lc} "
+  done
+
+  if [[ "${seen}" == *" all "* ]]; then
+    SUBSET_AGENTS=true
+    SUBSET_HOOKS=true
+    SUBSET_INSTRUCTIONS=true
+    SUBSET_PROMPTS=true
+    SUBSET_SKILLS=true
+    SUBSET_SPECIFY=true
+    SUBSET_DOCS=true
+    SUBSET_PROJECT=true
+    SUBSET_SPECKIT=true
+    # MCP remains opt-in even with 'all'; require explicit 'mcp' token.
+    return 0
+  fi
+
+  [[ "${seen}" == *" agents "* ]] && SUBSET_AGENTS=true
+  [[ "${seen}" == *" hooks "* ]] && SUBSET_HOOKS=true
+  [[ "${seen}" == *" instructions "* ]] && SUBSET_INSTRUCTIONS=true
+  [[ "${seen}" == *" prompts "* ]] && SUBSET_PROMPTS=true
+  [[ "${seen}" == *" skills "* ]] && SUBSET_SKILLS=true
+  [[ "${seen}" == *" specify "* ]] && SUBSET_SPECIFY=true
+  [[ "${seen}" == *" docs "* ]] && SUBSET_DOCS=true
+  [[ "${seen}" == *" project "* ]] && SUBSET_PROJECT=true
+  [[ "${seen}" == *" speckit "* ]] && SUBSET_SPECKIT=true
+  [[ "${seen}" == *" mcp "* ]] && SUBSET_MCP=true
+
+  # Speckit narrowing: when the caller asked for speckit but NOT the broader
+  # category, restrict agent/prompt copies to speckit.* and review.speckit-*.
+  if [[ "${SUBSET_SPECKIT}" == "true" && "${SUBSET_AGENTS}" != "true" ]]; then
+    SPECKIT_NARROW_AGENTS=true
+  fi
+  if [[ "${SUBSET_SPECKIT}" == "true" && "${SUBSET_PROMPTS}" != "true" ]]; then
+    SPECKIT_NARROW_PROMPTS=true
+  fi
+
+  return 0
+}
+
+# Emit a "skipping" info message for an unselected category. No-op unless
+# subset was explicitly set by the caller.
+# Arguments:
+#   $1=[category name]
+function subset-skip() {
+
+  if [[ "${SUBSET_EXPLICIT}" == "true" ]]; then
+    echo "[apply] skipping $1 (not in subset)"
+  fi
+
+  return 0
+}
 
 # Apply copilot-specific assets to the destination.
 # Arguments (provided as function parameters):
@@ -297,13 +448,42 @@ function copilot-apply() {
   if is-arg-true "${clean:-false}"; then
     copilot-clean-directories "${destination}"
   fi
-  copilot-copy-agents "${destination}"
-  copilot-copy-instructions "${destination}"
-  copilot-copy-prompts "${destination}"
-  copilot-copy-skills "${destination}"
-  copilot-copy-instructions-md "${destination}"
+  if [[ "${SUBSET_AGENTS}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
+    copilot-copy-agents "${destination}"
+  else
+    subset-skip "agents"
+  fi
+  if [[ "${SUBSET_HOOKS}" == "true" ]]; then
+    copilot-copy-hooks "${destination}"
+  else
+    subset-skip "hooks"
+  fi
+  if [[ "${SUBSET_INSTRUCTIONS}" == "true" ]]; then
+    copilot-copy-instructions "${destination}"
+  else
+    subset-skip "instructions"
+  fi
+  if [[ "${SUBSET_PROMPTS}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
+    copilot-copy-prompts "${destination}"
+  else
+    subset-skip "prompts"
+  fi
+  if [[ "${SUBSET_SKILLS}" == "true" ]]; then
+    copilot-copy-skills "${destination}"
+  else
+    subset-skip "skills"
+  fi
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    copilot-copy-instructions-md "${destination}"
+  else
+    subset-skip "copilot-instructions.md"
+  fi
   copy-shared-resources "${destination}"
-  update-vscode-settings "${destination}"
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    update-vscode-settings "${destination}"
+  else
+    subset-skip "vscode-settings"
+  fi
 
   return 0
 }
@@ -315,15 +495,46 @@ function copy-shared-resources() {
 
   local destination="$1"
 
-  copy-specify-memory "${destination}"
-  copy-specify-scripts-bash "${destination}"
-  copy-specify-templates "${destination}"
-  copy-pull-request-template "${destination}"
-  copy-adr-template "${destination}"
-  copy-docs-architecture "${destination}"
-  copy-docs-prompts "${destination}"
-  copy-workspace-file "${destination}"
-  update-gitignore "${destination}"
+  if [[ "${SUBSET_SPECIFY}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
+    copy-specify-memory "${destination}"
+    copy-specify-scripts-python "${destination}"
+    copy-specify-templates "${destination}"
+  else
+    subset-skip "specify"
+  fi
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    copy-pull-request-template "${destination}"
+  else
+    subset-skip "pull-request-template"
+  fi
+  if [[ "${SUBSET_DOCS}" == "true" ]]; then
+    copy-adr-template "${destination}"
+    copy-docs-architecture "${destination}"
+    copy-docs-prompts "${destination}"
+  else
+    subset-skip "docs"
+  fi
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    copy-workspace-file "${destination}"
+    copy-agents-md "${destination}"
+  else
+    subset-skip "project-files"
+  fi
+  if [[ "${SUBSET_HOOKS}" == "true" || "${SUBSET_PROJECT}" == "true" ]]; then
+    copy-hook-scripts "${destination}"
+  else
+    subset-skip "hook-scripts"
+  fi
+  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    update-gitignore "${destination}"
+  else
+    subset-skip "gitignore"
+  fi
+  if [[ "${SUBSET_MCP}" == "true" ]]; then
+    copy-mcp-assets "${destination}"
+  else
+    subset-skip "mcp"
+  fi
 
   return 0
 }
@@ -381,7 +592,7 @@ function is-tech-enabled() {
 function copilot-clean-directories() {
 
   local dest="$1/.github"
-  local dirs=("agents" "instructions" "prompts" "skills")
+  local dirs=("agents" "hooks" "instructions" "prompts" "skills")
 
   for dir in "${dirs[@]}"; do
     if [[ -d "${dest}/${dir}" ]]; then
@@ -418,7 +629,7 @@ function revert-copilot() {
   local dest="$1"
 
   # Remove .github directories
-  local github_dirs=("agents" "instructions" "prompts" "skills")
+  local github_dirs=("agents" "hooks" "instructions" "prompts" "skills")
   for dir in "${github_dirs[@]}"; do
     if [[ -d "${dest}/.github/${dir}" ]]; then
       print-info "Removing ${dest}/.github/${dir}"
@@ -430,6 +641,19 @@ function revert-copilot() {
   if [[ -f "${dest}/.github/copilot-instructions.md" ]]; then
     print-info "Removing ${dest}/.github/copilot-instructions.md"
     rm -f "${dest}/.github/copilot-instructions.md"
+  fi
+
+  # Remove AGENTS.md
+  if [[ -f "${dest}/AGENTS.md" ]]; then
+    print-info "Removing ${dest}/AGENTS.md"
+    rm -f "${dest}/AGENTS.md"
+  fi
+
+  # Remove hook scripts (scripts/hooks/ is fully managed by promptfiles;
+  # any user-authored files placed there will be removed on revert)
+  if [[ -d "${dest}/scripts/hooks" ]]; then
+    print-info "Removing ${dest}/scripts/hooks"
+    rm -rf "${dest:?}/scripts/hooks"
   fi
 
   return 0
@@ -457,13 +681,13 @@ function revert-shared-resources() {
     fi
   done
 
-  # Remove docs/architecture directory if empty or only contains .gitkeep
-  if [[ -d "${dest}/docs/architecture" ]]; then
+  # Remove docs/prompt-reports directory if empty or only contains .gitkeep
+  if [[ -d "${dest}/docs/prompt-reports" ]]; then
     local arch_contents
-    arch_contents=$(ls -A "${dest}/docs/architecture" 2>/dev/null)
+    arch_contents=$(ls -A "${dest}/docs/prompt-reports" 2>/dev/null)
     if [[ -z "${arch_contents}" ]] || [[ "${arch_contents}" == ".gitkeep" ]]; then
-      print-info "Removing ${dest}/docs/architecture"
-      rm -rf "${dest:?}/docs/architecture"
+      print-info "Removing ${dest}/docs/prompt-reports"
+      rm -rf "${dest:?}/docs/prompt-reports"
     fi
   fi
 
@@ -500,8 +724,22 @@ function revert-shared-resources() {
     fi
   fi
 
+  # Remove MCP example pack
+  if [[ -f "${dest}/.vscode/mcp.json.example" ]]; then
+    print-info "Removing ${dest}/.vscode/mcp.json.example"
+    rm -f "${dest}/.vscode/mcp.json.example"
+  fi
+  if [[ -d "${dest}/.github/mcp" ]]; then
+    print-info "Removing ${dest}/.github/mcp"
+    rm -rf "${dest:?}/.github/mcp"
+  fi
+  if [[ -f "${dest}/docs/mcp.md" ]]; then
+    print-info "Removing ${dest}/docs/mcp.md"
+    rm -f "${dest}/docs/mcp.md"
+  fi
+
   # Clean up empty parent directories
-  for dir in "${dest}/.github" "${dest}/docs/adr" "${dest}/docs" "${dest}/.vscode"; do
+  for dir in "${dest}/.github" "${dest}/docs/adr" "${dest}/docs" "${dest}/.vscode" "${dest}/scripts"; do
     if [[ -d "${dir}" ]] && [[ -z "$(ls -A "${dir}" 2>/dev/null)" ]]; then
       print-info "Removing empty directory ${dir}"
       rmdir "${dir}"
@@ -521,7 +759,26 @@ function copilot-copy-agents() {
   mkdir -p "${dest_agents}"
 
   print-info "Copying agent files to ${dest_agents}"
-  find "${COPILOT_AGENTS_DIR}" -maxdepth 1 -name "*.md" -type f -exec cp {} "${dest_agents}/" \;
+  # Recursive copy so nested persona files under personas/ are included.
+  # Preserve the relative directory structure under .github/agents/.
+  # When SPECKIT_NARROW_AGENTS is set, restrict to top-level speckit.*.agent.md
+  # files only (excludes personas/ and any non-speckit agents).
+  local src_file rel_path target_dir
+  if [[ "${SPECKIT_NARROW_AGENTS:-false}" == "true" ]]; then
+    while IFS= read -r -d '' src_file; do
+      rel_path="${src_file#"${COPILOT_AGENTS_DIR}/"}"
+      target_dir="${dest_agents}/$(dirname "${rel_path}")"
+      mkdir -p "${target_dir}"
+      cp "${src_file}" "${target_dir}/"
+    done < <(find "${COPILOT_AGENTS_DIR}" -maxdepth 1 -name "speckit.*.agent.md" -type f -print0)
+  else
+    while IFS= read -r -d '' src_file; do
+      rel_path="${src_file#"${COPILOT_AGENTS_DIR}/"}"
+      target_dir="${dest_agents}/$(dirname "${rel_path}")"
+      mkdir -p "${target_dir}"
+      cp "${src_file}" "${target_dir}/"
+    done < <(find "${COPILOT_AGENTS_DIR}" -name "*.md" -type f -print0)
+  fi
 }
 
 # Copy copilot instruction files to the destination.
@@ -605,11 +862,24 @@ function copilot-copy-prompts() {
 
   print-info "Copying prompt files to ${dest_prompts}"
 
+  # Default prompt pattern set; narrow to speckit-only when requested.
+  local -a patterns
+  if [[ "${SPECKIT_NARROW_PROMPTS:-false}" == "true" ]]; then
+    patterns=("speckit.*" "review.speckit-*")
+  else
+    patterns=("${DEFAULT_PROMPT_PATTERNS[@]}")
+  fi
+
   # Copy default prompt files using patterns
-  for pattern in "${DEFAULT_PROMPT_PATTERNS[@]}"; do
+  for pattern in "${patterns[@]}"; do
     # Use find with -name to match patterns
     find "${COPILOT_PROMPTS_DIR}" -maxdepth 1 -name "${pattern}.prompt.md" -type f -exec cp {} "${dest_prompts}/" \; 2>/dev/null || true
   done
+
+  # Skip technology-specific prompts when narrowing to speckit only.
+  if [[ "${SPECKIT_NARROW_PROMPTS:-false}" == "true" ]]; then
+    return 0
+  fi
 
   # Copy technology-specific prompt files
   for tech in "${ALL_TECHS[@]}"; do
@@ -675,6 +945,59 @@ function copilot-copy-instructions-md() {
   cp "${COPILOT_INSTRUCTIONS_MD_FILE}" "${dest}/"
 }
 
+# Copy .github/hooks/ to the destination.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copilot-copy-hooks() {
+
+  local dest="$1/.github/hooks"
+  mkdir -p "${dest}"
+
+  print-info "Copying hooks to ${dest}"
+  local hooks=()
+  shopt -s nullglob
+  hooks=("${COPILOT_HOOKS_DIR}"/*.json)
+  shopt -u nullglob
+  if (( ${#hooks[@]} == 0 )); then
+    print-info "No hook configuration files to copy"
+    return 0
+  fi
+  cp "${hooks[@]}" "${dest}/"
+}
+
+# Copy AGENTS.md to the destination root.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copy-agents-md() {
+
+  local dest="$1"
+  mkdir -p "${dest}"
+
+  print-info "Copying AGENTS.md to ${dest}"
+  cp "${AGENTS_MD_FILE}" "${dest}/"
+}
+
+# Copy scripts/hooks/ to the destination.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copy-hook-scripts() {
+
+  local dest="$1/scripts/hooks"
+  mkdir -p "${dest}"
+
+  print-info "Copying hook scripts to ${dest}"
+  local scripts=()
+  shopt -s nullglob
+  scripts=("${HOOK_SCRIPTS_DIR}"/*.sh)
+  shopt -u nullglob
+  if (( ${#scripts[@]} == 0 )); then
+    print-info "No hook scripts to copy"
+    return 0
+  fi
+  cp "${scripts[@]}" "${dest}/"
+  chmod +x "${dest}"/*.sh
+}
+
 # Copy pull_request_template.md to the destination if missing.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
@@ -705,16 +1028,16 @@ function copy-specify-memory() {
   return 0
 }
 
-# Copy .specify/scripts/bash directory to the destination.
+# Copy .specify/scripts/python directory to the destination.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
-function copy-specify-scripts-bash() {
+function copy-specify-scripts-python() {
 
-  local dest="$1/.specify/scripts/bash"
+  local dest="$1/.specify/scripts/python"
   mkdir -p "${dest}"
 
-  print-info "Copying .specify/scripts/bash to ${dest}"
-  cp -R "${SPECIFY_SCRIPTS_BASH}/". "${dest}/"
+  print-info "Copying .specify/scripts/python to ${dest}"
+  cp -R "${SPECIFY_SCRIPTS_PYTHON}/". "${dest}/"
 }
 
 # Copy .specify/templates directory to the destination.
@@ -744,16 +1067,16 @@ function copy-adr-template() {
   return 0
 }
 
-# Copy docs/architecture directory to the destination.
+# Copy docs/prompt-reports directory to the destination.
 # Only copies .gitkeep if the destination directory is empty or doesn't exist.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function copy-docs-architecture() {
 
-  local dest="$1/docs/architecture"
+  local dest="$1/docs/prompt-reports"
   mkdir -p "${dest}"
 
-  print-info "Copying docs/architecture to ${dest}"
+  print-info "Copying docs/prompt-reports to ${dest}"
 
   # Check if destination directory has any files (excluding hidden files that start with .)
   local file_count
@@ -874,7 +1197,7 @@ function update-vscode-settings() {
     "speckit.implement": true
   },
   "chat.tools.terminal.autoApprove": {
-    ".specify/scripts/bash/": true
+    ".specify/scripts/python/": true
   }
 }
 EOF
@@ -898,7 +1221,7 @@ EOF
     "speckit.implement": true
   },
   "chat.tools.terminal.autoApprove": {
-    ".specify/scripts/bash/": true
+    ".specify/scripts/python/": true
   }
 EOF
 
@@ -1023,6 +1346,40 @@ function remove-vscode-json-property() {
   return 0
 }
 
+# Copy MCP example pack to the destination.
+# Distributes .vscode/mcp.json.example, .github/mcp/ (per-server READMEs) and
+# docs/mcp.md. The .example suffix prevents VS Code from auto-loading the
+# config so the explicit trust prompt remains in effect.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copy-mcp-assets() {
+
+  local dest="$1"
+
+  if [[ -f "${MCP_VSCODE_EXAMPLE}" ]]; then
+    local dest_vscode="${dest}/.vscode"
+    mkdir -p "${dest_vscode}"
+    print-info "Copying .vscode/mcp.json.example to ${dest_vscode}"
+    cp "${MCP_VSCODE_EXAMPLE}" "${dest_vscode}/"
+  fi
+
+  if [[ -d "${MCP_GITHUB_DIR}" ]]; then
+    local dest_mcp="${dest}/.github/mcp"
+    mkdir -p "${dest_mcp}"
+    print-info "Copying .github/mcp to ${dest_mcp}"
+    copy-directory-excluding-git "${MCP_GITHUB_DIR}" "${dest_mcp}"
+  fi
+
+  if [[ -f "${MCP_DOC}" ]]; then
+    local dest_docs="${dest}/docs"
+    mkdir -p "${dest_docs}"
+    print-info "Copying docs/mcp.md to ${dest_docs}"
+    cp "${MCP_DOC}" "${dest_docs}/"
+  fi
+
+  return 0
+}
+
 # Copy a directory without bringing across any nested .git metadata.
 # Arguments (provided as function parameters):
 #   $1=[source directory path]
@@ -1058,6 +1415,7 @@ Technology switches (set to 'true' to include):
     all=true                Include all technology-specific files
     python=true             Python instruction and prompt
     typescript=true         TypeScript instruction and prompt
+    go=true                 Go instruction and prompt
     reactjs=true            ReactJS instruction and prompt
     rust=true               Rust instruction and prompt
     terraform=true          Terraform instruction and prompt
@@ -1069,7 +1427,22 @@ Technology switches (set to 'true' to include):
 Other options:
     clean=true              Remove destination directories before copying
     revert=true             Remove all promptfiles-managed artifacts and exit
+    subset=<csv>            Restrict copy to named categories (comma-separated).
+                            Valid tokens: agents, hooks, instructions, prompts,
+                            skills, specify, docs, project, speckit, mcp, all.
+                            Omitted or 'all' preserves full-copy behaviour.
     VERBOSE=true            Show all executed commands
+
+Always copied (default/glue layer):
+    AGENTS.md (cross-agent baseline at destination root)
+    .github/copilot-instructions.md
+    .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
+    scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
+    Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
+    Spec-kit agents, prompts, templates and constitution
+    Shell, Docker, Makefile instructions and prompts
+    docs/prompt-reports/, docs/prompts/, ADR template, Tech_Radar.md
+    project.code-workspace and managed .gitignore section
 
 Examples:
     $(basename "$0") /path/to/my-project

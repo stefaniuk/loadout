@@ -18,7 +18,7 @@ It exists to ensure:
 - Deterministic and testable behaviour
 - High-signal specifications suitable for automation
 - Safe, controlled evolution of the system
-- Fast, safe delivery in small increments ("flow") aligned to NHS engineering guidance ([GitHub][1])
+- Fast, safe delivery in small increments ("flow")
 
 ---
 
@@ -32,11 +32,7 @@ It exists to ensure:
   - Plans, tasks, and checklists
   - Implementation details
 - Any artefact that conflicts with this constitution is invalid.
-- Changes to this constitution must be explicit and deliberate and are treated as governance changes (see §11.3).
-
-### 2.2 External Organisational Requirements
-
-This constitution **must be applied alongside** relevant NHS organisational standards and policies (for example, NHS Architecture Manual requirements and security policies). Where an external requirement is mandatory, it is treated as a higher-order constraint within its scope. ([nhs.uk][2])
+- Changes to this constitution must be explicit and deliberate and are treated as governance changes (see §11.4).
 
 ---
 
@@ -47,8 +43,11 @@ This constitution **must be applied alongside** relevant NHS organisational stan
 - All behaviour **must** be defined in a specification before implementation.
 - Code is an implementation of specifications, never the primary source of truth.
 - If behaviour is not specified, it does not exist.
+- Specifications describe observable behaviour (what the system does), not implementation steps (how it does it). Implementation choices belong in plans, not specifications.
 - Behaviour must be deterministic and testable, with clear acceptance criteria.
+- A specification is not ready for implementation until it defines: observable behaviour, acceptance criteria, boundary conditions, and error or edge cases. Underspecified areas must be marked explicitly.
 - A unit of work is only "done" when it is specified, deterministic, testable, and understandable by a new engineer.
+- Existing specified behaviour is preserved unless the specification explicitly changes it with rationale and impact assessment.
 - Specifications must be retained after implementation and used as the authoritative basis for future evolution, maintenance, and refactoring.
 - The specification library is cumulative: every feature specification under `/specs/*` forms part of the single source of truth, so later work must remain compatible with earlier features unless the specification set itself is deliberately revised.
 - Documentation and tooling outside `/specs` (for example prompts, READMEs, ADRs, plans, and checklists) must always reference and reflect the complete specification set, not just the latest feature.
@@ -57,8 +56,8 @@ This constitution **must be applied alongside** relevant NHS organisational stan
 
 If code and specification diverge, you must explicitly choose one path and document it:
 
-- **Option A — Fix implementation:** bring code/tests back into alignment with the specification.
-- **Option B — Approve a behavioural change:** amend the specification (with rationale and impact), then update code/tests to match.
+- **Option A - Fix implementation:** bring code/tests back into alignment with the specification.
+- **Option B - Approve a behavioural change:** amend the specification (with rationale and impact), then update code/tests to match.
 
 Updating the specification solely to legitimise accidental behaviour is prohibited.
 
@@ -94,12 +93,13 @@ Updating the specification solely to legitimise accidental behaviour is prohibit
 
 ---
 
-### 3.5 AI-Assisted Development Discipline & Change Governance
+### 3.5 AI-Assisted Development Discipline
 
-- AI must not invent requirements, widen scope, or introduce behaviour not present in the specification.
-- AI output is draft until validated against this constitution and the relevant specifications.
+During specification, planning, and implementation, AI must work within the specification boundary. Scope decisions belong to the specification stage, not the implementation stage.
+
 - Every behavioural change must be intentional, documented, and reviewable, with backwards-incompatible changes called out explicitly.
 - When trade-offs exist between speed and correctness, convenience and clarity, or cleverness and simplicity, this constitution is final authority.
+- See AGENTS.md "Implementation discipline" for the operational rules that apply to every agent interaction.
 
 ---
 
@@ -132,37 +132,26 @@ Test coverage must be meaningful, not just numerical. Focus on behaviour, bounda
 
 ### 3.8 Engineer for Flow, Led by User Needs
 
-This project adopts the NHS software engineering emphasis on **rapid, safe delivery of high-quality software**, with strong automation and continuous improvement. ([GitHub][1])
+Deliver high-quality software rapidly and safely, with strong automation and continuous improvement.
 
 Non-negotiables:
 
-- Engineering decisions must be led by **user needs and service outcomes**, not internal convenience. ([GitHub][1])
-- Delivery must be **iterative and incremental** ("small batches"), optimising for fast learning and low risk. ([GitHub][1])
-- Delivery teams must be **empowered and accountable** for what they build and run. ([GitHub][1])
-- Products must be **actively maintained for their whole lifecycle**, not treated as "done after release". ([GitHub][1])
-- Operational reliability is part of engineering ("everything fails"): operate, measure, improve. ([GitHub][1])
-- Prioritisation must be based on **data and evidence**, not sentiment. ([GitHub][1])
+- Engineering decisions must be led by **user needs and service outcomes**, not internal convenience.
+- Delivery must be **iterative and incremental** ("small batches"), optimising for fast learning and low risk.
+- Delivery teams must be **empowered and accountable** for what they build and run.
+- Products must be **actively maintained for their whole lifecycle**, not treated as "done after release".
+- Operational reliability is part of engineering ("everything fails"): operate, measure, improve.
+- Prioritisation must be based on **data and evidence**, not sentiment.
 
 ---
 
 ### 3.9 Architect for Flow
 
-Design architecture to enable fast, safe flow of change across independent value streams.
+Design architecture to enable fast, safe flow of change. The goal is not theoretical purity or maximum reuse. The goal is that teams can deliver small, incremental changes frequently with confidence.
 
-This means intentionally shaping systems around:
-
-- Independent value streams
-- Stream-aligned teams
-- Clear bounded contexts
-- Loosely coupled services and products
-
-The primary goal is not theoretical purity or maximum reuse. The goal is fast flow: teams can deliver small, incremental changes frequently, with confidence.
-
-Key rules:
-
-- Prefer designs that minimise cross-team co-ordination and hand-offs.
+- Prefer designs that minimise cross-team coordination and hand-offs.
+- Align domain boundaries, team ownership, and interfaces deliberately.
 - Optimise for independent change and independent deployment where practical.
-- Align domain boundaries, team ownership, and interfaces (apply Conway's Law deliberately).
 - Accept duplication where it reduces coupling and improves flow.
 - Avoid over-fragmentation: a well-structured modular monolith is valid when it improves cognitive load and operability.
 
@@ -201,12 +190,12 @@ Key rules:
 
 ### 4.6 Architecture Decision Records
 
-- All architecture decisions must be captured as a lightweight Architecture (Any) Decision Record (ADR), with options considered and clear rationale. ([nhs.uk][2])
-- Decisions must be made at the lowest sensible level, with appropriate stakeholders involved. ([nhs.uk][2])
+- Significant architectural decisions must be recorded with rationale and alternatives considered.
+- See AGENTS.md "Architectural decisions" for the operational ADR process and template requirements.
 
 ### 4.7 Cloud Well-Architected Alignment
 
-- Where deployed to cloud platforms, follow the relevant cloud Well-Architected Framework and assess the solution against it. ([nhs.uk][2])
+- Where deployed to cloud platforms, follow the relevant cloud Well-Architected Framework and assess the solution against it.
 
 ---
 
@@ -244,13 +233,10 @@ Key rules:
 - Outputs must be readable by humans and suitable for automation.
 - Output formats must be stable and deterministic.
 - Any output ordering rules must be specified (for example stable sorting).
-- When referencing an inclusive range of identifiers, use an em dash (—) with spaces before and after it between the first and last identifier for readability, for example `001-FR-001 — 001-FR-008`. Do not express ranges by repeating identifiers with hyphens (for example `001-FR-001-001-FR-008`). This must be obeyed in documentation and code comments as well.
 
 ### 6.3 No Hidden State
 
-- Behaviour must not depend on hidden or implicit state.
-- Global mutable state is prohibited unless explicitly specified and justified.
-- Side effects must be explicit and documented.
+The rules in §3.2 (Determinism, Explicitness, and No Hidden State) apply to all data models and outputs. Behaviour must not depend on hidden or implicit state.
 
 ---
 
@@ -270,22 +256,11 @@ Key rules:
 
 ### 7.3 Static Typing Requirements
 
-- All code written in **statically analysable languages** must use the language's typing facilities consistently:
-  - Public APIs must have explicit types.
-  - Function and method parameters and return values must be typed.
-  - Data models and structured data must be typed.
-  - Avoid `any`-style escape hatches or implicit dynamic typing except where explicitly justified.
-- **TypeScript and Python are not exempt.** Both must use type annotations with static analysis enforced.
-- **Shell scripts** (Bash, zsh, and similar) are exempt from static typing, but must:
-  - Remain small and focused
-  - Validate inputs explicitly
-  - Fail fast with clear error messages
-  - Prefer simple, portable constructs
-- Any exception to the typing requirement must be:
-  - Explicitly documented with rationale
-  - Limited in scope
-  - Reviewed regularly
-  - Removed as soon as practicable (see §11.3)
+- All code must use the language's typing facilities consistently. Public APIs, function parameters, return values, and data models must have explicit types.
+- Avoid `any`-style escape hatches or implicit dynamic typing except where explicitly justified and documented.
+- TypeScript and Python are not exempt. Both must use type annotations with static analysis enforced.
+- Any exception must be explicitly documented with rationale, limited in scope, and removed as soon as practicable (see §11.4).
+- Language-specific typing details (for example shell script exemptions) belong in the relevant technology instruction file, not this constitution.
 
 ### 7.4 Functions and Methods
 
@@ -330,24 +305,10 @@ Within a file, order code to match the primary execution / call flow to aid read
 
 If strict call-order would reduce clarity (for example shared utilities used widely), group those helpers in a clearly labelled "Utilities" section at the end of the file.
 
-### 7.9 Mandatory Local Quality Gates
+### 7.9 Automated Quality Enforcement
 
-After making **any** change to implementation code or tests, you must run:
-
-- `make lint`
-- `make test`
-
-You must continue iterating on the changes until **both commands complete successfully with no errors or warnings**. This is mandatory and must be done automatically as part of AI-assisted development, without requiring an additional prompt.
-
-### 7.10 Automated Quality Enforcement
-
-- Quality must be protected by **robust and comprehensive automation** (tests, checks, policies), not by hope or manual vigilance. ([GitHub][1])
+- Quality must be protected by **robust and comprehensive automation** (tests, checks, policies), not by hope or manual vigilance.
 - Where CI exists, CI quality gates are authoritative for merge readiness; local gates must mirror them as closely as practical.
-
-### 7.11 Sensitive Data Must Not Leak
-
-- Sensitive data (including credentials, tokens, patient-identifiable data, or other secrets) must never be committed to source control.
-- Any suspected leak is treated as an incident: stop, contain, rotate/revoke, and record what happened. ([GitHub][1])
 
 ---
 
@@ -411,7 +372,13 @@ You must continue iterating on the changes until **both commands complete succes
 - Accidental complexity is a defect.
 - If something cannot be explained clearly, it is not ready to exist.
 
-### 11.3 Exceptions (Escape Hatch)
+### 11.3 Single Source of Truth per Concern
+
+- Each rule, constraint, or fact has exactly one canonical location.
+- Other documents reference it rather than restating it.
+- When duplication is discovered, consolidate to one location and add a link from the other.
+
+### 11.4 Exceptions (Escape Hatch)
 
 Deviations from this constitution are permitted only when they are:
 
@@ -422,11 +389,3 @@ Deviations from this constitution are permitted only when they are:
 - Removed as soon as practicable
 
 Any exception must be treated as a governance decision and recorded in the repository.
-
----
-
-> **Version**: 1.4.1
-> **Last Amended**: 2026-01-11
-
-[1]: https://github.com/NHSDigital/software-engineering-quality-framework "GitHub - NHSDigital/software-engineering-quality-framework: ️ Shared best-practice guidance & tools to support software engineering teams"
-[2]: https://architecture.digital.nhs.uk/solution-architecture-framework/requirements "Requirements - NHS Architecture manual"

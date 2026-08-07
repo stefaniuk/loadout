@@ -1,0 +1,23 @@
+name: "Validate customisations"
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  validate-customisations:
+    name: "Validate customisations"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@v3
+      - name: "Validate customisation artefacts"
+        run: make lint-customisations

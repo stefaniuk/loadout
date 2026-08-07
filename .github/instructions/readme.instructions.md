@@ -1,5 +1,6 @@
 ---
 applyTo: "**/README.md"
+description: "README Engineering Instructions"
 ---
 
 # README Engineering Instructions 📘
@@ -48,8 +49,8 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
 ## 3. Tone and style ✍️
 
 - [RD-TON-001] Use simple language and British English spelling across the document.
-- [RD-TON-002] Prefer short sentences, descriptive headings, and scannable bullet lists.
-- [RD-TON-003] Avoid marketing fluff; stay explicit, practical, and evidence-led.
+- [RD-TON-002] Prefer short sentences, descriptive headings, and scannable bullet lists where they improve readability. Use prose as the primary voice of each section.
+- [RD-TON-003] Avoid marketing fluff. Stay explicit, practical, and evidence-led.
 - [RD-TON-004] Use "must/should" only when you describe real constraints or agreed standards.
 - [RD-TON-005] Keep the tone direct and instructive, guiding readers to action rather than selling the project.
 
@@ -60,12 +61,12 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
 - [RD-GOV-003] When information is missing, insert an explicit `TODO:` placeholder rather than guessing, and make it clear what needs to be confirmed.
 - [RD-GOV-004] Always use relative links for files within the repository so the README stays portable across forks and mirrors.
 - [RD-GOV-005] Keep the top portion short enough that readers grasp the value proposition in under 30 seconds.
-- [RD-GOV-006] Keep the README as a top-level orientation document; move deep manuals or step-by-step guides into `docs/` and link to them.
+- [RD-GOV-006] Keep the README as a top-level orientation document. Move deep manuals or step-by-step guides into `docs/` and link to them.
 
 ## 5. Canonical structure 🧱
 
 - [RD-STR-001] Follow this exact sequence of headings (names may be lightly adapted, but order and intent must stay the same):
-  1. [RD-STR-002] `# <Project Name>` — the main title.
+  1. [RD-STR-002] `# <Project Name>`: the main title.
   2. [RD-STR-003] One-line summary immediately below the title.
   3. [RD-STR-004] `## Why this project exists`.
   4. [RD-STR-005] `## Quick start`.
@@ -77,26 +78,26 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
   10. [RD-STR-011] `## Repository layout`.
   11. [RD-STR-012] Optional sections (only if helpful) after `Repository layout` (for example FAQ, Roadmap).
   12. [RD-STR-013] `## Licence`.
-- [RD-STR-014] Keep the README at the repository root; do not split the canonical content into multiple files.
+- [RD-STR-014] Keep the README at the repository root and preserve the canonical section order from [RD-STR-001]. Move deep manuals, step-by-step procedural guides, and lengthy reference tables into `docs/` (for example `docs/architecture.md`, `docs/onboarding.md`, `docs/catalogue.md`) and link to them from the relevant section. The README itself must remain a compact orientation document, targeting under 200 lines, so readers can scan the whole landing page in one sitting.
 
 ## 6. Section-by-section requirements 📚
 
 ### 6.1 Title and one-line summary
 
-- [RD-SEC-001] The title must match the repository or package name; if uncertain, use the best available name and add `TODO: confirm project name`.
+- [RD-SEC-001] The title must match the repository or package name. If uncertain, use the best available name and add `TODO: confirm project name`.
 - [RD-SEC-002] Immediately follow the title with a one-sentence summary answering "What is this?" and "What is it for?".
 - [RD-SEC-003] Use the pattern "A <tool/service/library> that <does X> for <audience>." where it improves clarity.
 
 ### 6.2 Why this project exists
 
-- [RD-SEC-004] Populate the section using the exact subsections: **Purpose**, **Benefit to the user**, **Problem it solves**, **How it solves it (high level)**.
-- [RD-SEC-005] Use prose as the writing style in this section. Each of its subsections can have a sizable paragraph with good narrative being grounded in repository evidence.
+- [RD-SEC-004] Write this section as unified prose that covers all four topics in a natural flow: **purpose** (what the tool helps the reader do), **benefit to the user** (the practical gain), **problem it solves** (the user's friction or failure mode), and **how it solves it** (the high-level approach). Do not split these into separate subsections. Let the narrative move naturally from one topic to the next.
+- [RD-SEC-005] Ground every claim in repository evidence. The section should read like a calm explanation to a new reader and lead naturally into the quick start that follows.
 
 ### 6.3 Quick start
 
 - [RD-SEC-007] Document minimal prerequisites (runtime versions, tooling) before instructions.
 - [RD-SEC-008] Describe install or setup steps (build, compose, run) using fenced code blocks.
-- [RD-SEC-009] Provide a "first run" example and state the expected success indicator or output.
+- [RD-SEC-009] Provide a "first run" example and state the expected outcome under a clearly labelled `Expected result` block.
 - [RD-SEC-010] Use the fewest possible commands and prefer repository-provided targets or scripts.
 - [RD-SEC-011] When steps are unknown, include a minimal skeleton annotated with `TODO:` markers instead of omitting the section.
 - [RD-SEC-012] Prefer Makefile targets, project scripts, or documented CLI commands over raw shell instructions whenever they exist.
@@ -104,45 +105,45 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
 ### 6.4 What it does
 
 - [RD-SEC-013] List 3–8 key features that describe capabilities at a high level.
-- [RD-SEC-014] Add 2–6 out-of-scope or non-goal bullets to prevent misunderstanding.
+- [RD-SEC-014] Include 2–6 out-of-scope or non-goal bullets when they prevent a likely misunderstanding. Omit only when boundaries are self-evident from the feature list.
 - [RD-SEC-015] Mention supported platforms or versions only when they are known and evidenced (omit otherwise).
 
 ### 6.5 How it solves the problem
 
 - [RD-SEC-016] Provide a short flow (bullets or numbered list) showing how inputs become outputs.
 - [RD-SEC-017] Introduce key concepts or terms with concise, one-line definitions only when necessary.
-- [RD-SEC-018] Stay high level; avoid detailed internals, implementation trivia, or long paragraphs.
+- [RD-SEC-018] Stay high level. Avoid detailed internals, implementation trivia, or long paragraphs.
 
 ### 6.6 How to use
 
 - [RD-SEC-019] Break the section into clearly labelled subsections such as `Configuration`, `Common workflows`, `Examples`, and optional `Troubleshooting`.
 - [RD-SEC-020] Under `Configuration`, document environment variables, config files, flags, and secret handling exactly as implemented.
-- [RD-SEC-021] Under `Common workflows`, describe typical usage patterns with short, copyable examples.
+- [RD-SEC-021] Under `Common workflows`, describe three to five typical usage patterns with short, copyable examples. Move additional workflows to `docs/how-to/`.
 - [RD-SEC-022] Under `Examples`, link to `examples/`, `docs/`, or other evidence rather than duplicating long content.
-- [RD-SEC-023] Include a `Troubleshooting` subsection only for recurring issues backed by evidence; omit if unknown.
+- [RD-SEC-023] Include a `Troubleshooting` subsection only for recurring issues backed by evidence. Omit if unknown.
 - [RD-SEC-024] If usage instructions are lengthy, link to a dedicated doc (for example `docs/usage.md`) and summarise why the reader should follow it.
 
 ### 6.7 Contributing
 
-- [RD-SEC-025] Link to `.github/contributing.md`; if it does not exist, create a contributing file.
+- [RD-SEC-025] Link to `.github/contributing.md`. If it does not exist, create a contributing file.
 - [RD-SEC-026] Summarise development setup steps (dependencies, local run commands) at a high level.
 - [RD-SEC-027] List the quality commands (linting, testing, formatting) that contributors must run.
 - [RD-SEC-028] Explain how to propose changes (issues, pull requests, review expectations) without duplicating the full contributing guide.
 
 ### 6.8 Repository layout
 
-- [RD-SEC-030] Provide a bullet list of the most important directories/files that actually exist in the repo.
-- [RD-SEC-031] Keep descriptions short, consistent, and action-oriented; mark unknown paths as `TODO` instead of inventing details.
+- [RD-SEC-030] Provide a bullet list or tree-style code block of the most important directories and files that actually exist in the repo.
+- [RD-SEC-031] Keep descriptions short, consistent, and action-oriented. Mark unknown paths as `TODO` instead of inventing details.
 - [RD-SEC-032] Limit the list to the directories new contributors must know first.
 
 ### 6.9 Licence
 
 - [RD-SEC-033] State the licence name exactly as defined in `LICENCE.md`.
-- [RD-SEC-034] Link to the licence file using a relative link; if the file is missing, create an MIT licence file.
+- [RD-SEC-034] Link to the licence file using a relative link. If the file is missing, create an MIT licence file.
 
 ## 7. Standard links 🔗
 
-- [RD-LNK-001] Include relative links to `LICENCE.md`, `./github/contributing.md`, `./github/SECURITY.md`, `./github/CODE_OF_CONDUCT.md`, and key docs entry points (for example files in the `docs/architecture` directory) whenever those files exist.
+- [RD-LNK-001] Include relative links to `LICENCE.md`, `./github/contributing.md`, `./github/SECURITY.md`, `./github/CODE_OF_CONDUCT.md`, and key docs entry points (for example files in the `docs/prompt-reports` directory) whenever those files exist.
 - [RD-LNK-002] Use relative links for every in-repo reference, ensuring they work on forks and mirrors without modification.
 
 ## 8. Badges (optional) 🎖️
@@ -168,8 +169,3 @@ Before finalising the README, confirm:
 - [RD-VAL-004] The Licence section links to `LICENCE.md` (or records the need to add one).
 - [RD-VAL-005] Every statement is evidence-backed; there are no invented facts or unsupported claims.
 - [RD-VAL-006] The document consistently uses British English spelling and punctuation.
-
----
-
-> **Version**: 1.0.1
-> **Last Amended**: 2026-01-26

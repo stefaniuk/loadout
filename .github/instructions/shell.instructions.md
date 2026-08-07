@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.{sh,bash,zsh}"
+description: "Shell Script Engineering Instructions (Bash, CLI wrappers, automation)"
 ---
 
 # Shell Script Engineering Instructions (Bash, CLI wrappers, automation) 🐚
@@ -169,8 +170,8 @@ set -euo pipefail
 ### 3.4 Dual execution pattern (native vs Docker)
 
 - [SH-FN-008] For tool wrapper scripts, implement paired execution functions:
-  - `run-<tool>-natively` — runs the tool if installed locally
-  - `run-<tool>-in-docker` — runs the tool in a Docker container
+  - `run-<tool>-natively` - runs the tool if installed locally
+  - `run-<tool>-in-docker` - runs the tool in a Docker container
 
 Example:
 
@@ -425,7 +426,7 @@ For library scripts intended to be sourced by other scripts.
   #   $ source ./docker.lib.sh
   ```
 
-- [SH-LIB-003] Libraries should not call `main` or `exit` — they only define functions.
+- [SH-LIB-003] Libraries should not call `main` or `exit` - they only define functions.
 
 ### 9.2 Function prefixes
 
@@ -748,23 +749,23 @@ exit 0
 
 These patterns cause recurring issues in shell scripts. Avoid them unless an ADR documents a justified exception.
 
-- [SH-ANT-001] **Unquoted variables** — causes word splitting and glob expansion; always use `"$var"`.
-- [SH-ANT-002] **`cd` without error handling** — script continues in wrong directory if `cd` fails; use `cd dir || exit 1` or rely on `set -e`.
-- [SH-ANT-003] **Hardcoded absolute paths** — breaks portability; use `$(git rev-parse --show-toplevel)` or relative paths.
-- [SH-ANT-004] **Missing `local` for function variables** — pollutes global namespace; always declare `local`.
-- [SH-ANT-005] **`|| true` without comment** — masks failures silently; document why it is safe.
-- [SH-ANT-006] **Parsing `ls` output** — breaks on filenames with spaces/special chars; use globs or `find`.
-- [SH-ANT-007] **Command substitution in `[[` without quotes** — use `[[ -n "$var" ]]` not `[[ -n $var ]]`.
-- [SH-ANT-008] **Using `$?` after multiple commands** — `$?` only reflects the last command; capture immediately.
-- [SH-ANT-009] **`eval` with user input** — code injection risk; avoid `eval` unless absolutely necessary.
-- [SH-ANT-010] **Missing shebang** — script may run with wrong interpreter; always include `#!/bin/bash`.
-- [SH-ANT-011] **Using `echo` for error messages** — errors should go to stderr; use `echo "error" >&2`.
-- [SH-ANT-012] **Not using `set -euo pipefail`** — allows silent failures; always enable safety options.
-- [SH-ANT-013] **Inconsistent function naming** — mixing camelCase, snake_case, and kebab-case; use kebab-case consistently.
-- [SH-ANT-014] **Giant scripts without functions** — hard to test and maintain; break into functions.
-- [SH-ANT-015] **Forgetting `exit 0`** — script exit code may be non-zero from last command; explicitly exit 0.
-- [SH-ANT-016] **Tests without Arrange-Act-Assert comments** — harder to understand test intent; always include the three comments.
-- [SH-ANT-017] **Missing test summary** — no visibility into overall results; always print total/passed/failed counts.
+- [SH-ANT-001] **Unquoted variables** - causes word splitting and glob expansion; always use `"$var"`.
+- [SH-ANT-002] **`cd` without error handling** - script continues in wrong directory if `cd` fails; use `cd dir || exit 1` or rely on `set -e`.
+- [SH-ANT-003] **Hardcoded absolute paths** - breaks portability; use `$(git rev-parse --show-toplevel)` or relative paths.
+- [SH-ANT-004] **Missing `local` for function variables** - pollutes global namespace; always declare `local`.
+- [SH-ANT-005] **`|| true` without comment** - masks failures silently; document why it is safe.
+- [SH-ANT-006] **Parsing `ls` output** - breaks on filenames with spaces/special chars; use globs or `find`.
+- [SH-ANT-007] **Command substitution in `[[` without quotes** - use `[[ -n "$var" ]]` not `[[ -n $var ]]`.
+- [SH-ANT-008] **Using `$?` after multiple commands** - `$?` only reflects the last command; capture immediately.
+- [SH-ANT-009] **`eval` with user input** - code injection risk; avoid `eval` unless absolutely necessary.
+- [SH-ANT-010] **Missing shebang** - script may run with wrong interpreter; always include `#!/bin/bash`.
+- [SH-ANT-011] **Using `echo` for error messages** - errors should go to stderr; use `echo "error" >&2`.
+- [SH-ANT-012] **Not using `set -euo pipefail`** - allows silent failures; always enable safety options.
+- [SH-ANT-013] **Inconsistent function naming** - mixing camelCase, snake_case, and kebab-case; use kebab-case consistently.
+- [SH-ANT-014] **Giant scripts without functions** - hard to test and maintain; break into functions.
+- [SH-ANT-015] **Forgetting `exit 0`** - script exit code may be non-zero from last command; explicitly exit 0.
+- [SH-ANT-016] **Tests without Arrange-Act-Assert comments** - harder to understand test intent; always include the three comments.
+- [SH-ANT-017] **Missing test summary** - no visibility into overall results; always print total/passed/failed counts.
 
 ---
 
@@ -781,8 +782,3 @@ Per [constitution.md §3.5](../../.specify/memory/constitution.md#35-ai-assisted
 ## 14. Script template 📝
 
 Use the template at [templates/shell-script.template.sh](./templates/shell-script.template.sh) when creating new scripts.
-
----
-
-> **Version**: 1.1.0
-> **Last Amended**: 2026-01-17

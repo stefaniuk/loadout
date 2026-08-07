@@ -35,15 +35,15 @@ Use it for context and evaluate each runtime that emits structured logs against 
 
 ### Anti-patterns (flag and fix immediately) 🚫
 
-- **Bypassing central logger**: direct stdout/stderr writes (for example `print(...)`, `fmt.Fprint(os.Stderr, ...)`, `console.error(...)`) for diagnostic output — route through the central logger instead.
-- **Direct logging import**: language-standard logger import instead of project factory — use the central logger factory.
+- **Bypassing central logger**: direct stdout/stderr writes (for example `print(...)`, `fmt.Fprint(os.Stderr, ...)`, `console.error(...)`) for diagnostic output - route through the central logger instead.
+- **Direct logging import**: language-standard logger import instead of project factory - use the central logger factory.
 - **Inline helper functions**: local `_log_*()` wrappers that write directly to stderr rather than delegating to the central service.
 - **Silent failures**: catch-all exception handling without logging (for example `except Exception`, `catch (...)`).
 - **Mixed output channels**: some modules using central logger while others bypass it.
 
 ### Principles 🧭
 
-- **Signal over noise**: logs must capture intent, boundaries, decisions, and failures—not routine execution. Flag verbose or redundant log statements.
+- **Signal over noise**: logs must capture intent, boundaries, decisions, and failures-not routine execution. Flag verbose or redundant log statements.
 - **Structured format**: prefer key=value pairs or JSON; avoid unstructured prose that is hard to parse.
 - **Consistency**: log fields, levels, and phrasing should be uniform across all classes and modules. Flag deviations.
 
@@ -67,7 +67,7 @@ Use it for context and evaluate each runtime that emits structured logs against 
 
 ### Method-level logging 🧪
 
-- **Entry and exit traces**: every non-trivial method should log entry and exit at DEBUG or TRACE—unless it is a hot path.
+- **Entry and exit traces**: every non-trivial method should log entry and exit at DEBUG or TRACE-unless it is a hot path.
 - **Safe input logging**: log inputs only after sanitisation; never log secrets, tokens, or PII.
 - **Decision points**: log key branch outcomes with relevant identifiers (e.g., user ID, order ID).
 - **Exception handling**: log exceptions once at the boundary, include context and correlation ID, and always capture the stack trace.
@@ -142,8 +142,3 @@ Flag any misuse (e.g., logging an error condition at INFO).
    - [ ] Content
    - [ ] Console visualisation
    - [ ] Performance
-
----
-
-> **Version**: 1.1.5
-> **Last Amended**: 2026-02-08

@@ -24,8 +24,3 @@ When a specification or architecture decision imposes a constraint (e.g. "packag
 - [QG-BASE-MECH-002] **Architecture tests second.** Use custom test code (AST scanning, dependency graph analysis) only for constraints that linter rules cannot express: call-order verification, banned function-call patterns within a package, interface signature checks, or cross-file structural invariants.
 - [QG-BASE-MECH-003] **Integration/behavioural tests for product behaviour.** Use integration tests for constraints that require running the compiled artefact: CLI exit codes, output formats, error recovery, performance thresholds.
 - [QG-BASE-MECH-004] **Do not double up.** If a constraint is enforced by linter config, do not also write a Go test for the same constraint. One mechanism per constraint.
-
----
-
-> **Version**: 1.1.0
-> **Last Amended**: 2026-04-26

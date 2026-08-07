@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.{likec4,c4}"
+description: "LikeC4 DSL Instructions (architecture-as-code diagrams)"
 ---
 
 # LikeC4 DSL Instructions (architecture-as-code diagrams) 📐
@@ -25,7 +26,7 @@ They are **non-negotiable** unless an exception is explicitly documented (with r
 
 This section exists so humans and AI assistants can reliably apply the most important rules even when context is tight.
 
-- [LC4-QR-001] **Element syntax**: use `identifier = kind 'Title'` — identifier first, then `=`, then kind.
+- [LC4-QR-001] **Element syntax**: use `identifier = kind 'Title'` - identifier first, then `=`, then kind.
 - [LC4-QR-002] **Never mix forms**: `kind identifier = 'Title'` is INVALID and silently drops the element.
 - [LC4-QR-003] **Validate after generation**: use LikeC4 MCP tools to confirm all elements parsed correctly.
 - [LC4-QR-004] **Specification first**: declare every element kind in `specification {}` before using it in `model {}`.
@@ -39,7 +40,7 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
 - [LC4-OP-001] Treat the **specification as the source of truth** for the architecture model. If a system, container, or component is not evidenced in the codebase, it does not belong in the diagram.
 - [LC4-OP-002] Prefer **small, incremental updates** over full model rewrites.
 - [LC4-OP-003] Design for **determinism**: the same model source must produce the same diagrams.
-- [LC4-OP-004] **Validate every change** using LikeC4 MCP tools — the tooling fails silently on syntax errors.
+- [LC4-OP-004] **Validate every change** using LikeC4 MCP tools - the tooling fails silently on syntax errors.
 
 ---
 
@@ -50,12 +51,12 @@ LikeC4 supports two forms for declaring elements. Mixing them causes silent pars
 ### Valid forms
 
 ```likec4
-// Form A — identifier-first with = (PREFERRED)
+// Form A - identifier-first with = (PREFERRED)
 customer = actor 'Customer' {
   description 'End user of the system'
 }
 
-// Form B — kind-first WITHOUT = (alternative)
+// Form B - kind-first WITHOUT = (alternative)
 actor customer 'Customer' {
   description 'End user of the system'
 }
@@ -64,7 +65,7 @@ actor customer 'Customer' {
 ### Invalid form (common mistake)
 
 ```likec4
-// WRONG — kind-first WITH = sign
+// WRONG - kind-first WITH = sign
 // This silently fails: the element is dropped without error
 actor customer = 'Customer' {
   description 'End user of the system'
@@ -73,7 +74,7 @@ actor customer = 'Customer' {
 
 - [LC4-SYN-001] Prefer Form A (`identifier = kind 'Title'`) for consistency.
 - [LC4-SYN-002] Never combine kind-first ordering with the `=` sign.
-- [LC4-SYN-003] Apply the same rule to nested elements (containers, components) — the syntax is identical at every nesting level.
+- [LC4-SYN-003] Apply the same rule to nested elements (containers, components) - the syntax is identical at every nesting level.
 
 ---
 
@@ -129,22 +130,17 @@ views {
 
 ## 6. Validation ✅
 
-LikeC4 fails silently on syntax errors — invalid elements are dropped without diagnostics.
+LikeC4 fails silently on syntax errors - invalid elements are dropped without diagnostics.
 
 - [LC4-VAL-001] After generating or editing a `.likec4` file, use `mcp_likec4_read-project-summary` to verify the element count matches expectations.
 - [LC4-VAL-002] Use `mcp_likec4_read-view` to confirm each view contains the expected nodes and edges.
-- [LC4-VAL-003] If the element count is lower than expected, check for the invalid `kind identifier = 'Title'` pattern first — it is the most common cause.
+- [LC4-VAL-003] If the element count is lower than expected, check for the invalid `kind identifier = 'Title'` pattern first - it is the most common cause.
 
 ---
 
 ## 7. File conventions 📁
 
 - [LC4-STY-001] Use the `.likec4` extension for LikeC4 source files (`.c4` also works but `.likec4` is unambiguous).
-- [LC4-STY-002] Place architecture diagrams under `docs/architecture/`.
+- [LC4-STY-002] Place architecture diagrams under `docs/prompt-reports/`.
 - [LC4-STY-003] Use a single `workspace.likec4` file for small projects; split into multiple files for larger models.
 - [LC4-STY-004] Add a comment header with inputs and evidence pointers at the top of each file.
-
----
-
-> **Version**: 1.0.0
-> **Last Amended**: 2026-04-27

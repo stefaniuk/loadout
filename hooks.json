@@ -1,0 +1,46 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/session-start-cheatsheet.sh",
+        "timeout": 10000
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/user-prompt-record.sh",
+        "timeout": 10000
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/post-edit-lint.sh",
+        "timeout": 60000
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/stop-gate.sh",
+        "timeout": 60000
+      }
+    ],
+    "SubagentStart": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/subagent-start-context.sh",
+        "timeout": 10000
+      }
+    ],
+    "SubagentStop": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/subagent-stop-log.sh",
+        "timeout": 10000
+      }
+    ]
+  }
+}

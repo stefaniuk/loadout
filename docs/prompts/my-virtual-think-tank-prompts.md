@@ -52,7 +52,7 @@ Constraints: {constraints}
 Non-goals: {non_goals}
 Decision horizon: {decision_horizon}
 
-Step 1 — Validate the problem:
+Step 1 - Validate the problem:
 1) Tell me whether {problem_statement} is the real decision or a symptom of something else.
 2) Ask me at least 2 questions about each: decision subject, current state, required state, problem statement, constraints, non-goals.
 3) Reword the problem statement into a single crisp decision question.
@@ -303,8 +303,3 @@ For each stakeholder:
 - Identify risks and mitigations
 Output the same "options on the table" summary and decisive questions.
 ```
-
----
-
-> **Version**: 1.0.0
-> **Last Amended**: 2026-01-02

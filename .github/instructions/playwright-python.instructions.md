@@ -1,5 +1,6 @@
 ---
 applyTo: "**/*.py"
+description: "Playwright Python Test Generation Instructions"
 ---
 
 # Playwright Python Test Generation Instructions 🎭
@@ -161,15 +162,10 @@ E2E tests are prone to flakiness. Apply these rules to improve reliability.
 These patterns cause recurring issues in Playwright Python tests. Avoid them unless an ADR documents a justified exception.
 
 - [PW-PY-ANT-006] Follow the shared [Playwright baseline](./includes/playwright-baseline.include.md) for common anti-patterns (assertions, shared state, URLs, and CI artefacts).
-- [PW-PY-ANT-001] **`time.sleep()` instead of auto-wait** — Playwright waits automatically; explicit sleeps cause flakiness and slow tests.
-- [PW-PY-ANT-002] **`assert` instead of `expect`** — loses auto-retry; use Playwright's `expect` API for UI assertions.
-- [PW-PY-ANT-003] **Hardcoded timeouts to fix flakiness** — masks underlying issues; fix the root cause instead.
-- [PW-PY-ANT-004] **CSS/XPath when role-based locators exist** — brittle and less accessible; prefer `get_by_role`, `get_by_label`.
-- [PW-PY-ANT-005] **`force=True` click without justification** — hides real interactivity issues; document why it's necessary.
-- [PW-PY-ANT-008] **Overly broad locators** — causes strict mode violations; be specific enough to match exactly one element.
-- [PW-PY-ANT-011] **Catching exceptions to avoid test failure** — masks bugs; let tests fail and fix the underlying issue.
-
----
-
-> **Version**: 1.1.1
-> **Last Amended**: 2026-01-17
+- [PW-PY-ANT-001] **`time.sleep()` instead of auto-wait** - Playwright waits automatically; explicit sleeps cause flakiness and slow tests.
+- [PW-PY-ANT-002] **`assert` instead of `expect`** - loses auto-retry; use Playwright's `expect` API for UI assertions.
+- [PW-PY-ANT-003] **Hardcoded timeouts to fix flakiness** - masks underlying issues; fix the root cause instead.
+- [PW-PY-ANT-004] **CSS/XPath when role-based locators exist** - brittle and less accessible; prefer `get_by_role`, `get_by_label`.
+- [PW-PY-ANT-005] **`force=True` click without justification** - hides real interactivity issues; document why it's necessary.
+- [PW-PY-ANT-008] **Overly broad locators** - causes strict mode violations; be specific enough to match exactly one element.
+- [PW-PY-ANT-011] **Catching exceptions to avoid test failure** - masks bugs; let tests fail and fix the underlying issue.

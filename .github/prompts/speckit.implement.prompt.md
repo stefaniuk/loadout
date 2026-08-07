@@ -1,5 +1,6 @@
 ---
 agent: speckit.implement
+description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
 ---
 
 You **MUST** adhere to the following mandatory requirements when implementing features.
@@ -14,14 +15,14 @@ You **MUST** adhere to the following mandatory requirements when implementing fe
 
 - Repository Tooling
 - Test-Driven Development
-- Quality Gates
+- Repository verification policy
 
 ## Implementation Process (Mandatory)
 
 1. Work through tasks in `tasks.md` sequentially
 2. Follow TDD: write failing test first, then implement, then refactor
 3. After completing each phase or user story, execute its `Show & Tell` steps to verify correctness
-4. Run `make lint` and `make test` after every source code change
+4. Respect the repository's canonical local quality-gate policy after every source code change; where hooks enforce the gates automatically, do not duplicate the same gate commands manually unless diagnosing a failure
 
 ## Implementation Completion Checklist (Mandatory)
 
@@ -32,9 +33,4 @@ Before marking implementation as complete, verify:
 - [ ] TDD was followed: tests written before implementation
 - [ ] All `Show & Tell` steps executed successfully for each phase
 - [ ] Repository-template capabilities are present and up to date (see [.github/skills/repository-template/SKILL.md](/.github/skills/repository-template/SKILL.md))
-- [ ] `make lint` and `make test` complete with zero errors and zero warnings
-
----
-
-> **Version**: 1.6.0
-> **Last Amended**: 2026-03-01
+- [ ] The repository's canonical local quality gates pass with zero errors and zero warnings

@@ -47,8 +47,17 @@ clean:: # Remove all generated and temporary files (common) @Development
 config:: # Configure development environment (common) @Setup
 	# TODO: Set up git hooks, initialise environment variables, and configure local settings
 
-install:: # Install development tool (common) @Setup
-	# TODO: Install required CLI tools and language runtimes for local development
+install:: # Install the project package/binary locally and expose its CLI on PATH (common) @Setup
+	# TODO: Install the built package or binary locally (e.g. pip/uv/npm/cargo/go install) and verify the entry-point command is reachable on PATH
+
+uninstall:: # Uninstall the project package/binary previously installed by `make install` (common) @Setup
+	# TODO: Remove the package or binary using the same manager as `install` (e.g. pip/uv/npm/cargo uninstall, or rm -f $(GOBIN)/<bin>); succeed if nothing is installed
+
+link:: # Link the built package/binary into a user bin directory on PATH (alternative to install) (common) @Setup
+	# TODO: Link the built package or binary (e.g. pip install -e ., npm link, or ln -sf $(PWD)/dist/<bin> $(BIN_DIR)/<bin>) into a user-writable bin directory already on PATH (default BIN_DIR ?= $(HOME)/.local/bin); warn if BIN_DIR is not on PATH
+
+unlink:: # Unlink the package/binary previously linked by `make link` (common) @Setup
+	# TODO: Remove the editable install or symlink (e.g. pip uninstall -y <pkg>, npm unlink -g <pkg>, or rm -f $(BIN_DIR)/<bin>); verify the link points into $(PWD) before deletion and succeed if nothing is linked
 
 # ==============================================================================
 # CI/CD GitHub actions/workflows targets
