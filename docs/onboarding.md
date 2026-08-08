@@ -139,6 +139,36 @@ The repository is split into a default **core** plugin pack and an optional **sp
 
 For full argument details see `scripts/apply.sh --help` and the `apply` target in the [Makefile](../Makefile).
 
+## Import workflow from downstream repos
+
+The inverse of apply: pull improvements made in a project repository back into this source library.
+
+```bash
+make import dest=/absolute/path/to/project
+```
+
+The script compares prompt files in the project against the source library and reports which files have changed. By default it prompts before copying each changed file.
+
+### Options
+
+```bash
+# Copy all changed files without prompting
+force=true make import dest=/path/to/project
+
+# Also import new files that exist in the project but not in this repo
+new=true make import dest=/path/to/project
+
+# Both: import everything non-interactively
+new=true force=true make import dest=/path/to/project
+```
+
+### Typical workflow
+
+1. Apply the library to a project: `make apply dest=/path/to/project`
+2. Work in the project, improving instructions, prompts, or skills
+3. Import changes back: `make import dest=/path/to/project`
+4. Review the diff in this repository, run `make lint && make test`, and commit
+
 ## Counting tokens
 
 Estimate context-window usage for any subset of prompt files:
@@ -159,6 +189,104 @@ The report shows:
 - **Tokens** - per-file token counts.
 - **No IDs** - counts with identifiers like `[ID-<prefix>-NNN]` stripped.
 - **Usage %** - context-window usage against a 200K baseline.
+
+## Syncing upstream Spec Kit
+
+The repository uses Spec Kit agents, prompts, and templates from the upstream [github/spec-kit](https://github.com/github/spec-kit) project. Local extensions (patches, overrides) are maintained in `.specify/extensions/` and applied on top of the fetched upstream files.
+
+### Running sync
+
+```bash
+make specify
+```
+
+This fetches the latest Spec Kit files, applies local extensions declared in `.specify/extensions/manifest.yaml`, and writes the patched output to:
+
+- `.github/agents/` (speckit agent definitions)
+- `.github/prompts/` (speckit prompt files)
+- `.specify/templates/` (plan, spec, tasks templates)
+- `.specify/scripts/python/` (speckit helper scripts)
+
+The resolved Spec Kit version is recorded in `.specify/.speckit-version`.
+
+### Dry run
+
+Preview what would change without modifying files:
+
+```bash
+dry_run=true make specify
+```
+
+### When to run
+
+Run `make specify` after:
+
+- Pulling updates to this repository (upstream Spec Kit may have changed)
+- Modifying files in `.specify/extensions/`
+- Wanting to reset speckit agents/prompts to their canonical patched state
+
+### Prerequisites
+
+The `specify` CLI must be installed. See [github/spec-kit](https://github.com/github/spec-kit) for installation instructions. `yq` is also required for YAML parsing.
+
+## Managing external skills
+
+Third-party agent skills can be cloned into `.github/skills/` from upstream repositories. A YAML manifest at `scripts/config/skills.yaml` declares which skills to fetch, and two make targets manage the lifecycle.
+
+### Configuration
+
+Each entry in `scripts/config/skills.yaml` requires `name`, `repo`, and `path`. The `ref` defaults to `main` and `sha` is populated automatically on first sync:
+
+```yaml
+skills:
+  - name: systematic-debugging
+    repo: https://github.com/obra/superpowers.git
+    path: skills/systematic-debugging
+```
+
+### Adding a skill
+
+**Option A** (edit then sync):
+
+```bash
+# 1. Add an entry to scripts/config/skills.yaml
+# 2. Fetch it
+make skill-sync
+```
+
+**Option B** (one command):
+
+```bash
+make skill-add name=writing-plans repo=https://github.com/obra/superpowers.git path=skills/writing-plans
+```
+
+Both append the skill to `.github/skills/<name>/`, pin the resolved commit SHA in the manifest, update lint exclusions, and regenerate the catalogue.
+
+### Updating skills
+
+Re-run sync to fetch the latest from each declared ref:
+
+```bash
+make skill-sync
+```
+
+To update a single skill:
+
+```bash
+make skill-sync name=systematic-debugging
+```
+
+### What happens during sync
+
+1. Each skill is shallow-cloned using git sparse checkout (only the declared path).
+2. The resolved commit SHA is written back to `scripts/config/skills.yaml`.
+3. The `.markdownlintignore` managed section is updated with all synced skill directories (sorted alphabetically).
+4. Synced skill directories are excluded from shellcheck automatically.
+5. The artefact catalogue is regenerated.
+
+### Prerequisites
+
+`yq` is required for YAML manipulation. Install via `brew install yq`.
 
 ## Contributor setup and quality gates
 

@@ -56,6 +56,14 @@ For any technology or language choice, consult the [Tech Radar](/docs/adr/Tech_R
 - Ensure tests are always listed before implementation tasks
 - Use property-based testing (PBT) where applicable to maximise coverage and edge case validation
 
+## Skill invocation gates (mandatory)
+
+Before writing implementation code: load the `test-driven-development` skill.
+
+On any unexpected test, build, or runtime failure: load the `systematic-debugging` skill.
+
+Before marking any implementation task, phase, or feature complete: load the `verification-before-completion` skill.
+
 ## Repository tooling
 
 When you identify missing development capabilities (linting, CI/CD, Docker support, pre-commit hooks, and so on), consult the [repository-template skill](/.github/skills/repository-template/SKILL.md) for standardised implementations.

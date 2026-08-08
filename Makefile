@@ -50,6 +50,16 @@ test-install: # Run install/uninstall wrapper tests @Testing
 clone-rt: # Clone the repository template into .github/skills/repository-template @Operations
 	.github/skills/repository-template/scripts/git-clone-repository-template.sh
 
+skill-sync: # Fetch/update external skills declared in scripts/config/skills.yaml; optional: name=[skill] @Operations
+	name="$(name)" ./scripts/skill-sync.sh
+	$(MAKE) catalogue
+
+skill-add: # Add a new external skill to config and sync it; mandatory: name=[name] repo=[url] path=[path]; optional: ref=[branch] @Operations
+	$(if $(and $(name),$(repo),$(path)),,$(error Usage: make skill-add name=my-skill repo=https://github.com/owner/repo.git path=skills/my-skill))
+	name="$(name)" repo="$(repo)" path="$(path)" ref="$(or $(ref),main)" ./scripts/skill-add.sh
+	name="$(name)" ./scripts/skill-sync.sh
+	$(MAKE) catalogue
+
 specify: # Fetch upstream spec-kit and apply local extensions @Operations
 	./scripts/specify.sh
 
@@ -111,6 +121,8 @@ ${VERBOSE}.SILENT: \
 	lint-markdown-links \
 	lint-mcp \
 	lint-shell \
+	skill-add \
+	skill-sync \
 	specify \
 	test \
 	test-all \

@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-08-08T13:59:52Z",
-  "sourceRevision": "2fbc812",
+  "generatedAt": "2026-08-08T21:05:45Z",
+  "sourceRevision": "e489f6e",
   "counts": {
     "instruction": 14,
     "prompt": 39,
     "agent": 14,
-    "skill": 9,
+    "skill": 10,
     "hook": 2,
-    "total": 78,
+    "total": 79,
     "packs": 12,
     "byPack": {
-      "core": 55,
+      "core": 56,
       "speckit": 23
     }
   },
@@ -980,22 +980,6 @@
       "pack": "core"
     },
     {
-      "id": "skill:.github/skills/django-project/SKILL.md",
-      "type": "skill",
-      "path": ".github/skills/django-project/SKILL.md",
-      "name": "django-project",
-      "description": "Scaffold and evolve Django projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.",
-      "applyTo": null,
-      "tags": ["django-project"],
-      "metadata": {
-        "version": "1.0.0",
-        "license": "MIT",
-        "allowedTools": [],
-        "argumentHint": "Describe the Django project action: scaffold, add capability, or evolve an existing project"
-      },
-      "pack": "core"
-    },
-    {
       "id": "skill:.github/skills/enforcement-audit/SKILL.md",
       "type": "skill",
       "path": ".github/skills/enforcement-audit/SKILL.md",
@@ -1008,22 +992,6 @@
         "license": "MIT",
         "allowedTools": [],
         "argumentHint": "Specify the technology to audit: python, typescript, go, docker, rust, shell, makefile, terraform, reactjs, tauri, playwright-python, or playwright-typescript"
-      },
-      "pack": "core"
-    },
-    {
-      "id": "skill:.github/skills/fastapi-project/SKILL.md",
-      "type": "skill",
-      "path": ".github/skills/fastapi-project/SKILL.md",
-      "name": "fastapi-project",
-      "description": "Scaffold and evolve FastAPI projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.",
-      "applyTo": null,
-      "tags": ["fastapi-project"],
-      "metadata": {
-        "version": "1.0.0",
-        "license": "MIT",
-        "allowedTools": [],
-        "argumentHint": "Describe the FastAPI project action: scaffold, add capability, or evolve an existing project"
       },
       "pack": "core"
     },
@@ -1072,6 +1040,54 @@
         "license": "MIT",
         "allowedTools": [],
         "argumentHint": "Optional: step (foundation, architecture, reference, explanation, how-to, tutorials, operations, audience-indexes, governance, all), mode (establish, sync, audit, pre-pr-review), and scope (path, feature dir, or changed files)"
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/systematic-debugging/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/systematic-debugging/SKILL.md",
+      "name": "systematic-debugging",
+      "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
+      "applyTo": null,
+      "tags": ["systematic-debugging"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/test-driven-development/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/test-driven-development/SKILL.md",
+      "name": "test-driven-development",
+      "description": "Use when implementing any feature or bugfix, before writing implementation code",
+      "applyTo": null,
+      "tags": ["test-driven-development"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/verification-before-completion/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/verification-before-completion/SKILL.md",
+      "name": "verification-before-completion",
+      "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
+      "applyTo": null,
+      "tags": ["verification-before-completion"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
       },
       "pack": "core"
     },
@@ -1203,10 +1219,7 @@
       "tech": "python",
       "instruction": ".github/instructions/python.instructions.md",
       "enforcePrompt": ".github/prompts/enforce.python.prompt.md",
-      "skills": [
-        ".github/skills/django-project/SKILL.md",
-        ".github/skills/fastapi-project/SKILL.md"
-      ],
+      "skills": [],
       "adrCluster": "ADR-001",
       "complete": true
     },

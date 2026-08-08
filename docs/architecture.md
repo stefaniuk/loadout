@@ -142,7 +142,7 @@ flowchart TD
 Governance gates are explicit checkpoints between lifecycle stages. Each gate blocks the next phase until reviewers (human or agent) explicitly resolve findings.
 
 | Gate                   | Command                         | Purpose                                       |
-| :--------------------- | :------------------------------ | :-------------------------------------------- |
+| ---------------------- | ------------------------------- | --------------------------------------------- |
 | 📄 **Documentation**   | `/review.speckit-documentation` | Consistency across spec.md, plan.md, tasks.md |
 | ✅ **Code Compliance** | `/review.speckit-code`          | Reconcile implementation with spec            |
 | 🧪 **Test Quality**    | `/review.speckit-test`          | Ensure healthy test pyramid                   |
@@ -187,19 +187,19 @@ Both hooks append structured records to `${COPILOT_PROMPT_LOG_DIR:-~/.local/stat
 Each spec-kit stage produces artefacts worth committing. The table maps every commit point in the flow diagram above to a conventional commit message.
 
 | Stage | Trigger                                                                                  | Conventional commit                                    |
-| :---: | :--------------------------------------------------------------------------------------- | :----------------------------------------------------- |
-|   1   | Constitution created or updated (`/speckit.constitution`)                                | `docs(constitution): establish project constitution`   |
-|   2   | Specification drafted (`/speckit.specify`)                                               | `docs(spec): draft feature specification`              |
-|   3   | Specification refined after clarification loop (`/speckit.clarify` → `/speckit.specify`) | `docs(spec): refine specification after clarification` |
-|   4   | Implementation plan created (`/speckit.plan`)                                            | `docs(plan): draft implementation plan`                |
-|   5   | Plan revised after checklist gap-fill (`/speckit.checklist` → `/speckit.plan`)           | `docs(plan): revise plan with checklist coverage`      |
-|   6   | Tasks generated (`/speckit.tasks`)                                                       | `docs(tasks): generate implementation tasks`           |
-|   7   | Tasks revised after consistency analysis (`/speckit.analyze` → `/speckit.tasks`)         | `docs(tasks): align tasks after consistency analysis`  |
-|   8   | Documentation review passed (`/review.speckit-documentation`)                            | `docs(review): pass documentation review gate`         |
-|   9   | Implementation completed (`/speckit.implement`, per phase)                               | `feat(feature): implement phase N`                     |
-|  10   | Convergence gap-fill after implementation (`/speckit.converge` → `/speckit.tasks`)       | `docs(tasks): append unbuilt work after convergence`   |
-|  11   | Code review passed (`/review.speckit-code`)                                              | `refactor(review): address code review findings`       |
-|  12   | Test review passed (`/review.speckit-test`)                                              | `test(review): address test review findings`           |
+| ----- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| 1     | Constitution created or updated (`/speckit.constitution`)                                | `docs(constitution): establish project constitution`   |
+| 2     | Specification drafted (`/speckit.specify`)                                               | `docs(spec): draft feature specification`              |
+| 3     | Specification refined after clarification loop (`/speckit.clarify` → `/speckit.specify`) | `docs(spec): refine specification after clarification` |
+| 4     | Implementation plan created (`/speckit.plan`)                                            | `docs(plan): draft implementation plan`                |
+| 5     | Plan revised after checklist gap-fill (`/speckit.checklist` → `/speckit.plan`)           | `docs(plan): revise plan with checklist coverage`      |
+| 6     | Tasks generated (`/speckit.tasks`)                                                       | `docs(tasks): generate implementation tasks`           |
+| 7     | Tasks revised after consistency analysis (`/speckit.analyze` → `/speckit.tasks`)         | `docs(tasks): align tasks after consistency analysis`  |
+| 8     | Documentation review passed (`/review.speckit-documentation`)                            | `docs(review): pass documentation review gate`         |
+| 9     | Implementation completed (`/speckit.implement`, per phase)                               | `feat(feature): implement phase N`                     |
+| 10    | Convergence gap-fill after implementation (`/speckit.converge` → `/speckit.tasks`)       | `docs(tasks): append unbuilt work after convergence`   |
+| 11    | Code review passed (`/review.speckit-code`)                                              | `refactor(review): address code review findings`       |
+| 12    | Test review passed (`/review.speckit-test`)                                              | `test(review): address test review findings`           |
 
 Commit conventions explained:
 

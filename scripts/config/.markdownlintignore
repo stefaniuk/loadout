@@ -1,2 +1,8 @@
 .github/agents/speckit.*.agent.md
 .specify/templates/*-template.md
+
+# begin: synced skills
+.github/skills/systematic-debugging/
+.github/skills/test-driven-development/
+.github/skills/verification-before-completion/
+# end: synced skills

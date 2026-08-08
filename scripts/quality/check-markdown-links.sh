@@ -32,7 +32,7 @@ function main() {
   check=${check:-all}
   case $check in
     "all")
-      files="$(git ls-files "*.md")"
+      files="$(git ls-files "*.md" | while IFS= read -r f; do [ -f "$f" ] && printf '%s\n' "$f"; done)"
       ;;
     "staged-changes")
       files="$(git diff --diff-filter=ACMRT --name-only --cached "*.md")"

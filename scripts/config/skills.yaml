@@ -1,0 +1,20 @@
+# External agent skills manifest.
+# Add entries here and run `make sync-skills` to fetch them.
+# Only `name`, `repo`, and `path` are required. The `ref` defaults to `main`
+# and `sha` is populated automatically on first sync.
+skills:
+  - name: systematic-debugging
+    repo: https://github.com/obra/superpowers.git
+    path: skills/systematic-debugging
+    ref: main
+    sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1
+  - name: test-driven-development
+    repo: https://github.com/obra/superpowers.git
+    path: skills/test-driven-development
+    ref: main
+    sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1
+  - name: verification-before-completion
+    repo: https://github.com/obra/superpowers.git
+    path: skills/verification-before-completion
+    ref: main
+    sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1

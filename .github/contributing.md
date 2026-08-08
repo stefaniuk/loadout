@@ -67,7 +67,7 @@ Thank you for your interest in contributing to this prompt library! This guide w
 ## 💡 Ways to Contribute
 
 | Contribution Type    | Description                                          |
-| :------------------- | :--------------------------------------------------- |
+| -------------------- | ---------------------------------------------------- |
 | 🐛 **Bug fixes**     | Fix errors in existing prompts or instructions       |
 | ✨ **New prompts**   | Add prompts for new workflows or tools               |
 | 📋 **Instructions**  | Create coding standards for new languages/frameworks |
@@ -85,7 +85,7 @@ Thank you for your interest in contributing to this prompt library! This guide w
 Not sure which artefact to create? Use this **"I want to do X → use Y"** table to jump straight to the right quickstart block.
 
 | 🎯 I want to…                                                  | 📦 Use this artefact | 🚀 Jump to                                          |
-| :------------------------------------------------------------- | :------------------- | :-------------------------------------------------- |
+| -------------------------------------------------------------- | -------------------- | --------------------------------------------------- |
 | Enforce coding standards for a language or framework           | **Instructions**     | [Instructions Quickstart](#quickstart-instructions) |
 | Capture a repeatable one-shot workflow (review, refactor, doc) | **Prompt**           | [Prompts Quickstart](#quickstart-prompts)           |
 | Drive a multi-step Spec Kit / Copilot workflow                 | **Agent**            | [Agents Quickstart](#quickstart-agents)             |
@@ -244,7 +244,7 @@ These instructions define the default engineering approach for <scope>. They are
 ## Quick Reference
 
 | ID          | Rule                       |
-| :---------- | :------------------------- |
+| ----------- | -------------------------- |
 | [XX-QR-001] | <One-line, testable rule.> |
 
 ## Quality
@@ -679,7 +679,7 @@ Include:
 
 ```markdown
 | Column A | Column B |
-| :------- | :------- |
+| -------- | -------- |
 | Value 1  | Value 2  |
 ```
 

@@ -48,7 +48,7 @@ function main() {
   check=${check:-working-tree-changes}
   case $check in
     "all")
-      filter="git ls-files"
+      filter="git ls-files --exclude-standard"
       ;;
     "staged-changes")
       filter="git diff --diff-filter=ACMRT --name-only --cached"
@@ -64,29 +64,34 @@ function main() {
       ;;
   esac
 
+  # Exclude files tracked by git but missing from the working tree
+  local files
+  files=$($filter | while IFS= read -r f; do [ -f "$f" ] && printf '%s\n' "$f"; done || true)
+  [[ -z "$files" ]] && return 0
+
   if command -v editorconfig-checker > /dev/null 2>&1 && ! is-arg-true "${FORCE_USE_DOCKER:-false}"; then
-    filter="$filter" dry_run_opt="${dry_run_opt:-}" run-editorconfig-natively
+    files="$files" dry_run_opt="${dry_run_opt:-}" run-editorconfig-natively
   else
-    filter="$filter" dry_run_opt="${dry_run_opt:-}" run-editorconfig-in-docker
+    files="$files" dry_run_opt="${dry_run_opt:-}" run-editorconfig-in-docker
   fi
 }
 
 # Run editorconfig natively.
 # Arguments (provided as environment variables):
 #   dry_run_opt=[dry run option]
-#   filter=[git command to filter the files to check]
+#   files=[newline-separated file list]
 function run-editorconfig-natively() {
 
   # shellcheck disable=SC2046,SC2086
   editorconfig-checker \
     -config "$PWD/scripts/config/editorconfig-checker.json" \
-    --exclude '.git/' $dry_run_opt $($filter)
+    --exclude '.git/' $dry_run_opt $files
 }
 
 # Run editorconfig in a Docker container.
 # Arguments (provided as environment variables):
 #   dry_run_opt=[dry run option]
-#   filter=[git command to filter the files to check]
+#   files=[newline-separated file list]
 function run-editorconfig-in-docker() {
 
   # shellcheck disable=SC1091
@@ -97,10 +102,13 @@ function run-editorconfig-in-docker() {
   # We use /dev/null here as a backstop in case there are no files in the state
   # we choose. If the filter comes back empty, adding `/dev/null` onto it has
   # the effect of preventing `ec` from treating "no files" as "all the files".
+  local files_inline
+  files_inline=$(echo "$files" | tr '\n' ' ')
+  # shellcheck disable=SC2086
   docker run --rm --platform linux/amd64 \
     --volume "$PWD":/check \
     "$image" \
-      sh -c "ec -config /check/scripts/config/editorconfig-checker.json --exclude '.git/' $dry_run_opt \$($filter) /dev/null"
+      sh -c "cd /check && ec -config /check/scripts/config/editorconfig-checker.json --exclude '.git/' $dry_run_opt $files_inline /dev/null"
 }
 
 # ==============================================================================
