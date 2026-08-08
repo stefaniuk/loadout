@@ -169,8 +169,7 @@ If the user supplies both a mode and an alias, the explicit mode wins.
 Before starting any step:
 
 1. Read the [constitution](../../../.specify/memory/constitution.md).
-2. Read [AGENTS.md](../../../AGENTS.md) and
-   [.github/copilot-instructions.md](../../copilot-instructions.md).
+2. Read [.github/copilot-instructions.md](../../copilot-instructions.md).
 3. Read the current repository anchors when they exist: `README.md`,
    `docs/conventions.md`, `docs/architecture.md`, and `docs/onboarding.md`.
 4. Enumerate `docs/`, `docs/adr/`, and `specs/` when present.

@@ -56,7 +56,6 @@ make apply dest=/absolute/path/to/target
 
 What gets copied:
 
-- `AGENTS.md`
 - `.github/agents`, `.github/hooks`, `.github/instructions`, `.github/prompts`, `.github/skills`
 - `.github/copilot-instructions.md`
 - `.github/pull_request_template.md` (only if missing in the target)
@@ -115,7 +114,7 @@ Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `
 | `skills`       | `.github/skills/` (plus tech skills when `django`/`fastapi` are set)                                                                                                                 |
 | `specify`      | `.specify/memory`, `.specify/scripts/bash`, `.specify/templates`                                                                                                                     |
 | `docs`         | `docs/adr/` template + Tech Radar, `docs/prompt-reports/`                                                                                                                            |
-| `project`      | Project glue: `AGENTS.md`, `.github/copilot-instructions.md`, `pull_request_template.md`, `project.code-workspace`, `.vscode/settings.json`, `.gitignore`, hook scripts              |
+| `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `project.code-workspace`, `.vscode/settings.json`, `.gitignore`, hook scripts                           |
 | `speckit`      | Narrows `agents` and `prompts` to `speckit.*` and `review.speckit-*` files, and pulls in the `.specify/*` content. Combine with `agents` or `prompts` to widen back to the full set. |
 | `mcp`          | Opt-in MCP example pack: `.vscode/mcp.json.example`, `.github/mcp/` per-server READMEs, and `docs/mcp.md`. Included by default and by `all`; otherwise only when listed explicitly.  |
 
@@ -312,7 +311,7 @@ make test   # Apply pipeline and script tests
 1. **Raise an issue or PR** describing the planned changes.
 2. **Keep artefacts in sync** - specs, plans, tasks, and docs must align.
 3. **Run quality gates** - `make lint && make test` must pass before opening a PR.
-4. **Follow the constitution** in `.specify/memory/constitution.md` and the cross-agent rules in [AGENTS.md](../AGENTS.md).
+4. **Follow the constitution** in `.specify/memory/constitution.md` and the repository-wide rules in [.github/copilot-instructions.md](../.github/copilot-instructions.md).
 
 See [.github/contributing.md](../.github/contributing.md) for the full contributor guide.
 

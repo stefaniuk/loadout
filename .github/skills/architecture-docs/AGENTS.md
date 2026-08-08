@@ -1,11 +1,11 @@
 # Skill-Local Agent Instructions: Architecture Docs
 
-> **Scope.** This file applies only to the `architecture-docs` skill subtree. The canonical baseline is the [root AGENTS.md](../../../AGENTS.md); nothing here may contradict it.
+> **Scope.** This file applies only to the `architecture-docs` skill subtree. The canonical baseline is [.github/copilot-instructions.md](../../copilot-instructions.md); nothing here may contradict it.
 
 ## Inheritance and precedence
 
-- Inherit all rules from [root AGENTS.md](../../../AGENTS.md) and [.github/copilot-instructions.md](../../copilot-instructions.md).
-- When a conflict exists within this skill's subtree, the closest file applies; otherwise root rules win.
+- Inherit all rules from [.github/copilot-instructions.md](../../copilot-instructions.md).
+- When a conflict exists within this skill's subtree, the closest file applies; otherwise repository-wide Copilot rules win.
 - For the full task workflow, read [SKILL.md](SKILL.md). This file captures only behavioural constraints, not the workflow itself.
 
 ## Skill-local rules
@@ -17,11 +17,11 @@
 - **Mark unknowns explicitly.** When information cannot be determined from the codebase, record `Unknown from code - {suggested action}` rather than inferring.
 - **Update the index on every step.** After producing any artefact, update `docs/prompt-reports/README.md` so the catalogue stays in sync before handing off.
 
-## Deviations from root AGENTS.md
+## Deviations from repository-wide Copilot instructions
 
 None.
 
 ## References
 
 - [SKILL.md](SKILL.md) - the skill's task workflow.
-- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.
+- [.github/copilot-instructions.md](../../copilot-instructions.md) - canonical baseline.

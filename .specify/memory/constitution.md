@@ -99,7 +99,7 @@ During specification, planning, and implementation, AI must work within the spec
 
 - Every behavioural change must be intentional, documented, and reviewable, with backwards-incompatible changes called out explicitly.
 - When trade-offs exist between speed and correctness, convenience and clarity, or cleverness and simplicity, this constitution is final authority.
-- See AGENTS.md "Implementation discipline" for the operational rules that apply to every agent interaction.
+- See [.github/copilot-instructions.md](../../.github/copilot-instructions.md) for the operational implementation-discipline rules used in this repository's Copilot workflows.
 
 ---
 
@@ -191,11 +191,7 @@ Design architecture to enable fast, safe flow of change. The goal is not theoret
 ### 4.6 Architecture Decision Records
 
 - Significant architectural decisions must be recorded with rationale and alternatives considered.
-- See AGENTS.md "Architectural decisions" for the operational ADR process and template requirements.
-
-### 4.7 Cloud Well-Architected Alignment
-
-- Where deployed to cloud platforms, follow the relevant cloud Well-Architected Framework and assess the solution against it.
+- See [.github/copilot-instructions.md](../../.github/copilot-instructions.md) for the operational ADR process and template requirements used in this repository's Copilot workflows.
 
 ---
 
@@ -234,10 +230,6 @@ Design architecture to enable fast, safe flow of change. The goal is not theoret
 - Output formats must be stable and deterministic.
 - Any output ordering rules must be specified (for example stable sorting).
 
-### 6.3 No Hidden State
-
-The rules in §3.2 (Determinism, Explicitness, and No Hidden State) apply to all data models and outputs. Behaviour must not depend on hidden or implicit state.
-
 ---
 
 ## 7. Code Quality Guardrails
@@ -258,9 +250,8 @@ The rules in §3.2 (Determinism, Explicitness, and No Hidden State) apply to all
 
 - All code must use the language's typing facilities consistently. Public APIs, function parameters, return values, and data models must have explicit types.
 - Avoid `any`-style escape hatches or implicit dynamic typing except where explicitly justified and documented.
-- TypeScript and Python are not exempt. Both must use type annotations with static analysis enforced.
 - Any exception must be explicitly documented with rationale, limited in scope, and removed as soon as practicable (see §11.4).
-- Language-specific typing details (for example shell script exemptions) belong in the relevant technology instruction file, not this constitution.
+- Language-specific typing details belong in the relevant technology instruction file, not this constitution.
 
 ### 7.4 Functions and Methods
 
@@ -280,14 +271,7 @@ The rules in §3.2 (Determinism, Explicitness, and No Hidden State) apply to all
 
 ### 7.6 Code Smells
 
-- Code smells must be actively identified and removed, including (not limited to):
-  - Long functions
-  - Large classes
-  - Primitive obsession
-  - Flag arguments
-  - Deep nesting
-  - Temporal coupling
-  - Inconsistent naming
+- Code smells must be actively identified and removed.
 
 ### 7.7 Incremental Improvement
 
@@ -295,17 +279,7 @@ The rules in §3.2 (Determinism, Explicitness, and No Hidden State) apply to all
 - Small, incremental improvements are preferred over large rewrites.
 - Improvements must not widen scope or introduce new behaviour.
 
-### 7.8 File Ordering and Navigability
-
-Within a file, order code to match the primary execution / call flow to aid readability and navigation:
-
-- Put the main entrypoint first (for example `main()` or the primary public API entry).
-- Next, place the functions/methods it calls directly, then the functions/methods they call, and so on (top-down, in call order).
-- Keep closely related helpers adjacent to the behaviour they support.
-
-If strict call-order would reduce clarity (for example shared utilities used widely), group those helpers in a clearly labelled "Utilities" section at the end of the file.
-
-### 7.9 Automated Quality Enforcement
+### 7.8 Mandatory Local Quality Gates
 
 - Quality must be protected by **robust and comprehensive automation** (tests, checks, policies), not by hope or manual vigilance.
 - Where CI exists, CI quality gates are authoritative for merge readiness; local gates must mirror them as closely as practical.

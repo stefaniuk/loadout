@@ -67,7 +67,7 @@ Conventions for filenames, identifier schemes, and frontmatter live in the per-f
 
 ## ADR triggers
 
-Architecture Decision Records capture significant technical choices. The complete trigger list and ADR workflow are defined in [AGENTS.md](../AGENTS.md#architectural-decisions-adrs). In short, raise an ADR when a change affects:
+Architecture Decision Records capture significant technical choices. The complete trigger list and ADR workflow are defined in [.github/copilot-instructions.md](../.github/copilot-instructions.md). In short, raise an ADR when a change affects:
 
 - architectural style or pattern;
 - language, framework, or tooling selection within a language pack;
@@ -226,7 +226,7 @@ Includes are reusable Markdown fragments referenced from instruction packs (and,
 
 ## ADR trigger checklist
 
-Raise an ADR if any answer below is **yes**. Full prose, workflow, and template requirements live in [AGENTS.md](../AGENTS.md#architectural-decisions-adrs); do not duplicate them here.
+Raise an ADR if any answer below is **yes**. Full prose, workflow, and template requirements live in [.github/copilot-instructions.md](../.github/copilot-instructions.md); do not duplicate them here.
 
 - [ ] Does the change adopt or replace an **architectural style** (event-driven, layered, microservices, monolith, …)?
 - [ ] Does it adopt or replace an **architectural pattern** (event sourcing, repository pattern, composition over inheritance, …)?
@@ -242,22 +242,22 @@ For tooling choices inside a language pack, consult the [Tech Radar](adr/Tech_Ra
 
 VS Code combines every applicable instruction file into the chat context. When the rules conflict, the **higher-priority source wins**:
 
-1. **Personal instructions** - user-profile `.instructions.md` files and personal `AGENTS.md`/`CLAUDE.md` variants. Highest priority.
-2. **Repository instructions** - `.github/copilot-instructions.md`, `AGENTS.md`, and every `.github/instructions/*.instructions.md` whose `applyTo` glob matches the current file.
+1. **Personal instructions** - user-profile `.instructions.md` files and other user-level instruction files. Highest priority.
+2. **Repository instructions** - `.github/copilot-instructions.md` and every `.github/instructions/*.instructions.md` whose `applyTo` glob matches the current file.
 3. **Organisation instructions** - GitHub-org-level instructions discovered via `github.copilot.chat.organizationInstructions.enabled`. Lowest priority.
 
 Within a single tier, **no merge order is guaranteed**. VS Code states explicitly that "if you have multiple instruction files in your project, VS Code combines and adds them to the chat context, no specific order is guaranteed" ([custom-instructions docs](https://code.visualstudio.com/docs/copilot/customization/custom-instructions#_types-of-instruction-files)). Treat every set of co-applying instruction files as an **unordered bag of rules**.
 
 Practical consequences in this repository:
 
-- `AGENTS.md` is the canonical baseline (see its preamble). Workspace `.instructions.md` files must not contradict it; agent-specific additions live in sibling files such as `.github/copilot-instructions.md`.
+- `.github/copilot-instructions.md` is the repository-wide baseline. Workspace `.instructions.md` files must not contradict it.
 - Two instruction packs whose `applyTo` globs overlap (for example `playwright-typescript.instructions.md` and `typescript.instructions.md` both match `**/*.ts`) are both loaded. Their rules **must be compatible** - if a tension exists, narrow one pack's `applyTo` or move the disputed rule into an include shared by both.
 - Foundation packs (`likec4`, `readme`) are loaded purely by `applyTo` matching and have no enforce prompt to resolve conflicts; keep them strictly additive.
 
 ### Writing conflict-safe instructions
 
 - **Be order-independent.** A rule that depends on another rule being read first is fragile. State preconditions explicitly inside the rule itself.
-- **Scope tightly with `applyTo`.** Use the narrowest glob that captures the intended files. Repo-wide rules belong in `AGENTS.md` or `.github/copilot-instructions.md`, not in a `.instructions.md` with `applyTo: "**"`.
+- **Scope tightly with `applyTo`.** Use the narrowest glob that captures the intended files. Repo-wide rules belong in `.github/copilot-instructions.md`, not in a `.instructions.md` with `applyTo: "**"`.
 - **Avoid contradictions across packs.** Before adding a rule to a pack whose `applyTo` overlaps another, search the overlapping pack for the same topic and reconcile, or extract the shared rule into an include.
 - **Single source of truth per rule.** Each normative rule carries a unique identifier (for example `[PY-LOG-003]`) and is stated in exactly one location; cross-cutting baselines live in `includes/`.
 - **Use diagnostics to verify load order is irrelevant.** Run **Chat: Diagnostics** to enumerate which instruction files were applied; if a rule's behaviour changes when an unrelated pack is added, the rule is order-dependent and must be rewritten.

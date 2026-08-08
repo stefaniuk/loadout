@@ -1,11 +1,11 @@
 # Skill-Local Agent Instructions: Repository Template
 
-> **Scope.** This file applies only to the `repository-template` skill subtree. The canonical baseline is the [root AGENTS.md](../../../AGENTS.md); nothing here may contradict it.
+> **Scope.** This file applies only to the `repository-template` skill subtree. The canonical baseline is [.github/copilot-instructions.md](../../copilot-instructions.md); nothing here may contradict it.
 
 ## Inheritance and precedence
 
-- Inherit all rules from [root AGENTS.md](../../../AGENTS.md) and [.github/copilot-instructions.md](../../copilot-instructions.md).
-- When a conflict exists within this skill's subtree, the closest file applies; otherwise root rules win.
+- Inherit all rules from [.github/copilot-instructions.md](../../copilot-instructions.md).
+- When a conflict exists within this skill's subtree, the closest file applies; otherwise repository-wide Copilot rules win.
 - For the full task workflow, read [SKILL.md](SKILL.md). This file captures only behavioural constraints, not the workflow itself.
 
 ## Skill-local rules
@@ -18,11 +18,11 @@
 - **Verify after adoption.** After any `make apply` (or manual copy), instruct the user to run `make lint && make test` in the destination and to execute the capability-specific verification commands documented in [SKILL.md](SKILL.md).
 - **Identifier discipline.** When introducing rule blocks inside this skill, use the `[REPO-TEMPLATE-<area>-NNN]` tag scheme so downstream audits can cite them.
 
-## Deviations from root AGENTS.md
+## Deviations from repository-wide Copilot instructions
 
 None.
 
 ## References
 
 - [SKILL.md](SKILL.md) - the skill's task workflow and capability catalogue.
-- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.
+- [.github/copilot-instructions.md](../../copilot-instructions.md) - canonical baseline.

@@ -1,15 +1,14 @@
 # Skill-Local Agent Instructions: System Documentation
 
 > **Scope.** This file applies only to the `system-documentation` skill
-> subtree. The canonical baseline is the
-> [root AGENTS.md](../../../AGENTS.md); nothing here may contradict it.
+> subtree. The canonical baseline is
+> [.github/copilot-instructions.md](../../copilot-instructions.md); nothing here may contradict it.
 
 ## Inheritance and precedence
 
-- Inherit all rules from [root AGENTS.md](../../../AGENTS.md) and
-  [.github/copilot-instructions.md](../../copilot-instructions.md).
+- Inherit all rules from [.github/copilot-instructions.md](../../copilot-instructions.md).
 - When a conflict exists within this skill's subtree, the closest file
-  applies; otherwise root rules win.
+  applies; otherwise repository-wide Copilot rules win.
 - For the full task workflow, read [SKILL.md](SKILL.md). This file captures
   only behavioural constraints, not the workflow itself.
 
@@ -46,13 +45,13 @@
   before summaries and group them as missing, misplaced, duplicated,
   conflicting, or stale documentation.
 
-## Deviations from root AGENTS.md
+## Deviations from repository-wide Copilot instructions
 
 None.
 
 ## References
 
 - [SKILL.md](SKILL.md) - the skill workflow.
-- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.
+- [.github/copilot-instructions.md](../../copilot-instructions.md) - canonical baseline.
 - [constitution](../../../.specify/memory/constitution.md) - highest
   authority.

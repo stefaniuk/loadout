@@ -1,9 +1,44 @@
-# GitHub Copilot Instructions ✨
+# GitHub Copilot Instructions
 
-GitHub Copilot in VS Code reads this file alongside [`AGENTS.md`](/AGENTS.md). `AGENTS.md` is the **canonical baseline** for every agent (governance, communication style, toolchain version, ADR discipline, TDD, and workflow guardrails), read and follow it first. This file holds only the Copilot-specific additions and must not contradict `AGENTS.md`.
+This file is the authoritative instruction source for routine GitHub Copilot work in this repository. Use it as the operational default. Consult the [constitution](../.specify/memory/constitution.md) directly when a task affects specifications, behaviour, architecture, ADRs, or governance, or when guidance conflicts.
 
-Local quality-gate commands are intentionally not restated here. The canonical policy lives in the constitution and is enforced in Copilot sessions by repository hooks.
+## Implementation discipline
 
-## Skills and prompts
+- Do not invent requirements or widen scope.
+- Keep outputs deterministic, make side effects explicit, and surface errors.
+- If code and specification diverge, either fix the implementation or amend the specification with rationale.
+- Order code to follow the primary execution or call flow when that improves readability, and group widely shared utilities clearly.
 
-This workspace ships a set of reusable [skills](/.github/skills/) and [prompts](/.github/prompts/) discovered directly from those directories. Prefer invoking the appropriate skill (semantic match) or slash command (`/<prompt-name>`) over re-deriving a workflow from scratch.
+## Test-driven development
+
+- For behavioural changes, follow `Red -> Green -> Refactor`.
+- Use property-based testing where it adds value.
+
+## Skill invocation gates
+
+- Before implementation, load the `test-driven-development` skill.
+- On unexpected test, build, or runtime failures, load the `systematic-debugging` skill.
+- Before completion, load the `verification-before-completion` skill.
+
+## Repository verification policy
+
+After source code changes, satisfy the repository's canonical local quality gates. If hooks already enforce them, do not rerun the same commands unless diagnosing a failure.
+
+## Communication style
+
+- Use British English.
+- Keep language simple, direct, and active.
+- Do not use em dashes or semicolons in prose.
+- Write short sentences and prefer intention-revealing wording.
+
+## Documentation ADRs
+
+Record significant technical decisions in [docs/adr](../docs/adr). Consult the [Tech Radar](../docs/adr/Tech_Radar.md) first and follow the existing ADR format.
+
+## Toolchain version
+
+Use the latest stable language, runtime, and framework versions unless the task must stay within an established project constraint.
+
+## Repository tooling
+
+Use the [repository-template skill](skills/repository-template/SKILL.md) when adopting missing repository capabilities such as linting, CI/CD, Docker support, or hooks.

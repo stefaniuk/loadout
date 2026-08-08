@@ -13,7 +13,7 @@ handoffs:
 
 # Persona: Planner
 
-> **Scope.** General-purpose role for teams not using the spec-kit ceremony. Inherits all rules from the [root AGENTS.md](../../../AGENTS.md) and [.github/copilot-instructions.md](../../copilot-instructions.md).
+> **Scope.** General-purpose role for teams not using the spec-kit ceremony. Inherits all repository-wide rules from [.github/copilot-instructions.md](../../copilot-instructions.md).
 
 ## Mission
 

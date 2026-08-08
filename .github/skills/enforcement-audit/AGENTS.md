@@ -1,11 +1,11 @@
 # Skill-Local Agent Instructions: Enforcement Audit
 
-> **Scope.** This file applies only to the `enforcement-audit` skill subtree. The canonical baseline is the [root AGENTS.md](../../../AGENTS.md); nothing here may contradict it.
+> **Scope.** This file applies only to the `enforcement-audit` skill subtree. The canonical baseline is [.github/copilot-instructions.md](../../copilot-instructions.md); nothing here may contradict it.
 
 ## Inheritance and precedence
 
-- Inherit all rules from [root AGENTS.md](../../../AGENTS.md) and [.github/copilot-instructions.md](../../copilot-instructions.md).
-- When a conflict exists within this skill's subtree, the closest file applies; otherwise root rules win.
+- Inherit all rules from [.github/copilot-instructions.md](../../copilot-instructions.md).
+- When a conflict exists within this skill's subtree, the closest file applies; otherwise repository-wide Copilot rules win.
 - For the full task workflow, read [SKILL.md](SKILL.md). This file captures only behavioural constraints, not the workflow itself.
 
 ## Skill-local rules
@@ -19,11 +19,11 @@
 - **Quality-gate compliance.** Each implementation batch must satisfy the repository quality gates before the next batch or final summary. When hooks or other automation already enforce those gates, rely on that enforcement rather than rerunning the same commands blindly.
 - **Mark unknowns explicitly.** Record `Unknown from code - verify {topic} with maintainers` rather than assuming; unresolved unknowns must be tracked as explicit follow-ups in the plan file.
 
-## Deviations from root AGENTS.md
+## Deviations from repository-wide Copilot instructions
 
 None.
 
 ## References
 
 - [SKILL.md](SKILL.md) - the skill's task workflow and technology resolution table.
-- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.
+- [.github/copilot-instructions.md](../../copilot-instructions.md) - canonical baseline.

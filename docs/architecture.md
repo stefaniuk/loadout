@@ -29,13 +29,13 @@ The prompt library is organised into six customisation layers. Each layer builds
 │  Layer 0: Governance (constitution + ADRs)  │
 │  .specify/memory/constitution.md            │
 │  docs/adr/                                  │
-│  AGENTS.md                                  │
+│  .github/copilot-instructions.md            │
 └─────────────────────────────────────────────┘
 ```
 
 Each layer in detail:
 
-- **Layer 0 - Governance.** The project constitution, ADRs, and cross-agent `AGENTS.md` set non-negotiable rules. Every other layer must honour them. Changes here are infrequent and reviewed deliberately.
+- **Layer 0 - Governance.** The project constitution, ADRs, and [.github/copilot-instructions.md](../.github/copilot-instructions.md) set non-negotiable rules. Every other layer must honour them. Changes here are infrequent and reviewed deliberately.
 - **Layer 1 - Instructions.** Coding standards scoped by file glob (for example `**/*.py`, `**/Dockerfile`). Copilot loads them automatically when relevant files are open, so they shape every suggestion. Shared baselines live in `.github/instructions/includes/`.
 - **Layer 2 - Prompts.** One-off, copy-runnable tasks (documentation reviews, enforcement passes, utility commands). They reference instructions and agents but are invoked explicitly.
 - **Layer 3 - Agents.** Persistent personas with tool restrictions and handoff chains. Spec-kit ceremonies (`speckit.specify`, `speckit.plan`, `speckit.tasks`, `speckit.implement`) live here.

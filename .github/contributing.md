@@ -526,7 +526,7 @@ VS Code Copilot merges every instruction file whose `applyTo` glob matches the c
 - **Scope `applyTo` tightly.** A narrow glob (`src/api/**/*.py`) wins fewer conflicts than `**/*.py`.
 - **Avoid contradictions across files.** If two files target the same path, their rules must be additive. Resolve conflicts by merging or splitting `applyTo`.
 - **Verify the loaded set in VS Code.** Open a target file → run _Developer: Show Language Server Output_ or check the Copilot diagnostics panel to confirm which instruction files were actually applied.
-- **Global rules go in `.github/copilot-instructions.md` and [`AGENTS.md`](../AGENTS.md).** Per-language rules go in `.github/instructions/*.instructions.md`.
+- **Global rules go in `.github/copilot-instructions.md`.** Per-language rules go in `.github/instructions/*.instructions.md`.
 
 ---
 

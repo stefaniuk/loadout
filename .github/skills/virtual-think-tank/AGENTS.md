@@ -1,11 +1,11 @@
 # Skill-Local Agent Instructions: Virtual Think Tank
 
-> **Scope.** This file applies only to the `virtual-think-tank` skill subtree. The canonical baseline is the [root AGENTS.md](../../../AGENTS.md); nothing here may contradict it.
+> **Scope.** This file applies only to the `virtual-think-tank` skill subtree. The canonical baseline is [.github/copilot-instructions.md](../../copilot-instructions.md); nothing here may contradict it.
 
 ## Inheritance and precedence
 
-- Inherit all rules from [root AGENTS.md](../../../AGENTS.md) and [.github/copilot-instructions.md](../../copilot-instructions.md).
-- When a conflict exists within this skill's subtree, the closest file applies; otherwise root rules win.
+- Inherit all rules from [.github/copilot-instructions.md](../../copilot-instructions.md).
+- When a conflict exists within this skill's subtree, the closest file applies; otherwise repository-wide Copilot rules win.
 - For the full task workflow, read [SKILL.md](SKILL.md). This file captures only behavioural constraints, not the workflow itself.
 
 ## Skill-local rules
@@ -17,7 +17,7 @@
 - **Standalone wording only.** Files in this subtree should read as complete artefacts in their own right. Avoid provenance, migration, or historical framing unless the user explicitly asks for it.
 - **Named panels require real disagreement.** When examples or templates use `named_*` fields, the named voices should represent materially different viewpoints, not just famous people from the same school of thought.
 
-## Deviations from root AGENTS.md
+## Deviations from repository-wide Copilot instructions
 
 None.
 
@@ -26,4 +26,4 @@ None.
 - [SKILL.md](./SKILL.md) - the skill workflow and runtime behaviour.
 - [assets/briefing-template.md](./assets/briefing-template.md) - the structured input contract.
 - [examples/](./examples/) - usage examples and overview index.
-- [root AGENTS.md](../../../AGENTS.md) - canonical baseline.
+- [.github/copilot-instructions.md](../../copilot-instructions.md) - canonical baseline.

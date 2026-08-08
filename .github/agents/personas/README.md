@@ -4,7 +4,7 @@
 
 General-purpose, non-speckit agent roles for teams that want a lightweight planner → implementer → reviewer → release-manager flow without adopting the full spec-kit ceremony.
 
-All personas inherit governance from the [root AGENTS.md](../../../AGENTS.md) and [.github/copilot-instructions.md](../../copilot-instructions.md) - including British English, mandatory TDD, the `make lint && make test` quality gates, and ADR discipline.
+All personas inherit governance from [.github/copilot-instructions.md](../../copilot-instructions.md), including British English, mandatory TDD, the `make lint && make test` quality gates, and ADR discipline.
 
 ## Handoff choreography
 

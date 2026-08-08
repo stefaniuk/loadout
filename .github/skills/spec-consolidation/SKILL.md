@@ -91,8 +91,7 @@ Before starting any step:
 
 1. Read the [constitution](../../../.specify/memory/constitution.md) - highest
    authority.
-2. Read the [root AGENTS.md](../../../AGENTS.md) and
-   [.github/copilot-instructions.md](../../copilot-instructions.md).
+2. Read [.github/copilot-instructions.md](../../copilot-instructions.md).
 3. Enumerate every `specs/NNN-*/` directory and record which artefact types
    each one carries, including whether `checklists/` exists at all.
 4. If the repo is medium or large, use one read-only exploration-agent pass up
@@ -172,7 +171,7 @@ Before starting any step:
 13. **Non-destructive.** Never delete or rewrite the source `specs/NNN-*/`
     directories. Archival is an operator decision documented in the final
     summary message.
-14. **British English, ASCII-only**, in line with [AGENTS.md](../../../AGENTS.md).
+14. **British English, ASCII-only**, in line with [.github/copilot-instructions.md](../../copilot-instructions.md).
 
 ## Workflow Per Step
 
