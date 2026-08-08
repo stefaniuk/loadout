@@ -23,8 +23,8 @@ Three paths are supported. Pick the one that matches your goal:
 Clone the repository and configure the local environment:
 
 ```bash
-git clone https://github.com/stefaniuk/awesome-copilot-promptfiles.git
-cd awesome-copilot-promptfiles
+git clone https://github.com/stefaniuk/spec-driven-copilot.git
+cd spec-driven-copilot
 
 # Configure the development environment (installs git hooks, sets up scripts)
 make config
@@ -44,7 +44,7 @@ make lint
 make test
 ```
 
-**Expected output:** Each command completes with exit code `0`. Linting covers markdown, links, scripts, and configuration; tests exercise the apply pipeline and helper scripts. If either command fails on a clean clone, [open an issue](https://github.com/stefaniuk/awesome-copilot-promptfiles/issues) with the failure output.
+**Expected output:** Each command completes with exit code `0`. Linting covers markdown, links, scripts, and configuration; tests exercise the apply pipeline and helper scripts. If either command fails on a clean clone, [open an issue](https://github.com/stefaniuk/spec-driven-copilot/issues) with the failure output.
 
 ## Apply workflow to downstream repos
 
@@ -64,7 +64,7 @@ What gets copied:
 - `scripts/hooks/`
 - `.specify/scripts/bash`, `.specify/templates`
 - `docs/adr/ADR-nnn_Any_Decision_Record_Template.md`
-- `docs/prompt-reports/`, `docs/prompts/`, `docs/.gitignore`
+- `docs/prompt-reports/`, `docs/.gitignore`
 - `project.code-workspace` (only if missing in the target)
 
 After the copy completes, review `git status` in the target repository, commit the changes, and run `make lint && make test` to confirm everything wires up correctly.
@@ -75,7 +75,7 @@ The repository can be installed directly as a VS Code agent plugin, providing sk
 
 1. Open VS Code with Copilot agent mode enabled.
 2. Run `Cmd+Shift+P` → **Chat: Install Plugin From Source**.
-3. Enter the repository URL: `https://github.com/stefaniuk/awesome-copilot-promptfiles`.
+3. Enter the repository URL: `https://github.com/stefaniuk/spec-driven-copilot`.
 
 After installation, skills like `/enforcement-audit` and `/architecture-docs` appear as slash commands, and `speckit.*` agents appear in the agent dropdown.
 
@@ -114,7 +114,7 @@ Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `
 | `prompts`      | `.github/prompts/` (plus tech enforcement prompts when language flags are set)                                                                                                       |
 | `skills`       | `.github/skills/` (plus tech skills when `django`/`fastapi` are set)                                                                                                                 |
 | `specify`      | `.specify/memory`, `.specify/scripts/bash`, `.specify/templates`                                                                                                                     |
-| `docs`         | `docs/adr/` template + Tech Radar, `docs/prompt-reports/`, `docs/prompts/`                                                                                                           |
+| `docs`         | `docs/adr/` template + Tech Radar, `docs/prompt-reports/`                                                                                                                            |
 | `project`      | Project glue: `AGENTS.md`, `.github/copilot-instructions.md`, `pull_request_template.md`, `project.code-workspace`, `.vscode/settings.json`, `.gitignore`, hook scripts              |
 | `speckit`      | Narrows `agents` and `prompts` to `speckit.*` and `review.speckit-*` files, and pulls in the `.specify/*` content. Combine with `agents` or `prompts` to widen back to the full set. |
 | `mcp`          | Opt-in MCP example pack: `.vscode/mcp.json.example`, `.github/mcp/` per-server READMEs, and `docs/mcp.md`. Included by default and by `all`; otherwise only when listed explicitly.  |
@@ -167,8 +167,8 @@ Contributors follow the same `make config` flow as users, then layer the quality
 ### Development setup
 
 ```bash
-git clone https://github.com/stefaniuk/awesome-copilot-promptfiles.git
-cd awesome-copilot-promptfiles
+git clone https://github.com/stefaniuk/spec-driven-copilot.git
+cd spec-driven-copilot
 make config
 ```
 
@@ -192,7 +192,7 @@ See [.github/contributing.md](../.github/contributing.md) for the full contribut
 
 <!-- TODO: Populate with evidence-backed recurring issues as they emerge from real usage. -->
 
-No recurring issues have been documented yet. If you hit a reproducible problem, [open an issue](https://github.com/stefaniuk/awesome-copilot-promptfiles/issues) so it can be triaged and added here.
+No recurring issues have been documented yet. If you hit a reproducible problem, [open an issue](https://github.com/stefaniuk/spec-driven-copilot/issues) so it can be triaged and added here.
 
 ---
 

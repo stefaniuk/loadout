@@ -45,7 +45,6 @@
 - **Findings-first reviews.** In `audit` and `pre-pr-review`, report findings
   before summaries and group them as missing, misplaced, duplicated,
   conflicting, or stale documentation.
-- **British English, ASCII-only.**
 
 ## Deviations from root AGENTS.md
 

@@ -16,7 +16,6 @@
 - **Evidence-first authoring.** Every claim must cite a concrete repository path (with line range where applicable) or an external source. Never guess.
 - **Mark unknowns explicitly.** When information cannot be determined from the codebase, record `Unknown from code - {suggested action}` rather than inferring.
 - **Update the index on every step.** After producing any artefact, update `docs/prompt-reports/README.md` so the catalogue stays in sync before handing off.
-- **ASCII by default.** Keep output ASCII-only unless the touched files already contain Unicode.
 
 ## Deviations from root AGENTS.md
 

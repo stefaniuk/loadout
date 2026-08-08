@@ -57,7 +57,6 @@ set -euo pipefail
 #   - ADR-nnn_Any_Decision_Record_Template.md
 #   - Tech_Radar.md
 #   - docs/prompt-reports/
-#   - docs/prompts/
 #   - project.code-workspace (if not already present)
 #   - .gitignore content (managed section with begin/end markers)
 #
@@ -98,7 +97,6 @@ PULL_REQUEST_TEMPLATE="${REPO_ROOT}/.github/pull_request_template.md"
 ADR_TEMPLATE="${REPO_ROOT}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
 ADR_TECH_RADAR="${REPO_ROOT}/docs/adr/Tech_Radar.md"
 DOCS_ARCHITECTURE="${REPO_ROOT}/docs/prompt-reports"
-DOCS_PROMPTS="${REPO_ROOT}/docs/prompts"
 MCP_VSCODE_EXAMPLE="${REPO_ROOT}/.vscode/mcp.json.example"
 MCP_GITHUB_DIR="${REPO_ROOT}/.github/mcp"
 MCP_DOC="${REPO_ROOT}/docs/mcp.md"
@@ -510,7 +508,6 @@ function copy-shared-resources() {
   if [[ "${SUBSET_DOCS}" == "true" ]]; then
     copy-adr-template "${destination}"
     copy-docs-architecture "${destination}"
-    copy-docs-prompts "${destination}"
   else
     subset-skip "docs"
   fi
@@ -689,12 +686,6 @@ function revert-shared-resources() {
       print-info "Removing ${dest}/docs/prompt-reports"
       rm -rf "${dest:?}/docs/prompt-reports"
     fi
-  fi
-
-  # Remove docs/prompts directory
-  if [[ -d "${dest}/docs/prompts" ]]; then
-    print-info "Removing ${dest}/docs/prompts"
-    rm -rf "${dest:?}/docs/prompts"
   fi
 
   # Remove managed VS Code settings properties
@@ -1091,18 +1082,6 @@ function copy-docs-architecture() {
   fi
 }
 
-# Copy docs/prompts directory to the destination.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function copy-docs-prompts() {
-
-  local dest="$1/docs"
-  mkdir -p "${dest}/prompts"
-
-  print-info "Copying docs/prompts to ${dest}/prompts"
-  cp -R "${DOCS_PROMPTS}/." "${dest}/prompts/"
-}
-
 # Copy project.code-workspace to the destination if it does not already exist.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
@@ -1441,7 +1420,7 @@ Always copied (default/glue layer):
     Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
     Spec-kit agents, prompts, templates and constitution
     Shell, Docker, Makefile instructions and prompts
-    docs/prompt-reports/, docs/prompts/, ADR template, Tech_Radar.md
+    docs/prompt-reports/, ADR template, Tech_Radar.md
     project.code-workspace and managed .gitignore section
 
 Examples:

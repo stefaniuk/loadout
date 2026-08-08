@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-07-31T06:38:55Z",
-  "sourceRevision": "de425f3",
+  "generatedAt": "2026-08-08T13:59:52Z",
+  "sourceRevision": "2fbc812",
   "counts": {
     "instruction": 14,
     "prompt": 39,
     "agent": 14,
-    "skill": 8,
+    "skill": 9,
     "hook": 2,
-    "total": 77,
+    "total": 78,
     "packs": 12,
     "byPack": {
-      "core": 54,
+      "core": 55,
       "speckit": 23
     }
   },
@@ -1072,6 +1072,22 @@
         "license": "MIT",
         "allowedTools": [],
         "argumentHint": "Optional: step (foundation, architecture, reference, explanation, how-to, tutorials, operations, audience-indexes, governance, all), mode (establish, sync, audit, pre-pr-review), and scope (path, feature dir, or changed files)"
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/virtual-think-tank/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/virtual-think-tank/SKILL.md",
+      "name": "virtual-think-tank",
+      "description": "Run a structured multi-step think tank for engineering, architecture, product, process, policy, vendor, or organisational decisions. Use when the user needs conflicting viewpoints, explicit trade-offs, and a forced human decision rather than a one-shot answer.",
+      "applyTo": null,
+      "tags": ["virtual-think-tank"],
+      "metadata": {
+        "version": "1.0.0",
+        "license": "MIT",
+        "allowedTools": [],
+        "argumentHint": "Paste a decision brief, or say guided and answer the questions step by step"
       },
       "pack": "core"
     },

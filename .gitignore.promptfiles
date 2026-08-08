@@ -67,9 +67,6 @@ docs/prompt-reports/
 # MCP documentation (opt-in via subset=mcp)
 docs/mcp.md
 
-# Prompts documentation
-docs/prompts/
-
 # ------------------------------------------------------------------------------
 # Workspace configuration
 # ------------------------------------------------------------------------------

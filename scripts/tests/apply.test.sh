@@ -210,7 +210,6 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" ]] || return 1
   [[ -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
   [[ -d "${d}/docs/prompt-reports" ]] || return 1
-  [[ -d "${d}/docs/prompts" ]] || return 1
   # VS Code settings
   [[ -f "${d}/.vscode/settings.json" ]] || return 1
   grep -q "chat.promptFilesRecommendations" "${d}/.vscode/settings.json" || return 1

@@ -1,166 +1,185 @@
-# GitHub Copilot Prompt Files
+# spec-driven-copilot
 
-A curated, specification-first library of prompts, instruction packs, skills, and Copilot agents that keeps AI helpers aligned with the spec-kit operating model.
-
-[![Licence](https://img.shields.io/badge/licence-MIT-green?style=for-the-badge)](LICENCE.md)
+A specification-first GitHub Copilot customisation toolkit for teams that want reusable prompts, instructions, agents, skills, hooks, and MCP examples to behave consistently across repositories.
 
 ## Why this project exists
 
-This library provides a central source of reusable prompts, instruction packs, skills, and Copilot agents for AI-assisted development workflows. It keeps AI helpers aligned with a shared, specification-driven operating model so teams gain consistent, deterministic automation across repositories.
+AI customisation tends to drift once each repository invents its own prompts, review flow, and guardrails. That makes it harder to trust outputs, onboard contributors, and keep documentation, specs, and validation rules aligned.
 
-Without shared prompt files, AI assistants drift from agreed standards, produce inconsistent outputs, and lack deterministic validation. Teams end up reinventing the same prompts and struggling to maintain alignment across projects.
-
-This library solves that by writing prompts, agents, and skills directly against the spec-kit constitution, applying deterministic lint, test, and review rules through instruction packs, and leaning on `make lint`, `make test`, and explicit governance gates so behaviour stays measurable and testable. Copy-paste reuse speeds onboarding, and governance gates keep specifications, code, and documentation synchronised.
+spec-driven-copilot packages those pieces into one reusable toolkit. It gives teams a clear starting point for governance, authoring rules, reusable workflows, and quality checks, then makes that toolkit easy to copy into another repository with the same structure and expectations.
 
 ## Quick start
+
+This path proves the repository is healthy locally and shows the main contributor workflow.
 
 ### Prerequisites
 
 - Git
-- GNU Make 3.82+
-- A text editor (VS Code recommended for Copilot integration)
+- GNU Make 3.82 or newer
+- VS Code, if you want to use the shipped GitHub Copilot customisations locally
 
-### Setup
+### Install
 
 ```bash
-git clone https://github.com/stefaniuk/awesome-copilot-promptfiles.git
-cd awesome-copilot-promptfiles
+git clone https://github.com/stefaniuk/spec-driven-copilot.git
+cd spec-driven-copilot
 make config
-make lint && make test
 ```
 
-Expected result:
+### First run
 
-- `make lint` and `make test` complete with exit code 0.
+```bash
+make lint
+make test
+```
 
-See [docs/onboarding.md](docs/onboarding.md) for the full first-run walkthrough, including installation paths, selective install flags, and contributor setup.
+Expected result
+
+- `make lint` completes without markdown, link, shell, or customisation errors.
+- `make test` completes with a zero exit code.
+
+For plugin installation, selective installs, and downstream apply workflows, see [docs/onboarding.md](docs/onboarding.md).
 
 ## What it does
 
+The repository collects the files and helper scripts needed to run a specification-first Copilot workflow without rebuilding the same structure in every project.
+
 ### Key features
 
-- **Specification-first truth:** prompts, agents, and skills are written against the spec-kit constitution so code, docs, and governance stay synchronised.
-- **Consistent guardrails:** instruction packs apply deterministic lint, test, and review rules across every repo.
-- **Deterministic automation:** every workflow leans on `make lint`, `make test`, and explicit governance gates.
-- **Copy-ready building blocks:** everything is shippable by folder, accelerating onboarding for large organisations.
-- **Governance gates:** explicit checkpoints between specification and implementation.
+- Instruction packs for languages and tools such as Python, TypeScript, Go, Rust, Docker, Terraform, and Make.
+- Prompts, personas, and speckit agents for specification, planning, implementation, review, and convergence workflows.
+- Reusable skills for documentation, code review, enforcement audits, repository templating, and framework-specific setup.
+- Deterministic hooks and quality scripts for markdown, links, shell, MCP config, and customisation metadata.
+- Optional MCP example packs with trust guidance and least-privilege defaults.
 
 ### Non-goals
 
-- Does not implement the underlying spec-kit framework itself.
-- Does not provide a runtime execution environment for prompts.
-- Not a replacement for language-specific linters or test frameworks.
+- It is not a runtime replacement for GitHub Copilot or VS Code.
+- It does not replace the language-specific build, lint, or test tooling inside a downstream repository.
+- It does not auto-enable MCP servers or inline secrets into workspace configuration.
 
 ## How it solves the problem
 
-The library is organised into six customisation layers. Each layer builds on the one below, from governance foundations through to deterministic automation hooks.
+The toolkit is organised so teams can adopt shared rules first, then layer reusable workflows on top. Governance lives in the constitution and ADRs. File-scoped instructions shape day-to-day authoring. Prompts, agents, and skills package repeatable tasks. Hooks and quality scripts catch drift before it spreads.
 
-```text
-┌─────────────────────────────────────────────┐
-│  Layer 5: Hooks (deterministic gates)       │
-├─────────────────────────────────────────────┤
-│  Layer 4: Skills (reusable capabilities)    │
-├─────────────────────────────────────────────┤
-│  Layer 3: Agents (personas + handoffs)      │
-├─────────────────────────────────────────────┤
-│  Layer 2: Prompts (one-off tasks)           │
-├─────────────────────────────────────────────┤
-│  Layer 1: Instructions (standards + rules)  │
-├─────────────────────────────────────────────┤
-│  Layer 0: Governance (constitution + ADRs)  │
-└─────────────────────────────────────────────┘
-```
+In practice, the flow is simple:
 
-A typical workflow follows the spec-kit lifecycle: discover the right prompt, ground it in a specification, plan, generate tasks, implement, converge, and review. Every validation step runs through `make lint` and `make test`.
+1. Start from the shared governance and authoring rules.
+2. Choose the prompts, agents, skills, and hooks that match your workflow.
+3. Copy them into a target repository with `make apply`.
+4. Use the built-in docs and quality gates to keep the setup understandable and consistent.
 
-See [docs/architecture.md](docs/architecture.md) for the full layer model, artefact type decision matrix, orchestration diagram, and commit conventions per lifecycle stage.
+Key concepts
+
+- `Instructions`: always-on rules matched to file types.
+- `Prompts`: one-off task entrypoints.
+- `Agents`: reusable personas and lifecycle workers.
+- `Skills`: multi-step capabilities bundled with supporting assets.
+- `Hooks`: deterministic checks that run outside the model.
+
+See [docs/architecture.md](docs/architecture.md) for the full customisation model and the spec-kit lifecycle.
 
 ## How to use
 
-This section covers the three workflows most users need first. For the full reference, see [docs/onboarding.md](docs/onboarding.md).
+The README covers the workflows most people need first. Use the docs for the full catalogue, installation variants, and architecture detail.
 
 ### Configuration
 
-No additional configuration is required beyond `make config`. The library uses convention over configuration with sensible defaults.
+Run `make config` when you want a local working copy ready for validation and contribution. When you apply the toolkit to another repository, pass the destination through `dest=/path/to/repo`. Use `subset=` and the language flags, such as `python=true`, when you only want part of the toolkit. MCP examples stay opt-in and are shipped as `.example` files.
 
 ### Common workflows
 
-#### 1. Apply the full library to a target repo
+#### Validate the toolkit locally
 
-Use this when you want to sync all prompt files into a downstream repository.
+Use this when you want to confirm the repository is in a good state before changing it.
+
+```bash
+make config
+make lint
+make test
+```
+
+Expected result
+
+- Local setup completes.
+- Linting passes.
+- Tests pass.
+
+Further reading: [docs/onboarding.md#contributor-setup-and-quality-gates](docs/onboarding.md#contributor-setup-and-quality-gates)
+
+#### Apply the full toolkit to another repository
+
+Use this when you want to copy the standard prompt, instruction, agent, skill, and hook set into a target repository.
 
 ```bash
 make apply dest=/absolute/path/to/target
 ```
 
-Expected result:
+Expected result
 
-- Prompt files, instructions, skills, and hooks are copied into the target.
+- The target repository receives the standard toolkit files.
 
-#### 2. Remote bootstrap via curl
+Further reading: [docs/onboarding.md#apply-workflow-to-downstream-repos](docs/onboarding.md#apply-workflow-to-downstream-repos)
 
-Use this when you want to install without cloning first.
+#### Install only selected packs
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/stefaniuk/awesome-copilot-promptfiles/main/scripts/install.sh \
-  | bash -s -- --dest /absolute/path/to/target --ref v1.0.0
-```
-
-Expected result:
-
-- The target repository receives the library at the pinned ref.
-
-Always pin `--ref` to an immutable tag or commit SHA in CI and shared environments.
-
-#### 3. Selective install
-
-Use this when you only need a subset of the library (for example, Python-only or Terraform-only files).
+Use this when you only need a narrower set of artefacts, such as selected languages or categories.
 
 ```bash
-make apply dest=/absolute/path/to/target python=true
+make apply dest=/absolute/path/to/target subset=instructions,prompts python=true terraform=true
 ```
 
-Expected result:
+Expected result
 
-- Only the selected technology pack is copied to the target.
+- Only the requested categories and language packs are copied.
 
-See [docs/onboarding.md#apply-workflow-to-downstream-repos](docs/onboarding.md#apply-workflow-to-downstream-repos) for the full list of flags and category-level scoping.
+Further reading: [docs/onboarding.md#selective-install](docs/onboarding.md#selective-install)
 
 ### Examples
 
-See [docs/catalogue.md](docs/catalogue.md) for the auto-generated index of every prompt, instruction pack, agent, skill, and hook in this repository. The cross-cutting taxonomy is described in [docs/conventions.md](docs/conventions.md).
+- Browse the generated artefact index in [docs/catalogue.md](docs/catalogue.md).
+- Read the naming and placement rules in [docs/conventions.md](docs/conventions.md).
+- Review the optional MCP pack in [docs/mcp.md](docs/mcp.md).
 
-## Resources
+## Documentation
 
-- [Custom Prompts](https://code.visualstudio.com/docs/copilot/customization/prompt-files): VS Code docs
-- [Custom Instructions](https://code.visualstudio.com/docs/copilot/customization/custom-instructions): VS Code docs
-- [Custom Agents](https://code.visualstudio.com/docs/copilot/customization/custom-agents): VS Code docs (this repository uses `.agent.md` exclusively)
-- [Custom Skills](https://code.visualstudio.com/docs/copilot/customization/agent-skills): VS Code docs
-- [Copilot Chat setup (macOS)](docs/prompts/vscode-copilot-chat-setup-macos.md): local setup guide
-- [Awesome Copilot](https://github.com/github/awesome-copilot): community index
+- [docs/README.md](docs/README.md): documentation landing page for the supporting docs set.
+- [docs/onboarding.md](docs/onboarding.md): setup paths, first run, selective install, and contributor flow.
+- [docs/architecture.md](docs/architecture.md): customisation layers, lifecycle, and governance gates.
+- [docs/conventions.md](docs/conventions.md): naming, placement, frontmatter, and ADR rules.
+- [docs/catalogue.md](docs/catalogue.md): generated inventory of prompts, instructions, agents, skills, and hooks.
 
 ## Contributing
 
-Contributions are welcome. The short version: clone, run `make config`, make your changes, and ensure `make lint && make test` pass before opening a PR.
+Contributions should keep the repository's specs, docs, prompts, and helper scripts aligned. Start with `make config`, make the smallest change that fits the documented workflow, then run the quality gates before you open a pull request.
 
-See [.github/contributing.md](.github/contributing.md) for the full guide, [.github/security.md](.github/security.md) for the security policy, and [docs/onboarding.md#contributor-setup-and-quality-gates](docs/onboarding.md#contributor-setup-and-quality-gates) for dev setup and quality commands.
+```bash
+make lint
+make test
+```
+
+If you change prompts, agents, skills, hooks, or generated inventories, also run `make catalogue` before you submit the change.
+
+See [.github/contributing.md](.github/contributing.md) for the full contributor guide and [.github/security.md](.github/security.md) for private vulnerability reporting.
 
 ## Repository layout
 
+These are the top-level paths most contributors need to recognise first.
+
 ```text
 .
-├── AGENTS.md                 # Cross-agent always-on instructions
-├── plugin.json               # VS Code agent plugin manifest
-├── hooks.json                # Root-level hook bindings
-├── Makefile                  # Quality, apply, and utility targets
-├── .github/                  # Agents, hooks, instructions, prompts, skills
-├── .specify/                 # Spec-kit templates and project constitution
-├── docs/                     # Architecture, onboarding, catalogue, ADRs
-└── scripts/                  # Build, apply, hook, and utility scripts
+├── .github/      # Agents, instructions, prompts, skills, hooks, and repo governance files
+├── .specify/     # Project constitution and spec-kit templates
+├── docs/         # Architecture, onboarding, catalogue, ADRs, and MCP guidance
+├── scripts/      # Apply, import, install, and quality helpers
+├── tests/        # Repository tests
+├── Makefile      # Main entrypoint for setup, validation, and apply workflows
+├── plugin.json   # VS Code plugin metadata
+└── hooks.json    # Root lifecycle hook bindings
 ```
 
-A full directory listing with per-artefact descriptions is available in [docs/catalogue.md](docs/catalogue.md).
+For a fuller inventory, see [docs/catalogue.md](docs/catalogue.md).
 
 ## Licence
 
-This project is licensed under the MIT Licence. See [LICENCE.md](LICENCE.md) for details.
+This project is licensed under the MIT Licence. See [LICENCE.md](LICENCE.md) for the full text.

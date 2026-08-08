@@ -55,7 +55,6 @@ confirm intent with operator` and surface it in `research.md`
   `specs/product/**` first, then broader repo gates. If broader gates fail for
   unrelated pre-existing issues, report that separately instead of treating the
   new product docs as the cause.
-- **British English, ASCII-only.**
 
 ## Deviations from root AGENTS.md
 
