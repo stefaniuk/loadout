@@ -50,6 +50,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Pre-Execution Checks
 
 **Check for extension hooks (before implementation)**:
+
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_implement` key
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
@@ -212,6 +213,7 @@ Note: This command assumes a complete task breakdown exists in tasks.md. If task
 **You MUST complete this section before reporting completion to the user.**
 
 Check if `.specify/extensions.yml` exists in the project root.
+
 - If it does not exist, or no hooks are registered under `hooks.after_implement`, skip to the Completion Report.
 - If it exists, read it and look for entries under the `hooks.after_implement` key.
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue to the Completion Report.

@@ -4,7 +4,7 @@ include scripts/init.mk
 # Project targets
 
 format: # Auto-format code @Quality
-	# No formatting required for this repository
+	./scripts/quality/format-markdown-tables.sh
 
 lint-file-format: # Check file formats @Quality
 	check=all ./scripts/quality/check-file-format.sh && echo "file format: ok"
@@ -75,6 +75,7 @@ import: # Import changed prompt files from a destination repository; mandatory: 
 catalogue: # Generate artefact catalogue (catalogue.json + docs/catalogue.md) @Operations
 	./scripts/quality/generate-folder-indexes.py
 	./scripts/quality/generate-catalogue.sh
+	./scripts/quality/format-markdown-tables.sh
 
 count-tokens: # Count LLM tokens for key instruction packs; optional: args=[files/options] @Operations
 	uv run --with tiktoken python scripts/count-tokens.py \

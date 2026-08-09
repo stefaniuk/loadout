@@ -70,6 +70,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Pre-Execution Checks
 
 **Check for extension hooks (before tasks generation)**:
+
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_tasks` key
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
@@ -142,6 +143,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 **You MUST complete this section before reporting completion to the user.**
 
 Check if `.specify/extensions.yml` exists in the project root.
+
 - If it does not exist, or no hooks are registered under `hooks.after_tasks`, skip to the Completion Report.
 - If it exists, read it and look for entries under the `hooks.after_tasks` key.
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue to the Completion Report.
@@ -175,6 +177,7 @@ Check if `.specify/extensions.yml` exists in the project root.
 ## Completion Report
 
 Output path to generated tasks.md and summary:
+
 - Total task count
 - Task count per user story
 - Parallel opportunities identified
