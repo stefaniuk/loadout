@@ -1,16 +1,16 @@
 {
-  "name": "awesome-copilot-promptfiles",
-  "displayName": "Awesome Copilot Promptfiles",
+  "name": "loadout",
+  "displayName": "Loadout",
   "description": "Spec-driven development toolkit with enforcement audits, architecture documentation, code review, and repository scaffolding",
   "version": "1.0.0",
   "license": "MIT",
-  "homepage": "https://github.com/stefaniuk/awesome-copilot-promptfiles",
+  "homepage": "https://github.com/stefaniuk/loadout",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stefaniuk/awesome-copilot-promptfiles.git"
+    "url": "https://github.com/stefaniuk/loadout.git"
   },
   "bugs": {
-    "url": "https://github.com/stefaniuk/awesome-copilot-promptfiles/issues"
+    "url": "https://github.com/stefaniuk/loadout/issues"
   },
   "keywords": [
     "copilot",

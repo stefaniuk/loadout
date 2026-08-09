@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/stefaniuk/awesome-copilot-promptfiles/schemas/customisation-frontmatter.schema.json",
+  "$id": "https://github.com/stefaniuk/loadout/schemas/customisation-frontmatter.schema.json",
   "title": "Customisation Frontmatter",
   "description": "Schema for YAML frontmatter across the four customisation artefact types (instruction, prompt, agent, skill). Canonical source: docs/conventions.md \u00a7'Frontmatter schema'.",
   "oneOf": [

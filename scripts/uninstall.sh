@@ -3,10 +3,10 @@
 set -euo pipefail
 umask 077
 
-# Uninstaller for awesome-copilot-promptfiles.
+# Uninstaller for loadout.
 #
 # Thin wrapper around `revert=true scripts/apply.sh <dest>` that removes
-# all promptfiles-managed artifacts from a previously-installed destination.
+# all loadout-managed artifacts from a previously-installed destination.
 # Local mode only in v1: requires a sibling apply.sh (cloned repository).
 #
 # Usage:

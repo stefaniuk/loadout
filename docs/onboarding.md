@@ -23,8 +23,8 @@ Three paths are supported. Pick the one that matches your goal:
 Clone the repository and configure the local environment:
 
 ```bash
-git clone https://github.com/stefaniuk/spec-driven-copilot.git
-cd spec-driven-copilot
+git clone https://github.com/stefaniuk/loadout.git
+cd loadout
 
 # Configure the development environment (installs git hooks, sets up scripts)
 make config
@@ -44,7 +44,7 @@ make lint
 make test
 ```
 
-**Expected output:** Each command completes with exit code `0`. Linting covers markdown, links, scripts, and configuration; tests exercise the apply pipeline and helper scripts. If either command fails on a clean clone, [open an issue](https://github.com/stefaniuk/spec-driven-copilot/issues) with the failure output.
+**Expected output:** Each command completes with exit code `0`. Linting covers markdown, links, scripts, and configuration; tests exercise the apply pipeline and helper scripts. If either command fails on a clean clone, [open an issue](https://github.com/stefaniuk/loadout/issues) with the failure output.
 
 ## Apply workflow to downstream repos
 
@@ -74,7 +74,7 @@ The repository can be installed directly as a VS Code agent plugin, providing sk
 
 1. Open VS Code with Copilot agent mode enabled.
 2. Run `Cmd+Shift+P` → **Chat: Install Plugin From Source**.
-3. Enter the repository URL: `https://github.com/stefaniuk/spec-driven-copilot`.
+3. Enter the repository URL: `https://github.com/stefaniuk/loadout`.
 
 After installation, skills like `/enforcement-audit` and `/architecture-docs` appear as slash commands, and speckit skills (`/speckit-specify`, `/speckit-plan`, etc.) become available.
 
@@ -293,8 +293,8 @@ Contributors follow the same `make config` flow as users, then layer the quality
 ### Development setup
 
 ```bash
-git clone https://github.com/stefaniuk/spec-driven-copilot.git
-cd spec-driven-copilot
+git clone https://github.com/stefaniuk/loadout.git
+cd loadout
 make config
 ```
 
@@ -318,7 +318,7 @@ See [.github/contributing.md](../.github/contributing.md) for the full contribut
 
 <!-- TODO: Populate with evidence-backed recurring issues as they emerge from real usage. -->
 
-No recurring issues have been documented yet. If you hit a reproducible problem, [open an issue](https://github.com/stefaniuk/spec-driven-copilot/issues) so it can be triaged and added here.
+No recurring issues have been documented yet. If you hit a reproducible problem, [open an issue](https://github.com/stefaniuk/loadout/issues) so it can be triaged and added here.
 
 ---
 

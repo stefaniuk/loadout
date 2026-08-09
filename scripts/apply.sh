@@ -12,7 +12,7 @@ set -euo pipefail
 #
 # Options:
 #   clean=true              # Remove destination .github/{agents,instructions,prompts,skills} before copying, default is 'false'
-#   revert=true             # Remove all promptfiles-managed artifacts from destination and exit, default is 'false'
+#   revert=true             # Remove all loadout-managed artifacts from destination and exit, default is 'false'
 #   subset=<csv>            # Restrict copy to named categories (comma-separated). Valid tokens:
 #                           #   agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, mcp, all
 #                           # Omitted or 'all' preserves the default full-copy behaviour byte-for-byte.
@@ -99,11 +99,11 @@ MCP_VSCODE_EXAMPLE="${REPO_ROOT}/.vscode/mcp.json.example"
 MCP_GITHUB_DIR="${REPO_ROOT}/.github/mcp"
 MCP_DOC="${REPO_ROOT}/docs/mcp.md"
 WORKSPACE_FILE="${REPO_ROOT}/project.code-workspace"
-GITIGNORE_PROMPTFILES="${REPO_ROOT}/.gitignore.promptfiles"
+GITIGNORE_LOADOUT="${REPO_ROOT}/.gitignore.loadout"
 
 # Begin/end markers for managed .gitignore content
-GITIGNORE_BEGIN_MARKER="# >>> promptfiles-copilot managed content - DO NOT EDIT BELOW THIS LINE >>>"
-GITIGNORE_END_MARKER="# <<< promptfiles-copilot managed content - DO NOT EDIT ABOVE THIS LINE <<<"
+GITIGNORE_BEGIN_MARKER="# >>> loadout managed content - DO NOT EDIT BELOW THIS LINE >>>"
+GITIGNORE_END_MARKER="# <<< loadout managed content - DO NOT EDIT ABOVE THIS LINE <<<"
 
 # Default instruction files (glue layer)
 DEFAULT_INSTRUCTIONS=("docker" "makefile" "readme" "shell")
@@ -193,9 +193,9 @@ function main() {
   echo
 
   if is-arg-true "${revert:-false}"; then
-    revert-promptfiles "${destination}"
+    revert-loadout "${destination}"
     echo
-    echo "Done. Promptfiles artifacts reverted from ${destination}"
+    echo "Done. Loadout artifacts reverted from ${destination}"
     return 0
   fi
 
@@ -598,11 +598,11 @@ function copilot-clean-directories() {
   return 0
 }
 
-# Remove all promptfiles-managed artifacts from the destination.
+# Remove all loadout-managed artifacts from the destination.
 # This undoes what a previous apply has done.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
-function revert-promptfiles() {
+function revert-loadout() {
 
   local dest="$1"
 
@@ -615,7 +615,7 @@ function revert-promptfiles() {
   return 0
 }
 
-# Remove copilot-specific promptfiles-managed artifacts from the destination.
+# Remove copilot-specific loadout-managed artifacts from the destination.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function revert-copilot() {
@@ -637,7 +637,7 @@ function revert-copilot() {
     rm -f "${dest}/.github/copilot-instructions.md"
   fi
 
-  # Remove hook scripts (scripts/hooks/ is fully managed by promptfiles;
+  # Remove hook scripts (scripts/hooks/ is fully managed by loadout;
   # any user-authored files placed there will be removed on revert)
   if [[ -d "${dest}/scripts/hooks" ]]; then
     print-info "Removing ${dest}/scripts/hooks"
@@ -647,7 +647,7 @@ function revert-copilot() {
   return 0
 }
 
-# Remove shared promptfiles-managed artifacts from the destination.
+# Remove shared loadout-managed artifacts from the destination.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function revert-shared-resources() {
@@ -681,7 +681,7 @@ function revert-shared-resources() {
 
   # Remove managed VS Code settings properties
   if [[ -f "${dest}/.vscode/settings.json" ]]; then
-    print-info "Removing promptfiles properties from VS Code settings"
+    print-info "Removing loadout properties from VS Code settings"
     remove-vscode-json-property "${dest}/.vscode/settings.json" "chat.skillRecommendations"
     remove-vscode-json-property "${dest}/.vscode/settings.json" "chat.promptFilesRecommendations"
     remove-vscode-json-property "${dest}/.vscode/settings.json" "chat.tools.terminal.autoApprove"
@@ -689,7 +689,7 @@ function revert-shared-resources() {
 
   # Remove managed .gitignore section
   if [[ -f "${dest}/.gitignore" ]] && grep -qF "${GITIGNORE_BEGIN_MARKER}" "${dest}/.gitignore"; then
-    print-info "Removing promptfiles managed content from .gitignore"
+    print-info "Removing loadout managed content from .gitignore"
     local temp_file
     temp_file=$(mktemp)
     awk -v begin="${GITIGNORE_BEGIN_MARKER}" -v end="${GITIGNORE_END_MARKER}" '
@@ -1078,7 +1078,7 @@ function copy-workspace-file() {
   fi
 }
 
-# Update .gitignore with promptfiles managed content.
+# Update .gitignore with loadout managed content.
 # Creates .gitignore if it doesn't exist, or updates the managed section if it does.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
@@ -1086,11 +1086,11 @@ function update-gitignore() {
 
   local dest_gitignore="$1/.gitignore"
   local source_content
-  source_content=$(cat "${GITIGNORE_PROMPTFILES}")
+  source_content=$(cat "${GITIGNORE_LOADOUT}")
 
   if [[ ! -f "${dest_gitignore}" ]]; then
     # No .gitignore exists, create it with markers and content
-    print-info "Creating .gitignore with promptfiles managed content"
+    print-info "Creating .gitignore with loadout managed content"
     {
       echo "${GITIGNORE_BEGIN_MARKER}"
       echo "${source_content}"
@@ -1100,7 +1100,7 @@ function update-gitignore() {
     # .gitignore exists, check for existing managed content
     if grep -qF "${GITIGNORE_BEGIN_MARKER}" "${dest_gitignore}"; then
       # Remove existing managed content (between markers, inclusive)
-      print-info "Updating promptfiles managed content in .gitignore"
+      print-info "Updating loadout managed content in .gitignore"
       local temp_file
       temp_file=$(mktemp)
       awk -v begin="${GITIGNORE_BEGIN_MARKER}" -v end="${GITIGNORE_END_MARKER}" '
@@ -1121,7 +1121,7 @@ function update-gitignore() {
       rm -f "${temp_file}"
     else
       # No managed content exists, append it
-      print-info "Appending promptfiles managed content to .gitignore"
+      print-info "Appending loadout managed content to .gitignore"
       {
         echo ""
         echo "${GITIGNORE_BEGIN_MARKER}"
@@ -1134,7 +1134,7 @@ function update-gitignore() {
   return 0
 }
 
-# Update .vscode/settings.json with promptfiles settings.
+# Update .vscode/settings.json with loadout settings.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function update-vscode-settings() {
@@ -1386,7 +1386,7 @@ Technology switches (set to 'true' to include):
 
 Other options:
     clean=true              Remove destination directories before copying
-    revert=true             Remove all promptfiles-managed artifacts and exit
+    revert=true             Remove all loadout-managed artifacts and exit
     subset=<csv>            Restrict copy to named categories (comma-separated).
                             Valid tokens: agents, hooks, instructions, prompts,
                             skills, specify, docs, project, speckit, mcp, all.

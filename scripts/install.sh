@@ -3,7 +3,7 @@
 set -euo pipefail
 umask 077
 
-# Bootstrap installer for awesome-copilot-promptfiles.
+# Bootstrap installer for loadout.
 #
 # Thin wrapper around scripts/apply.sh that supports two modes:
 #   - local mode: run when a sibling apply.sh is present (cloned repo).
@@ -12,22 +12,22 @@ umask 077
 #
 # Usage:
 #   $ ./scripts/install.sh --dest <path> [--ref <ref>] [--subset <csv>] [--dry-run]
-#   $ curl -fsSL https://raw.githubusercontent.com/stefaniuk/awesome-copilot-promptfiles/main/scripts/install.sh \
+#   $ curl -fsSL https://raw.githubusercontent.com/stefaniuk/loadout/main/scripts/install.sh \
 #         | bash -s -- --dest <path> [--ref <ref>] [--subset <csv>]
 #
 # Options:
 #   --dest <path>        Destination directory (required).
 #   --ref <ref>          Branch, tag, or commit SHA to install from (default: 'main').
-#                        Overridable via the PROMPTFILES_REF environment variable.
+#                        Overridable via the LOADOUT_REF environment variable.
 #   --subset <csv>       Restrict copy to named categories (forwarded to apply.sh).
 #   --dry-run            Print the resolved mode and the exact command without running it.
 #   --help               Show this help message.
 #
 # Environment variables:
-#   PROMPTFILES_REPO       owner/repo slug (default: 'stefaniuk/awesome-copilot-promptfiles').
-#   PROMPTFILES_GIT_URL    Full git URL; overrides derivation from PROMPTFILES_REPO.
-#   PROMPTFILES_REF        Default value for --ref.
-#   PROMPTFILES_NO_CLEANUP If 'true', the temporary clone directory is retained.
+#   LOADOUT_REPO       owner/repo slug (default: 'stefaniuk/loadout').
+#   LOADOUT_GIT_URL    Full git URL; overrides derivation from LOADOUT_REPO.
+#   LOADOUT_REF        Default value for --ref.
+#   LOADOUT_NO_CLEANUP If 'true', the temporary clone directory is retained.
 #
 # Exit codes:
 #   0 - Success.
@@ -38,7 +38,7 @@ umask 077
 #   $ ./scripts/install.sh --dest ~/projects/my-app
 #   $ ./scripts/install.sh --dest ~/projects/my-app --ref v1.2.3
 #   $ ./scripts/install.sh --dest ~/projects/my-app --subset agents,prompts
-#   $ curl -fsSL https://raw.githubusercontent.com/stefaniuk/awesome-copilot-promptfiles/main/scripts/install.sh \
+#   $ curl -fsSL https://raw.githubusercontent.com/stefaniuk/loadout/main/scripts/install.sh \
 #       | bash -s -- --dest ~/projects/my-app --ref v1.2.3
 
 # ==============================================================================
@@ -58,7 +58,7 @@ function die() {
 function main() {
 
   local dest=""
-  local ref="${PROMPTFILES_REF:-main}"
+  local ref="${LOADOUT_REF:-main}"
   local subset=""
   local dry_run="false"
 
@@ -158,21 +158,21 @@ function install_remote() {
 
   command -v git > /dev/null 2>&1 || die 1 "git is required for remote install; install git or run from a cloned repository"
 
-  local repo="${PROMPTFILES_REPO:-stefaniuk/awesome-copilot-promptfiles}"
-  local git_url="${PROMPTFILES_GIT_URL:-https://github.com/${repo}.git}"
+  local repo="${LOADOUT_REPO:-stefaniuk/loadout}"
+  local git_url="${LOADOUT_GIT_URL:-https://github.com/${repo}.git}"
 
   local tmp_dir
-  tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t promptfiles-install)"
+  tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t loadout-install)"
 
-  if [[ "${PROMPTFILES_NO_CLEANUP:-false}" != "true" ]]; then
+  if [[ "${LOADOUT_NO_CLEANUP:-false}" != "true" ]]; then
     # shellcheck disable=SC2064
     trap "rm -rf '${tmp_dir}'" EXIT INT TERM
   fi
 
   if ! git clone --depth 1 --branch "${ref}" "${git_url}" "${tmp_dir}" > /dev/null 2>&1; then
     rm -rf "${tmp_dir}"
-    tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t promptfiles-install)"
-    if [[ "${PROMPTFILES_NO_CLEANUP:-false}" != "true" ]]; then
+    tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t loadout-install)"
+    if [[ "${LOADOUT_NO_CLEANUP:-false}" != "true" ]]; then
       # shellcheck disable=SC2064
       trap "rm -rf '${tmp_dir}'" EXIT INT TERM
     fi

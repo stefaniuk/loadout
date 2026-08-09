@@ -15,7 +15,7 @@ If you believe you have found a security vulnerability in this repository - for 
 
 Instead, use GitHub's private vulnerability reporting:
 
-1. Go to the [Security tab](https://github.com/stefaniuk/spec-driven-copilot/security) of this repository.
+1. Go to the [Security tab](https://github.com/stefaniuk/loadout/security) of this repository.
 2. Click **Report a vulnerability**.
 3. Provide a clear description, reproduction steps, and any suggested mitigation.
 

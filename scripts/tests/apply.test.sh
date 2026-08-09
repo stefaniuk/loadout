@@ -215,7 +215,7 @@ function test-apply-default-copies-expected-artefacts() {
   grep -q "chat.tools.terminal.autoApprove" "${d}/.vscode/settings.json" || return 1
   # .gitignore
   [[ -f "${d}/.gitignore" ]] || return 1
-  grep -qF "promptfiles-copilot managed content" "${d}/.gitignore" || return 1
+  grep -qF "loadout managed content" "${d}/.gitignore" || return 1
   # Hooks
   [[ -f "${d}/.github/hooks/quality-gates.json" ]] || return 1
   [[ -x "${d}/scripts/hooks/post-edit-lint.sh" ]] || return 1
@@ -363,7 +363,7 @@ function test-apply-revert-removes-all-managed-artefacts() {
   fi
   # gitignore managed section removed (file itself may be gone if it was empty)
   if [[ -f "${d}/.gitignore" ]]; then
-    ! grep -qF "promptfiles-copilot managed content" "${d}/.gitignore" || return 1
+    ! grep -qF "loadout managed content" "${d}/.gitignore" || return 1
   fi
   return 0
 }
@@ -404,16 +404,16 @@ function test-apply-updates-existing-gitignore-managed-section() {
   {
     echo "# Custom rules"
     echo "*.log"
-    echo "# >>> promptfiles-copilot managed content - DO NOT EDIT BELOW THIS LINE >>>"
+    echo "# >>> loadout managed content - DO NOT EDIT BELOW THIS LINE >>>"
     echo "old-managed-content"
-    echo "# <<< promptfiles-copilot managed content - DO NOT EDIT ABOVE THIS LINE <<<"
+    echo "# <<< loadout managed content - DO NOT EDIT ABOVE THIS LINE <<<"
   } > "${dest}/.gitignore"
 
   helper-apply "${dest}" || return 1
 
   ! grep -q "old-managed-content" "${dest}/.gitignore" || return 1
   grep -q "Custom rules" "${dest}/.gitignore" || return 1
-  grep -qF "promptfiles-copilot managed content" "${dest}/.gitignore" || return 1
+  grep -qF "loadout managed content" "${dest}/.gitignore" || return 1
   return 0
 }
 

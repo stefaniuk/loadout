@@ -1,4 +1,4 @@
-# spec-driven-copilot
+# loadout
 
 A specification-first GitHub Copilot customisation toolkit for teams that want reusable prompts, instructions, agents, skills, hooks, and MCP examples to behave consistently across repositories.
 
@@ -6,7 +6,7 @@ A specification-first GitHub Copilot customisation toolkit for teams that want r
 
 AI customisation tends to drift once each repository invents its own prompts, review flow, and guardrails. That makes it harder to trust outputs, onboard contributors, and keep documentation, specs, and validation rules aligned.
 
-spec-driven-copilot packages those pieces into one reusable toolkit. It gives teams a clear starting point for governance, authoring rules, reusable workflows, and quality checks, then makes that toolkit easy to copy into another repository with the same structure and expectations.
+loadout packages those pieces into one reusable toolkit. It gives teams a clear starting point for governance, authoring rules, reusable workflows, and quality checks, then makes that toolkit easy to copy into another repository with the same structure and expectations.
 
 ## Quick start
 
@@ -21,8 +21,8 @@ This path proves the repository is healthy locally and shows the main contributo
 ### Install
 
 ```bash
-git clone https://github.com/stefaniuk/spec-driven-copilot.git
-cd spec-driven-copilot
+git clone https://github.com/stefaniuk/loadout.git
+cd loadout
 make config
 ```
 

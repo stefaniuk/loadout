@@ -111,8 +111,8 @@ For a deeper decision matrix (when to pick a Skill over a Prompt, etc.), see [do
 
 ```bash
 # Clone the repository
-git clone https://github.com/stefaniuk/spec-driven-copilot.git
-cd spec-driven-copilot
+git clone https://github.com/stefaniuk/loadout.git
+cd loadout
 
 # Verify quality gates work
 make lint && make test
