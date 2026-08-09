@@ -5,3 +5,14 @@ exclude = [
   ".github/skills/repository-template/assets/**",
   "docs/prompt-reports/**",
 ]
+exclude_path = [
+  ".github/skills/dispatching-parallel-agents",
+  ".github/skills/executing-plans",
+  ".github/skills/subagent-driven-development",
+  ".github/skills/systematic-debugging",
+  ".github/skills/test-driven-development",
+  ".github/skills/using-git-worktrees",
+  ".github/skills/verification-before-completion",
+  ".github/skills/writing-plans",
+  ".github/skills/writing-skills",
+]

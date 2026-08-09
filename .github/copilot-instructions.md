@@ -16,7 +16,7 @@ This file is the authoritative instruction source for routine GitHub Copilot wor
 
 ## Skill invocation gates
 
-- Before implementation, load the `test-driven-development` skill.
+- Use the `test-driven-development` skill only when the task requires a new failing test that should drive a code or behaviour change.
 - On unexpected test, build, or runtime failures, load the `systematic-debugging` skill.
 - Before completion, load the `verification-before-completion` skill.
 

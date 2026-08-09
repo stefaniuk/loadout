@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-08-08T21:05:45Z",
-  "sourceRevision": "e489f6e",
+  "generatedAt": "2026-08-08T23:56:16Z",
+  "sourceRevision": "7106bb4",
   "counts": {
     "instruction": 14,
     "prompt": 39,
     "agent": 14,
-    "skill": 10,
+    "skill": 18,
     "hook": 2,
-    "total": 79,
+    "total": 87,
     "packs": 12,
     "byPack": {
-      "core": 56,
+      "core": 64,
       "speckit": 23
     }
   },
@@ -980,6 +980,38 @@
       "pack": "core"
     },
     {
+      "id": "skill:.github/skills/dispatching-parallel-agents/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/dispatching-parallel-agents/SKILL.md",
+      "name": "dispatching-parallel-agents",
+      "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
+      "applyTo": null,
+      "tags": ["dispatching-parallel-agents"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/django-project/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/django-project/SKILL.md",
+      "name": "django-project",
+      "description": "Scaffold and evolve Django projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.",
+      "applyTo": null,
+      "tags": ["django-project"],
+      "metadata": {
+        "version": "1.0.0",
+        "license": "MIT",
+        "allowedTools": [],
+        "argumentHint": "Describe the Django project action: scaffold, add capability, or evolve an existing project"
+      },
+      "pack": "core"
+    },
+    {
       "id": "skill:.github/skills/enforcement-audit/SKILL.md",
       "type": "skill",
       "path": ".github/skills/enforcement-audit/SKILL.md",
@@ -992,6 +1024,38 @@
         "license": "MIT",
         "allowedTools": [],
         "argumentHint": "Specify the technology to audit: python, typescript, go, docker, rust, shell, makefile, terraform, reactjs, tauri, playwright-python, or playwright-typescript"
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/executing-plans/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/executing-plans/SKILL.md",
+      "name": "executing-plans",
+      "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
+      "applyTo": null,
+      "tags": ["executing-plans"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/fastapi-project/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/fastapi-project/SKILL.md",
+      "name": "fastapi-project",
+      "description": "Scaffold and evolve FastAPI projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.",
+      "applyTo": null,
+      "tags": ["fastapi-project"],
+      "metadata": {
+        "version": "1.0.0",
+        "license": "MIT",
+        "allowedTools": [],
+        "argumentHint": "Describe the FastAPI project action: scaffold, add capability, or evolve an existing project"
       },
       "pack": "core"
     },
@@ -1024,6 +1088,22 @@
         "license": "MIT",
         "allowedTools": [],
         "argumentHint": "Specify step: spec, data-model, research, quickstart, contracts, checklists, or all. Optional baseline: working-tree, HEAD, or default-branch"
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/subagent-driven-development/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/subagent-driven-development/SKILL.md",
+      "name": "subagent-driven-development",
+      "description": "Use when executing implementation plans with independent tasks in the current session",
+      "applyTo": null,
+      "tags": ["subagent-driven-development"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
       },
       "pack": "core"
     },
@@ -1076,6 +1156,22 @@
       "pack": "core"
     },
     {
+      "id": "skill:.github/skills/using-git-worktrees/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/using-git-worktrees/SKILL.md",
+      "name": "using-git-worktrees",
+      "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback",
+      "applyTo": null,
+      "tags": ["using-git-worktrees"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "core"
+    },
+    {
       "id": "skill:.github/skills/verification-before-completion/SKILL.md",
       "type": "skill",
       "path": ".github/skills/verification-before-completion/SKILL.md",
@@ -1104,6 +1200,38 @@
         "license": "MIT",
         "allowedTools": [],
         "argumentHint": "Paste a decision brief, or say guided and answer the questions step by step"
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/writing-plans/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/writing-plans/SKILL.md",
+      "name": "writing-plans",
+      "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
+      "applyTo": null,
+      "tags": ["writing-plans"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/writing-skills/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/writing-skills/SKILL.md",
+      "name": "writing-skills",
+      "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
+      "applyTo": null,
+      "tags": ["writing-skills"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
       },
       "pack": "core"
     },
@@ -1219,7 +1347,10 @@
       "tech": "python",
       "instruction": ".github/instructions/python.instructions.md",
       "enforcePrompt": ".github/prompts/enforce.python.prompt.md",
-      "skills": [],
+      "skills": [
+        ".github/skills/django-project/SKILL.md",
+        ".github/skills/fastapi-project/SKILL.md"
+      ],
       "adrCluster": "ADR-001",
       "complete": true
     },

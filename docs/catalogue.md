@@ -4,7 +4,7 @@ Auto-generated index of every Copilot customisation artefact in this repository.
 
 > **Do not edit by hand.** Regenerate with `make catalogue`.
 
-Pack breakdown: core=58, speckit=23 (see [docs/conventions.md#plugin-packs](conventions.md#plugin-packs) for the boundary).
+Pack breakdown: core=64, speckit=23 (see [docs/conventions.md#plugin-packs](conventions.md#plugin-packs) for the boundary).
 
 ## Summary
 
@@ -13,9 +13,9 @@ Pack breakdown: core=58, speckit=23 (see [docs/conventions.md#plugin-packs](conv
 | Instructions | 14     |
 | Prompts      | 39     |
 | Agents       | 14     |
-| Skills       | 12     |
+| Skills       | 18     |
 | Hooks        | 2      |
-| **Total**    | **81** |
+| **Total**    | **87** |
 
 ## Instructions
 
@@ -105,16 +105,22 @@ Pack breakdown: core=58, speckit=23 (see [docs/conventions.md#plugin-packs](conv
 | ------------------------------ | ------------------------------------------------------------------------------------------- | ------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | architecture-docs              | [architecture-docs](../.github/skills/architecture-docs/SKILL.md)                           | 1.0.0   | -             | Generate architecture documentation for a repository, producing structured artefacts from repository maps to C4 models and infrastructure diagrams.                                                                                                                  |
 | code-review                    | [code-review](../.github/skills/code-review/SKILL.md)                                       | 1.0.0   | -             | Run a structured Spec Kit review focused on code compliance, documentation quality, or test coverage, positioned within the spec-driven development pipeline.                                                                                                        |
+| dispatching-parallel-agents    | [dispatching-parallel-agents](../.github/skills/dispatching-parallel-agents/SKILL.md)       | -       | -             | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies                                                                                                                                                           |
 | django-project                 | [django-project](../.github/skills/django-project/SKILL.md)                                 | 1.0.0   | -             | Scaffold and evolve Django projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.                                                             |
 | enforcement-audit              | [enforcement-audit](../.github/skills/enforcement-audit/SKILL.md)                           | 1.0.0   | -             | Run a compliance audit against a technology instruction file, detecting discrepancies, planning workstreams, implementing fixes, and validating quality gates.                                                                                                       |
+| executing-plans                | [executing-plans](../.github/skills/executing-plans/SKILL.md)                               | -       | -             | Use when you have a written implementation plan to execute in a separate session with review checkpoints                                                                                                                                                             |
 | fastapi-project                | [fastapi-project](../.github/skills/fastapi-project/SKILL.md)                               | 1.0.0   | -             | Scaffold and evolve FastAPI projects with uv-based tooling, structured settings, and production-ready observability, resilience, availability, and security patterns aligned with python.instructions.md.                                                            |
 | repository-template            | [repository-template](../.github/skills/repository-template/SKILL.md)                       | 1.0.0   | -             | Create code repository from template, or/and update it in parts from the content of the template that contains example of use of tools like make, pre-commit git hooks, Docker, and quality checks.                                                                  |
 | spec-consolidation             | [spec-consolidation](../.github/skills/spec-consolidation/SKILL.md)                         | 1.2.0   | -             | Consolidate per-feature Spec Kit artefacts under specs/ into a product-facing specification set aligned to a selected baseline, excluding plan.md and tasks.md from the final output.                                                                                |
+| subagent-driven-development    | [subagent-driven-development](../.github/skills/subagent-driven-development/SKILL.md)       | -       | -             | Use when executing implementation plans with independent tasks in the current session                                                                                                                                                                                |
 | system-documentation           | [system-documentation](../.github/skills/system-documentation/SKILL.md)                     | 1.4.0   | -             | Establish, synchronise, audit, and review an opinionated repository documentation system across entrypoints, architecture, reference, explanation, tutorials, how-to guides, operations, audience indexes, and governance/lifecycle artefacts.                       |
 | systematic-debugging           | [systematic-debugging](../.github/skills/systematic-debugging/SKILL.md)                     | -       | -             | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes                                                                                                                                                                          |
 | test-driven-development        | [test-driven-development](../.github/skills/test-driven-development/SKILL.md)               | -       | -             | Use when implementing any feature or bugfix, before writing implementation code                                                                                                                                                                                      |
+| using-git-worktrees            | [using-git-worktrees](../.github/skills/using-git-worktrees/SKILL.md)                       | -       | -             | Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback                                                                 |
 | verification-before-completion | [verification-before-completion](../.github/skills/verification-before-completion/SKILL.md) | -       | -             | Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always                                    |
 | virtual-think-tank             | [virtual-think-tank](../.github/skills/virtual-think-tank/SKILL.md)                         | 1.0.0   | -             | Run a structured multi-step think tank for engineering, architecture, product, process, policy, vendor, or organisational decisions. Use when the user needs conflicting viewpoints, explicit trade-offs, and a forced human decision rather than a one-shot answer. |
+| writing-plans                  | [writing-plans](../.github/skills/writing-plans/SKILL.md)                                   | -       | -             | Use when you have a spec or requirements for a multi-step task, before touching code                                                                                                                                                                                 |
+| writing-skills                 | [writing-skills](../.github/skills/writing-skills/SKILL.md)                                 | -       | -             | Use when creating new skills, editing existing skills, or verifying skills work before deployment                                                                                                                                                                    |
 
 ## Hooks
 
@@ -153,4 +159,4 @@ Instruction-only artefacts without an enforce prompt - see [conventions.md](conv
 
 ---
 
-_Generated at 2026-08-08T20:38:43Z from revision `e489f6e`._
+_Generated at 2026-08-08T23:56:16Z from revision `7106bb4`._
