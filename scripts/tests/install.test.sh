@@ -30,7 +30,7 @@ function main() {
     {
       echo -n "$test"
       # shellcheck disable=SC2015
-      $test && echo " PASS" || { echo " FAIL"; ((status++)); }
+      $test && echo " PASS" || { echo " FAIL"; status=$((status + 1)); }
     }
   done
   echo "Total: ${#tests[@]}, Passed: $(( ${#tests[@]} - status )), Failed: $status"

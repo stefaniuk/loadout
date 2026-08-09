@@ -44,7 +44,7 @@ function main() {
     {
       echo -n "$test"
       # shellcheck disable=SC2015
-      run-test-with-cleanup "$test" && echo " PASS" || { echo " FAIL"; ((status++)); }
+      run-test-with-cleanup "$test" && echo " PASS" || { echo " FAIL"; status=$((status + 1)); }
     }
   done
   echo "Total: ${#tests[@]}, Passed: $(( ${#tests[@]} - status )), Failed: $status"
@@ -303,7 +303,7 @@ function test-import-new-false-does-not-import-new-files() {
   return 0
 }
 
-# Consolidated: detect modifications across instruction, agent, prompt and
+# Consolidated: detect modifications across instruction, skill, prompt and
 # shared-resource files in one dry-run import, and validate the changed-count
 # summary.
 function test-import-dry-run-detects-modifications-across-tracked-types() {
@@ -311,18 +311,20 @@ function test-import-dry-run-detects-modifications-across-tracked-types() {
   local dest
   dest=$(helper-apply-copilot "detect-modifications")
   echo "# Modified instruction" >> "${dest}/.github/instructions/shell.instructions.md"
-  echo "# Modified agent" >> "${dest}/.github/agents/speckit.plan.agent.md"
+  echo "# Modified skill" >> "${dest}/.github/skills/repository-template/SKILL.md"
   echo "# Modified prompt" >> "${dest}/.github/prompts/enforce.shell.prompt.md"
+  echo "# Modified setup script" >> "${dest}/.specify/scripts/python/setup_plan.py"
   echo "# Modified constitution" >> "${dest}/.specify/memory/constitution.md"
 
   local output
   output=$(./scripts/import.sh "${dest}" 2>&1)
 
   echo "${output}" | grep -q "shell.instructions.md" || return 1
-  echo "${output}" | grep -q "speckit.plan.agent.md" || return 1
+  echo "${output}" | grep -q "repository-template/SKILL.md" || return 1
   echo "${output}" | grep -q "enforce.shell.prompt.md" || return 1
+  echo "${output}" | grep -q ".specify/scripts/python/setup_plan.py" || return 1
   echo "${output}" | grep -q "constitution.md" || return 1
-  echo "${output}" | grep -q "Changed files (4)" || return 1
+  echo "${output}" | grep -q "Changed files (5)" || return 1
 
   return 0
 }
@@ -375,36 +377,32 @@ function test-import-force-copies-changed-files-back() {
   return 0
 }
 
-# Consolidated: AGENTS.md, hook config and hook scripts must all be detected
-# in one dry-run and round-trip in one force run; hook scripts keep their
-# executable bit.
+# Consolidated: hook config and hook scripts must all be detected in one
+# dry-run and round-trip in one force run; hook scripts keep their executable
+# bit.
 function test-import-detects-and-round-trips-singletons-and-hooks() {
 
   local dest
   dest=$(helper-apply-copilot "singletons-and-hooks")
-  track-repo-file-state "AGENTS.md"
   track-repo-file-state ".github/hooks/quality-gates.json"
   track-repo-file-state "scripts/hooks/post-edit-lint.sh"
   track-repo-file-state "scripts/hooks/stop-gate.sh"
 
   local marker
   marker="SINGLETON-HOOK-MARKER-$(date +%s)"
-  echo "# ${marker}" >> "${dest}/AGENTS.md"
   printf '\n' >> "${dest}/.github/hooks/quality-gates.json"
   echo "# ${marker}" >> "${dest}/scripts/hooks/post-edit-lint.sh"
   echo "# ${marker}" >> "${dest}/scripts/hooks/stop-gate.sh"
 
-  # Dry-run detection covers all four paths
+  # Dry-run detection covers all three paths
   local output
   output=$(./scripts/import.sh "${dest}" 2>&1)
-  echo "${output}" | grep -qE "(^|[[:space:]])AGENTS\.md" || return 1
   echo "${output}" | grep -q "quality-gates.json" || return 1
   echo "${output}" | grep -q "post-edit-lint.sh" || return 1
   echo "${output}" | grep -q "stop-gate.sh" || return 1
 
   # Force import round-trips the changes
   force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
-  grep -q "${marker}" "${REPO_ROOT}/AGENTS.md" || return 1
   diff -q "${dest}/.github/hooks/quality-gates.json" "${REPO_ROOT}/.github/hooks/quality-gates.json" > /dev/null 2>&1 || return 1
   grep -q "${marker}" "${REPO_ROOT}/scripts/hooks/post-edit-lint.sh" || return 1
   grep -q "${marker}" "${REPO_ROOT}/scripts/hooks/stop-gate.sh" || return 1
@@ -430,6 +428,8 @@ function is-arg-true() {
 
 is-arg-true "${VERBOSE:-false}" && set -x
 
-main "$@"
+if main "$@"; then
+  exit 0
+fi
 
-exit 0
+exit 1

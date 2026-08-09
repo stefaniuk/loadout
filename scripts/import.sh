@@ -144,9 +144,8 @@ function collect-shared-changes() {
 
   local source_dir="$1"
 
-  compare-file "${source_dir}" "AGENTS.md"
   compare-file "${source_dir}" ".specify/memory/constitution.md"
-  compare-directory-recursive "${source_dir}" ".specify/scripts/bash"
+  compare-directory-recursive "${source_dir}" ".specify/scripts/python"
   compare-directory-recursive "${source_dir}" ".specify/templates"
   compare-file "${source_dir}" "docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
   compare-file "${source_dir}" "docs/adr/Tech_Radar.md"

@@ -4,7 +4,7 @@ You **MUST** adhere to the following mandatory requirements when creating a deve
 
 - **Input:** `spec.md` (feature specification)
 - **Output:** `plan.md` (implementation plan)
-- **Next phase:** Tasks generation (`/speckit.tasks`)
+- **Next phase:** Tasks generation (`/speckit-tasks`)
 
 **Base requirements:** Follow all rules in [copilot-instructions.md](/.github/copilot-instructions.md), particularly:
 
@@ -26,7 +26,7 @@ Show & Tell steps must be written so AI Assistant can execute and validate them 
 - Use explicit, runnable commands, URLs, and API calls
 - Include an expected result for every step (output text, status code, or visible UI state)
 - Avoid vague language such as "check it works" or "verify manually"
-- State pass/fail criteria clearly so steps cannot be skipped or missed during `/speckit.implement`
+- State pass/fail criteria clearly so steps cannot be skipped or missed during `/speckit-implement`
 
 During implementation, AI Assistant **MUST** execute every Show & Tell step and confirm the expected result before marking the phase or user story complete.
 
@@ -48,4 +48,3 @@ Before marking `plan.md` as complete, verify:
 - [ ] Each phase and user story includes a `Show & Tell` subsection
 - [ ] Show & Tell subsections are placed at the end of each phase or user story
 - [ ] Show & Tell steps are specific enough for AI Assistant to execute and validate without ambiguity
-- [ ] Show & Tell steps define explicit expected outcomes and pass/fail criteria

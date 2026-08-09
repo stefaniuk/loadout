@@ -32,8 +32,9 @@ lint: # Run linter to check code style and errors @Quality
 	$(MAKE) lint-customisations
 	$(MAKE) lint-mcp
 
-test: # Run fast local test suite (apply + subagent-hooks + install). Slower tests run in CI via `test-all` @Testing
+test: # Run fast local test suite (apply + specify + subagent-hooks + install). Slower tests run in CI via `test-all` @Testing
 	bash ./scripts/tests/apply.test.sh && echo "apply: ok"
+	bash ./scripts/tests/specify.test.sh && echo "specify: ok"
 	bash ./scripts/tests/subagent-hooks.test.sh && echo "subagent-hooks: ok"
 	$(MAKE) test-install
 
@@ -60,8 +61,8 @@ skill-add: # Add a new external skill to config and sync it; mandatory: name=[na
 	name="$(name)" ./scripts/skill-sync.sh
 	$(MAKE) catalogue
 
-specify: # Fetch upstream spec-kit and apply local extensions @Operations
-	./scripts/specify.sh
+specify: # Fetch upstream spec-kit and apply local extensions; optional: extensions=[true|false] @Operations
+	extensions="$(or $(extensions),true)" ./scripts/specify.sh
 
 apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean|revert=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright|django|fastapi=[true] @Operations
 	$(if $(dest),,$(error dest is required. Usage: make apply dest=/path/to/destination))

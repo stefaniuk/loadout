@@ -156,7 +156,7 @@ Single-purpose prompt files that guide Copilot through specific tasks.
 
 **File naming:** `<prefix>.<category-or-action>.prompt.md` (prefix + category + verb)
 
-Examples: `speckit.plan.prompt.md`, `architecture.01-repository-map.prompt.md`, `review.speckit-code.prompt.md`, `util.gh-pr.prompt.md`, `enforce.python.prompt.md`
+Examples: `architecture.01-repository-map.prompt.md`, `review.speckit-code.prompt.md`, `util.gh-pr.prompt.md`, `enforce.python.prompt.md`
 
 ### Instructions (`.github/instructions/*.instructions.md`)
 
@@ -190,9 +190,9 @@ Copilot agent definitions that combine prompts with specific behaviours.
 - Specialised domain expertise
 - Workflow requiring specific agent configuration
 
-**File naming:** `<namespace>.<action>.agent.md`
+**File naming:** `<namespace>.<action>.agent.md` or `personas/<role>.agent.md`
 
-Examples: `speckit.specify.agent.md`, `speckit.implement.agent.md`
+Examples: `personas/implementer.agent.md`, `personas/reviewer.agent.md`
 
 ### Skills (`.github/skills/<skill-name>/`)
 
@@ -337,7 +337,7 @@ $ARGUMENTS
 
 ### 🤖 Agents Quickstart
 
-**When to choose this artefact.** You're building a **multi-step workflow with handoffs** to other agents (typical Spec Kit pattern: specify → plan → tasks → implement). For one-shot work, a Prompt is enough. See [docs/architecture.md](../docs/architecture.md).
+**When to choose this artefact.** You're building a **multi-step workflow with handoffs** between persistent personas or other custom agents. For Spec Kit lifecycle stages, prefer the `speckit-*` skills. For one-shot work, a Prompt is enough. See [docs/architecture.md](../docs/architecture.md).
 
 **Minimal starter template** - save as `.github/agents/<namespace>.<action>.agent.md`:
 
@@ -377,7 +377,7 @@ handoffs:
 ```
 ````
 
-**Required fields and naming constraints.** `description` (required); `tools` array scoped to the **minimum** needed; `handoffs` if the agent participates in a chain; filename `<namespace>.<action>.agent.md` (e.g. `speckit.specify.agent.md`). Full schema: [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
+**Required fields and naming constraints.** `description` (required); `tools` array scoped to the **minimum** needed; `handoffs` if the agent participates in a chain; filename `<namespace>/<action>.agent.md` (e.g. `personas/implementer.agent.md`). Full schema: [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
 
 **Pre-PR validation checklist.**
 

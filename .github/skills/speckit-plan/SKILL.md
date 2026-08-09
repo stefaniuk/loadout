@@ -1,14 +1,62 @@
 ---
-description: Execute the implementation planning workflow using the plan template to generate design artifacts.
-handoffs:
-  - label: Create Tasks
-    agent: speckit.tasks
-    prompt: Break the plan into tasks
-    send: true
-  - label: Create Checklist
-    agent: speckit.checklist
-    prompt: Create a checklist for the following domain...
+name: "speckit-plan"
+description: "Execute the implementation planning workflow using the plan template to generate design artifacts."
+compatibility: "Requires spec-kit project structure with .specify/ directory"
+metadata:
+  author: "github-spec-kit"
+  source: "templates/commands/plan.md"
 ---
+
+You **MUST** adhere to the following mandatory requirements when creating a development plan.
+
+**Workflow context:**
+
+- **Input:** `spec.md` (feature specification)
+- **Output:** `plan.md` (implementation plan)
+- **Next phase:** Tasks generation (`/speckit-tasks`)
+
+**Base requirements:** Follow all rules in [copilot-instructions.md](/.github/copilot-instructions.md), particularly:
+
+- Documentation ADRs
+- Toolchain Version
+- Repository Tooling
+
+## Show & Tell Sections (Mandatory)
+
+Each phase and user story in `plan.md` must include a `Show & Tell` subsection. This subsection defines the demonstration steps that will be:
+
+1. Expanded with specific commands in `tasks.md` (next phase)
+2. Executed by the user during implementation to verify completion
+
+### AI Assistant Execution Requirement (Mandatory)
+
+Show & Tell steps must be written so AI Assistant can execute and validate them without guessing.
+
+- Use explicit, runnable commands, URLs, and API calls
+- Include an expected result for every step (output text, status code, or visible UI state)
+- Avoid vague language such as "check it works" or "verify manually"
+- State pass/fail criteria clearly so steps cannot be skipped or missed during `/speckit-implement`
+
+During implementation, AI Assistant **MUST** execute every Show & Tell step and confirm the expected result before marking the phase or user story complete.
+
+## Plan Completion Checklist (Mandatory)
+
+Before marking `plan.md` as complete, verify:
+
+- [ ] Plan addresses all requirements from `spec.md`
+- [ ] All architectural decisions have corresponding ADRs
+- [ ] Toolchain versions are specified, verified online during planning, and confirmed as the latest stable releases
+- [ ] Repository-template capabilities are planned using the skill at [.github/skills/repository-template/SKILL.md](/.github/skills/repository-template/SKILL.md), including at minimum:
+  - [ ] Core Make System
+  - [ ] Pre-commit Hooks
+  - [ ] Secret Scanning
+  - [ ] File Format Checking
+  - [ ] Markdown Linting
+  - [ ] Docker Support
+  - [ ] Tool Version Management
+- [ ] Each phase and user story includes a `Show & Tell` subsection
+- [ ] Show & Tell subsections are placed at the end of each phase or user story
+- [ ] Show & Tell steps are specific enough for AI Assistant to execute and validate without ambiguity
 
 ## User Input
 
@@ -21,7 +69,6 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Pre-Execution Checks
 
 **Check for extension hooks (before planning)**:
-
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_plan` key
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
@@ -29,9 +76,9 @@ You **MUST** consider the user input before proceeding (if not empty).
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
   - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
+- When constructing command invocations from hook command names, replace dots (`.`) with hyphens (`-`). For example, `speckit.git.commit` → `/speckit-git-commit`.
 - For each executable hook, output the following based on its `optional` flag:
   - **Optional hook** (`optional: true`):
-
     ```
     ## Extension Hooks
 
@@ -42,9 +89,7 @@ You **MUST** consider the user input before proceeding (if not empty).
     Prompt: {prompt}
     To execute: `/{command}`
     ```
-
   - **Mandatory hook** (`optional: false`):
-
     ```
     ## Extension Hooks
 
@@ -54,9 +99,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
     Wait for the result of the hook command before proceeding to the Outline.
     ```
-
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
-
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
 ## Outline
@@ -78,7 +121,6 @@ You **MUST** consider the user input before proceeding (if not empty).
 **You MUST complete this section before reporting completion to the user.**
 
 Check if `.specify/extensions.yml` exists in the project root.
-
 - If it does not exist, or no hooks are registered under `hooks.after_plan`, skip to the Completion Report.
 - If it exists, read it and look for entries under the `hooks.after_plan` key.
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue to the Completion Report.
@@ -86,9 +128,9 @@ Check if `.specify/extensions.yml` exists in the project root.
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
   - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
+- When constructing command invocations from hook command names, replace dots (`.`) with hyphens (`-`). For example, `speckit.git.commit` → `/speckit-git-commit`.
 - For each executable hook, output the following based on its `optional` flag:
-  - **Mandatory hook** (`optional: false`) - **You MUST emit `EXECUTE_COMMAND:` for each mandatory hook**:
-
+  - **Mandatory hook** (`optional: false`) — **You MUST emit `EXECUTE_COMMAND:` for each mandatory hook**:
     ```
     ## Extension Hooks
 
@@ -96,11 +138,8 @@ Check if `.specify/extensions.yml` exists in the project root.
     Executing: `/{command}`
     EXECUTE_COMMAND: {command}
     ```
-
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
-
   - **Optional hook** (`optional: true`):
-
     ```
     ## Extension Hooks
 
@@ -163,7 +202,7 @@ Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated 
    - Do not include full implementation code, model/service/controller bodies, migrations, or complete test suites
    - Keep this artifact as a validation/run guide; implementation details belong in `tasks.md` and the implementation phase
 
-**Output**: data-model.md, /contracts/\*, quickstart.md
+**Output**: data-model.md, /contracts/*, quickstart.md
 
 ## Key rules
 

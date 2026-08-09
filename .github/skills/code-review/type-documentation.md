@@ -43,8 +43,8 @@ Before reporting findings, gather full context by:
 
 ## Spec-kit Workflow Integration
 
-- Run this review after completing `speckit.specify` and any `speckit.clarify`, and after `speckit.plan` + `speckit.tasks` so plans, tasks, and contracts exist; run it before `speckit.analyze` and `speckit.implement`.
-- If this review changes spec/plan/tasks/ADRs, update any affected tasks/checklists and re-run `speckit.analyze` so downstream checks use the corrected baseline.
+- Run this review after completing `speckit-specify` and any `speckit-clarify`, and after `speckit-plan` + `speckit-tasks` so plans, tasks, and contracts exist; run it before `speckit-analyze` and `speckit-implement`.
+- If this review changes spec/plan/tasks/ADRs, update any affected tasks/checklists and re-run `speckit-analyze` so downstream checks use the corrected baseline.
 - Capture every decision, rename, or identifier fix discovered here so that downstream prompts (code and test reviews) inherit the corrected baseline; block implementation until inconsistencies are resolved.
 
 ## Operating Principles (Must Follow)

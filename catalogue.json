@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-08-08T23:56:16Z",
-  "sourceRevision": "7106bb4",
+  "generatedAt": "2026-08-09T06:30:33Z",
+  "sourceRevision": "756c9c8",
   "counts": {
     "instruction": 14,
-    "prompt": 39,
-    "agent": 14,
-    "skill": 18,
+    "prompt": 29,
+    "agent": 4,
+    "skill": 28,
     "hook": 2,
-    "total": 87,
+    "total": 77,
     "packs": 12,
     "byPack": {
       "core": 64,
-      "speckit": 23
+      "speckit": 13
     }
   },
   "artefacts": [
@@ -520,146 +520,6 @@
       "pack": "core"
     },
     {
-      "id": "prompt:.github/prompts/speckit.analyze.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.analyze.prompt.md",
-      "name": "speckit.analyze",
-      "description": "Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.analyze",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "prompt:.github/prompts/speckit.checklist.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.checklist.prompt.md",
-      "name": "speckit.checklist",
-      "description": "Generate a custom checklist for the current feature based on user requirements.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.checklist",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "prompt:.github/prompts/speckit.clarify.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.clarify.prompt.md",
-      "name": "speckit.clarify",
-      "description": "Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.clarify",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "prompt:.github/prompts/speckit.constitution.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.constitution.prompt.md",
-      "name": "speckit.constitution",
-      "description": "Create or update the project constitution from interactive or provided principle inputs.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.constitution",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "prompt:.github/prompts/speckit.converge.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.converge.prompt.md",
-      "name": "speckit.converge",
-      "description": "Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.converge",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "prompt:.github/prompts/speckit.implement.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.implement.prompt.md",
-      "name": "speckit.implement",
-      "description": "Execute the implementation plan by processing and executing all tasks defined in tasks.md",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.implement",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "prompt:.github/prompts/speckit.plan.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.plan.prompt.md",
-      "name": "speckit.plan",
-      "description": "Execute the implementation planning workflow using the plan template to generate design artifacts.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.plan",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "prompt:.github/prompts/speckit.specify.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.specify.prompt.md",
-      "name": "speckit.specify",
-      "description": "Create or update the feature specification from a natural language feature description.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.specify",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "prompt:.github/prompts/speckit.tasks.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.tasks.prompt.md",
-      "name": "speckit.tasks",
-      "description": "Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.tasks",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "prompt:.github/prompts/speckit.taskstoissues.prompt.md",
-      "type": "prompt",
-      "path": ".github/prompts/speckit.taskstoissues.prompt.md",
-      "name": "speckit.taskstoissues",
-      "description": "Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "agent": "speckit.taskstoissues",
-        "argumentHint": null
-      },
-      "pack": "speckit"
-    },
-    {
       "id": "prompt:.github/prompts/util.doc-system.prompt.md",
       "type": "prompt",
       "path": ".github/prompts/util.doc-system.prompt.md",
@@ -793,159 +653,6 @@
         "handoffAgents": ["implementer", "release-manager"]
       },
       "pack": "core"
-    },
-    {
-      "id": "agent:.github/agents/speckit.analyze.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.analyze.agent.md",
-      "name": "speckit.analyze",
-      "description": "Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [],
-        "handoffAgents": []
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "agent:.github/agents/speckit.checklist.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.checklist.agent.md",
-      "name": "speckit.checklist",
-      "description": "Generate a custom checklist for the current feature based on user requirements.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [],
-        "handoffAgents": []
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "agent:.github/agents/speckit.clarify.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.clarify.agent.md",
-      "name": "speckit.clarify",
-      "description": "Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [],
-        "handoffAgents": ["speckit.plan"]
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "agent:.github/agents/speckit.constitution.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.constitution.agent.md",
-      "name": "speckit.constitution",
-      "description": "Create or update the project constitution from interactive or provided principle inputs.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [],
-        "handoffAgents": ["speckit.specify"]
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "agent:.github/agents/speckit.converge.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.converge.agent.md",
-      "name": "speckit.converge",
-      "description": "Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [],
-        "handoffAgents": []
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "agent:.github/agents/speckit.implement.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.implement.agent.md",
-      "name": "speckit.implement",
-      "description": "Execute the implementation plan by processing and executing all tasks defined in tasks.md",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [],
-        "handoffAgents": []
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "agent:.github/agents/speckit.plan.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.plan.agent.md",
-      "name": "speckit.plan",
-      "description": "Execute the implementation planning workflow using the plan template to generate design artifacts.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [],
-        "handoffAgents": ["speckit.tasks", "speckit.checklist"]
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "agent:.github/agents/speckit.specify.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.specify.agent.md",
-      "name": "speckit.specify",
-      "description": "Create or update the feature specification from a natural language feature description.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [],
-        "handoffAgents": ["speckit.plan", "speckit.clarify"]
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "agent:.github/agents/speckit.tasks.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.tasks.agent.md",
-      "name": "speckit.tasks",
-      "description": "Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [],
-        "handoffAgents": ["speckit.analyze", "speckit.implement"]
-      },
-      "pack": "speckit"
-    },
-    {
-      "id": "agent:.github/agents/speckit.taskstoissues.agent.md",
-      "type": "agent",
-      "path": ".github/agents/speckit.taskstoissues.agent.md",
-      "name": "speckit.taskstoissues",
-      "description": "Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.",
-      "applyTo": null,
-      "tags": ["speckit"],
-      "metadata": {
-        "argumentHint": null,
-        "tools": [
-          "github/github-mcp-server/issue_write",
-          "github/github-mcp-server/list_issues"
-        ],
-        "handoffAgents": []
-      },
-      "pack": "speckit"
     },
     {
       "id": "skill:.github/skills/architecture-docs/SKILL.md",
@@ -1090,6 +797,166 @@
         "argumentHint": "Specify step: spec, data-model, research, quickstart, contracts, checklists, or all. Optional baseline: working-tree, HEAD, or default-branch"
       },
       "pack": "core"
+    },
+    {
+      "id": "skill:.github/skills/speckit-analyze/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-analyze/SKILL.md",
+      "name": "speckit-analyze",
+      "description": "Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.",
+      "applyTo": null,
+      "tags": ["speckit-analyze"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "skill:.github/skills/speckit-checklist/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-checklist/SKILL.md",
+      "name": "speckit-checklist",
+      "description": "Generate a custom checklist for the current feature based on user requirements.",
+      "applyTo": null,
+      "tags": ["speckit-checklist"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "skill:.github/skills/speckit-clarify/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-clarify/SKILL.md",
+      "name": "speckit-clarify",
+      "description": "Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec.",
+      "applyTo": null,
+      "tags": ["speckit-clarify"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "skill:.github/skills/speckit-constitution/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-constitution/SKILL.md",
+      "name": "speckit-constitution",
+      "description": "Create or update the project constitution from interactive or provided principle inputs.",
+      "applyTo": null,
+      "tags": ["speckit-constitution"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "skill:.github/skills/speckit-converge/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-converge/SKILL.md",
+      "name": "speckit-converge",
+      "description": "Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it.",
+      "applyTo": null,
+      "tags": ["speckit-converge"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "skill:.github/skills/speckit-implement/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-implement/SKILL.md",
+      "name": "speckit-implement",
+      "description": "Execute the implementation plan by processing and executing all tasks defined in tasks.md",
+      "applyTo": null,
+      "tags": ["speckit-implement"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "skill:.github/skills/speckit-plan/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-plan/SKILL.md",
+      "name": "speckit-plan",
+      "description": "Execute the implementation planning workflow using the plan template to generate design artifacts.",
+      "applyTo": null,
+      "tags": ["speckit-plan"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "skill:.github/skills/speckit-specify/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-specify/SKILL.md",
+      "name": "speckit-specify",
+      "description": "Create or update the feature specification from a natural language feature description.",
+      "applyTo": null,
+      "tags": ["speckit-specify"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "skill:.github/skills/speckit-tasks/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-tasks/SKILL.md",
+      "name": "speckit-tasks",
+      "description": "Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.",
+      "applyTo": null,
+      "tags": ["speckit-tasks"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
+    },
+    {
+      "id": "skill:.github/skills/speckit-taskstoissues/SKILL.md",
+      "type": "skill",
+      "path": ".github/skills/speckit-taskstoissues/SKILL.md",
+      "name": "speckit-taskstoissues",
+      "description": "Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.",
+      "applyTo": null,
+      "tags": ["speckit-taskstoissues"],
+      "metadata": {
+        "version": null,
+        "license": null,
+        "allowedTools": [],
+        "argumentHint": null
+      },
+      "pack": "speckit"
     },
     {
       "id": "skill:.github/skills/subagent-driven-development/SKILL.md",

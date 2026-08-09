@@ -1,17 +1,12 @@
 {
-  "chat.promptFilesRecommendations": {
-    "speckit.constitution": true,
-    "speckit.specify": true,
-    "speckit.plan": true,
-    "speckit.tasks": true,
-    "speckit.implement": true
-  },
   "chat.tools.terminal.autoApprove": {
     ".specify/scripts/bash/": true
   },
   "markdownlint.config": {
     "MD010": {
-      "ignore_code_languages": ["makefile"]
+      "ignore_code_languages": [
+        "makefile"
+      ]
     },
     "MD013": false,
     "MD024": {

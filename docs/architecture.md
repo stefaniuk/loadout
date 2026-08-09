@@ -37,9 +37,9 @@ Each layer in detail:
 
 - **Layer 0 - Governance.** The project constitution, ADRs, and [.github/copilot-instructions.md](../.github/copilot-instructions.md) set non-negotiable rules. Every other layer must honour them. Changes here are infrequent and reviewed deliberately.
 - **Layer 1 - Instructions.** Coding standards scoped by file glob (for example `**/*.py`, `**/Dockerfile`). Copilot loads them automatically when relevant files are open, so they shape every suggestion. Shared baselines live in `.github/instructions/includes/`.
-- **Layer 2 - Prompts.** One-off, copy-runnable tasks (documentation reviews, enforcement passes, utility commands). They reference instructions and agents but are invoked explicitly.
-- **Layer 3 - Agents.** Persistent personas with tool restrictions and handoff chains. Spec-kit ceremonies (`speckit.specify`, `speckit.plan`, `speckit.tasks`, `speckit.implement`) live here.
-- **Layer 4 - Skills.** Reusable multi-step capabilities bundled with helper scripts and resources. Examples: `architecture-docs`, `enforcement-audit`, `code-review`.
+- **Layer 2 - Prompts.** One-off, copy-runnable tasks (documentation reviews, enforcement passes, utility commands). They reference instructions and skills but are invoked explicitly.
+- **Layer 3 - Agents.** Persistent personas with tool restrictions and handoff chains. Repository personas such as `implementer`, `reviewer`, and `release-manager` live here.
+- **Layer 4 - Skills.** Reusable multi-step capabilities bundled with helper scripts and resources. This layer includes the Spec Kit ceremonies (`speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement`) alongside capabilities such as `architecture-docs`, `enforcement-audit`, and `code-review`.
 - **Layer 5 - Hooks.** Deterministic automation that runs without an LLM in the loop: lint, format, link checks, and quality gates wired into the agent environment.
 
 ## Artefact type decision matrix
@@ -79,43 +79,43 @@ Start at the top and walk down - the first matching branch wins. When more than 
 The spec-kit lifecycle follows a structured flow that progresses through specification, planning, task generation, implementation, and three review gates. Clarification, checklist, and analysis loops feed back into earlier stages until the artefacts are coherent.
 
 1. **Discover** the right prompt from the library.
-2. **Ground** it in a specification using agents like `/speckit.specify`.
-3. **Plan** the implementation with `/speckit.plan`.
-4. **Generate tasks** with `/speckit.tasks`.
+2. **Ground** it in a specification using agents like `/speckit-specify`.
+3. **Plan** the implementation with `/speckit-plan`.
+4. **Generate tasks** with `/speckit-tasks`.
 5. **Review documentation** with `/review.speckit-documentation`.
-6. **Implement** with `/speckit.implement`.
-7. **Converge** with `/speckit.converge` to verify completeness and gap remaining work.
+6. **Implement** with `/speckit-implement`.
+7. **Converge** with `/speckit-converge` to verify completeness and gap remaining work.
 8. **Review** with governance gates (`/review.speckit-code`, `/review.speckit-test`).
 9. **Automate** every validation step with `make lint` and `make test`.
 
 ```mermaid
 flowchart TD
-  constitution["/speckit.constitution"] --> specify["/speckit.specify"]
+  constitution["/speckit-constitution"] --> specify["/speckit-specify"]
 
   specify --> needClarification{Need clarification?}
   specify -.- specifyNote["💡 Example: Transform the product requirements document #file:PRD.md into a formal specification of the XXX feature"]
-  needClarification -- Yes --> clarify["/speckit.clarify"]
+  needClarification -- Yes --> clarify["/speckit-clarify"]
   clarify --> specify
-  needClarification -- No --> plan["/speckit.plan"]
+  needClarification -- No --> plan["/speckit-plan"]
   plan -.- planNote["💡 Example (run +1): Run again to verify all items on the Plan Completion Checklist are satisfied"]
   plan -.- planNote2["💡 Example: Use Python, uv and pytest as the implementation technologies"]
 
   plan --> domainCoverage{Anything missing?}
-  domainCoverage -- Yes --> checklist["/speckit.checklist"]
+  domainCoverage -- Yes --> checklist["/speckit-checklist"]
   checklist --> plan
   checklist -.- checklistNote["💡 Example: Create a checklist for building, assembling and testing the deployment artefacts of all the components being implemented"]
-  domainCoverage -- No --> tasks["/speckit.tasks"]
+  domainCoverage -- No --> tasks["/speckit-tasks"]
   tasks -.- tasksNote["💡 Example (run +1): Run again to verify all items on the Tasks Completion Checklist items are satisfied"]
 
   tasks --> consistency{Need consistency check?}
-  consistency -- Yes --> analyze["/speckit.analyze"]
+  consistency -- Yes --> analyze["/speckit-analyze"]
   analyze --> tasks
   consistency -- No --> reviewDocs["/review.speckit-documentation"]
   reviewDocs -.- reviewDocsNote["💡 Example (run+1): Validate #file:deployment.md checklist, confirm each item is documented, apply sensible defaults where missing or request clarification"]
-  reviewDocs --> implement["/speckit.implement"]
+  reviewDocs --> implement["/speckit-implement"]
   implement -.- implementNote["💡 Example (run N-times): Phase X, use subagents for each task to keep the main context window as small as possible"]
   implement --> anythingUnbuilt{Anything unbuilt?}
-  anythingUnbuilt -- Yes --> converge["/speckit.converge"]
+  anythingUnbuilt -- Yes --> converge["/speckit-converge"]
   converge --> tasks
   anythingUnbuilt -- No --> reviewCode["/review.speckit-code"]
   reviewCode --> reviewTest["/review.speckit-test"]
@@ -158,18 +158,18 @@ Why the gates matter:
 
 ## Subagent workers and lifecycle hooks
 
-The agent catalogue distinguishes two roles:
+The customisation catalogue distinguishes two roles:
 
-- **Coordinators** drive a lifecycle stage end-to-end, write artefacts, and are user-invocable through their slash command. Examples: `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`, `/speckit.converge`, plus the personas `implementer`, `reviewer`, `release-manager`.
-- **Workers** are read-only or single-writer agents that a coordinator delegates to for a bounded analysis. They are marked with `subagent: true` in their frontmatter; some additionally set `user-invocable: false` so they only run when explicitly handed off to.
+- **Coordinators** drive a lifecycle stage end-to-end, write artefacts, and are user-invocable through their slash command. Examples: `/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement`, `/speckit-converge`, plus the personas `implementer`, `reviewer`, `release-manager`.
+- **Workers** are read-only or single-writer skills or agents that a coordinator delegates to for a bounded analysis. They are marked with `subagent: true` in their frontmatter; some additionally set `user-invocable: false` so they only run when explicitly handed off to.
 
-Agents currently marked as subagent workers:
+Customisations currently marked as subagent workers:
 
-- [`speckit.analyze`](../.github/agents/speckit.analyze.agent.md) - `subagent: true`, `user-invocable: false`. Non-destructive cross-artefact consistency check; should only be reached through the spec-kit pipeline.
-- [`speckit.checklist`](../.github/agents/speckit.checklist.agent.md) - `subagent: true` (no `user-invocable` override). Appends checklist files (single-writer). Useful directly as well as via handoff, so it remains user-invocable.
+- [`speckit-analyze`](../.github/skills/speckit-analyze/SKILL.md) - Non-destructive cross-artefact consistency check; should only be reached through the spec-kit pipeline.
+- [`speckit-checklist`](../.github/skills/speckit-checklist/SKILL.md) - Appends checklist files (single-writer). Useful directly as well as via handoff.
 - [`personas/planner`](../.github/agents/personas/planner.agent.md) - `subagent: true`, `user-invocable: false`. Explicitly read-only planner persona; runs as a worker for an orchestrating implementer or human-driven workflow.
 
-Coordinators such as `speckit.clarify`, `personas/implementer`, `personas/reviewer`, and `personas/release-manager` are **not** marked as subagents: they own writes, decisions, or rollout gates and remain user-invocable.
+Coordinators such as `speckit-clarify`, `personas/implementer`, `personas/reviewer`, and `personas/release-manager` are **not** marked as subagents: they own writes, decisions, or rollout gates and remain user-invocable.
 
 The repository ships two lifecycle hooks that align with this worker/coordinator split:
 
@@ -188,16 +188,16 @@ Each spec-kit stage produces artefacts worth committing. The table maps every co
 
 | Stage | Trigger                                                                                  | Conventional commit                                    |
 | ----- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| 1     | Constitution created or updated (`/speckit.constitution`)                                | `docs(constitution): establish project constitution`   |
-| 2     | Specification drafted (`/speckit.specify`)                                               | `docs(spec): draft feature specification`              |
-| 3     | Specification refined after clarification loop (`/speckit.clarify` → `/speckit.specify`) | `docs(spec): refine specification after clarification` |
-| 4     | Implementation plan created (`/speckit.plan`)                                            | `docs(plan): draft implementation plan`                |
-| 5     | Plan revised after checklist gap-fill (`/speckit.checklist` → `/speckit.plan`)           | `docs(plan): revise plan with checklist coverage`      |
-| 6     | Tasks generated (`/speckit.tasks`)                                                       | `docs(tasks): generate implementation tasks`           |
-| 7     | Tasks revised after consistency analysis (`/speckit.analyze` → `/speckit.tasks`)         | `docs(tasks): align tasks after consistency analysis`  |
+| 1     | Constitution created or updated (`/speckit-constitution`)                                | `docs(constitution): establish project constitution`   |
+| 2     | Specification drafted (`/speckit-specify`)                                               | `docs(spec): draft feature specification`              |
+| 3     | Specification refined after clarification loop (`/speckit-clarify` → `/speckit-specify`) | `docs(spec): refine specification after clarification` |
+| 4     | Implementation plan created (`/speckit-plan`)                                            | `docs(plan): draft implementation plan`                |
+| 5     | Plan revised after checklist gap-fill (`/speckit-checklist` → `/speckit-plan`)           | `docs(plan): revise plan with checklist coverage`      |
+| 6     | Tasks generated (`/speckit-tasks`)                                                       | `docs(tasks): generate implementation tasks`           |
+| 7     | Tasks revised after consistency analysis (`/speckit-analyze` → `/speckit-tasks`)         | `docs(tasks): align tasks after consistency analysis`  |
 | 8     | Documentation review passed (`/review.speckit-documentation`)                            | `docs(review): pass documentation review gate`         |
-| 9     | Implementation completed (`/speckit.implement`, per phase)                               | `feat(feature): implement phase N`                     |
-| 10    | Convergence gap-fill after implementation (`/speckit.converge` → `/speckit.tasks`)       | `docs(tasks): append unbuilt work after convergence`   |
+| 9     | Implementation completed (`/speckit-implement`, per phase)                               | `feat(feature): implement phase N`                     |
+| 10    | Convergence gap-fill after implementation (`/speckit-converge` → `/speckit-tasks`)       | `docs(tasks): append unbuilt work after convergence`   |
 | 11    | Code review passed (`/review.speckit-code`)                                              | `refactor(review): address code review findings`       |
 | 12    | Test review passed (`/review.speckit-test`)                                              | `test(review): address test review findings`           |
 

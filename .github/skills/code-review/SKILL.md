@@ -44,7 +44,7 @@ For all review types:
 
 This review is positioned within the spec-driven development pipeline:
 
-- `speckit.specify` → `speckit.clarify` → `speckit.plan` → `speckit.tasks` → **review** → `speckit.implement`
+- `speckit-specify` → `speckit-clarify` → `speckit-plan` → `speckit-tasks` → **review** → `speckit-implement`
 - Documentation review should run before code review.
 - Code review should run before test review.
 

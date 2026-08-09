@@ -32,10 +32,10 @@ function main() {
   cheatsheet=$(cat <<'EOF'
 ## Spec-kit cheatsheet 🧭
 
-Lifecycle: `/speckit.constitution` → `/speckit.specify` → `/speckit.clarify`?
-  → `/speckit.plan` → `/speckit.checklist`? → `/speckit.tasks`
-  → `/speckit.analyze`? → `/review.speckit-documentation`
-  → `/speckit.implement` → `/review.speckit-code` → `/review.speckit-test`
+Lifecycle: `/speckit-constitution` → `/speckit-specify` → `/speckit-clarify`?
+  → `/speckit-plan` → `/speckit-checklist`? → `/speckit-tasks`
+  → `/speckit-analyze`? → `/review.speckit-documentation`
+  → `/speckit-implement` → `/review.speckit-code` → `/review.speckit-test`
 
 Artefact types (when to use):
   - Instructions  → coding standards, file-glob-scoped rules

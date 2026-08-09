@@ -61,7 +61,7 @@ function main() {
     test-apply-subset-instructions-only-with-python-tech \
     test-apply-subset-invalid-value-fails-with-helpful-message \
     test-apply-subset-comma-whitespace-trimmed \
-    test-apply-subset-speckit-only-narrows-agents-and-prompts \
+    test-apply-subset-speckit-only-narrows-skills-and-prompts \
     test-apply-subset-docs-only \
     test-apply-subset-project-only \
   )
@@ -70,7 +70,7 @@ function main() {
     {
       echo -n "$test"
       # shellcheck disable=SC2015
-      $test && echo " PASS" || { echo " FAIL"; ((status++)); }
+      $test && echo " PASS" || { echo " FAIL"; status=$((status + 1)); }
     }
   done
   echo "Total: ${#tests[@]}, Passed: $(( ${#tests[@]} - status )), Failed: $status"
@@ -200,7 +200,6 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/.github/skills/system-documentation/SKILL.md" ]] || return 1
   # Singleton files
   [[ -f "${d}/.github/copilot-instructions.md" ]] || return 1
-  [[ -f "${d}/AGENTS.md" ]] || return 1
   [[ -f "${d}/project.code-workspace" ]] || return 1
   [[ -f "${d}/.github/pull_request_template.md" ]] || return 1
   # Shared resources
@@ -212,7 +211,7 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -d "${d}/docs/prompt-reports" ]] || return 1
   # VS Code settings
   [[ -f "${d}/.vscode/settings.json" ]] || return 1
-  grep -q "chat.promptFilesRecommendations" "${d}/.vscode/settings.json" || return 1
+  grep -q "chat.skillRecommendations" "${d}/.vscode/settings.json" || return 1
   grep -q "chat.tools.terminal.autoApprove" "${d}/.vscode/settings.json" || return 1
   # .gitignore
   [[ -f "${d}/.gitignore" ]] || return 1
@@ -357,10 +356,9 @@ function test-apply-revert-removes-all-managed-artefacts() {
   [[ ! -d "${d}/scripts/hooks" ]] || return 1
   # Singleton files removed
   [[ ! -f "${d}/.github/copilot-instructions.md" ]] || return 1
-  [[ ! -f "${d}/AGENTS.md" ]] || return 1
   # VS Code settings managed properties removed (file may or may not still exist)
   if [[ -f "${d}/.vscode/settings.json" ]]; then
-    ! grep -q "chat.promptFilesRecommendations" "${d}/.vscode/settings.json" || return 1
+    ! grep -q "chat.skillRecommendations" "${d}/.vscode/settings.json" || return 1
     ! grep -q "chat.tools.terminal.autoApprove" "${d}/.vscode/settings.json" || return 1
   fi
   # gitignore managed section removed (file itself may be gone if it was empty)
@@ -451,7 +449,6 @@ function test-apply-subset-agents-only() {
   [[ $(find "${d}/.github/agents" -name "*.md" -type f | wc -l | tr -d ' ') -gt 0 ]] || return 1
   [[ ! -d "${d}/.github/prompts" ]] || return 1
   [[ ! -d "${d}/.github/skills" ]] || return 1
-  [[ ! -f "${d}/AGENTS.md" ]] || return 1
   [[ ! -f "${d}/.github/copilot-instructions.md" ]] || return 1
   return 0
 }
@@ -498,13 +495,12 @@ function test-apply-subset-comma-whitespace-trimmed() {
   return 0
 }
 
-function test-apply-subset-speckit-only-narrows-agents-and-prompts() {
+function test-apply-subset-speckit-only-narrows-skills-and-prompts() {
 
   local d="${SUBSET_SPECKIT_DEST}"
-  [[ -f "${d}/.github/agents/speckit.specify.agent.md" ]] || return 1
-  [[ -f "${d}/.github/agents/speckit.implement.agent.md" ]] || return 1
-  [[ ! -d "${d}/.github/agents/personas" ]] || return 1
-  [[ -f "${d}/.github/prompts/speckit.specify.prompt.md" ]] || return 1
+  [[ -d "${d}/.github/skills/speckit-specify" ]] || return 1
+  [[ -d "${d}/.github/skills/speckit-implement" ]] || return 1
+  [[ ! -d "${d}/.github/skills/repository-template" ]] || return 1
   [[ -f "${d}/.github/prompts/review.speckit-code.prompt.md" ]] || return 1
   [[ ! -f "${d}/.github/prompts/enforce.shell.prompt.md" ]] || return 1
   [[ ! -f "${d}/.github/prompts/enforce.docker.prompt.md" ]] || return 1
@@ -512,8 +508,7 @@ function test-apply-subset-speckit-only-narrows-agents-and-prompts() {
   [[ -d "${d}/.specify/memory" ]] || return 1
   [[ -d "${d}/.specify/templates" ]] || return 1
   [[ ! -d "${d}/.github/instructions" ]] || return 1
-  [[ ! -d "${d}/.github/skills" ]] || return 1
-  [[ ! -f "${d}/AGENTS.md" ]] || return 1
+  [[ ! -d "${d}/.github/agents" ]] || return 1
   return 0
 }
 
@@ -525,7 +520,6 @@ function test-apply-subset-docs-only() {
   [[ -d "${d}/docs/prompt-reports" ]] || return 1
   [[ ! -d "${d}/.github/agents" ]] || return 1
   [[ ! -d "${d}/.github/prompts" ]] || return 1
-  [[ ! -f "${d}/AGENTS.md" ]] || return 1
   return 0
 }
 
@@ -535,7 +529,6 @@ function test-apply-subset-project-only() {
   [[ -f "${d}/.vscode/settings.json" ]] || return 1
   [[ -f "${d}/project.code-workspace" ]] || return 1
   [[ -f "${d}/.gitignore" ]] || return 1
-  [[ -f "${d}/AGENTS.md" ]] || return 1
   [[ -f "${d}/.github/copilot-instructions.md" ]] || return 1
   [[ -f "${d}/.github/pull_request_template.md" ]] || return 1
   [[ ! -d "${d}/.github/agents" ]] || return 1
@@ -560,6 +553,8 @@ function is-arg-true() {
 
 is-arg-true "${VERBOSE:-false}" && set -x
 
-main "$@"
+if main "$@"; then
+  exit 0
+fi
 
-exit 0
+exit 1

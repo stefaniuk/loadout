@@ -4,6 +4,7 @@
 #
 # Injection Strategies:
 #   after-frontmatter     - Inject immediately after YAML front matter (---)
+#   replace-before-section:<name> - Replace content after front matter up to a specific section heading
 #   before-section:<name> - Inject before a specific section heading
 #   after-section:<name>  - Inject after a specific section heading
 #   append                - Append at end of file
@@ -11,7 +12,7 @@
 #
 # Usage:
 #   1. Create an extension file in the appropriate subdirectory:
-#      - .specify/extensions/copilot/prompts/speckit.<name>.prompt.ext.md
+#      - .specify/extensions/copilot/skills/speckit-<name>.ext.md
 #      - .specify/extensions/templates/<name>-template.ext.md
 #
 #   2. Optionally configure the injection point below.
@@ -22,11 +23,11 @@
 # Default injection points per AI tool and category
 defaults:
   copilot:
-    prompts: after-frontmatter
+    skills: replace-before-section:## User Input
   templates: after-frontmatter
 
 # Per-file overrides (filename: injection-strategy)
 # Examples:
-#   speckit.specify.agent.md: before-section:## Outline
+#   speckit-plan/SKILL.md: replace-before-section:## User Input
 #   tasks-template.md: after-section:## Format
 overrides: {}

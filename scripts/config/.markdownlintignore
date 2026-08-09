@@ -1,4 +1,4 @@
-.github/agents/speckit.*.agent.md
+.github/skills/speckit-*/
 .specify/templates/*-template.md
 
 # begin: synced skills

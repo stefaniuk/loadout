@@ -9,6 +9,7 @@ set -euo pipefail
 #   $ [options] ./scripts/specify.sh
 #
 # Options:
+#   extensions=false        # Skip local extensions and use vanilla upstream files, default is 'true'
 #   dry_run=true            # Show what would change without modifying files, default is 'false'
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
@@ -29,8 +30,7 @@ EXTENSIONS_DIR="${REPO_ROOT}/.specify/extensions"
 MANIFEST_FILE="${EXTENSIONS_DIR}/manifest.yaml"
 
 # Target locations for patched files
-TARGET_AGENTS="${REPO_ROOT}/.github/agents"
-TARGET_PROMPTS="${REPO_ROOT}/.github/prompts"
+TARGET_SKILLS="${REPO_ROOT}/.github/skills"
 TARGET_TEMPLATES="${REPO_ROOT}/.specify/templates"
 TARGET_SCRIPTS="${REPO_ROOT}/.specify/scripts/python"
 VERSION_FILE="${REPO_ROOT}/.specify/.speckit-version"
@@ -55,16 +55,20 @@ function main() {
   echo "==> Saving spec-kit version..."
   save-speckit-version
 
-  echo "==> Applying local extensions..."
-  patch-category "$TEMP_DIR" "copilot" "agents" ".github/agents" "${TARGET_AGENTS}" "speckit.*.agent.md"
-  patch-category "$TEMP_DIR" "copilot" "prompts" ".github/prompts" "${TARGET_PROMPTS}" "speckit.*.prompt.md"
-  patch-category "$TEMP_DIR" "" "templates" ".specify/templates" "${TARGET_TEMPLATES}" "*-template.md"
+  local extensions=${extensions:-true}
+
+  if is-arg-true "$extensions"; then
+    echo "==> Applying local extensions..."
+    patch-skills "$TEMP_DIR"
+    patch-category "$TEMP_DIR" "" "templates" ".specify/templates" "${TARGET_TEMPLATES}" "*-template.md"
+  else
+    echo "==> Skipping local extensions (extensions=false)."
+    copy-vanilla-skills "$TEMP_DIR"
+    patch-category "$TEMP_DIR" "" "templates" ".specify/templates" "${TARGET_TEMPLATES}" "*-template.md"
+  fi
 
   echo "==> Copying spec-kit scripts (Python)..."
   copy-scripts "$TEMP_DIR"
-
-  echo "==> Syncing prompt descriptions from agents..."
-  sync-prompt-descriptions
 
   if is-arg-true "$dry_run"; then
     echo "==> Dry run complete. No files were modified."
@@ -193,50 +197,6 @@ function emit-commit-message() {
   return 0
 }
 
-# Sync description from agent files into corresponding prompt files.
-# Prompt files that delegate via `agent:` need a `description:` field
-# to satisfy the customisation linter.
-function sync-prompt-descriptions() {
-  local dry_run=${dry_run:-false}
-  local prompt_file
-
-  for prompt_file in "${TARGET_PROMPTS}"/speckit.*.prompt.md; do
-    [[ -f "$prompt_file" ]] || continue
-
-    local filename
-    filename=$(basename "$prompt_file")
-    local agent_name="${filename%.prompt.md}"
-    local agent_file="${TARGET_AGENTS}/${agent_name}.agent.md"
-
-    # Skip if prompt already has a description
-    if grep -q '^description:' "$prompt_file" 2>/dev/null; then
-      continue
-    fi
-
-    # Extract description from corresponding agent file
-    if [[ ! -f "$agent_file" ]]; then
-      continue
-    fi
-
-    local description
-    description=$(sed -n '/^---$/,/^---$/{ /^description:/{ s/^description: *//; p; q; } }' "$agent_file")
-
-    if [[ -z "$description" ]]; then
-      continue
-    fi
-
-    echo "    ${filename}: added description"
-
-    if ! is-arg-true "$dry_run"; then
-      # Insert description: line after agent: line in frontmatter
-      sed -i'' -e "/^agent: ${agent_name}$/a\\
-description: ${description}" "$prompt_file"
-    fi
-  done
-
-  return 0
-}
-
 # Copy Python scripts from the upstream init output, removing any
 # legacy bash scripts directory.
 # Arguments:
@@ -279,6 +239,104 @@ function copy-scripts() {
   return 0
 }
 
+# Patch speckit skill files from upstream with local extensions.
+# Arguments:
+#   $1=[path to temporary directory]
+function patch-skills() {
+  local temp_dir="$1"
+  local source_dir="${temp_dir}/.github/skills"
+  local extensions_dir="${EXTENSIONS_DIR}/copilot/skills"
+  local dry_run=${dry_run:-false}
+
+  echo "  [copilot/skills]"
+
+  if [[ ! -d "$source_dir" ]]; then
+    echo "    Warning: Skills source directory not found: ${source_dir}"
+    return 0
+  fi
+
+  local skill_dir
+  for skill_dir in "${source_dir}"/speckit-*/; do
+    [[ -d "$skill_dir" ]] || continue
+
+    local skill_name
+    skill_name=$(basename "$skill_dir")
+    local source_file="${skill_dir}SKILL.md"
+    local ext_file="${extensions_dir}/${skill_name}.ext.md"
+    local target_dir="${TARGET_SKILLS}/${skill_name}"
+    local target_file="${target_dir}/SKILL.md"
+
+    if [[ ! -f "$source_file" ]]; then
+      continue
+    fi
+
+    if ! is-arg-true "$dry_run"; then
+      mkdir -p "$target_dir"
+    fi
+
+    if [[ -f "$ext_file" ]]; then
+      local injection_point
+      injection_point=$(get-injection-point "${skill_name}/SKILL.md" "copilot" "skills")
+      echo "    Patching: ${skill_name}/SKILL.md (injection: ${injection_point})"
+      if ! is-arg-true "$dry_run"; then
+        local upstream_content
+        local extension_content
+        local patched_content
+        upstream_content=$(cat "$source_file")
+        extension_content=$(cat "$ext_file")
+        patched_content=$(inject-extension "$upstream_content" "$extension_content" "$injection_point")
+        echo "$patched_content" > "$target_file"
+      fi
+    else
+      echo "    Copying:  ${skill_name}/SKILL.md (no extension)"
+      if ! is-arg-true "$dry_run"; then
+        cp "$source_file" "$target_file"
+      fi
+    fi
+  done
+
+  return 0
+}
+
+# Copy upstream skill files without applying extensions.
+# Arguments:
+#   $1=[path to temporary directory]
+function copy-vanilla-skills() {
+  local temp_dir="$1"
+  local source_dir="${temp_dir}/.github/skills"
+  local dry_run=${dry_run:-false}
+
+  echo "  [copilot/skills] (vanilla)"
+
+  if [[ ! -d "$source_dir" ]]; then
+    echo "    Warning: Skills source directory not found: ${source_dir}"
+    return 0
+  fi
+
+  local skill_dir
+  for skill_dir in "${source_dir}"/speckit-*/; do
+    [[ -d "$skill_dir" ]] || continue
+
+    local skill_name
+    skill_name=$(basename "$skill_dir")
+    local source_file="${skill_dir}SKILL.md"
+    local target_dir="${TARGET_SKILLS}/${skill_name}"
+    local target_file="${target_dir}/SKILL.md"
+
+    if [[ ! -f "$source_file" ]]; then
+      continue
+    fi
+
+    echo "    Copying:  ${skill_name}/SKILL.md"
+    if ! is-arg-true "$dry_run"; then
+      mkdir -p "$target_dir"
+      cp "$source_file" "$target_file"
+    fi
+  done
+
+  return 0
+}
+
 # Fetch upstream spec-kit files using the specify CLI.
 # Runs specify init for copilot so that all upstream artifacts are
 # available for patching.
@@ -291,6 +349,7 @@ function fetch-upstream-files() {
     cd "$temp_dir"
     specify init \
       --integration copilot \
+      --integration-options="--skills" \
       --script py \
       --ignore-agent-tools \
       --here \
@@ -443,7 +502,9 @@ function get-injection-point() {
   local filename="$1"
   local ai_tool="$2"
   local category="$3"
-  local default_injection="after-frontmatter"
+  local default_injection
+
+  default_injection=$(get-default-injection-point "$ai_tool" "$category")
 
   # Try to read from manifest if yq is available
   if command -v yq > /dev/null 2>&1 && [[ -f "$MANIFEST_FILE" ]]; then
@@ -472,6 +533,25 @@ function get-injection-point() {
   return 0
 }
 
+# Get the built-in default injection point for a category.
+# Arguments:
+#   $1=[AI tool name: copilot, or empty for shared categories]
+#   $2=[category name: skills, templates, or other manifest category]
+# Returns:
+#   Default injection point string (via stdout)
+function get-default-injection-point() {
+  local ai_tool="$1"
+  local category="$2"
+
+  if [[ "$ai_tool" == "copilot" ]] && [[ "$category" == "skills" ]]; then
+    echo "replace-before-section:## User Input"
+  else
+    echo "after-frontmatter"
+  fi
+
+  return 0
+}
+
 # Inject extension content into upstream content at the specified location.
 # Arguments:
 #   $1=[upstream content]
@@ -487,6 +567,10 @@ function inject-extension() {
   case "$injection_point" in
     after-frontmatter)
       inject-after-frontmatter "$upstream_content" "$extension_content"
+      ;;
+    replace-before-section:*)
+      local section_name="${injection_point#replace-before-section:}"
+      inject-replace-before-section "$upstream_content" "$extension_content" "$section_name"
       ;;
     before-section:*)
       local section_name="${injection_point#before-section:}"
@@ -507,6 +591,79 @@ function inject-extension() {
       inject-after-frontmatter "$upstream_content" "$extension_content"
       ;;
   esac
+
+  return 0
+}
+
+# Replace the content after front matter up to a specific section heading.
+# If the section heading is not found, the remaining upstream content is kept.
+# Arguments:
+#   $1=[upstream content]
+#   $2=[extension content]
+#   $3=[section heading to keep from upstream]
+# Returns:
+#   Patched content (via stdout)
+function inject-replace-before-section() {
+  local upstream_content="$1"
+  local extension_content="$2"
+  local section_name="$3"
+
+  local -a lines=()
+  local line
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    lines+=("$line")
+  done <<< "$upstream_content"
+
+  local line_count="${#lines[@]}"
+  local frontmatter_end_index=-1
+  local delimiter_count=0
+  local index=0
+  local result=""
+  local content_start_index=0
+  local section_index=-1
+
+  if (( line_count > 0 )) && [[ "${lines[0]}" == "---" ]]; then
+    for ((index=0; index<line_count; index++)); do
+      if [[ "${lines[$index]}" == "---" ]]; then
+        ((delimiter_count++))
+        if (( delimiter_count == 2 )); then
+          frontmatter_end_index=$index
+          break
+        fi
+      fi
+    done
+  fi
+
+  if (( frontmatter_end_index >= 0 )); then
+    for ((index=0; index<=frontmatter_end_index; index++)); do
+      result+="${lines[$index]}"$'\n'
+    done
+    result+=$'\n'"${extension_content}"$'\n'
+    content_start_index=$((frontmatter_end_index + 1))
+  else
+    result+="${extension_content}"$'\n'
+  fi
+
+  for ((index=content_start_index; index<line_count; index++)); do
+    if [[ "${lines[$index]}" == "$section_name"* ]]; then
+      section_index=$index
+      break
+    fi
+  done
+
+  if (( section_index >= 0 )); then
+    result+=$'\n'
+    for ((index=section_index; index<line_count; index++)); do
+      result+="${lines[$index]}"$'\n'
+    done
+  else
+    for ((index=content_start_index; index<line_count; index++)); do
+      result+="${lines[$index]}"$'\n'
+    done
+  fi
+
+  result="${result%$'\n'}"
+  echo "$result"
 
   return 0
 }

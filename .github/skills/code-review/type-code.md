@@ -47,9 +47,9 @@ Before reporting findings, gather full context by:
 
 ## Spec-kit Workflow Integration
 
-- Trigger this review after the documentation review has passed, after `speckit.analyze` reports no unresolved critical/high findings (or they are explicitly waived), and after `speckit.implement` has been executed with checklist status PASS or an explicit waiver.
+- Trigger this review after the documentation review has passed, after `speckit-analyze` reports no unresolved critical/high findings (or they are explicitly waived), and after `speckit-implement` has been executed with checklist status PASS or an explicit waiver.
 - Treat this review as the post-implementation gate: all findings here must be resolved (or formally tracked) before the test automation quality review can run.
-- When you discover specification gaps during this review, feed them back to the documentation review; if spec/plan/tasks change, update tasks as needed and re-run `speckit.analyze` before continuing.
+- When you discover specification gaps during this review, feed them back to the documentation review; if spec/plan/tasks change, update tasks as needed and re-run `speckit-analyze` before continuing.
 
 ## Operating Principles (Must Follow)
 

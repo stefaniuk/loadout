@@ -16,8 +16,8 @@ set -euo pipefail
 #   subset=<csv>            # Restrict copy to named categories (comma-separated). Valid tokens:
 #                           #   agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, mcp, all
 #                           # Omitted or 'all' preserves the default full-copy behaviour byte-for-byte.
-#                           # The 'speckit' token narrows agents/prompts copy functions to speckit.* and
-#                           # review.speckit-* files only when used WITHOUT 'agents'/'prompts' respectively.
+#                           # The 'speckit' token narrows skills/prompts copy functions to speckit-* skills and
+#                           # review.speckit-* prompts only when used WITHOUT 'skills'/'prompts' respectively.
 #                           # The 'mcp' token is opt-in only: MCP assets are NOT copied by default and NOT
 #                           # included by 'all'. They are copied only when 'mcp' is named explicitly in the
 #                           # subset csv (e.g. subset=all,mcp or subset=mcp).
@@ -41,13 +41,12 @@ set -euo pipefail
 #   - Shell, Docker, Makefile instructions and prompts
 #   - Development prompts (dev.implement-*)
 #   - Architecture documentation prompts (architecture.*)
-#   - Spec-kit prompts (speckit.*, review.speckit-*)
+#   - Spec-kit review prompts (review.speckit-*)
 #   - Utility prompts (util.*)
 #   - Shared includes (baselines)
 #   - Default templates (Makefile, Dockerfile, compose.yaml, shell-script)
 #   - Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
 #   - copilot-instructions.md
-#   - AGENTS.md (cross-agent baseline at destination root)
 #   - .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
 #   - scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
 #   - pull_request_template.md (if not already present)
@@ -86,7 +85,6 @@ COPILOT_INSTRUCTIONS_DIR="${REPO_ROOT}/.github/instructions"
 COPILOT_PROMPTS_DIR="${REPO_ROOT}/.github/prompts"
 COPILOT_SKILLS_DIR="${REPO_ROOT}/.github/skills"
 COPILOT_INSTRUCTIONS_MD_FILE="${REPO_ROOT}/.github/copilot-instructions.md"
-AGENTS_MD_FILE="${REPO_ROOT}/AGENTS.md"
 HOOK_SCRIPTS_DIR="${REPO_ROOT}/scripts/hooks"
 
 SPECIFY_MEMORY="${REPO_ROOT}/.specify/memory"
@@ -111,7 +109,7 @@ GITIGNORE_END_MARKER="# <<< promptfiles-copilot managed content - DO NOT EDIT AB
 DEFAULT_INSTRUCTIONS=("docker" "makefile" "readme" "shell")
 
 # Default prompt patterns (glue layer and spec-kit)
-DEFAULT_PROMPT_PATTERNS=("architecture.*" "dev.implement-*" "enforce.docker" "enforce.makefile" "enforce.shell" "review.speckit-*" "spec.*" "speckit.*" "util.*")
+DEFAULT_PROMPT_PATTERNS=("architecture.*" "dev.implement-*" "enforce.docker" "enforce.makefile" "enforce.shell" "review.speckit-*" "spec.*" "util.*")
 
 # Default templates (glue layer)
 DEFAULT_TEMPLATES=("Makefile.template" "Dockerfile.template" "compose.yaml.template" "shell-script.template.sh")
@@ -141,7 +139,7 @@ SUBSET_MCP=false
 # True only when subset was explicitly set (used to gate observability messages).
 SUBSET_EXPLICIT=false
 # Narrowing flags - true when subset contains 'speckit' but not the broader category.
-SPECKIT_NARROW_AGENTS=false
+SPECKIT_NARROW_SKILLS=false
 SPECKIT_NARROW_PROMPTS=false
 
 # ==============================================================================
@@ -412,9 +410,9 @@ function parse-subset() {
   [[ "${seen}" == *" mcp "* ]] && SUBSET_MCP=true
 
   # Speckit narrowing: when the caller asked for speckit but NOT the broader
-  # category, restrict agent/prompt copies to speckit.* and review.speckit-*.
-  if [[ "${SUBSET_SPECKIT}" == "true" && "${SUBSET_AGENTS}" != "true" ]]; then
-    SPECKIT_NARROW_AGENTS=true
+  # category, restrict skills to speckit-* and prompts to review.speckit-*.
+  if [[ "${SUBSET_SPECKIT}" == "true" && "${SUBSET_SKILLS}" != "true" ]]; then
+    SPECKIT_NARROW_SKILLS=true
   fi
   if [[ "${SUBSET_SPECKIT}" == "true" && "${SUBSET_PROMPTS}" != "true" ]]; then
     SPECKIT_NARROW_PROMPTS=true
@@ -446,7 +444,7 @@ function copilot-apply() {
   if is-arg-true "${clean:-false}"; then
     copilot-clean-directories "${destination}"
   fi
-  if [[ "${SUBSET_AGENTS}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
+  if [[ "${SUBSET_AGENTS}" == "true" ]]; then
     copilot-copy-agents "${destination}"
   else
     subset-skip "agents"
@@ -466,7 +464,7 @@ function copilot-apply() {
   else
     subset-skip "prompts"
   fi
-  if [[ "${SUBSET_SKILLS}" == "true" ]]; then
+  if [[ "${SUBSET_SKILLS}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
     copilot-copy-skills "${destination}"
   else
     subset-skip "skills"
@@ -513,7 +511,6 @@ function copy-shared-resources() {
   fi
   if [[ "${SUBSET_PROJECT}" == "true" ]]; then
     copy-workspace-file "${destination}"
-    copy-agents-md "${destination}"
   else
     subset-skip "project-files"
   fi
@@ -640,12 +637,6 @@ function revert-copilot() {
     rm -f "${dest}/.github/copilot-instructions.md"
   fi
 
-  # Remove AGENTS.md
-  if [[ -f "${dest}/AGENTS.md" ]]; then
-    print-info "Removing ${dest}/AGENTS.md"
-    rm -f "${dest}/AGENTS.md"
-  fi
-
   # Remove hook scripts (scripts/hooks/ is fully managed by promptfiles;
   # any user-authored files placed there will be removed on revert)
   if [[ -d "${dest}/scripts/hooks" ]]; then
@@ -691,6 +682,7 @@ function revert-shared-resources() {
   # Remove managed VS Code settings properties
   if [[ -f "${dest}/.vscode/settings.json" ]]; then
     print-info "Removing promptfiles properties from VS Code settings"
+    remove-vscode-json-property "${dest}/.vscode/settings.json" "chat.skillRecommendations"
     remove-vscode-json-property "${dest}/.vscode/settings.json" "chat.promptFilesRecommendations"
     remove-vscode-json-property "${dest}/.vscode/settings.json" "chat.tools.terminal.autoApprove"
   fi
@@ -752,24 +744,13 @@ function copilot-copy-agents() {
   print-info "Copying agent files to ${dest_agents}"
   # Recursive copy so nested persona files under personas/ are included.
   # Preserve the relative directory structure under .github/agents/.
-  # When SPECKIT_NARROW_AGENTS is set, restrict to top-level speckit.*.agent.md
-  # files only (excludes personas/ and any non-speckit agents).
   local src_file rel_path target_dir
-  if [[ "${SPECKIT_NARROW_AGENTS:-false}" == "true" ]]; then
-    while IFS= read -r -d '' src_file; do
-      rel_path="${src_file#"${COPILOT_AGENTS_DIR}/"}"
-      target_dir="${dest_agents}/$(dirname "${rel_path}")"
-      mkdir -p "${target_dir}"
-      cp "${src_file}" "${target_dir}/"
-    done < <(find "${COPILOT_AGENTS_DIR}" -maxdepth 1 -name "speckit.*.agent.md" -type f -print0)
-  else
-    while IFS= read -r -d '' src_file; do
-      rel_path="${src_file#"${COPILOT_AGENTS_DIR}/"}"
-      target_dir="${dest_agents}/$(dirname "${rel_path}")"
-      mkdir -p "${target_dir}"
-      cp "${src_file}" "${target_dir}/"
-    done < <(find "${COPILOT_AGENTS_DIR}" -name "*.md" -type f -print0)
-  fi
+  while IFS= read -r -d '' src_file; do
+    rel_path="${src_file#"${COPILOT_AGENTS_DIR}/"}"
+    target_dir="${dest_agents}/$(dirname "${rel_path}")"
+    mkdir -p "${target_dir}"
+    cp "${src_file}" "${target_dir}/"
+  done < <(find "${COPILOT_AGENTS_DIR}" -name "*.md" -type f -print0)
 }
 
 # Copy copilot instruction files to the destination.
@@ -856,7 +837,7 @@ function copilot-copy-prompts() {
   # Default prompt pattern set; narrow to speckit-only when requested.
   local -a patterns
   if [[ "${SPECKIT_NARROW_PROMPTS:-false}" == "true" ]]; then
-    patterns=("speckit.*" "review.speckit-*")
+    patterns=("review.speckit-*")
   else
     patterns=("${DEFAULT_PROMPT_PATTERNS[@]}")
   fi
@@ -900,6 +881,18 @@ function copilot-copy-skills() {
   mkdir -p "${dest_skills}"
 
   print-info "Copying skills files to ${dest_skills}"
+
+  # When narrowing to speckit only, copy only speckit-* skills.
+  if [[ "${SPECKIT_NARROW_SKILLS:-false}" == "true" ]]; then
+    local skill_dir
+    for skill_dir in "${COPILOT_SKILLS_DIR}"/speckit-*/; do
+      [[ -d "$skill_dir" ]] || continue
+      local skill_name
+      skill_name=$(basename "$skill_dir")
+      copy-directory-excluding-git "${skill_dir}" "${dest_skills}/${skill_name}"
+    done
+    return 0
+  fi
 
   # Copy default skills
   for skill in "${DEFAULT_SKILLS[@]}"; do
@@ -954,18 +947,6 @@ function copilot-copy-hooks() {
     return 0
   fi
   cp "${hooks[@]}" "${dest}/"
-}
-
-# Copy AGENTS.md to the destination root.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function copy-agents-md() {
-
-  local dest="$1"
-  mkdir -p "${dest}"
-
-  print-info "Copying AGENTS.md to ${dest}"
-  cp "${AGENTS_MD_FILE}" "${dest}/"
 }
 
 # Copy scripts/hooks/ to the destination.
@@ -1168,12 +1149,12 @@ function update-vscode-settings() {
     print-info "Creating VS Code settings: ${settings_file}"
     cat <<'EOF' > "${settings_file}"
 {
-  "chat.promptFilesRecommendations": {
-    "speckit.constitution": true,
-    "speckit.specify": true,
-    "speckit.plan": true,
-    "speckit.tasks": true,
-    "speckit.implement": true
+  "chat.skillRecommendations": {
+    "speckit-constitution": true,
+    "speckit-specify": true,
+    "speckit-plan": true,
+    "speckit-tasks": true,
+    "speckit-implement": true
   },
   "chat.tools.terminal.autoApprove": {
     ".specify/scripts/python/": true
@@ -1184,7 +1165,7 @@ EOF
   fi
 
   # Always remove existing sections before adding them back
-  remove-vscode-json-property "${settings_file}" "chat.promptFilesRecommendations"
+  remove-vscode-json-property "${settings_file}" "chat.skillRecommendations"
   remove-vscode-json-property "${settings_file}" "chat.tools.terminal.autoApprove"
 
   # Prepare content to insert (always both sections)
@@ -1192,12 +1173,12 @@ EOF
   insert_file=$(mktemp)
 
   cat <<'EOF' >> "${insert_file}"
-  "chat.promptFilesRecommendations": {
-    "speckit.constitution": true,
-    "speckit.specify": true,
-    "speckit.plan": true,
-    "speckit.tasks": true,
-    "speckit.implement": true
+  "chat.skillRecommendations": {
+    "speckit-constitution": true,
+    "speckit-specify": true,
+    "speckit-plan": true,
+    "speckit-tasks": true,
+    "speckit-implement": true
   },
   "chat.tools.terminal.autoApprove": {
     ".specify/scripts/python/": true
@@ -1413,7 +1394,6 @@ Other options:
     VERBOSE=true            Show all executed commands
 
 Always copied (default/glue layer):
-    AGENTS.md (cross-agent baseline at destination root)
     .github/copilot-instructions.md
     .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
     scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)

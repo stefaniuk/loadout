@@ -1,6 +1,6 @@
 {
   "Exclude": [
-    "^\\.github/agents/speckit\\..*\\.agent\\.md$",
+    "^\\.github/skills/speckit-[^/]+/SKILL\\.md$",
     "^\\.github/instructions/makefile\\.instructions\\.md$",
     "^\\.specify/scripts/python/.*\\.py$",
     "^\\.specify/templates/.*-template\\.md$"

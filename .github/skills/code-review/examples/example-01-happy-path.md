@@ -15,7 +15,7 @@
 ## Argument and intent resolution
 
 - `$ARGUMENTS` resolves to `code`, so the skill takes the Implementation Engineer role.
-- Pipeline position confirmed: this run comes after `speckit.implement` and before the `test` review.
+- Pipeline position confirmed: this run comes after `speckit-implement` and before the `test` review.
 - Documentation review for this feature has already been completed (assumed clean).
 
 ## Context gathering
@@ -59,5 +59,5 @@
 ## Notes and follow-ups
 
 - The `test` review should be run next to assess pyramid health and unit-test quality for the new modules.
-- The idempotency finding requires a spec amendment via `speckit.specify`; do not silently patch the code.
+- The idempotency finding requires a spec amendment via `speckit-specify`; do not silently patch the code.
 - Re-run this skill after addressing the `critical` finding to confirm closure before merging.

@@ -4,7 +4,7 @@ You **MUST** adhere to the following mandatory requirements when generating deve
 
 - **Input:** `plan.md` (implementation plan)
 - **Output:** `tasks.md` (actionable task list)
-- **Next phase:** Implementation (`/speckit.implement`)
+- **Next phase:** Implementation (`/speckit-implement`)
 
 **Base requirements:** Follow all rules in [copilot-instructions.md](/.github/copilot-instructions.md), particularly:
 
@@ -25,7 +25,7 @@ These steps will be executed during implementation to verify each phase is compl
 
 ### AI Assistant Execution Requirement (Mandatory)
 
-AI Assistant **MUST** execute every Show & Tell step during `/speckit.implement` and validate that the expected result is achieved.
+AI Assistant **MUST** execute every Show & Tell step during `/speckit-implement` and validate that the expected result is achieved.
 
 - Do not allow placeholder or ambiguous steps
 - Every step must include explicit pass/fail criteria
@@ -49,17 +49,3 @@ make run
 - Navigate to <http://localhost:3000/dashboard>
 - Verify the analytics widget displays sample data
 ````
-
-## Tasks Completion Checklist (Mandatory)
-
-Before marking `tasks.md` as complete, verify:
-
-- [ ] All phases and user stories from `plan.md` are covered
-- [ ] There is a task for each repository-template capability that was planned to be implemented using the skill at [.github/skills/repository-template/SKILL.md](/.github/skills/repository-template/SKILL.md)
-- [ ] TDD sequencing is applied: Red (write failing test), Green (implement to pass), Refactor
-- [ ] Test tasks are listed before their corresponding implementation tasks
-- [ ] Each phase and user story ends with a validation task aligned to the repository's verification model; do not add redundant gate-only tasks when hooks already enforce the local quality gates
-- [ ] Each phase and user story includes a `Show & Tell` subsection with executable steps
-- [ ] AI Assistant executes every Show & Tell step during implementation
-- [ ] Every Show & Tell step has explicit expected output/state and clear pass/fail criteria
-- [ ] No phase or user story is marked complete if any Show & Tell step has not passed

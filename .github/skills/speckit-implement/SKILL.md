@@ -1,6 +1,43 @@
 ---
-description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
+name: "speckit-implement"
+description: "Execute the implementation plan by processing and executing all tasks defined in tasks.md"
+compatibility: "Requires spec-kit project structure with .specify/ directory"
+metadata:
+  author: "github-spec-kit"
+  source: "templates/commands/implement.md"
 ---
+
+You **MUST** adhere to the following mandatory requirements when implementing features.
+
+**Workflow context:**
+
+- **Input:** `tasks.md` (actionable task list)
+- **Output:** Working code with passing tests
+- **Verification:** Execute Show & Tell steps after each phase
+
+**Base requirements:** Follow all rules in [copilot-instructions.md](/.github/copilot-instructions.md), particularly:
+
+- Repository Tooling
+- Test-Driven Development
+- Repository verification policy
+
+## Implementation Process (Mandatory)
+
+1. Work through tasks in `tasks.md` sequentially
+2. Follow TDD: write failing test first, then implement, then refactor
+3. After completing each phase or user story, execute its `Show & Tell` steps to verify correctness
+4. Respect the repository's canonical local quality-gate policy after every source code change; where hooks enforce the gates automatically, do not duplicate the same gate commands manually unless diagnosing a failure
+
+## Implementation Completion Checklist (Mandatory)
+
+Before marking implementation as complete, verify:
+
+- [ ] All tasks in `tasks.md` are completed
+- [ ] Each repository-template capability that was planned to be implemented using the skill at [.github/skills/repository-template/SKILL.md](/.github/skills/repository-template/SKILL.md) is completed
+- [ ] TDD was followed: tests written before implementation
+- [ ] All `Show & Tell` steps executed successfully for each phase
+- [ ] Repository-template capabilities are present and up to date (see [.github/skills/repository-template/SKILL.md](/.github/skills/repository-template/SKILL.md))
+- [ ] The repository's canonical local quality gates pass with zero errors and zero warnings
 
 ## User Input
 
@@ -13,7 +50,6 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Pre-Execution Checks
 
 **Check for extension hooks (before implementation)**:
-
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_implement` key
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
@@ -21,9 +57,9 @@ You **MUST** consider the user input before proceeding (if not empty).
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
   - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
+- When constructing command invocations from hook command names, replace dots (`.`) with hyphens (`-`). For example, `speckit.git.commit` → `/speckit-git-commit`.
 - For each executable hook, output the following based on its `optional` flag:
   - **Optional hook** (`optional: true`):
-
     ```
     ## Extension Hooks
 
@@ -34,9 +70,7 @@ You **MUST** consider the user input before proceeding (if not empty).
     Prompt: {prompt}
     To execute: `/{command}`
     ```
-
   - **Mandatory hook** (`optional: false`):
-
     ```
     ## Extension Hooks
 
@@ -46,9 +80,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
     Wait for the result of the hook command before proceeding to the Outline.
     ```
-
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
-
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
 ## Outline
@@ -105,12 +137,12 @@ You **MUST** consider the user input before proceeding (if not empty).
      git rev-parse --git-dir 2>/dev/null
      ```
 
-   - Check if Dockerfile\* exists or Docker in plan.md → create/verify .dockerignore
-   - Check if .eslintrc\* exists → create/verify .eslintignore
-   - Check if eslint.config.\* exists → ensure the config's `ignores` entries cover required patterns
-   - Check if .prettierrc\* exists → create/verify .prettierignore
+   - Check if Dockerfile* exists or Docker in plan.md → create/verify .dockerignore
+   - Check if .eslintrc* exists → create/verify .eslintignore
+   - Check if eslint.config.* exists → ensure the config's `ignores` entries cover required patterns
+   - Check if .prettierrc* exists → create/verify .prettierignore
    - Check if .npmrc or package.json exists → create/verify .npmignore (if publishing)
-   - Check if terraform files (\*.tf) exist → create/verify .terraformignore
+   - Check if terraform files (*.tf) exist → create/verify .terraformignore
    - Check if .helmignore needed (helm charts present) → create/verify .helmignore
 
    **If ignore file already exists**: Verify it contains essential patterns, append missing critical patterns only
@@ -173,14 +205,13 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Validate that tests pass and coverage meets requirements
    - Confirm the implementation follows the technical plan
 
-Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.
+Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit-tasks` first to regenerate the task list.
 
 ## Mandatory Post-Execution Hooks
 
 **You MUST complete this section before reporting completion to the user.**
 
 Check if `.specify/extensions.yml` exists in the project root.
-
 - If it does not exist, or no hooks are registered under `hooks.after_implement`, skip to the Completion Report.
 - If it exists, read it and look for entries under the `hooks.after_implement` key.
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue to the Completion Report.
@@ -188,9 +219,9 @@ Check if `.specify/extensions.yml` exists in the project root.
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
   - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
+- When constructing command invocations from hook command names, replace dots (`.`) with hyphens (`-`). For example, `speckit.git.commit` → `/speckit-git-commit`.
 - For each executable hook, output the following based on its `optional` flag:
-  - **Mandatory hook** (`optional: false`) - **You MUST emit `EXECUTE_COMMAND:` for each mandatory hook**:
-
+  - **Mandatory hook** (`optional: false`) — **You MUST emit `EXECUTE_COMMAND:` for each mandatory hook**:
     ```
     ## Extension Hooks
 
@@ -198,11 +229,8 @@ Check if `.specify/extensions.yml` exists in the project root.
     Executing: `/{command}`
     EXECUTE_COMMAND: {command}
     ```
-
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
-
   - **Optional hook** (`optional: true`):
-
     ```
     ## Extension Hooks
 

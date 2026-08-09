@@ -10,7 +10,7 @@ set -euo pipefail
 # the subagent and (when discoverable) the current feature directory.
 #
 # Usage:
-#   $ echo '{"session_id":"abc","cwd":"/tmp","agent_id":"speckit.analyze"}' \
+#   $ echo '{"session_id":"abc","cwd":"/tmp","agent_id":"speckit-analyze"}' \
 #       | ./subagent-start-context.sh
 #
 # Exit codes:

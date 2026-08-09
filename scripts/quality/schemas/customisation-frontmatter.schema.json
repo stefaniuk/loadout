@@ -130,6 +130,13 @@
         "allowed-tools": {
           "type": "array",
           "items": { "type": "string" }
+        },
+        "compatibility": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metadata": {
+          "type": "object"
         }
       }
     }

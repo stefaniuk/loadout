@@ -7,7 +7,7 @@ Merge review checklists from every `specs/NNN-*/checklists/`, deduplicating
 items and aligning each checklist against the consolidated artefacts.
 
 This step is conditional. In Spec Kit, checklists are optional outputs of
-`/speckit.checklist`, not guaranteed feature artefacts.
+`/speckit-checklist`, not guaranteed feature artefacts.
 
 ## Discovery
 

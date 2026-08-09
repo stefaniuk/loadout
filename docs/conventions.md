@@ -90,15 +90,13 @@ All artefacts use **kebab-case** slugs (lowercase ASCII letters, digits, and hyp
 
 Per-artefact slug constraints:
 
-| Artefact type    | Slug constraint                                                                                                    | Example                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
-| Instruction pack | Tech slug; must match the language-pack `<tech>` exactly when the file is part of a pack                           | `python`, `playwright-typescript`          |
-| Prompt           | Mandatory **prefix.** (see table below) followed by a descriptive kebab-case slug                                  | `enforce.python`, `dev.implement-logging`  |
-| Agent            | Either a persona slug under `personas/` or a `speckit.<step>` slug matching the spec-kit step                      | `implementer`, `speckit.plan`              |
-| Skill            | Folder name only; kebab-case noun-phrase describing the capability                                                 | `code-review`, `fastapi-project`           |
-| Include fragment | `<topic>` kebab-case noun-phrase; suffix `.include.md`; no leading underscore                                      | `quality-gates-baseline.include.md`        |
-| Pack ID          | `language-pack.<tech>` where `<tech>` matches the instruction slug                                                 | `language-pack.reactjs`                    |
-| ADR              | `ADR-NNN[a-z]?_<Pascal_Snake>_<Title>.md`; cluster letters (`a`–`g`) are reserved for language-pack ADR sub-topics | `ADR-001a_Python_Dependency_Management.md` |
+- Instruction pack: tech slug; must match the language-pack `<tech>` exactly when the file is part of a pack. Example: `python`, `playwright-typescript`.
+- Prompt: mandatory **prefix.** (see table below) followed by a descriptive kebab-case slug. Example: `enforce.python`, `dev.implement-logging`.
+- Agent: persona slug under `personas/`, matching the role expressed in the file name. Example: `implementer`, `reviewer`.
+- Skill: folder name only; kebab-case noun-phrase describing the capability. Example: `code-review`, `fastapi-project`.
+- Include fragment: `<topic>` kebab-case noun-phrase with suffix `.include.md` and no leading underscore. Example: `quality-gates-baseline.include.md`.
+- Pack ID: `language-pack.<tech>` where `<tech>` matches the instruction slug. Example: `language-pack.reactjs`.
+- ADR: `ADR-NNN[a-z]?_<Pascal_Snake>_<Title>.md`; cluster letters (`a`–`g`) are reserved for language-pack ADR sub-topics. Example: `ADR-001a_Python_Dependency_Management.md`.
 
 **Prompt prefixes.** Prompts must begin with one of the following registered prefixes; the prefix is part of the filename and is followed by a literal dot:
 
@@ -106,7 +104,7 @@ Per-artefact slug constraints:
 | --------------- | -------------------------------------------------------------- |
 | `enforce.`      | Repository-wide compliance audits against an instruction pack  |
 | `review.`       | Review and audit prompts (typically spec-kit-aware)            |
-| `speckit.`      | Spec-kit lifecycle steps (`specify`, `plan`, `tasks`, …)       |
+| `spec.`         | Specification consolidation and product-facing spec workflows  |
 | `dev.`          | Developer-workflow helpers (commands, logging, CLI parsing, …) |
 | `architecture.` | Evidence-first architecture-documentation flows                |
 | `util.`         | Operational utilities (PR content, commit messages, …)         |
@@ -123,7 +121,7 @@ Adding a new prefix requires an ADR (it shapes the catalogue surface) and a matc
 | Prompt               | `<prefix>.<slug>.prompt.md`           | `.github/prompts/`                | Invokable as slash command `/<prefix>.<slug>`                     |
 | Prompt include       | `<topic>.include.md`                  | `.github/prompts/includes/`       | Currently a reserved scaffold; see directory README before adding |
 | Agent (persona)      | `<slug>.agent.md`                     | `.github/agents/personas/`        | General-purpose roles                                             |
-| Agent (spec-kit)     | `speckit.<step>.agent.md`             | `.github/agents/`                 | Paired one-to-one with a `speckit.<step>.prompt.md`               |
+| Skill (spec-kit)     | `SKILL.md`                            | `.github/skills/speckit-<step>/`  | Upstream-managed via `make specify`                               |
 | Skill                | `SKILL.md` (+ `assets/`, `examples/`) | `.github/skills/<slug>/`          | Folder-based; `SKILL.md` is mandatory                             |
 | Hook                 | `<name>.json`                         | `.github/hooks/`                  | Lifecycle hooks (Preview); see [hooks.json](../hooks.json)        |
 | ADR                  | `ADR-NNN[a-z]?_*.md`                  | `docs/adr/`                       | Cluster letters reserved for language-pack ADRs                   |
@@ -153,12 +151,12 @@ description: "Python Engineering Instructions (CLI + API, framework-agnostic)"
 
 ### Prompts (`.prompt.md`)
 
-| Field           | Required | Purpose                                                              |
-| --------------- | -------- | -------------------------------------------------------------------- |
-| `description`   | yes      | Short summary shown in the slash-command palette                     |
-| `agent`         | no       | Routes the prompt to a specific agent (e.g. `agent`, `speckit.plan`) |
-| `argument-hint` | no       | One-line UI hint for `$ARGUMENTS`                                    |
-| `tools`         | no       | Restricts the tool surface for the invocation                        |
+| Field           | Required | Purpose                                                          |
+| --------------- | -------- | ---------------------------------------------------------------- |
+| `description`   | yes      | Short summary shown in the slash-command palette                 |
+| `agent`         | no       | Routes the prompt to a specific agent (e.g. `agent`, `reviewer`) |
+| `argument-hint` | no       | One-line UI hint for `$ARGUMENTS`                                |
+| `tools`         | no       | Restricts the tool surface for the invocation                    |
 
 ```yaml
 ---
@@ -267,7 +265,7 @@ Practical consequences in this repository:
 Independently of the per-tech _language packs_, the repository's artefacts are also split into two **plugin packs**, which describe the spec-kit boundary for selective install:
 
 - **Core pack** - all language packs, foundation packs, persona agents, util/dev/architecture prompts, hooks, and skills (with the caveat noted below).
-- **Speckit pack** (optional sub-pack) - every `speckit.*` agent, every `speckit.*` prompt, the `review.speckit-*` review prompts, and the entire `.specify/` tree (constitution, templates, scripts).
+- **Speckit pack** (optional sub-pack) - every `speckit-*` skill, the `review.speckit-*` review prompts, and the entire `.specify/` tree (constitution, templates, scripts).
 
 VS Code's plugin manifest does not currently support first-class sub-plugins, so [plugin.json](../plugin.json) ships **both packs together** under a single manifest. To install only one pack, use the `make apply subset=…` flag (see [onboarding.md#subset-selection](onboarding.md#subset-selection)).
 
@@ -275,17 +273,16 @@ VS Code's plugin manifest does not currently support first-class sub-plugins, so
 
 ### Pack boundary
 
-| Artefact                                                     | Pack                                          |
-| ------------------------------------------------------------ | --------------------------------------------- |
-| `.github/agents/speckit.*.agent.md`                          | speckit                                       |
-| `.github/agents/**` (everything else, including `personas/`) | core                                          |
-| `.github/prompts/speckit.*.prompt.md`                        | speckit                                       |
-| `.github/prompts/review.speckit-*.prompt.md`                 | speckit                                       |
-| `.github/prompts/**` (everything else)                       | core                                          |
-| `.github/instructions/**`                                    | core                                          |
-| `.github/skills/**`                                          | core (note: `code-review` references speckit) |
-| `.github/hooks/**`, `hooks.json`                             | core                                          |
-| `.specify/**`                                                | speckit                                       |
+| Artefact                                     | Pack                                          |
+| -------------------------------------------- | --------------------------------------------- |
+| `.github/skills/speckit-*/SKILL.md`          | speckit                                       |
+| `.github/agents/**` (personas)               | core                                          |
+| `.github/prompts/review.speckit-*.prompt.md` | speckit                                       |
+| `.github/prompts/**` (everything else)       | core                                          |
+| `.github/instructions/**`                    | core                                          |
+| `.github/skills/**`                          | core (note: `code-review` references speckit) |
+| `.github/hooks/**`, `hooks.json`             | core                                          |
+| `.specify/**`                                | speckit                                       |
 
 ### Recommended profiles
 
@@ -295,4 +292,4 @@ VS Code's plugin manifest does not currently support first-class sub-plugins, so
 | Spec-kit only             | `make apply dest=… subset=speckit`                                               |
 | Non-spec-kit core (today) | `make apply dest=… subset=agents,hooks,instructions,prompts,skills,docs,project` |
 
-The "non-spec-kit core" profile uses chained category tokens to omit `speckit` and `specify`. A single `core` shorthand is not implemented today because it would require an inverse exclusion filter inside `copilot-copy-agents`/`copilot-copy-prompts` (the broader category tokens currently include speckit artefacts). Until that lands, use the chained-subset form above.
+The "non-spec-kit core" profile uses chained category tokens to omit `speckit` and `specify`. A single `core` shorthand is not implemented today because it would require an inverse exclusion filter inside `copilot-copy-skills`/`copilot-copy-prompts` (the broader category tokens currently include speckit artefacts). Until that lands, use the chained-subset form above.

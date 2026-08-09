@@ -61,7 +61,7 @@ What gets copied:
 - `.github/pull_request_template.md` (only if missing in the target)
 - `.specify/memory/constitution.md`
 - `scripts/hooks/`
-- `.specify/scripts/bash`, `.specify/templates`
+- `.specify/scripts/python`, `.specify/templates`
 - `docs/adr/ADR-nnn_Any_Decision_Record_Template.md`
 - `docs/prompt-reports/`, `docs/.gitignore`
 - `project.code-workspace` (only if missing in the target)
@@ -76,7 +76,7 @@ The repository can be installed directly as a VS Code agent plugin, providing sk
 2. Run `Cmd+Shift+P` → **Chat: Install Plugin From Source**.
 3. Enter the repository URL: `https://github.com/stefaniuk/spec-driven-copilot`.
 
-After installation, skills like `/enforcement-audit` and `/architecture-docs` appear as slash commands, and `speckit.*` agents appear in the agent dropdown.
+After installation, skills like `/enforcement-audit` and `/architecture-docs` appear as slash commands, and speckit skills (`/speckit-specify`, `/speckit-plan`, etc.) become available.
 
 > **Note:** Plugin installation provides skills, agents, and hooks only. For project-specific instructions, templates, and include baselines, use `make apply`.
 
@@ -104,19 +104,19 @@ make apply dest=/path/to/target python=true terraform=true
 
 Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `subset` (or setting `subset=all`) preserves the default full-copy behaviour. Tokens are comma-separated, case-insensitive, and validated against a closed set.
 
-| Token          | Categories included                                                                                                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `all`          | Everything (default; equivalent to omitting `subset`)                                                                                                                                |
-| `agents`       | `.github/agents/` (all agents and personas)                                                                                                                                          |
-| `hooks`        | `.github/hooks/` and `scripts/hooks/`                                                                                                                                                |
-| `instructions` | `.github/instructions/` (plus tech files when language flags are set)                                                                                                                |
-| `prompts`      | `.github/prompts/` (plus tech enforcement prompts when language flags are set)                                                                                                       |
-| `skills`       | `.github/skills/` (plus tech skills when `django`/`fastapi` are set)                                                                                                                 |
-| `specify`      | `.specify/memory`, `.specify/scripts/bash`, `.specify/templates`                                                                                                                     |
-| `docs`         | `docs/adr/` template + Tech Radar, `docs/prompt-reports/`                                                                                                                            |
-| `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `project.code-workspace`, `.vscode/settings.json`, `.gitignore`, hook scripts                           |
-| `speckit`      | Narrows `agents` and `prompts` to `speckit.*` and `review.speckit-*` files, and pulls in the `.specify/*` content. Combine with `agents` or `prompts` to widen back to the full set. |
-| `mcp`          | Opt-in MCP example pack: `.vscode/mcp.json.example`, `.github/mcp/` per-server READMEs, and `docs/mcp.md`. Included by default and by `all`; otherwise only when listed explicitly.  |
+| Token          | Categories included                                                                                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `all`          | Everything (default; equivalent to omitting `subset`)                                                                                                                               |
+| `agents`       | `.github/agents/` (all agents and personas)                                                                                                                                         |
+| `hooks`        | `.github/hooks/` and `scripts/hooks/`                                                                                                                                               |
+| `instructions` | `.github/instructions/` (plus tech files when language flags are set)                                                                                                               |
+| `prompts`      | `.github/prompts/` (plus tech enforcement prompts when language flags are set)                                                                                                      |
+| `skills`       | `.github/skills/` (plus tech skills when `django`/`fastapi` are set)                                                                                                                |
+| `specify`      | `.specify/memory`, `.specify/scripts/python`, `.specify/templates`                                                                                                                  |
+| `docs`         | `docs/adr/` template + Tech Radar, `docs/prompt-reports/`                                                                                                                           |
+| `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `project.code-workspace`, `.vscode/settings.json`, `.gitignore`, hook scripts                          |
+| `speckit`      | Narrows `skills` to `speckit-*` and `prompts` to `review.speckit-*` files, and pulls in the `.specify/*` content. Combine with `skills` or `prompts` to widen back to the full set. |
+| `mcp`          | Opt-in MCP example pack: `.vscode/mcp.json.example`, `.github/mcp/` per-server READMEs, and `docs/mcp.md`. Included by default and by `all`; otherwise only when listed explicitly. |
 
 Examples:
 
@@ -201,8 +201,7 @@ make specify
 
 This fetches the latest Spec Kit files, applies local extensions declared in `.specify/extensions/manifest.yaml`, and writes the patched output to:
 
-- `.github/agents/` (speckit agent definitions)
-- `.github/prompts/` (speckit prompt files)
+- `.github/skills/speckit-*/` (speckit skill definitions)
 - `.specify/templates/` (plan, spec, tasks templates)
 - `.specify/scripts/python/` (speckit helper scripts)
 
@@ -222,7 +221,7 @@ Run `make specify` after:
 
 - Pulling updates to this repository (upstream Spec Kit may have changed)
 - Modifying files in `.specify/extensions/`
-- Wanting to reset speckit agents/prompts to their canonical patched state
+- Wanting to reset speckit skills to their canonical patched state
 
 ### Prerequisites
 
