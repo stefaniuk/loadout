@@ -52,6 +52,6 @@ MD036: false
 MD041: false
 
 # https://github.com/DavidAnson/markdownlint/blob/main/doc/md060.md
-# Table column style: Enforces vertically aligned pipe characters in tables.
+# Table column style: Each table must be internally consistent.
 MD060:
-  style: aligned
+  style: consistent

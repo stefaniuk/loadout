@@ -18,29 +18,9 @@ skills:
     path: skills/verification-before-completion
     ref: main
     sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1
-  - name: writing-plans
-    repo: https://github.com/obra/superpowers.git
-    path: skills/writing-plans
-    ref: main
-    sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1
   - name: writing-skills
     repo: https://github.com/obra/superpowers.git
     path: skills/writing-skills
-    ref: main
-    sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1
-  - name: executing-plans
-    repo: https://github.com/obra/superpowers.git
-    path: skills/executing-plans
-    ref: main
-    sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1
-  - name: dispatching-parallel-agents
-    repo: https://github.com/obra/superpowers.git
-    path: skills/dispatching-parallel-agents
-    ref: main
-    sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1
-  - name: subagent-driven-development
-    repo: https://github.com/obra/superpowers.git
-    path: skills/subagent-driven-development
     ref: main
     sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1
   - name: using-git-worktrees
