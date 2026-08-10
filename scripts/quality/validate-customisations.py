@@ -44,8 +44,23 @@ SUFFIX_BY_TYPE = {
 
 KEBAB_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 SKIP_DIR_NAMES = {"includes", "templates"}
+SKILLS_CONFIG = ROOT / "scripts/config/skills.yaml"
 
 WC_FLAGS = wcglob.BRACE | wcglob.GLOBSTAR
+
+
+def synced_skill_names() -> set[str]:
+    """Return set of skill names declared in the synced skills manifest."""
+    if not SKILLS_CONFIG.is_file():
+        return set()
+    try:
+        data = yaml.safe_load(SKILLS_CONFIG.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return set()
+    skills = data.get("skills") if isinstance(data, dict) else None
+    if not isinstance(skills, list):
+        return set()
+    return {s["name"] for s in skills if isinstance(s, dict) and "name" in s}
 
 
 def is_kebab(value: str) -> bool:
@@ -124,9 +139,12 @@ def discover_skills() -> list[Path]:
     base = STANDARD_PARENTS["skill"]
     if not base.is_dir():
         return []
+    synced = synced_skill_names()
     out: list[Path] = []
     for p in sorted(base.rglob("SKILL.md")):
         if is_in_skipped_dir(p):
+            continue
+        if p.parent.name in synced:
             continue
         out.append(p)
     return out

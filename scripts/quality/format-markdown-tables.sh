@@ -30,6 +30,19 @@ function main() {
     return 0
   fi
 
+  # Exclude paths listed in .prettierignore
+  local ignore_file="$PWD/scripts/config/.prettierignore"
+  if [[ -f "$ignore_file" ]]; then
+    local patterns
+    patterns=$(grep -v '^#' "$ignore_file" | grep -v '^$' || true)
+    if [[ -n "$patterns" ]]; then
+      local grep_pattern
+      grep_pattern=$(echo "$patterns" | sed 's|/$||' | paste -sd'|' -)
+      files=$(echo "$files" | grep -Ev "^($grep_pattern)" || true)
+      [[ -z "$files" ]] && return 0
+    fi
+  fi
+
   if command -v npx > /dev/null 2>&1 && ! is-arg-true "${FORCE_USE_DOCKER:-false}"; then
     files="$files" run-prettier-natively
   else
@@ -47,6 +60,7 @@ function run-prettier-natively() {
   # shellcheck disable=SC2086
   echo $files | xargs npx --yes prettier@3 \
     --config "$PWD/scripts/config/prettierrc.yaml" \
+    --ignore-path "$PWD/scripts/config/.prettierignore" \
     --write
 
   return 0
@@ -69,6 +83,7 @@ function run-prettier-in-docker() {
     "$image" \
     npx --yes prettier@3 \
       --config /workdir/scripts/config/prettierrc.yaml \
+      --ignore-path /workdir/scripts/config/.prettierignore \
       --write
 
   return 0

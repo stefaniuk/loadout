@@ -1,6 +1,3 @@
-.github/skills/speckit-*/
-.specify/templates/*-template.md
-
 # begin: synced skills
 .github/skills/find-bugs/
 .github/skills/incremental-implementation/

@@ -28,3 +28,23 @@ skills:
     path: skills/using-git-worktrees
     ref: main
     sha: 44c9b2d6e889982ac18c27d05a19fefe335194e1
+  - name: security-and-hardening
+    repo: https://github.com/addyosmani/agent-skills.git
+    path: skills/security-and-hardening
+    ref: main
+    sha: 7676817c12a1317454ae3898a0c5c1eacf5dd3d5
+  - name: incremental-implementation
+    repo: https://github.com/addyosmani/agent-skills.git
+    path: skills/incremental-implementation
+    ref: main
+    sha: 7676817c12a1317454ae3898a0c5c1eacf5dd3d5
+  - name: find-bugs
+    repo: https://github.com/getsentry/skills.git
+    path: skills/find-bugs
+    ref: main
+    sha: 24fdb833b9e67670a027e3b482189100a69ff7f9
+  - name: spec-to-code-compliance
+    repo: https://github.com/trailofbits/skills.git
+    path: plugins/spec-to-code-compliance/skills/spec-to-code-compliance
+    ref: main
+    sha: 7b9bd5f950f89a9ba71b249b9801c1a95be3928e

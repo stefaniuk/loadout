@@ -69,6 +69,19 @@ function main() {
   files=$($filter | while IFS= read -r f; do [ -f "$f" ] && printf '%s\n' "$f"; done || true)
   [[ -z "$files" ]] && return 0
 
+  # Exclude paths listed in .editorconfigignore
+  local ignore_file="$PWD/scripts/config/.editorconfigignore"
+  if [[ -f "$ignore_file" ]]; then
+    local patterns
+    patterns=$(grep -v '^#' "$ignore_file" | grep -v '^$' || true)
+    if [[ -n "$patterns" ]]; then
+      local grep_pattern
+      grep_pattern=$(echo "$patterns" | sed 's|/$||' | paste -sd'|' -)
+      files=$(echo "$files" | grep -Ev "^($grep_pattern)" || true)
+      [[ -z "$files" ]] && return 0
+    fi
+  fi
+
   if command -v editorconfig-checker > /dev/null 2>&1 && ! is-arg-true "${FORCE_USE_DOCKER:-false}"; then
     files="$files" dry_run_opt="${dry_run_opt:-}" run-editorconfig-natively
   else

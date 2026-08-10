@@ -73,15 +73,34 @@ function main() {
   fi
 
   echo "==> Synced ${synced} skill(s)"
+  update-editorconfig-ignore
   update-markdownlint-ignore
+  update-prettier-ignore
   return 0
 }
 
 # ==============================================================================
 
+# Update .editorconfigignore with entries for all synced skill directories.
+function update-editorconfig-ignore() {
+  update-ignore-file "${REPO_ROOT}/scripts/config/.editorconfigignore"
+}
+
 # Update .markdownlintignore with entries for all synced skill directories.
 function update-markdownlint-ignore() {
-  local ignore_file="${REPO_ROOT}/scripts/config/.markdownlintignore"
+  update-ignore-file "${REPO_ROOT}/scripts/config/.markdownlintignore"
+}
+
+# Update .prettierignore with entries for all synced skill directories.
+function update-prettier-ignore() {
+  update-ignore-file "${REPO_ROOT}/scripts/config/.prettierignore"
+}
+
+# Update a given ignore file with entries for all synced skill directories.
+# Arguments:
+#   $1=[path to the ignore file]
+function update-ignore-file() {
+  local ignore_file="$1"
   local marker_begin="# begin: synced skills"
   local marker_end="# end: synced skills"
 

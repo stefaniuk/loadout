@@ -594,3 +594,115 @@ npx skills add dash0hq/agent-skills          # OpenTelemetry
 ```
 
 Use `--list` to browse before installing, `--skill <name>` to install individual skills.
+
+## Recomendation
+
+### Recommended core set with Spec Kit
+
+| Rank | Skill                                   | Decision                                                                               |
+| ---- | --------------------------------------- | -------------------------------------------------------------------------------------- |
+| 1    | `systematic-debugging`                  | Add                                                                                    |
+| 2    | `test-driven-development` — Superpowers | Add                                                                                    |
+| 3    | `verification-before-completion`        | Add                                                                                    |
+| 7    | `security-and-hardening`                | Add                                                                                    |
+| 10   | `incremental-implementation`            | Add, but it must implement the existing Spec Kit tasks rather than create another plan |
+| 20   | `find-bugs`                             | Add as the principal general code-review skill                                         |
+| 37   | `spec-to-code-compliance`               | Add; particularly well aligned with Spec Kit                                           |
+
+### Compatible specialist skills
+
+| Area            | Compatible skills                                                                                                                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Static analysis | `codeql`, `semgrep`, `semgrep-rule-creator`                                                                                                                                                                                                            |
+| Security review | `differential-review`, `variant-analysis`, `supply-chain-risk-auditor`, `insecure-defaults`, `security-review`, `agentic-actions-auditor`, `audit-context-building`, `sharp-edges`, `gha-security-review`, `vulnerability-triage-brocards`, `fp-check` |
+| Testing         | `property-based-testing`, `atheris`, `mutation-testing`                                                                                                                                                                                                |
+| Python          | `modern-python`, `atheris`                                                                                                                                                                                                                             |
+| React/frontend  | `react-best-practices`, `frontend-ui-engineering`, `frontend-design`, `performance-optimization`                                                                                                                                                       |
+| Browser testing | `playwright-cli`, `browser-testing-with-devtools`                                                                                                                                                                                                      |
+| PostgreSQL      | `supabase-postgres-best-practices`                                                                                                                                                                                                                     |
+| API design      | `api-and-interface-design`                                                                                                                                                                                                                             |
+| C/C++           | `c-review`, `constant-time-analysis`, `zeroize-audit`                                                                                                                                                                                                  |
+| Rust            | `rust-review`                                                                                                                                                                                                                                          |
+| Terraform       | `terraform-style-guide`, `terraform-code-generation`                                                                                                                                                                                                   |
+| Kubernetes      | `k8s-api-conventions`                                                                                                                                                                                                                                  |
+| Observability   | `otel-instrumentation`, `otel-semantic-conventions`, `observability-and-instrumentation`                                                                                                                                                               |
+| CI/CD           | `ci-cd-and-automation`                                                                                                                                                                                                                                 |
+| Documentation   | `documentation-and-adrs`                                                                                                                                                                                                                               |
+| MCP development | `mcp-builder`                                                                                                                                                                                                                                          |
+
+### Choose only one from each group
+
+| Function           | Options                                                                                         | Recommendation                                                                      |
+| ------------------ | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| TDD                | Superpowers `test-driven-development`; Addy Osmani `test-driven-development`; Matt Pocock `tdd` | Choose Superpowers                                                                  |
+| Debugging          | `systematic-debugging`; `diagnosing-bugs`                                                       | Choose `systematic-debugging`                                                       |
+| General review     | `code-review-and-quality`; `find-bugs`; Sentry `code-review`                                    | Choose `find-bugs`                                                                  |
+| Browser automation | `playwright-cli`; `webapp-testing`                                                              | Choose `playwright-cli`; add `browser-testing-with-devtools` separately if required |
+
+### Do not combine as automatically activated skills
+
+These compete directly with Spec Kit:
+
+| Rank | Skill                         | Reason                                        |
+| ---- | ----------------------------- | --------------------------------------------- |
+| 5    | `writing-plans`               | Duplicates `speckit-plan` and `speckit-tasks` |
+| 16   | `subagent-driven-development` | Competes with `speckit-implement`             |
+| 17   | `planning-and-task-breakdown` | Duplicates `speckit-tasks`                    |
+| 63   | `OpenSpec`                    | Alternative specification framework           |
+| 76   | `spec-driven-development`     | Alternative end-to-end specification workflow |
+
+### Keep manually invocable
+
+| Rank | Skill                           | Reason                                                                               |
+| ---- | ------------------------------- | ------------------------------------------------------------------------------------ |
+| 6    | `using-git-worktrees`           | May conflict with Spec Kit’s feature-branch handling                                 |
+| 8    | `grill-with-docs`               | Overlaps with specification and clarification                                        |
+| 19   | `requesting-code-review`        | Useful as an explicit review gate, but should not interrupt every task automatically |
+| 28   | `api-to-agent-cli`              | Special-purpose workflow                                                             |
+| 40   | `skill-scanner`                 | Use when adding or updating skills                                                   |
+| 58   | `wa-review`                     | Run explicitly for an AWS architecture review                                        |
+| 69   | `git-workflow-and-versioning`   | Its trunk-based assumptions may conflict with Spec Kit feature branches              |
+| 72   | `code-simplification`           | Could expand work beyond the approved specification                                  |
+| 73   | `doubt-driven-development`      | Valuable for high-risk decisions but too intrusive by default                        |
+| 74   | `improve-codebase-architecture` | Periodic architecture assessment, not normal implementation                          |
+| 77   | `context-engineering`           | Project-setup and maintenance activity                                               |
+| 80   | `shipping-and-launch`           | Invoke during release preparation                                                    |
+| 81   | `open-sourcing`                 | Invoke only when preparing a public release                                          |
+
+Use this frontmatter for those skills in VS Code Copilot:
+
+```yaml
+user-invocable: true
+disable-model-invocation: true
+```
+
+### Keep active-security skills manual and isolated
+
+| Skills                                        |
+| --------------------------------------------- |
+| `performing-web-application-penetration-test` |
+| `dast-zap`                                    |
+| `burpsuite-project-parser`                    |
+| `api-mitmproxy`                               |
+| `recon-nmap`                                  |
+| `performing-kubernetes-penetration-testing`   |
+| `performing-dynamic-analysis-with-any-run`    |
+| `analyzing-linux-elf-malware`                 |
+| `conducting-mobile-app-penetration-test`      |
+| `yara-authoring`                              |
+
+### Final recommended starting installation
+
+```text
+All speckit-* skills
+
+systematic-debugging
+test-driven-development
+verification-before-completion
+security-and-hardening
+incremental-implementation
+find-bugs
+spec-to-code-compliance
+```
+
+Then add stack-specific and security-analysis skills only where the project actually needs them. The principal change I recommend to the ranked document is removing `writing-plans` and `using-git-worktrees` from the automatically active core layer when Spec Kit is the selected workflow.
