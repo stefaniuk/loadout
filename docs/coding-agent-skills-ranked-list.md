@@ -595,19 +595,55 @@ npx skills add dash0hq/agent-skills          # OpenTelemetry
 
 Use `--list` to browse before installing, `--skill <name>` to install individual skills.
 
-## Recomendation
+## Recommendation
+
+### Adoption strategy legend
+
+- ✅ Imported and present in this repository
+- 🟢 Full: keep the upstream skill available with no repository-specific behavioural restriction
+- 🟡 Patch: keep the upstream skill, but add a repository-specific guard or overlay
+- 🔵 Manual: keep installed, but use only by explicit invocation
+- 🟣 Bundled: managed through the Spec Kit import flow rather than `scripts/config/skills.yaml`
+
+### Adoption progress
+
+| Rank | Skill                            | Status | Strategy                    | Notes              |
+| ---- | -------------------------------- | ------ | --------------------------- | ------------------ |
+| 1    | `systematic-debugging`           | ✅     | 🟢 Full                     | Core debugger      |
+| 2    | `test-driven-development`        | ✅     | 🟢 Full                     | Primary TDD        |
+| 3    | `verification-before-completion` | ✅     | 🟢 Full                     | Completion gate    |
+| 4    | All `speckit-*` skills           | ✅     | 🟣 Bundled                  | Spec Kit workflow  |
+| 7    | `security-and-hardening`         | ✅     | 🟢 Full                     | Security default   |
+| 10   | `incremental-implementation`     | ✅     | 🟡 Patch, non-Spec Kit only | Standalone only    |
+| 20   | `find-bugs`                      | ✅     | 🟢 Full                     | Main review skill  |
+| 37   | `spec-to-code-compliance`        | ✅     | 🟢 Full                     | Spec compliance    |
+| 6    | `using-git-worktrees`            | ✅     | 🔵 Manual                   | Manual only        |
+| 14   | `writing-skills`                 | ✅     | 🔵 Manual                   | Skills maintenance |
+
+Adoption notes:
+
+- ✅ `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `security-and-hardening`, `find-bugs`, and `spec-to-code-compliance` are imported and kept as full upstream skills.
+- ✅ All `speckit-*` skills are bundled through `make specify` and remain the primary Spec Kit workflow.
+- ✅ `incremental-implementation` is imported, but patched with a repository guard so it is used only for standalone, non-Spec Kit work.
+- ✅ `using-git-worktrees` and `writing-skills` are imported, but should stay manual rather than automatically active.
 
 ### Recommended core set with Spec Kit
 
-| Rank | Skill                                   | Decision                                                                               |
-| ---- | --------------------------------------- | -------------------------------------------------------------------------------------- |
-| 1    | `systematic-debugging`                  | Add                                                                                    |
-| 2    | `test-driven-development` — Superpowers | Add                                                                                    |
-| 3    | `verification-before-completion`        | Add                                                                                    |
-| 7    | `security-and-hardening`                | Add                                                                                    |
-| 10   | `incremental-implementation`            | Add, but it must implement the existing Spec Kit tasks rather than create another plan |
-| 20   | `find-bugs`                             | Add as the principal general code-review skill                                         |
-| 37   | `spec-to-code-compliance`               | Add; particularly well aligned with Spec Kit                                           |
+| Rank | Skill                            | Status      | Recommended adoption       |
+| ---- | -------------------------------- | ----------- | -------------------------- |
+| 1    | `systematic-debugging`           | ✅ Imported | Keep active                |
+| 2    | `test-driven-development`        | ✅ Imported | Keep active                |
+| 3    | `verification-before-completion` | ✅ Imported | Keep active                |
+| 7    | `security-and-hardening`         | ✅ Imported | Keep active                |
+| 10   | `incremental-implementation`     | ✅ Imported | Keep patched, non-Spec Kit |
+| 20   | `find-bugs`                      | ✅ Imported | Keep active                |
+| 37   | `spec-to-code-compliance`        | ✅ Imported | Keep active                |
+
+Core-set notes:
+
+- ✅ The imported core set is already in place for this repository.
+- 🟡 `incremental-implementation` remains part of the stack, but only behind the non-Spec Kit guard.
+- 🟣 The Spec Kit path for planned work remains `speckit-plan` → `speckit-tasks` → `speckit-implement`.
 
 ### Compatible specialist skills
 
@@ -703,6 +739,10 @@ security-and-hardening
 incremental-implementation
 find-bugs
 spec-to-code-compliance
+
+Manual but already imported:
+using-git-worktrees
+writing-skills
 ```
 
-Then add stack-specific and security-analysis skills only where the project actually needs them. The principal change I recommend to the ranked document is removing `writing-plans` and `using-git-worktrees` from the automatically active core layer when Spec Kit is the selected workflow.
+Then add stack-specific and security-analysis skills only where the project actually needs them. For this repository, the main adjustment is to keep `incremental-implementation` installed but patched for standalone work only, and to keep `using-git-worktrees` and `writing-skills` installed as manual tools rather than automatically active skills.

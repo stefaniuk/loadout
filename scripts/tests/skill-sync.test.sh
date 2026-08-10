@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2329
+# shellcheck disable=SC1091,SC2329
 
 set -euo pipefail
 
@@ -29,6 +29,7 @@ function main() {
     test-skill-sync-applies-default-skill-patch \
     test-skill-sync-applies-per-skill-replacement-patch \
     test-skill-sync-skips-patches-when-patch-false \
+    test-skill-sync-applies-frontmatter-overrides \
   )
   local status=0
 
@@ -442,6 +443,55 @@ function test-skill-sync-skips-patches-when-patch-false() {
 
   grep -qF "Original content that should be replaced." "${fixture_dir}/.github/skills/incremental-implementation/SKILL.md" || return 1
   ! grep -qF "Patched overview for Spec Kit compatibility." "${fixture_dir}/.github/skills/incremental-implementation/SKILL.md" || return 1
+
+  return 0
+}
+
+function test-skill-sync-applies-frontmatter-overrides() {
+
+  if ! command -v yq > /dev/null 2>&1; then
+    echo -n " (skipped: yq not installed) "
+    return 0
+  fi
+
+  local fixture_dir="${TEMP_DIR}/frontmatter-test"
+  local skill_dir="${fixture_dir}/.github/skills/vanilla-skill"
+  mkdir -p "${skill_dir}"
+  mkdir -p "${fixture_dir}/scripts/skill-patches/skills"
+
+  cat <<'EOF' > "${skill_dir}/SKILL.md"
+---
+name: vanilla-skill
+description: Original description.
+---
+
+# Vanilla Skill
+
+Body content.
+EOF
+
+  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/manifest.yaml"
+defaults:
+  skills: after-frontmatter
+frontmatter:
+  vanilla-skill/SKILL.md:
+    userSkill: true
+    invocable: false
+    description: null
+EOF
+
+  cp "${REPO_ROOT}/scripts/skill-patches/patch.lib.sh" "${fixture_dir}/scripts/skill-patches/patch.lib.sh"
+  source "${fixture_dir}/scripts/skill-patches/patch.lib.sh"
+
+  patch-apply-frontmatter \
+    "${skill_dir}/SKILL.md" \
+    "${fixture_dir}/scripts/skill-patches/manifest.yaml" \
+    "vanilla-skill/SKILL.md"
+
+  grep -qF "userSkill: true" "${skill_dir}/SKILL.md" || return 1
+  grep -qF "invocable: false" "${skill_dir}/SKILL.md" || return 1
+  ! grep -qF "description:" "${skill_dir}/SKILL.md" || return 1
+  grep -qF "Body content." "${skill_dir}/SKILL.md" || return 1
 
   return 0
 }

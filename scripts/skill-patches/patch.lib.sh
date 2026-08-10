@@ -10,6 +10,89 @@ set -euo pipefail
 
 # ==============================================================================
 
+# Apply frontmatter field overrides from the manifest to a file on disk.
+# Fields set to null in the manifest are removed; all others are set or added.
+# Arguments:
+#   $1=[path to the target file]
+#   $2=[manifest file path]
+#   $3=[relative file path key, e.g. find-bugs/SKILL.md]
+function patch-apply-frontmatter() {
+  local target_file="$1"
+  local manifest_file="$2"
+  local file_key="$3"
+
+  if ! command -v yq > /dev/null 2>&1 || [[ ! -f "$manifest_file" || ! -f "$target_file" ]]; then
+    return 0
+  fi
+
+  local has_overrides
+  has_overrides=$(yq ".frontmatter.\"${file_key}\" // {} | length" "$manifest_file" 2>/dev/null || echo "0")
+  if [[ "$has_overrides" == "0" ]]; then
+    return 0
+  fi
+
+  local first_line
+  first_line=$(head -1 "$target_file")
+  if [[ "$first_line" != "---" ]]; then
+    return 0
+  fi
+
+  local tmp_fm tmp_body tmp_overrides
+  tmp_fm=$(mktemp)
+  tmp_body=$(mktemp)
+  tmp_overrides=$(mktemp)
+  touch "$tmp_fm" "$tmp_body"
+
+  awk '
+    BEGIN { delim_count = 0; in_body = 0 }
+    /^---$/ {
+      delim_count++
+      if (delim_count == 2) { in_body = 1; next }
+      next
+    }
+    in_body == 0 { print > "'"$tmp_fm"'" }
+    in_body == 1 { print > "'"$tmp_body"'" }
+  ' "$target_file"
+
+  # Ensure the frontmatter file is valid YAML for yq (empty doc if no content)
+  if [[ ! -s "$tmp_fm" ]]; then
+    echo "{}" > "$tmp_fm"
+  fi
+
+  # Collect keys marked as null (fields to remove)
+  local null_keys
+  null_keys=$(yq -r ".frontmatter.\"${file_key}\" | to_entries | map(select(.value == null)) | .[].key" "$manifest_file" 2>/dev/null || echo "")
+
+  # Write non-null overrides to a temp file for merging
+  yq ".frontmatter.\"${file_key}\" | with_entries(select(.value != null))" "$manifest_file" > "$tmp_overrides" 2>/dev/null
+
+  # Merge overrides into frontmatter
+  if [[ -s "$tmp_overrides" ]]; then
+    yq -i ". *= load(\"${tmp_overrides}\")" "$tmp_fm"
+  fi
+
+  # Delete keys marked as null
+  if [[ -n "$null_keys" ]]; then
+    while IFS= read -r key; do
+      [[ -z "$key" ]] && continue
+      yq -i "del(.\"${key}\")" "$tmp_fm"
+    done <<< "$null_keys"
+  fi
+
+  # Reassemble the file
+  {
+    echo "---"
+    cat "$tmp_fm"
+    echo "---"
+    cat "$tmp_body"
+  } > "$target_file"
+
+  rm -f "$tmp_fm" "$tmp_body" "$tmp_overrides"
+  return 0
+}
+
+# ==============================================================================
+
 # Resolve the configured injection point for a patched file.
 # Arguments:
 #   $1=[manifest file path]

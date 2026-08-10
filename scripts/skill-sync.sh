@@ -186,23 +186,27 @@ function patch-local-skill() {
     return 0
   fi
 
-  if [[ ! -f "${skill_file}" || ! -f "${patch_file}" ]]; then
+  if [[ ! -f "${skill_file}" ]]; then
     return 0
   fi
 
-  local injection_point
-  injection_point=$(patch-get-injection-point "$MANIFEST_FILE" "${skill_name}/SKILL.md" "skills")
+  if [[ -f "${patch_file}" ]]; then
+    local injection_point
+    injection_point=$(patch-get-injection-point "$MANIFEST_FILE" "${skill_name}/SKILL.md" "skills")
 
-  echo "  patching .github/skills/${skill_name}/SKILL.md (injection: ${injection_point})"
+    echo "  patching .github/skills/${skill_name}/SKILL.md (injection: ${injection_point})"
 
-  local upstream_content
-  local patch_content
-  local patched_content
-  upstream_content=$(cat "${skill_file}")
-  patch_content=$(cat "${patch_file}")
-  patched_content=$(patch-inject "${upstream_content}" "${patch_content}" "${injection_point}")
+    local upstream_content
+    local patch_content
+    local patched_content
+    upstream_content=$(cat "${skill_file}")
+    patch_content=$(cat "${patch_file}")
+    patched_content=$(patch-inject "${upstream_content}" "${patch_content}" "${injection_point}")
 
-  echo "${patched_content}" > "${skill_file}"
+    echo "${patched_content}" > "${skill_file}"
+  fi
+
+  patch-apply-frontmatter "${skill_file}" "$MANIFEST_FILE" "${skill_name}/SKILL.md"
 
   return 0
 }

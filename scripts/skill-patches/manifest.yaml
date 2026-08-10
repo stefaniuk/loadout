@@ -10,6 +10,10 @@
 #   after-section:<name>           - Inject after a section heading
 #   append                         - Append at end of file
 #   prepend                        - Prepend at start of file
+#
+# Frontmatter Overrides:
+#   Set or add a field:  key: value
+#   Remove a field:      key: null
 
 # Usage:
 #   1. Create a patch file in the appropriate subdirectory:
@@ -18,7 +22,9 @@
 #
 #   2. Optionally configure the injection point below.
 #
-#   3. Run: make specify or make skill-sync
+#   3. Optionally configure frontmatter field overrides below.
+#
+#   4. Run: make specify or make skill-sync
 
 defaults:
   skills: after-frontmatter
@@ -29,3 +35,26 @@ overrides:
   speckit-plan/SKILL.md: replace-before-section:## User Input
   speckit-tasks/SKILL.md: replace-before-section:## User Input
   speckit-implement/SKILL.md: replace-before-section:## User Input
+
+frontmatter:
+  # Spec Kit skills: user-invocable only (no agent auto-invocation)
+  speckit-analyze/SKILL.md:
+    disable-model-invocation: true
+  speckit-checklist/SKILL.md:
+    disable-model-invocation: true
+  speckit-clarify/SKILL.md:
+    disable-model-invocation: true
+  speckit-constitution/SKILL.md:
+    disable-model-invocation: true
+  speckit-converge/SKILL.md:
+    disable-model-invocation: true
+  speckit-implement/SKILL.md:
+    disable-model-invocation: true
+  speckit-plan/SKILL.md:
+    disable-model-invocation: true
+  speckit-specify/SKILL.md:
+    disable-model-invocation: true
+  speckit-tasks/SKILL.md:
+    disable-model-invocation: true
+  speckit-taskstoissues/SKILL.md:
+    disable-model-invocation: true

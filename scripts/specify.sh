@@ -303,6 +303,10 @@ function patch-skills() {
         cp "$source_file" "$target_file"
       fi
     fi
+
+    if ! is-arg-true "$dry_run"; then
+      patch-apply-frontmatter "$target_file" "$MANIFEST_FILE" "${skill_name}/SKILL.md"
+    fi
   done
 
   return 0
