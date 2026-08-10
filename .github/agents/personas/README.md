@@ -39,12 +39,9 @@ Any persona that cannot make progress within its cap stops and requests human in
 
 ## Discovery note
 
-[`plugin.json`](../../../plugin.json) registers `.github/agents/` as the agents path. VS Code's agent loader may not recurse into subdirectories - behaviour at the time of writing is not formally documented. If the personas are not picked up automatically, either:
+VS Code's agent loader may not recurse into subdirectories - behaviour at the time of writing is not formally documented. If the personas are not picked up automatically, flatten the persona files into `.github/agents/` (rename to keep the role unambiguous, for example `persona.planner.agent.md`).
 
-- flatten the persona files into `.github/agents/` (rename to keep the role unambiguous, for example `persona.planner.agent.md`); or
-- extend `plugin.json` once the loader gains explicit nested-path support.
-
-The repository's own discovery scripts (`apply.sh`, `import.sh`, the catalogue and folder-index generators) recurse into this subdirectory, so distribution and indexing work regardless of how VS Code resolves the files at runtime.
+The repository's own discovery scripts (`apply.sh`, `import.sh`) recurse into this subdirectory, so distribution works regardless of how VS Code resolves the files at runtime.
 
 ## Subagent markings
 

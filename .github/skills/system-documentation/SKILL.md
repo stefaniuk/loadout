@@ -87,7 +87,6 @@ are first-class artefacts. See
     ├── architecture.md
     ├── conventions.md
     ├── onboarding.md
-    ├── catalogue.md
     ├── adr/
     ├── tutorials/
     ├── how-to/
@@ -221,9 +220,7 @@ If an expected anchor is missing, apply these fallback rules:
    decisions with alternatives and consequences.
 7. **`docs/prompt-reports/` is evidence-only.** Do not place normative docs
    there.
-8. **Generated inventories stay generated.** Regenerate `docs/catalogue.md`
-   and folder indexes with `make catalogue` instead of editing them by hand.
-9. **`plan.md` is narrow context only.** `tasks.md` is never a documentation
+8. **`plan.md` is narrow context only.** `tasks.md` is never a documentation
    source.
 
 ## Common document contract
@@ -365,15 +362,13 @@ After producing or updating any step output:
 
 1. Run focused documentation-scoped validation on the changed Markdown and
    customisation files. Skip this for `audit` and `pre-pr-review` runs.
-2. If prompts, skills, agents, or generated indexes changed, regenerate the
-   catalogues with `make catalogue`.
-3. Re-run focused validation after generation when applicable.
-4. In a combined produce-and-review workflow, if the `audit` phase surfaces
+2. Re-run focused validation after generation when applicable.
+3. In a combined produce-and-review workflow, if the `audit` phase surfaces
    resolvable drift, re-enter the producing phase to fix it and re-run the
    validation gates. Stop after at most one corrective pass and report any
    drift that remains.
-5. Report unresolved drift by class and by canonical target file.
-6. In the final assistant message, state the resolved mode, step, and scope,
+4. Report unresolved drift by class and by canonical target file.
+5. In the final assistant message, state the resolved mode, step, and scope,
    or each phase if more than one phase ran, the canonical files created or
    updated, the validation run and result, and any exact gaps left open.
 

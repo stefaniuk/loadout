@@ -1,6 +1,6 @@
 # Model Context Protocol (MCP) Servers
 
-This repository ships optional MCP server stubs as **workspace-distributed examples**. They are intentionally **not** registered through [`plugin.json`](/plugin.json), so VS Code triggers an explicit trust confirmation the first time each server is started in a workspace. See the upstream documentation: <https://code.visualstudio.com/docs/copilot/customization/mcp-servers>.
+This repository ships optional MCP server stubs as **workspace-distributed examples**. They are intentionally not registered as a plugin, so VS Code triggers an explicit trust confirmation the first time each server is started in a workspace. See the upstream documentation: <https://code.visualstudio.com/docs/copilot/customization/mcp-servers>.
 
 ## Purpose
 

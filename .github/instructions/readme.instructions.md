@@ -78,7 +78,7 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
   10. [RD-STR-011] `## Repository layout`.
   11. [RD-STR-012] Optional sections (only if helpful) after `Repository layout` (for example FAQ, Roadmap).
   12. [RD-STR-013] `## Licence`.
-- [RD-STR-014] Keep the README at the repository root and preserve the canonical section order from [RD-STR-001]. Move deep manuals, step-by-step procedural guides, and lengthy reference tables into `docs/` (for example `docs/architecture.md`, `docs/onboarding.md`, `docs/catalogue.md`) and link to them from the relevant section. The README itself must remain a compact orientation document, targeting under 200 lines, so readers can scan the whole landing page in one sitting.
+- [RD-STR-014] Keep the README at the repository root and preserve the canonical section order from [RD-STR-001]. Move deep manuals, step-by-step procedural guides, and lengthy reference tables into `docs/` (for example `docs/architecture.md`, `docs/onboarding.md`) and link to them from the relevant section. The README itself must remain a compact orientation document, targeting under 200 lines, so readers can scan the whole landing page in one sitting.
 
 ## 6. Section-by-section requirements 📚
 

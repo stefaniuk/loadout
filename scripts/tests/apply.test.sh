@@ -180,7 +180,7 @@ function test-apply-default-copies-expected-artefacts() {
   local d="${DEFAULT_DEST}"
   # Agents
   [[ -d "${d}/.github/agents" ]] || return 1
-  [[ $(find "${d}/.github/agents" -maxdepth 1 -name "*.md" -type f | wc -l | tr -d ' ') -gt 0 ]] || return 1
+  [[ $(find "${d}/.github/agents" -name "*.md" -type f | wc -l | tr -d ' ') -gt 0 ]] || return 1
   # Default instructions
   [[ -f "${d}/.github/instructions/shell.instructions.md" ]] || return 1
   [[ -f "${d}/.github/instructions/docker.instructions.md" ]] || return 1

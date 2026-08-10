@@ -1,6 +1,6 @@
 # Onboarding 🚀
 
-> Linked from the [README](../README.md) under **Quick start** and **How to use**. See also [docs/architecture.md](architecture.md) for the customisation model and lifecycle, and [docs/catalogue.md](catalogue.md) for the auto-generated artefact index.
+> Linked from the [README](../README.md) under **Quick start** and **How to use**. See also [docs/architecture.md](architecture.md) for the customisation model and lifecycle.
 
 This guide walks new users and contributors through every supported installation path, the first-run experience, the apply workflow for downstream repositories, and the quality gates expected before opening a pull request.
 
@@ -168,27 +168,6 @@ new=true force=true make import dest=/path/to/project
 3. Import changes back: `make import dest=/path/to/project`
 4. Review the diff in this repository, run `make lint && make test`, and commit
 
-## Counting tokens
-
-Estimate context-window usage for any subset of prompt files:
-
-```bash
-# Default: scan Copilot prompt files
-make count-tokens
-
-# Scan all markdown, sorted by token count
-make count-tokens args="--all --sort-by tokens"
-
-# Target specific paths
-make count-tokens args=".github/instructions .specify"
-```
-
-The report shows:
-
-- **Tokens** - per-file token counts.
-- **No IDs** - counts with identifiers like `[ID-<prefix>-NNN]` stripped.
-- **Usage %** - context-window usage against a 200K baseline.
-
 ## Syncing upstream Spec Kit
 
 The repository uses Spec Kit agents, prompts, and templates from the upstream [github/spec-kit](https://github.com/github/spec-kit) project. Local extensions (patches, overrides) are maintained in `.specify/extensions/` and applied on top of the fetched upstream files.
@@ -258,7 +237,7 @@ make skill-sync
 make skill-add name=writing-plans repo=https://github.com/obra/superpowers.git path=skills/writing-plans
 ```
 
-Both append the skill to `.github/skills/<name>/`, pin the resolved commit SHA in the manifest, update lint exclusions, and regenerate the catalogue.
+Both append the skill to `.github/skills/<name>/`, pin the resolved commit SHA in the manifest, and update lint exclusions.
 
 ### Updating skills
 
@@ -280,7 +259,6 @@ make skill-sync name=systematic-debugging
 2. The resolved commit SHA is written back to `scripts/config/skills.yaml`.
 3. The `.markdownlintignore` managed section is updated with all synced skill directories (sorted alphabetically).
 4. Synced skill directories are excluded from shellcheck automatically.
-5. The artefact catalogue is regenerated.
 
 ### Prerequisites
 
@@ -322,4 +300,4 @@ No recurring issues have been documented yet. If you hit a reproducible problem,
 
 ---
 
-See also: [README](../README.md) · [Architecture](architecture.md) · [Catalogue](catalogue.md)
+See also: [README](../README.md) · [Architecture](architecture.md)

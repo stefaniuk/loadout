@@ -1,6 +1,6 @@
 # MCP Server Stubs
 
-This directory hosts opt-in [Model Context Protocol](https://modelcontextprotocol.io) server examples that workspaces may copy in alongside the Copilot customisation pack. The stubs are **workspace-level only** - they are deliberately _not_ registered through [`plugin.json`](/plugin.json) so VS Code triggers an explicit trust prompt the first time each server starts.
+This directory hosts opt-in [Model Context Protocol](https://modelcontextprotocol.io) server examples that workspaces may copy in alongside the Copilot customisation pack. The stubs are **workspace-level only** - they are not registered as a plugin so VS Code triggers an explicit trust prompt the first time each server starts.
 
 Read [`docs/mcp.md`](/docs/mcp.md) for the trust model, secret-handling rules, and the workspace install workflow (`make apply dest=… subset=mcp`).
 

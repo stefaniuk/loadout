@@ -17,9 +17,6 @@ repository-wide structure that later steps rely on.
 | `docs/onboarding.md`                                                                          | Contributor on-ramp        | prerequisites, setup, first successful validation path, common newcomer tasks                             | long rationale, duplicate reference tables                  |
 | `docs/{tutorials,how-to,reference,explanation,operations/runbooks,developers,users,prompts}/` | Baseline structure         | location exists when the model is established; add a short index page where direct navigation is expected | empty placeholder prose presented as authoritative guidance |
 
-`docs/catalogue.md` is generated and is not part of this step's authored
-outputs.
-
 ## Discovery
 
 1. Read the current `README.md` and top-level docs entrypoints.

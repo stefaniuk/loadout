@@ -28,4 +28,4 @@ This directory is intentionally **empty of fragments** today. As of v2.0.0:
 - All `review.speckit-*.prompt.md` files (3) are thin delegates to the [code-review](../../skills/code-review/SKILL.md) skill.
 - Substantive shared content lives inside those skills, not in the prompts.
 
-The directory exists as a **scaffold** so future long-form prompts can adopt the include pattern without bespoke setup. When you add the first include file here, also update [.github/prompts/README.md](../README.md) to surface this subdirectory.
+The directory exists as a **scaffold** so future long-form prompts can adopt the include pattern without bespoke setup.

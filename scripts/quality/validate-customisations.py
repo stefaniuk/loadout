@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Validate customisation artefact frontmatter, filename, and plugin manifest.
+"""Validate customisation artefact frontmatter and filename conventions.
 
 Discovers instruction packs, prompts, agents, and skills under the standard
 parent directories and validates each artefact's YAML frontmatter against
 ``scripts/quality/schemas/customisation-frontmatter.schema.json``. Also enforces
-kebab-case naming rules, ``plugin.json`` path existence, and ``applyTo`` glob
-compilability via ``wcmatch.glob.translate``.
+kebab-case naming rules and ``applyTo`` glob compilability via
+``wcmatch.glob.translate``.
 
 Exit code is 0 when zero errors are detected, otherwise 1. Each error is
 emitted as ``<path>: <message>``. Run via the shell wrapper or directly with::
@@ -27,7 +27,6 @@ from wcmatch import glob as wcglob
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = ROOT / "scripts/quality/schemas/customisation-frontmatter.schema.json"
-PLUGIN_PATH = ROOT / "plugin.json"
 
 STANDARD_PARENTS = {
     "instruction": ROOT / ".github/instructions",
@@ -182,57 +181,6 @@ def validate_apply_to(value: str) -> str | None:
     return None
 
 
-def validate_plugin_json(errors: list[tuple[str, str]]) -> None:
-    if not PLUGIN_PATH.is_file():
-        errors.append((rel(PLUGIN_PATH), "plugin.json not found"))
-        return
-    try:
-        data = json.loads(PLUGIN_PATH.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        errors.append((rel(PLUGIN_PATH), f"invalid JSON: {exc}"))
-        return
-
-    name = data.get("name")
-    if not isinstance(name, str) or not name:
-        errors.append((rel(PLUGIN_PATH), "name: required non-empty string"))
-    elif not is_kebab(name):
-        errors.append((rel(PLUGIN_PATH), f"name: '{name}' is not kebab-case"))
-
-    def _check_path(key: str, must_be: str) -> None:
-        value = data.get(key)
-        if value is None:
-            return
-        if not isinstance(value, str) or not value:
-            errors.append((rel(PLUGIN_PATH), f"{key}: must be a non-empty string"))
-            return
-        if value.startswith("/"):
-            errors.append(
-                (rel(PLUGIN_PATH), f"{key}: path must be relative ('{value}')")
-            )
-            return
-        norm = (ROOT / value).resolve()
-        try:
-            norm.relative_to(ROOT.resolve())
-        except ValueError:
-            errors.append(
-                (rel(PLUGIN_PATH), f"{key}: path escapes repository root ('{value}')")
-            )
-            return
-        if not norm.exists():
-            errors.append((rel(PLUGIN_PATH), f"{key}: path does not exist ('{value}')"))
-            return
-        if must_be == "dir" and not norm.is_dir():
-            errors.append(
-                (rel(PLUGIN_PATH), f"{key}: path is not a directory ('{value}')")
-            )
-        elif must_be == "file" and not norm.is_file():
-            errors.append((rel(PLUGIN_PATH), f"{key}: path is not a file ('{value}')"))
-
-    _check_path("skills", "dir")
-    _check_path("agents", "dir")
-    _check_path("hooks", "file")
-
-
 def stem_for(path: Path, suffix: str) -> str:
     """Return filename with trailing ``suffix`` removed."""
     name = path.name
@@ -309,8 +257,6 @@ def main() -> int:
     for path, atype in artefacts:
         for msg in validate_artefact(path, atype, schema):
             errors.append((rel(path), msg))
-
-    validate_plugin_json(errors)
 
     errors.sort(key=lambda e: (e[0], e[1]))
     for path_str, message in errors:

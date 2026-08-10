@@ -53,13 +53,11 @@ clone-rt: # Clone the repository template into .github/skills/repository-templat
 
 skill-sync: # Fetch/update external skills declared in scripts/config/skills.yaml; optional: name=[skill] @Operations
 	name="$(name)" ./scripts/skill-sync.sh
-	$(MAKE) catalogue
 
 skill-add: # Add a new external skill to config and sync it; mandatory: name=[name] repo=[url] path=[path]; optional: ref=[branch] @Operations
 	$(if $(and $(name),$(repo),$(path)),,$(error Usage: make skill-add name=my-skill repo=https://github.com/owner/repo.git path=skills/my-skill))
 	name="$(name)" repo="$(repo)" path="$(path)" ref="$(or $(ref),main)" ./scripts/skill-add.sh
 	name="$(name)" ./scripts/skill-sync.sh
-	$(MAKE) catalogue
 
 specify: # Fetch upstream spec-kit and apply local extensions; optional: extensions=[true|false] @Operations
 	extensions="$(or $(extensions),true)" ./scripts/specify.sh
@@ -72,24 +70,6 @@ import: # Import changed prompt files from a destination repository; mandatory: 
 	$(if $(dest),,$(error dest is required. Usage: make import dest=/path/to/destination))
 	./scripts/import.sh "$(dest)"
 
-catalogue: # Generate artefact catalogue (catalogue.json + docs/catalogue.md) @Operations
-	./scripts/quality/generate-folder-indexes.py
-	./scripts/quality/generate-catalogue.sh
-	./scripts/quality/format-markdown-tables.sh
-
-count-tokens: # Count LLM tokens for key instruction packs; optional: args=[files/options] @Operations
-	uv run --with tiktoken python scripts/count-tokens.py \
-		$(if $(args),$(args), \
-			--sort-by tokens \
-			.github/copilot-instructions.md \
-			.specify/memory/constitution.md \
-			.github/instructions/makefile.instructions.md \
-			.github/instructions/shell.instructions.md \
-			.github/instructions/docker.instructions.md \
-			.github/instructions/python.instructions.md \
-			.github/instructions/includes \
-			.github/skills/repository-template/SKILL.md \
-		)
 
 clean:: # Remove project-specific generated files (main) @Operations
 	rm -f docs/prompt-reports/*.{md,txt}
@@ -109,11 +89,9 @@ config:: # Configure development environment (main) @Configuration
 
 ${VERBOSE}.SILENT: \
 	apply \
-	catalogue \
 	clean \
 	clone-rt \
 	config \
-	count-tokens \
 	format \
 	import \
 	lint \

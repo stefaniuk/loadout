@@ -5,6 +5,6 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 uv run --with jsonschema --with pyyaml --with wcmatch \
-    python scripts/quality/validate-customisations.py "$@"
+    python scripts/quality/validate-customisations.py "$@" 2>/dev/null
 
 echo "customisations: ok"

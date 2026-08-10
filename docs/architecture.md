@@ -1,6 +1,6 @@
 # Architecture 🏛️
 
-> Linked from the [README](../README.md) under **How it works** and **Spec-kit lifecycle**. See also [docs/onboarding.md](onboarding.md) for the contributor walkthrough and [docs/catalogue.md](catalogue.md) for the auto-generated artefact index.
+> Linked from the [README](../README.md) under **How it works** and **Spec-kit lifecycle**. See also [docs/onboarding.md](onboarding.md) for the contributor walkthrough.
 
 This document holds the deep architectural reference for the prompt library: the six-layer customisation model, the artefact type decision matrix, the spec-kit lifecycle, governance gates, and commit conventions per lifecycle stage.
 
@@ -210,4 +210,4 @@ Commit conventions explained:
 
 ---
 
-See also: [README](../README.md) · [Onboarding](onboarding.md) · [Catalogue](catalogue.md)
+See also: [README](../README.md) · [Onboarding](onboarding.md)

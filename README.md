@@ -137,7 +137,6 @@ Further reading: [docs/onboarding.md#selective-install](docs/onboarding.md#selec
 
 ### Examples
 
-- Browse the generated artefact index in [docs/catalogue.md](docs/catalogue.md).
 - Read the naming and placement rules in [docs/conventions.md](docs/conventions.md).
 - Review the optional MCP pack in [docs/mcp.md](docs/mcp.md).
 
@@ -147,7 +146,6 @@ Further reading: [docs/onboarding.md#selective-install](docs/onboarding.md#selec
 - [docs/onboarding.md](docs/onboarding.md): setup paths, first run, selective install, and contributor flow.
 - [docs/architecture.md](docs/architecture.md): customisation layers, lifecycle, and governance gates.
 - [docs/conventions.md](docs/conventions.md): naming, placement, frontmatter, and ADR rules.
-- [docs/catalogue.md](docs/catalogue.md): generated inventory of prompts, instructions, agents, skills, and hooks.
 
 ## Contributing
 
@@ -170,15 +168,12 @@ These are the top-level paths most contributors need to recognise first.
 .
 ├── .github/      # Agents, instructions, prompts, skills, hooks, and repo governance files
 ├── .specify/     # Project constitution and spec-kit templates
-├── docs/         # Architecture, onboarding, catalogue, ADRs, and MCP guidance
+├── docs/         # Architecture, onboarding, ADRs, and MCP guidance
 ├── scripts/      # Apply, import, install, and quality helpers
 ├── tests/        # Repository tests
 ├── Makefile      # Main entrypoint for setup, validation, and apply workflows
-├── plugin.json   # VS Code plugin metadata
 └── hooks.json    # Root lifecycle hook bindings
 ```
-
-For a fuller inventory, see [docs/catalogue.md](docs/catalogue.md).
 
 ## Licence
 
