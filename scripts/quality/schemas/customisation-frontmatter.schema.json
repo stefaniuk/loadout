@@ -8,19 +8,21 @@
       "title": "instruction",
       "type": "object",
       "additionalProperties": false,
-      "required": ["description", "applyTo"],
       "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name shown in the UI. Defaults to the file name."
+        },
         "description": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Short description shown on hover in the Chat view."
         },
         "applyTo": {
           "type": "string",
-          "minLength": 1
-        },
-        "name": {
-          "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Glob pattern defining which files the instructions apply to automatically, relative to the workspace root."
         }
       }
     },
@@ -30,23 +32,37 @@
       "additionalProperties": false,
       "required": ["description"],
       "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The name of the prompt, used after typing / in chat. Defaults to the file name."
+        },
         "description": {
           "type": "string",
-          "minLength": 1
-        },
-        "agent": {
-          "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Short description of the prompt."
         },
         "argument-hint": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Hint text shown in the chat input field."
+        },
+        "agent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The agent used for running the prompt: ask, agent, plan, or the name of a custom agent."
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The language model used when running the prompt."
         },
         "tools": {
           "oneOf": [
             { "type": "array", "items": { "type": "string" } },
             { "type": "string" }
-          ]
+          ],
+          "description": "Tool or tool set names available for this prompt. Use <server>/* for all MCP server tools."
         }
       }
     },
@@ -56,13 +72,61 @@
       "additionalProperties": false,
       "required": ["description"],
       "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The name of the custom agent. Defaults to the file name."
+        },
         "description": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Brief description shown as placeholder text in the chat input field."
         },
         "argument-hint": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Hint text shown in the chat input field."
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tool or tool set names available for this agent. Use <server>/* for all MCP server tools."
+        },
+        "agents": {
+          "oneOf": [
+            { "type": "array", "items": { "type": "string" } },
+            { "const": "*" }
+          ],
+          "description": "Agent names available as subagents. Use * to allow all agents, or [] to prevent any."
+        },
+        "model": {
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "minItems": 1
+            }
+          ],
+          "description": "AI model to use. A single model name or a prioritized list tried in order."
+        },
+        "user-invocable": {
+          "type": "boolean",
+          "description": "Whether the agent appears in the agents dropdown (default true)."
+        },
+        "disable-model-invocation": {
+          "type": "boolean",
+          "description": "Prevent the agent from being invoked as a subagent by other agents (default false)."
+        },
+        "target": {
+          "type": "string",
+          "enum": ["vscode", "github-copilot"],
+          "description": "Target environment or context for the custom agent."
+        },
+        "mcp-servers": {
+          "type": "array",
+          "items": { "type": "object" },
+          "description": "MCP server config objects for use with GitHub Copilot (target: github-copilot)."
         },
         "handoffs": {
           "type": "array",
@@ -71,33 +135,37 @@
             "additionalProperties": false,
             "required": ["label", "agent"],
             "properties": {
-              "label": { "type": "string", "minLength": 1 },
-              "agent": { "type": "string", "minLength": 1 },
-              "prompt": { "type": "string", "minLength": 1 },
-              "send": { "type": "boolean" }
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Display text on the handoff button."
+              },
+              "agent": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Target agent identifier to switch to."
+              },
+              "prompt": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Prompt text to send to the target agent."
+              },
+              "send": {
+                "type": "boolean",
+                "description": "Auto-submit the prompt (default false)."
+              },
+              "model": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Language model to use when the handoff executes."
+              }
             }
-          }
+          },
+          "description": "Suggested next actions to transition between agents."
         },
-        "tools": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "model": {
-          "type": "string",
-          "minLength": 1
-        },
-        "user-invocable": {
-          "type": "boolean"
-        },
-        "disable-model-invocation": {
-          "type": "boolean"
-        },
-        "agents": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "subagent": {
-          "type": "boolean"
+        "hooks": {
+          "type": "object",
+          "description": "Hook commands scoped to this agent (Preview). Same format as hook configuration files."
         }
       }
     },
@@ -109,34 +177,59 @@
       "properties": {
         "name": {
           "type": "string",
-          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "maxLength": 64,
+          "description": "Unique identifier. Lowercase letters, numbers, and hyphens only. Must match the parent directory name."
         },
         "description": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "What the skill does and when to use it."
         },
         "argument-hint": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Hint text shown in the chat input field when the skill is invoked as a slash command."
         },
         "license": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "License name or reference to a bundled license file."
         },
         "version": {
           "type": "string",
-          "minLength": 1
-        },
-        "allowed-tools": {
-          "type": "array",
-          "items": { "type": "string" }
+          "minLength": 1,
+          "description": "Skill version."
         },
         "compatibility": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Environment requirements (intended product, system packages, network access)."
+        },
+        "allowed-tools": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Space-separated string of pre-approved tools the skill may use (experimental)."
+        },
+        "user-invocable": {
+          "type": "boolean",
+          "description": "Whether the skill appears as a slash command in the / menu (default true)."
+        },
+        "disable-model-invocation": {
+          "type": "boolean",
+          "description": "Whether to require manual invocation only, preventing automatic loading (default false)."
+        },
+        "context": {
+          "type": "string",
+          "enum": ["inline", "fork"],
+          "description": "How the skill is loaded: inline (default) adds to parent context, fork runs in a dedicated subagent (experimental)."
         },
         "metadata": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Arbitrary key-value pairs for additional metadata."
         }
       }
     }

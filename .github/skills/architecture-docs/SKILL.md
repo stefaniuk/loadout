@@ -4,7 +4,6 @@ description: Generate architecture documentation for a repository, producing str
 argument-hint: "Specify step: repository-map, component-catalogue, runtime-flows, domain-analysis, c4-model, infrastructure-diagram, or all"
 license: MIT
 version: 1.0.0
-allowed-tools: []
 ---
 
 # Architecture Documentation Skill

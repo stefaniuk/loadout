@@ -4,7 +4,6 @@ description: Run a structured multi-step think tank for engineering, architectur
 argument-hint: "Paste a decision brief, or say guided and answer the questions step by step"
 license: MIT
 version: 1.0.0
-allowed-tools: []
 ---
 
 # Virtual Think Tank

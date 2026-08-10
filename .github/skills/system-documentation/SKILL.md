@@ -4,7 +4,6 @@ description: Establish, synchronise, audit, and review an opinionated repository
 argument-hint: "Optional: step (foundation, architecture, reference, explanation, how-to, tutorials, operations, audience-indexes, governance, all), mode (establish, sync, audit, pre-pr-review), and scope (path, feature dir, or changed files)"
 license: MIT
 version: 1.4.0
-allowed-tools: []
 ---
 
 # System Documentation Skill

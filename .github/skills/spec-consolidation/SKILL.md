@@ -4,7 +4,6 @@ description: Consolidate per-feature Spec Kit artefacts under specs/ into a prod
 argument-hint: "Specify step: spec, data-model, research, quickstart, contracts, checklists, or all. Optional baseline: working-tree, HEAD, or default-branch"
 license: MIT
 version: 1.2.0
-allowed-tools: []
 ---
 
 # Spec Consolidation Skill

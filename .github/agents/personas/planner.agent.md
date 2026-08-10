@@ -2,7 +2,6 @@
 description: Turn a user goal into an actionable execution plan with acceptance criteria and a risk list.
 argument-hint: "Describe the goal, constraints, and any non-goals"
 tools: [semantic_search, grep_search, file_search, read_file, list_dir]
-subagent: true
 user-invocable: false
 handoffs:
   - label: Implement plan

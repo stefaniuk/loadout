@@ -4,7 +4,6 @@ description: Run a compliance audit against a technology instruction file, detec
 argument-hint: "Specify the technology to audit: python, typescript, go, docker, rust, shell, makefile, terraform, reactjs, tauri, playwright-python, or playwright-typescript"
 license: MIT
 version: 1.0.0
-allowed-tools: []
 ---
 
 # Enforcement Audit Skill

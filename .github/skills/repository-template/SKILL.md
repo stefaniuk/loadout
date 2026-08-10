@@ -4,7 +4,6 @@ description: Create code repository from template, or/and update it in parts fro
 argument-hint: "Name the capability to add, remove, or improve from the repository template"
 license: MIT
 version: 1.0.0
-allowed-tools: []
 ---
 
 # Repository Template Skill 🧩

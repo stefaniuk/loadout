@@ -4,7 +4,6 @@ description: Run a structured Spec Kit review focused on code compliance, docume
 argument-hint: "Specify review type: code, documentation, or test"
 license: MIT
 version: 1.0.0
-allowed-tools: []
 ---
 
 # Code Review Skill
