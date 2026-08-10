@@ -62,7 +62,7 @@ skill-add: # Add a new external skill to config and sync it; mandatory: name=[na
 specify: # Fetch upstream spec-kit and apply local extensions; optional: extensions=[true|false] @Operations
 	extensions="$(or $(extensions),true)" ./scripts/specify.sh
 
-apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean|revert=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright|django|fastapi=[true] @Operations
+apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean|revert=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright=[true] @Operations
 	$(if $(dest),,$(error dest is required. Usage: make apply dest=/path/to/destination))
 	./scripts/apply.sh "$(dest)"
 

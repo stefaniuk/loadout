@@ -84,7 +84,7 @@ After installation, skills like `/enforcement-audit` and `/architecture-docs` ap
 
 `make apply` accepts per-technology flags so you can scope what gets copied. Pass any of the following as `name=true`:
 
-`all`, `python`, `typescript`, `go`, `reactjs`, `rust`, `terraform`, `tauri`, `playwright`, `django`, `fastapi`
+`all`, `python`, `typescript`, `go`, `reactjs`, `rust`, `terraform`, `tauri`, `playwright`
 
 These per-tech flags correspond to the language packs documented in [docs/conventions.md](conventions.md#language-packs).
 
@@ -111,7 +111,7 @@ Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `
 | `hooks`        | `.github/hooks/` and `scripts/hooks/`                                                                                                                                               |
 | `instructions` | `.github/instructions/` (plus tech files when language flags are set)                                                                                                               |
 | `prompts`      | `.github/prompts/` (plus tech enforcement prompts when language flags are set)                                                                                                      |
-| `skills`       | `.github/skills/` (plus tech skills when `django`/`fastapi` are set)                                                                                                                |
+| `skills`       | `.github/skills/` (plus tech skills when language flags are set)                                                                                                                    |
 | `specify`      | `.specify/memory`, `.specify/scripts/python`, `.specify/templates`                                                                                                                  |
 | `docs`         | `docs/adr/` template + Tech Radar, `docs/prompt-reports/`                                                                                                                           |
 | `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `project.code-workspace`, `.vscode/settings.json`, `.gitignore`, hook scripts                          |

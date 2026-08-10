@@ -33,8 +33,6 @@ set -euo pipefail
 #   terraform=true          # Include Terraform instruction and enforcement prompt
 #   tauri=true              # Include Tauri instruction and enforcement prompt (auto-enables rust, typescript, reactjs)
 #   playwright=true         # Include Playwright instruction and prompt (requires python or typescript)
-#   django=true             # Include Django skill (auto-enables python)
-#   fastapi=true            # Include FastAPI skill (auto-enables python)
 #
 # Always copied (default/glue layer):
 #   - All spec-kit agents (.github/agents)
@@ -71,7 +69,6 @@ set -euo pipefail
 #   $ python=true ./scripts/apply.sh ../my-project
 #   $ all=true ./scripts/apply.sh ~/projects/my-app
 #   $ python=true playwright=true ./scripts/apply.sh ~/projects/my-app
-#   $ django=true ./scripts/apply.sh ~/projects/my-app  # auto-enables python
 #   $ revert=true ./scripts/apply.sh ~/projects/my-app  # remove all managed artifacts
 
 # ==============================================================================
@@ -118,7 +115,7 @@ DEFAULT_TEMPLATES=("Makefile.template" "Dockerfile.template" "compose.yaml.templ
 DEFAULT_SKILLS=("repository-template" "enforcement-audit" "architecture-docs" "code-review" "spec-consolidation" "system-documentation")
 
 # All technology switches (for iteration)
-ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "playwright" "django" "fastapi")
+ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "playwright")
 
 # Valid subset selector tokens (closed set).
 SUBSET_VALID_TOKENS=("agents" "hooks" "instructions" "prompts" "skills" "specify" "docs" "project" "speckit" "mcp" "all")
@@ -163,11 +160,6 @@ function main() {
     rust=true
     typescript=true
     reactjs=true
-  fi
-
-  # Auto-enable python if django or fastapi is specified
-  if is-arg-true "${django:-false}" || is-arg-true "${fastapi:-false}"; then
-    python=true
   fi
 
   # Validate playwright requires python or typescript (unless all=true)
@@ -319,8 +311,6 @@ function get-tech-template() {
 function get-tech-skill() {
 
   case "$1" in
-    django) echo "django-project" ;;
-    fastapi) echo "fastapi-project" ;;
     *) echo "" ;;
   esac
 }
@@ -1381,8 +1371,6 @@ Technology switches (set to 'true' to include):
     terraform=true          Terraform instruction and prompt
     tauri=true              Tauri instruction and prompt (auto-enables rust, typescript, reactjs)
     playwright=true         Playwright instruction and prompt (requires python or typescript)
-    django=true             Django skill (auto-enables python)
-    fastapi=true            FastAPI skill (auto-enables python)
 
 Other options:
     clean=true              Remove destination directories before copying
@@ -1409,7 +1397,6 @@ Examples:
     all=true clean=true $(basename "$0") ~/projects/my-app
     revert=true $(basename "$0") ~/projects/my-app
     python=true playwright=true $(basename "$0") ~/projects/my-app
-    django=true $(basename "$0") ~/projects/my-app  # auto-enables python
 EOF
 }
 

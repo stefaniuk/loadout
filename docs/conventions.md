@@ -15,7 +15,7 @@ A **language pack** is a named, composable unit of Copilot customisation keyed b
 
 **A language pack MAY contain:**
 
-- one or more related skills under `.github/skills/<name>/SKILL.md` (typically framework skills such as `django-project` for the `python` pack);
+- one or more related skills under `.github/skills/<name>/SKILL.md`;
 - an ADR cluster under `docs/adr/ADR-NNN[a-g]_<Tech>_*.md` covering tooling choices for the language;
 - optional templates under `.github/instructions/templates/`.
 
@@ -37,20 +37,20 @@ Foundation packs today: `likec4`, `readme`.
 
 The table below is descriptive.
 
-| Pack ID                               | Class     | Constituent artefacts                                                                                              |
-| ------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------ |
-| `language-pack.python`                | language  | `python.instructions.md`, `enforce.python.prompt.md`, skills `django-project` + `fastapi-project`, ADR-001 cluster |
-| `language-pack.typescript`            | language  | `typescript.instructions.md`, `enforce.typescript.prompt.md`, ADR-002 cluster                                      |
-| `language-pack.go`                    | language  | `go.instructions.md`, `enforce.go.prompt.md`, ADR-003 cluster                                                      |
-| `language-pack.rust`                  | language  | `rust.instructions.md`, `enforce.rust.prompt.md`, ADR-004 cluster                                                  |
-| `language-pack.docker`                | tool      | `docker.instructions.md`, `enforce.docker.prompt.md`                                                               |
-| `language-pack.makefile`              | tool      | `makefile.instructions.md`, `enforce.makefile.prompt.md`                                                           |
-| `language-pack.shell`                 | tool      | `shell.instructions.md`, `enforce.shell.prompt.md`                                                                 |
-| `language-pack.terraform`             | tool      | `terraform.instructions.md`, `enforce.terraform.prompt.md`                                                         |
-| `language-pack.reactjs`               | framework | `reactjs.instructions.md`, `enforce.reactjs.prompt.md`                                                             |
-| `language-pack.tauri`                 | framework | `tauri.instructions.md`, `enforce.tauri.prompt.md`                                                                 |
-| `language-pack.playwright-python`     | framework | `playwright-python.instructions.md`, `enforce.playwright-python.prompt.md`                                         |
-| `language-pack.playwright-typescript` | framework | `playwright-typescript.instructions.md`, `enforce.playwright-typescript.prompt.md`                                 |
+| Pack ID                               | Class     | Constituent artefacts                                                              |
+| ------------------------------------- | --------- | ---------------------------------------------------------------------------------- |
+| `language-pack.python`                | language  | `python.instructions.md`, `enforce.python.prompt.md`, ADR-001 cluster              |
+| `language-pack.typescript`            | language  | `typescript.instructions.md`, `enforce.typescript.prompt.md`, ADR-002 cluster      |
+| `language-pack.go`                    | language  | `go.instructions.md`, `enforce.go.prompt.md`, ADR-003 cluster                      |
+| `language-pack.rust`                  | language  | `rust.instructions.md`, `enforce.rust.prompt.md`, ADR-004 cluster                  |
+| `language-pack.docker`                | tool      | `docker.instructions.md`, `enforce.docker.prompt.md`                               |
+| `language-pack.makefile`              | tool      | `makefile.instructions.md`, `enforce.makefile.prompt.md`                           |
+| `language-pack.shell`                 | tool      | `shell.instructions.md`, `enforce.shell.prompt.md`                                 |
+| `language-pack.terraform`             | tool      | `terraform.instructions.md`, `enforce.terraform.prompt.md`                         |
+| `language-pack.reactjs`               | framework | `reactjs.instructions.md`, `enforce.reactjs.prompt.md`                             |
+| `language-pack.tauri`                 | framework | `tauri.instructions.md`, `enforce.tauri.prompt.md`                                 |
+| `language-pack.playwright-python`     | framework | `playwright-python.instructions.md`, `enforce.playwright-python.prompt.md`         |
+| `language-pack.playwright-typescript` | framework | `playwright-typescript.instructions.md`, `enforce.playwright-typescript.prompt.md` |
 
 ## Naming and frontmatter
 
@@ -84,7 +84,7 @@ Per-artefact slug constraints:
 - Instruction pack: tech slug; must match the language-pack `<tech>` exactly when the file is part of a pack. Example: `python`, `playwright-typescript`.
 - Prompt: mandatory **prefix.** (see table below) followed by a descriptive kebab-case slug. Example: `enforce.python`, `dev.implement-logging`.
 - Agent: persona slug under `personas/`, matching the role expressed in the file name. Example: `implementer`, `reviewer`.
-- Skill: folder name only; kebab-case noun-phrase describing the capability. Example: `code-review`, `fastapi-project`.
+- Skill: folder name only; kebab-case noun-phrase describing the capability. Example: `code-review`, `enforcement-audit`.
 - Include fragment: `<topic>` kebab-case noun-phrase with suffix `.include.md` and no leading underscore. Example: `quality-gates-baseline.include.md`.
 - Pack ID: `language-pack.<tech>` where `<tech>` matches the instruction slug. Example: `language-pack.reactjs`.
 - ADR: `ADR-NNN[a-z]?_<Pascal_Snake>_<Title>.md`; cluster letters (`a`–`g`) are reserved for language-pack ADR sub-topics. Example: `ADR-001a_Python_Dependency_Management.md`.

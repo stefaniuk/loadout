@@ -45,8 +45,6 @@ function main() {
     test-apply-default-excludes-tech-files \
     test-apply-all-copies-all-tech-files \
     test-apply-tauri-auto-enables-rust-typescript-reactjs \
-    test-apply-django-auto-enables-python-and-copies-skill \
-    test-apply-fastapi-auto-enables-python-and-copies-skill \
     test-apply-playwright-python-copies-both-instructions \
     test-apply-playwright-without-lang-fails \
     test-apply-clean-removes-previous-tech-files \
@@ -236,8 +234,6 @@ function test-apply-default-excludes-tech-files() {
   [[ ! -f "${d}/.github/prompts/enforce.typescript.prompt.md" ]] || return 1
   [[ ! -f "${d}/.github/prompts/enforce.go.prompt.md" ]] || return 1
   # Tech-specific skills absent
-  [[ ! -d "${d}/.github/skills/django-project" ]] || return 1
-  [[ ! -d "${d}/.github/skills/fastapi-project" ]] || return 1
   return 0
 }
 
@@ -270,8 +266,6 @@ function test-apply-all-copies-all-tech-files() {
   # Templates
   [[ -f "${d}/.github/instructions/templates/pyproject.toml" ]] || return 1
   # Skills
-  [[ -d "${d}/.github/skills/django-project" ]] || return 1
-  [[ -d "${d}/.github/skills/fastapi-project" ]] || return 1
   [[ -d "${d}/.github/skills/repository-template" ]] || return 1
   return 0
 }
@@ -288,26 +282,6 @@ function test-apply-tauri-auto-enables-rust-typescript-reactjs() {
   [[ -f "${dest}/.github/instructions/rust.instructions.md" ]] || return 1
   [[ -f "${dest}/.github/instructions/typescript.instructions.md" ]] || return 1
   [[ -f "${dest}/.github/instructions/reactjs.instructions.md" ]] || return 1
-  return 0
-}
-
-function test-apply-django-auto-enables-python-and-copies-skill() {
-
-  local dest="${TEMP_DIR}/django-combined"
-  django=true helper-apply "${dest}" || return 1
-  [[ -f "${dest}/.github/instructions/python.instructions.md" ]] || return 1
-  [[ -f "${dest}/.github/prompts/enforce.python.prompt.md" ]] || return 1
-  [[ -f "${dest}/.github/skills/django-project/SKILL.md" ]] || return 1
-  return 0
-}
-
-function test-apply-fastapi-auto-enables-python-and-copies-skill() {
-
-  local dest="${TEMP_DIR}/fastapi-combined"
-  fastapi=true helper-apply "${dest}" || return 1
-  [[ -f "${dest}/.github/instructions/python.instructions.md" ]] || return 1
-  [[ -f "${dest}/.github/prompts/enforce.python.prompt.md" ]] || return 1
-  [[ -f "${dest}/.github/skills/fastapi-project/SKILL.md" ]] || return 1
   return 0
 }
 
