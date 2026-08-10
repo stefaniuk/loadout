@@ -1,0 +1,31 @@
+# Shared Skill Patch Manifest
+#
+# Defines the local patch rules for both upstream Spec Kit skills imported via
+# scripts/specify.sh and third-party skills synced via scripts/skill-sync.sh.
+#
+# Injection Strategies:
+#   after-frontmatter              - Inject immediately after YAML front matter
+#   replace-before-section:<name>  - Replace content after front matter up to a section heading
+#   before-section:<name>          - Inject before a section heading
+#   after-section:<name>           - Inject after a section heading
+#   append                         - Append at end of file
+#   prepend                        - Prepend at start of file
+
+# Usage:
+#   1. Create a patch file in the appropriate subdirectory:
+#      - scripts/skill-patches/skills/<name>.patch.md
+#      - scripts/skill-patches/templates/<name>-template.patch.md
+#
+#   2. Optionally configure the injection point below.
+#
+#   3. Run: make specify or make skill-sync
+
+defaults:
+  skills: after-frontmatter
+  templates: after-frontmatter
+
+overrides:
+  incremental-implementation/SKILL.md: after-frontmatter
+  speckit-plan/SKILL.md: replace-before-section:## User Input
+  speckit-tasks/SKILL.md: replace-before-section:## User Input
+  speckit-implement/SKILL.md: replace-before-section:## User Input

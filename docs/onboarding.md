@@ -170,7 +170,7 @@ new=true force=true make import dest=/path/to/project
 
 ## Syncing upstream Spec Kit
 
-The repository uses Spec Kit agents, prompts, and templates from the upstream [github/spec-kit](https://github.com/github/spec-kit) project. Local extensions (patches, overrides) are maintained in `.specify/extensions/` and applied on top of the fetched upstream files.
+The repository uses Spec Kit agents, prompts, and templates from the upstream [github/spec-kit](https://github.com/github/spec-kit) project. Local patches for both imported Spec Kit skills and synced third-party skills are maintained in `scripts/skill-patches/` and applied on top of the fetched upstream files.
 
 ### Running sync
 
@@ -178,7 +178,7 @@ The repository uses Spec Kit agents, prompts, and templates from the upstream [g
 make specify
 ```
 
-This fetches the latest Spec Kit files, applies local extensions declared in `.specify/extensions/manifest.yaml`, and writes the patched output to:
+This fetches the latest Spec Kit files, applies local patches declared in `scripts/skill-patches/manifest.yaml`, and writes the patched output to:
 
 - `.github/skills/speckit-*/` (speckit skill definitions)
 - `.specify/templates/` (plan, spec, tasks templates)
@@ -199,7 +199,7 @@ dry_run=true make specify
 Run `make specify` after:
 
 - Pulling updates to this repository (upstream Spec Kit may have changed)
-- Modifying files in `.specify/extensions/`
+- Modifying files in `scripts/skill-patches/`
 - Wanting to reset speckit skills to their canonical patched state
 
 ### Prerequisites
@@ -208,7 +208,7 @@ The `specify` CLI must be installed. See [github/spec-kit](https://github.com/gi
 
 ## Managing external skills
 
-Third-party agent skills can be cloned into `.github/skills/` from upstream repositories. A YAML manifest at `scripts/config/skills.yaml` declares which skills to fetch, and two make targets manage the lifecycle.
+Third-party agent skills can be cloned into `.github/skills/` from upstream repositories. A YAML manifest at `scripts/config/skills.yaml` declares which skills to fetch, and three make targets manage the lifecycle. The same patch engine and manifest used by `make specify` patch every upstream skill through the shared `scripts/skill-patches/skills/` directory.
 
 ### Configuration
 
@@ -237,7 +237,7 @@ make skill-sync
 make skill-add name=writing-plans repo=https://github.com/obra/superpowers.git path=skills/writing-plans
 ```
 
-Both append the skill to `.github/skills/<name>/`, pin the resolved commit SHA in the manifest, and update lint exclusions.
+Both append the skill to `.github/skills/<name>/`, apply any local `SKILL.md` patch from `scripts/skill-patches/skills/`, pin the resolved commit SHA in the manifest, and update lint exclusions.
 
 ### Updating skills
 
@@ -253,12 +253,31 @@ To update a single skill:
 make skill-sync name=systematic-debugging
 ```
 
+To inspect the vanilla upstream content without applying local patches:
+
+```bash
+make skill-sync name=incremental-implementation patch=false
+```
+
+To reapply local patches to already-synced skills without fetching upstream:
+
+```bash
+make skill-patch
+```
+
+To reapply the patch for a single skill:
+
+```bash
+make skill-patch name=incremental-implementation
+```
+
 ### What happens during sync
 
 1. Each skill is shallow-cloned using git sparse checkout (only the declared path).
-2. The resolved commit SHA is written back to `scripts/config/skills.yaml`.
-3. The `.markdownlintignore` managed section is updated with all synced skill directories (sorted alphabetically).
-4. Synced skill directories are excluded from shellcheck automatically.
+2. If `scripts/skill-patches/skills/<name>.patch.md` exists, it is injected into the synced `SKILL.md` using the shared rules from `scripts/skill-patches/manifest.yaml` that also apply to imported Spec Kit skills.
+3. The resolved commit SHA is written back to `scripts/config/skills.yaml`.
+4. The `.markdownlintignore` managed section is updated with all synced skill directories (sorted alphabetically).
+5. Synced skill directories are excluded from shellcheck automatically.
 
 ### Prerequisites
 

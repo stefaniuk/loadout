@@ -4,14 +4,17 @@ set -euo pipefail
 
 # Synchronise external agent skills declared in scripts/config/skills.yaml.
 # Clones each skill's directory from its upstream repository into
-# .github/skills/<name>/ and pins the resolved commit SHA back
-# into the config file.
+# .github/skills/<name>/, applies any local patch from the shared
+# scripts/skill-patches/ tree, and pins the resolved commit SHA back into
+# the config file.
 #
 # Usage:
 #   $ [options] ./scripts/skill-sync.sh
 #
 # Options:
 #   name=<skill>            # Sync only the named skill, default syncs all
+#   patch=false             # Skip local patches and use vanilla upstream content, default is 'true'
+#   patch_only=true         # Reapply local patches without fetching upstream, default is 'false'
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
 # Exit codes:
@@ -25,6 +28,17 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 CONFIG_FILE="${SCRIPT_DIR}/config/skills.yaml"
 DEST_DIR="${REPO_ROOT}/.github/skills"
+PATCHES_DIR="${SCRIPT_DIR}/skill-patches"
+MANIFEST_FILE="${PATCHES_DIR}/manifest.yaml"
+PATCH_LIB="${PATCHES_DIR}/patch.lib.sh"
+
+if [[ ! -f "${PATCH_LIB}" ]]; then
+  echo "error: patch library not found: ${PATCH_LIB}" >&2
+  exit 1
+fi
+
+# shellcheck source=/dev/null
+source "${PATCH_LIB}"
 
 # ==============================================================================
 
@@ -54,6 +68,8 @@ function main() {
     return 0
   fi
 
+  local patch_only=${patch_only:-false}
+
   local synced=0
   for i in $(seq 0 $((skill_count - 1))); do
     local skill_name
@@ -63,7 +79,16 @@ function main() {
       continue
     fi
 
-    sync-skill "$i" "$skill_name"
+    if is-arg-true "$patch_only"; then
+      local dest="${DEST_DIR}/${skill_name}"
+      if [[ ! -d "$dest" ]]; then
+        echo "error: skill '${skill_name}' not found on disk; run 'make skill-sync' first" >&2
+        return 1
+      fi
+      patch-local-skill "$skill_name" "$dest"
+    else
+      sync-skill "$i" "$skill_name"
+    fi
     synced=$((synced + 1))
   done
 
@@ -72,7 +97,11 @@ function main() {
     return 1
   fi
 
-  echo "==> Synced ${synced} skill(s)"
+  if is-arg-true "$patch_only"; then
+    echo "==> Patched ${synced} skill(s)"
+  else
+    echo "==> Synced ${synced} skill(s)"
+  fi
   update-editorconfig-ignore
   update-markdownlint-ignore
   update-prettier-ignore
@@ -142,6 +171,44 @@ function update-ignore-file() {
 
 # ==============================================================================
 
+# Apply a local patch fragment to a synced upstream skill.
+# Arguments:
+#   $1=[skill name]
+#   $2=[destination directory]
+function patch-local-skill() {
+  local skill_name="$1"
+  local dest_dir="$2"
+  local patch=${patch:-true}
+  local skill_file="${dest_dir}/SKILL.md"
+  local patch_file="${PATCHES_DIR}/skills/${skill_name}.patch.md"
+
+  if ! is-arg-true "${patch}"; then
+    return 0
+  fi
+
+  if [[ ! -f "${skill_file}" || ! -f "${patch_file}" ]]; then
+    return 0
+  fi
+
+  local injection_point
+  injection_point=$(patch-get-injection-point "$MANIFEST_FILE" "${skill_name}/SKILL.md" "skills")
+
+  echo "  patching .github/skills/${skill_name}/SKILL.md (injection: ${injection_point})"
+
+  local upstream_content
+  local patch_content
+  local patched_content
+  upstream_content=$(cat "${skill_file}")
+  patch_content=$(cat "${patch_file}")
+  patched_content=$(patch-inject "${upstream_content}" "${patch_content}" "${injection_point}")
+
+  echo "${patched_content}" > "${skill_file}"
+
+  return 0
+}
+
+# ==============================================================================
+
 # Sync a single skill by its index in the config.
 # Arguments:
 #   $1=[index in the skills array]
@@ -177,6 +244,9 @@ function sync-skill() {
   rm -rf "$dest"
   mkdir -p "$dest"
   cp -R "${source_dir}/." "$dest/"
+
+  patch-local-skill "$skill_name" "$dest"
+
   rm -rf "$temp_dir"
 
   # Pin the resolved SHA back into the config

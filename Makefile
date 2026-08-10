@@ -35,6 +35,7 @@ lint: # Run linter to check code style and errors @Quality
 test: # Run fast local test suite (apply + specify + subagent-hooks + install). Slower tests run in CI via `test-all` @Testing
 	bash ./scripts/tests/apply.test.sh && echo "apply: ok"
 	bash ./scripts/tests/specify.test.sh && echo "specify: ok"
+	bash ./scripts/tests/skill-sync.test.sh && echo "skill-sync: ok"
 	bash ./scripts/tests/subagent-hooks.test.sh && echo "subagent-hooks: ok"
 	$(MAKE) test-install
 
@@ -48,19 +49,25 @@ test-all: # Run the whole test suite (fast + import); used by the CI/CD workflow
 test-install: # Run install/uninstall wrapper tests @Testing
 	bash ./scripts/tests/install.test.sh && echo "install: ok"
 
+test-skill-sync: # Run external skill sync tests @Testing
+	bash ./scripts/tests/skill-sync.test.sh && echo "skill-sync: ok"
+
 clone-rt: # Clone the repository template into .github/skills/repository-template @Operations
 	.github/skills/repository-template/scripts/git-clone-repository-template.sh
 
-skill-sync: # Fetch/update external skills declared in scripts/config/skills.yaml; optional: name=[skill] @Operations
-	name="$(name)" ./scripts/skill-sync.sh
+skill-sync: # Fetch/update external skills declared in scripts/config/skills.yaml and apply local patches; optional: name=[skill], patch=[true|false] @Operations
+	name="$(name)" patch="$(or $(patch),true)" ./scripts/skill-sync.sh
+
+skill-patch: # Reapply local patches to already-synced skills without fetching upstream; optional: name=[skill] @Operations
+	name="$(name)" patch_only=true ./scripts/skill-sync.sh
 
 skill-add: # Add a new external skill to config and sync it; mandatory: name=[name] repo=[url] path=[path]; optional: ref=[branch] @Operations
 	$(if $(and $(name),$(repo),$(path)),,$(error Usage: make skill-add name=my-skill repo=https://github.com/owner/repo.git path=skills/my-skill))
 	name="$(name)" repo="$(repo)" path="$(path)" ref="$(or $(ref),main)" ./scripts/skill-add.sh
 	name="$(name)" ./scripts/skill-sync.sh
 
-specify: # Fetch upstream spec-kit and apply local extensions; optional: extensions=[true|false] @Operations
-	extensions="$(or $(extensions),true)" ./scripts/specify.sh
+specify: # Fetch upstream spec-kit and apply local patches; optional: patch=[true|false] @Operations
+	patch="$(or $(patch),true)" ./scripts/specify.sh
 
 apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean|revert=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright=[true] @Operations
 	$(if $(dest),,$(error dest is required. Usage: make apply dest=/path/to/destination))
@@ -102,8 +109,10 @@ ${VERBOSE}.SILENT: \
 	lint-mcp \
 	lint-shell \
 	skill-add \
+	skill-patch \
 	skill-sync \
 	specify \
 	test \
+	test-skill-sync \
 	test-all \
 	test-import \

@@ -69,17 +69,12 @@ function create-specify-fixture-repo() {
   local fixture_dir="$1"
 
   mkdir -p "${fixture_dir}/scripts"
-  mkdir -p "${fixture_dir}/.specify/extensions/copilot/skills"
+  mkdir -p "${fixture_dir}/scripts/skill-patches/skills"
   mkdir -p "${fixture_dir}/bin"
 
   cp "${REPO_ROOT}/scripts/specify.sh" "${fixture_dir}/scripts/specify.sh"
-  cp "${REPO_ROOT}/.specify/extensions/manifest.yaml" "${fixture_dir}/.specify/extensions/manifest.yaml"
-  cp "${REPO_ROOT}/.specify/extensions/copilot/skills/speckit-plan.ext.md" \
-    "${fixture_dir}/.specify/extensions/copilot/skills/speckit-plan.ext.md"
-  cp "${REPO_ROOT}/.specify/extensions/copilot/skills/speckit-tasks.ext.md" \
-    "${fixture_dir}/.specify/extensions/copilot/skills/speckit-tasks.ext.md"
-  cp "${REPO_ROOT}/.specify/extensions/copilot/skills/speckit-implement.ext.md" \
-    "${fixture_dir}/.specify/extensions/copilot/skills/speckit-implement.ext.md"
+  cp "${REPO_ROOT}/scripts/skill-patches/patch.lib.sh" "${fixture_dir}/scripts/skill-patches/patch.lib.sh"
+  create-specify-skill-patch-fixture "${fixture_dir}"
 
   create-specify-stub "${fixture_dir}/bin/specify"
   create-curl-stub "${fixture_dir}/bin/curl"
@@ -87,6 +82,59 @@ function create-specify-fixture-repo() {
   chmod +x "${fixture_dir}/scripts/specify.sh" \
     "${fixture_dir}/bin/specify" \
     "${fixture_dir}/bin/curl"
+
+  return 0
+}
+
+# Create the unified local patch fixture consumed by scripts/specify.sh.
+# Arguments:
+#   $1=[fixture directory]
+function create-specify-skill-patch-fixture() {
+
+  local fixture_dir="$1"
+
+  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/manifest.yaml"
+defaults:
+  skills: after-frontmatter
+
+overrides:
+  speckit-plan/SKILL.md: replace-before-section:## User Input
+  speckit-tasks/SKILL.md: replace-before-section:## User Input
+  speckit-implement/SKILL.md: replace-before-section:## User Input
+EOF
+
+  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/speckit-plan.patch.md"
+You **MUST** adhere to the following mandatory requirements when creating a development plan.
+
+**Workflow context:**
+
+- **Next phase:** Tasks generation (`/speckit-tasks`)
+
+## Show & Tell Sections (Mandatory)
+
+- State pass/fail criteria clearly so steps cannot be skipped or missed during `/speckit-implement`
+EOF
+
+  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/speckit-tasks.patch.md"
+You **MUST** adhere to the following mandatory requirements when generating development tasks.
+
+**Workflow context:**
+
+- **Next phase:** Implementation (`/speckit-implement`)
+
+## Show & Tell Sections (Mandatory)
+
+AI Assistant **MUST** execute every Show & Tell step during `/speckit-implement` and validate that the expected result is achieved.
+EOF
+
+  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/speckit-implement.patch.md"
+You **MUST** adhere to the following mandatory requirements when implementing features.
+
+## Implementation Process (Mandatory)
+
+1. Work through tasks in `tasks.md` sequentially
+2. Follow TDD: write failing test first, then implement, then refactor
+EOF
 
   return 0
 }
