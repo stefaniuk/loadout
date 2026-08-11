@@ -89,7 +89,19 @@ frontmatter:
     disable-model-invocation: true
   documentation-and-adrs/SKILL.md:
     disable-model-invocation: true
+  gha-security-review/SKILL.md:
+    disable-model-invocation: true
+  insecure-defaults/SKILL.md:
+    disable-model-invocation: true
   mcp-builder/SKILL.md:
     disable-model-invocation: true
   mutation-testing/SKILL.md:
+    disable-model-invocation: true
+  semgrep/SKILL.md:
+    disable-model-invocation: true
+  sharp-edges/SKILL.md:
+    disable-model-invocation: true
+  skill-scanner/SKILL.md:
+    disable-model-invocation: true
+  supply-chain-risk-auditor/SKILL.md:
     disable-model-invocation: true

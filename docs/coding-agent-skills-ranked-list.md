@@ -616,8 +616,14 @@ Use `--list` to browse before installing, `--skill <name>` to install individual
 | 4    | All `speckit-*` skills           | ✅     | 🟣 Bundled    | Blocked     | Yes        | Yes   | Spec Kit workflow         |
 | 7    | `security-and-hardening`         | ✅     | 🟢 Full       | Yes         | No         | No    | Security default          |
 | 10   | `incremental-implementation`     | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers discipline    |
+| 12   | `semgrep`                        | ✅     | 🔵 Manual     | Blocked     | No         | No    | Rapid SAST                |
 | 20   | `find-bugs`                      | ✅     | 🟢 Full       | Yes         | No         | No    | Main review skill         |
+| 25   | `supply-chain-risk-auditor`      | ✅     | 🔵 Manual     | Blocked     | No         | No    | Dependency posture        |
+| 26   | `insecure-defaults`              | ✅     | 🔵 Manual     | Blocked     | No         | No    | Fail-open audit           |
 | 37   | `spec-to-code-compliance`        | ✅     | 🟢 Full       | Yes         | No         | No    | Spec compliance           |
+| 38   | `sharp-edges`                    | ✅     | 🔵 Manual     | Blocked     | No         | No    | Footgun review            |
+| 39   | `gha-security-review`            | ✅     | 🔵 Manual     | Blocked     | No         | No    | Actions security          |
+| 40   | `skill-scanner`                  | ✅     | 🔵 Manual     | Blocked     | No         | No    | Skill supply chain        |
 | 5    | `writing-plans`                  | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers lane          |
 | 6    | `using-git-worktrees`            | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers cross-cutting |
 | 16   | `subagent-driven-development`    | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers lane          |
@@ -643,9 +649,10 @@ Adoption notes:
 - ✅ All `speckit-*` skills are bundled through `make specify` and remain the primary Spec Kit workflow.
 - ✅ `incremental-implementation` is imported through `scripts/config/skills.yaml` and now uses the standard workflow-mode guard, so it runs only in the `superpowers` lane.
 - ✅ The Superpowers workflow lane is now imported through `scripts/config/skills.yaml`, including `brainstorming`, `writing-plans`, `dispatching-parallel-agents`, `executing-plans`, `subagent-driven-development`, `requesting-code-review`, `receiving-code-review`, and `finishing-a-development-branch`.
+- ✅ `semgrep`, `supply-chain-risk-auditor`, `insecure-defaults`, `sharp-edges`, `gha-security-review`, and `skill-scanner` are now imported as manual-only specialist skills for shell, CI, and skill supply-chain review.
 - ✅ Those Superpowers workflow skills, plus `incremental-implementation`, are intentionally mode-gated rather than always active. Use `make workflow-status` to inspect the current lane and `make workflow-use mode=speckit|superpowers` to switch lanes.
 - ✅ `using-git-worktrees` and `brainstorming` are now auto-invocable with a mode guard, so the agent triggers them automatically in the `superpowers` lane.
-- ✅ `writing-skills` remains manual (explicit invocation only).
+- ✅ `writing-skills` remains manual alongside the newly imported specialist review skills.
 
 ### Recommended core set with Spec Kit
 
@@ -718,20 +725,19 @@ These should not run as peers inside one active session or worktree because they
 
 ### Keep manually invocable
 
-| Rank | Skill | Reason |
-| ---- | ----- | ------ |
-
-| 8 | `grill-with-docs` | Overlaps with specification and clarification |
-| 28 | `api-to-agent-cli` | Special-purpose workflow |
-| 40 | `skill-scanner` | Use when adding or updating skills |
-| 58 | `wa-review` | Run explicitly for an AWS architecture review |
-| 69 | `git-workflow-and-versioning` | Its trunk-based assumptions may conflict with Spec Kit feature branches |
-| 72 | `code-simplification` | Could expand work beyond the approved specification |
-| 73 | `doubt-driven-development` | Valuable for high-risk decisions but too intrusive by default |
-| 74 | `improve-codebase-architecture` | Periodic architecture assessment, not normal implementation |
-| 77 | `context-engineering` | Project-setup and maintenance activity |
-| 80 | `shipping-and-launch` | Invoke during release preparation |
-| 81 | `open-sourcing` | Invoke only when preparing a public release |
+| Rank | Skill                           | Reason                                                                  |
+| ---- | ------------------------------- | ----------------------------------------------------------------------- |
+| 8    | `grill-with-docs`               | Overlaps with specification and clarification                           |
+| 28   | `api-to-agent-cli`              | Special-purpose workflow                                                |
+| 40   | `skill-scanner`                 | Use when adding or updating skills                                      |
+| 58   | `wa-review`                     | Run explicitly for an AWS architecture review                           |
+| 69   | `git-workflow-and-versioning`   | Its trunk-based assumptions may conflict with Spec Kit feature branches |
+| 72   | `code-simplification`           | Could expand work beyond the approved specification                     |
+| 73   | `doubt-driven-development`      | Valuable for high-risk decisions but too intrusive by default           |
+| 74   | `improve-codebase-architecture` | Periodic architecture assessment, not normal implementation             |
+| 77   | `context-engineering`           | Project-setup and maintenance activity                                  |
+| 80   | `shipping-and-launch`           | Invoke during release preparation                                       |
+| 81   | `open-sourcing`                 | Invoke only when preparing a public release                             |
 
 Use this frontmatter for those skills in VS Code Copilot:
 
@@ -784,6 +790,12 @@ using-git-worktrees
 
 Manual but already imported:
 writing-skills
+semgrep
+supply-chain-risk-auditor
+insecure-defaults
+sharp-edges
+gha-security-review
+skill-scanner
 ```
 
-Then add stack-specific and security-analysis skills only where the project actually needs them. For this repository, the full Superpowers lane is mode-gated and auto-invocable, with `brainstorming` and `using-git-worktrees` now included. Only `writing-skills` remains manual.
+Then add stack-specific and security-analysis skills only where the project actually needs them. For this repository, the full Superpowers lane is mode-gated and auto-invocable, with `brainstorming` and `using-git-worktrees` now included. `writing-skills`, `semgrep`, `supply-chain-risk-auditor`, `insecure-defaults`, `sharp-edges`, `gha-security-review`, and `skill-scanner` remain manual specialist imports.

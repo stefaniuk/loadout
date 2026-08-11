@@ -8,7 +8,9 @@
 .github/skills/executing-plans/
 .github/skills/find-bugs/
 .github/skills/finishing-a-development-branch/
+.github/skills/gha-security-review/
 .github/skills/incremental-implementation/
+.github/skills/insecure-defaults/
 .github/skills/mcp-builder/
 .github/skills/mutation-testing/
 .github/skills/playwright-cli/
@@ -16,8 +18,12 @@
 .github/skills/receiving-code-review/
 .github/skills/requesting-code-review/
 .github/skills/security-and-hardening/
+.github/skills/semgrep/
+.github/skills/sharp-edges/
+.github/skills/skill-scanner/
 .github/skills/spec-to-code-compliance/
 .github/skills/subagent-driven-development/
+.github/skills/supply-chain-risk-auditor/
 .github/skills/systematic-debugging/
 .github/skills/test-driven-development/
 .github/skills/using-git-worktrees/
