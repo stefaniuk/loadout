@@ -5,7 +5,7 @@
 # GitHub Copilot configuration
 # ------------------------------------------------------------------------------
 
-# Agents (spec-kit agents, personas, READMEs)
+# Agents (custom agent definitions or README placeholder)
 .github/agents/
 
 # Hooks (Copilot agent hooks, e.g. quality-gates.json)
@@ -73,3 +73,6 @@ docs/mcp.md
 
 # VS Code workspace file (only copied if not present)
 # project.code-workspace
+
+# Local active workflow selection (session/worktree scoped)
+.copilot/workflow-mode.json

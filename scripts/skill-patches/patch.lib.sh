@@ -143,6 +143,221 @@ function patch-get-default-injection-point() {
   return 0
 }
 
+# Remove the first exact occurrence of a patch block from upstream content.
+# Also trims one blank separator line on either side when present so reinjection
+# preserves stable spacing.
+# Arguments:
+#   $1=[upstream content]
+#   $2=[patch content]
+# Returns:
+#   Upstream content with the first matching patch block removed (via stdout)
+function patch-strip-first-existing-content() {
+  local upstream_content="$1"
+  local patch_content="$2"
+
+  if [[ -z "${patch_content}" ]]; then
+    echo "${upstream_content}"
+    return 0
+  fi
+
+  local -a lines=()
+  local -a patch_lines=()
+  local line
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    lines+=("$line")
+  done <<< "$upstream_content"
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    patch_lines+=("$line")
+  done <<< "$patch_content"
+
+  local line_count="${#lines[@]}"
+  local patch_line_count="${#patch_lines[@]}"
+
+  if (( line_count == 0 || patch_line_count == 0 || patch_line_count > line_count )); then
+    echo "${upstream_content}"
+    return 0
+  fi
+
+  local match_start=-1
+  local match_end=-1
+  local index=0
+  local offset=0
+
+  for ((index=0; index<=line_count-patch_line_count; index++)); do
+    local matched=true
+    for ((offset=0; offset<patch_line_count; offset++)); do
+      if [[ "${lines[$((index + offset))]}" != "${patch_lines[$offset]}" ]]; then
+        matched=false
+        break
+      fi
+    done
+
+    if $matched; then
+      match_start=$index
+      match_end=$((index + patch_line_count - 1))
+      break
+    fi
+  done
+
+  if (( match_start < 0 )); then
+    echo "${upstream_content}"
+    return 0
+  fi
+
+  local remove_start=$match_start
+  local remove_end=$match_end
+
+  if (( remove_start > 0 )) && [[ -z "${lines[$((remove_start - 1))]}" ]]; then
+    remove_start=$((remove_start - 1))
+  fi
+
+  if (( remove_end + 1 < line_count )) && [[ -z "${lines[$((remove_end + 1))]}" ]]; then
+    remove_end=$((remove_end + 1))
+  fi
+
+  local result=""
+  for ((index=0; index<line_count; index++)); do
+    if (( index < remove_start || index > remove_end )); then
+      result+="${lines[$index]}"$'\n'
+    fi
+  done
+
+  result="${result%$'\n'}"
+  echo "$result"
+
+  return 0
+}
+
+# Remove all exact occurrences of a patch block from upstream content before a
+# fresh injection pass. This makes repeated patch runs idempotent and also
+# normalises files that already contain duplicated injected blocks.
+# Arguments:
+#   $1=[upstream content]
+#   $2=[patch content]
+# Returns:
+#   Upstream content with all matching patch blocks removed (via stdout)
+function patch-strip-existing-content() {
+  local upstream_content="$1"
+  local patch_content="$2"
+  local current_content="$upstream_content"
+
+  while true; do
+    local stripped_content
+    stripped_content=$(patch-strip-first-existing-content "$current_content" "$patch_content")
+
+    if [[ "$stripped_content" == "$current_content" ]]; then
+      break
+    fi
+
+    current_content="$stripped_content"
+  done
+
+  echo "$current_content"
+
+  return 0
+}
+
+# Return success when a patch is already present at the expected
+# after-frontmatter location, so reapplying the patch becomes a no-op.
+# Arguments:
+#   $1=[upstream content]
+#   $2=[patch content]
+function patch-has-after-frontmatter-injection() {
+  local upstream_content="$1"
+  local patch_content="$2"
+
+  local -a lines=()
+  local -a patch_lines=()
+  local line
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    lines+=("$line")
+  done <<< "$upstream_content"
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    patch_lines+=("$line")
+  done <<< "$patch_content"
+
+  local patch_line_count="${#patch_lines[@]}"
+  if (( patch_line_count == 0 )); then
+    return 1
+  fi
+
+  if (( ${#lines[@]} > 0 )) && [[ "${lines[0]}" == "---" ]]; then
+    local delimiter_count=0
+    local frontmatter_end_index=-1
+    local index=0
+
+    for ((index=0; index<${#lines[@]}; index++)); do
+      if [[ "${lines[$index]}" == "---" ]]; then
+        ((delimiter_count++))
+        if (( delimiter_count == 2 )); then
+          frontmatter_end_index=$index
+          break
+        fi
+      fi
+    done
+
+    if (( frontmatter_end_index < 0 )); then
+      return 1
+    fi
+
+    local patch_start=$((frontmatter_end_index + 2))
+    if (( frontmatter_end_index + 1 >= ${#lines[@]} )) || [[ -n "${lines[$((frontmatter_end_index + 1))]}" ]]; then
+      return 1
+    fi
+
+    if (( patch_start + patch_line_count > ${#lines[@]} )); then
+      return 1
+    fi
+
+    for ((index=0; index<patch_line_count; index++)); do
+      if [[ "${lines[$((patch_start + index))]}" != "${patch_lines[$index]}" ]]; then
+        return 1
+      fi
+    done
+
+    return 0
+  fi
+
+  local index=0
+  if (( patch_line_count > ${#lines[@]} )); then
+    return 1
+  fi
+
+  for ((index=0; index<patch_line_count; index++)); do
+    if [[ "${lines[$index]}" != "${patch_lines[$index]}" ]]; then
+      return 1
+    fi
+  done
+
+  return 0
+}
+
+# Return success when a patch is already present in the exact location implied
+# by the injection strategy, making reapplication a no-op.
+# Arguments:
+#   $1=[upstream content]
+#   $2=[patch content]
+#   $3=[injection point]
+function patch-is-already-applied() {
+  local upstream_content="$1"
+  local patch_content="$2"
+  local injection_point="$3"
+
+  case "$injection_point" in
+    after-frontmatter)
+      patch-has-after-frontmatter-injection "$upstream_content" "$patch_content"
+      return $?
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 # Inject patch content into upstream content at the specified location.
 # Arguments:
 #   $1=[upstream content]
@@ -154,31 +369,39 @@ function patch-inject() {
   local upstream_content="$1"
   local patch_content="$2"
   local injection_point="$3"
+  local stripped_upstream_content
+
+  if patch-is-already-applied "$upstream_content" "$patch_content" "$injection_point"; then
+    echo "$upstream_content"
+    return 0
+  fi
+
+  stripped_upstream_content=$(patch-strip-existing-content "$upstream_content" "$patch_content")
 
   case "$injection_point" in
     after-frontmatter)
-      patch-inject-after-frontmatter "$upstream_content" "$patch_content"
+      patch-inject-after-frontmatter "$stripped_upstream_content" "$patch_content"
       ;;
     replace-before-section:*)
       local section_name="${injection_point#replace-before-section:}"
-      patch-inject-replace-before-section "$upstream_content" "$patch_content" "$section_name"
+      patch-inject-replace-before-section "$stripped_upstream_content" "$patch_content" "$section_name"
       ;;
     before-section:*)
       local section_name="${injection_point#before-section:}"
-      patch-inject-before-section "$upstream_content" "$patch_content" "$section_name"
+      patch-inject-before-section "$stripped_upstream_content" "$patch_content" "$section_name"
       ;;
     after-section:*)
       local section_name="${injection_point#after-section:}"
-      patch-inject-after-section "$upstream_content" "$patch_content" "$section_name"
+      patch-inject-after-section "$stripped_upstream_content" "$patch_content" "$section_name"
       ;;
     append)
-      patch-inject-append "$upstream_content" "$patch_content"
+      patch-inject-append "$stripped_upstream_content" "$patch_content"
       ;;
     prepend)
-      patch-inject-prepend "$upstream_content" "$patch_content"
+      patch-inject-prepend "$stripped_upstream_content" "$patch_content"
       ;;
     *)
-      patch-inject-after-frontmatter "$upstream_content" "$patch_content"
+      patch-inject-after-frontmatter "$stripped_upstream_content" "$patch_content"
       ;;
   esac
 

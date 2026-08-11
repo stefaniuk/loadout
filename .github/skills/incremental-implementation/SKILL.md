@@ -3,17 +3,15 @@ name: incremental-implementation
 description: Delivers changes incrementally. Use when implementing any feature or change that touches more than one file. Use when you're about to write a large amount of code at once, or when a task feels too big to land in one step.
 ---
 
-## Repository Guard
+## Workflow Mode Guard
 
-Use this skill only for standalone, non-Spec Kit work.
+Use this skill only when the active local workflow mode is `superpowers`.
 
-Do not use this skill when the repository or active work already has
-`.specify/`, `spec.md`, `plan.md`, or `tasks.md`.
+Before proceeding:
 
-For Spec Kit work:
-
-- use `speckit-implement` to execute the existing task list
-- use `speckit-converge` if implementation work is missing from the task list
+- Run `./scripts/hooks/workflow-mode.sh status`.
+- If the active mode is `speckit`, stop and tell the user to switch with `make workflow-use mode=superpowers` or continue with the Spec Kit lifecycle instead.
+- Do not mix Superpowers workflow skills with `speckit-*` commands in the same session or worktree.
 
 # Incremental Implementation
 

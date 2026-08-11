@@ -2,13 +2,21 @@
 .specify/templates/*-template.md
 
 # begin: synced skills
+.github/skills/brainstorming/
+.github/skills/dispatching-parallel-agents/
+.github/skills/executing-plans/
 .github/skills/find-bugs/
+.github/skills/finishing-a-development-branch/
 .github/skills/incremental-implementation/
+.github/skills/receiving-code-review/
+.github/skills/requesting-code-review/
 .github/skills/security-and-hardening/
 .github/skills/spec-to-code-compliance/
+.github/skills/subagent-driven-development/
 .github/skills/systematic-debugging/
 .github/skills/test-driven-development/
 .github/skills/using-git-worktrees/
 .github/skills/verification-before-completion/
+.github/skills/writing-plans/
 .github/skills/writing-skills/
 # end: synced skills

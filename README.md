@@ -47,7 +47,7 @@ The repository collects the files and helper scripts needed to run a specificati
 ### Key features
 
 - Instruction packs for languages and tools such as Python, TypeScript, Go, Rust, Docker, Terraform, and Make.
-- Prompts, personas, and speckit agents for specification, planning, implementation, review, and convergence workflows.
+- Prompts and workflow skills for specification-first and Superpowers-based planning, implementation, review, and convergence workflows.
 - Reusable skills for documentation, code review, enforcement audits, repository templating, and framework-specific setup.
 - Deterministic hooks and quality scripts for markdown, links, shell, MCP config, and customisation metadata.
 - Optional MCP example packs with trust guidance and least-privilege defaults.
@@ -73,7 +73,7 @@ Key concepts
 
 - `Instructions`: always-on rules matched to file types.
 - `Prompts`: one-off task entrypoints.
-- `Agents`: reusable personas and lifecycle workers.
+- `Agents`: optional custom agents when a repository needs tool-restricted roles or handoff chains.
 - `Skills`: multi-step capabilities bundled with supporting assets.
 - `Hooks`: deterministic checks that run outside the model.
 

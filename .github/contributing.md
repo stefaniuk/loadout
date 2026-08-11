@@ -190,9 +190,9 @@ Copilot agent definitions that combine prompts with specific behaviours.
 - Specialised domain expertise
 - Workflow requiring specific agent configuration
 
-**File naming:** `<namespace>.<action>.agent.md` or `personas/<role>.agent.md`
+**File naming:** `<slug>.agent.md` or `<namespace>.<action>.agent.md`
 
-Examples: `personas/implementer.agent.md`, `personas/reviewer.agent.md`
+Examples: `docs-review.agent.md`, `workflow.release-check.agent.md`
 
 ### Skills (`.github/skills/<skill-name>/`)
 
@@ -337,7 +337,7 @@ $ARGUMENTS
 
 ### 🤖 Agents Quickstart
 
-**When to choose this artefact.** You're building a **multi-step workflow with handoffs** between persistent personas or other custom agents. For Spec Kit lifecycle stages, prefer the `speckit-*` skills. For one-shot work, a Prompt is enough. See [docs/architecture.md](../docs/architecture.md).
+**When to choose this artefact.** You're building a **multi-step workflow with handoffs** between custom agents. For Spec Kit lifecycle stages, prefer the `speckit-*` skills. For one-shot work, a Prompt is enough. See [docs/architecture.md](../docs/architecture.md).
 
 **Minimal starter template** - save as `.github/agents/<namespace>.<action>.agent.md`:
 
@@ -377,7 +377,7 @@ handoffs:
 ```
 ````
 
-**Required fields and naming constraints.** `description` (required); `tools` array scoped to the **minimum** needed; `handoffs` if the agent participates in a chain; filename `<namespace>/<action>.agent.md` (e.g. `personas/implementer.agent.md`). Full schema: [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
+**Required fields and naming constraints.** `description` (required); `tools` array scoped to the **minimum** needed; `handoffs` if the agent participates in a chain; filename `<slug>.agent.md` or `<namespace>.<action>.agent.md` (for example `docs-review.agent.md`). Full schema: [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
 
 **Pre-PR validation checklist.**
 

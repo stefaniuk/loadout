@@ -35,7 +35,7 @@ set -euo pipefail
 #   playwright=true         # Include Playwright instruction and prompt (requires python or typescript)
 #
 # Always copied (default/glue layer):
-#   - All spec-kit agents (.github/agents)
+#   - Agent markdown files under .github/agents (currently README placeholder only)
 #   - Shell, Docker, Makefile instructions and prompts
 #   - Development prompts (dev.implement-*)
 #   - Architecture documentation prompts (architecture.*)
@@ -723,7 +723,7 @@ function revert-shared-resources() {
 }
 
 # Copy copilot agent files to the destination.
-# All agents are spec-kit related and always copied.
+# Copies any markdown files present under .github/agents recursively.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function copilot-copy-agents() {
@@ -732,7 +732,6 @@ function copilot-copy-agents() {
   mkdir -p "${dest_agents}"
 
   print-info "Copying agent files to ${dest_agents}"
-  # Recursive copy so nested persona files under personas/ are included.
   # Preserve the relative directory structure under .github/agents/.
   local src_file rel_path target_dir
   while IFS= read -r -d '' src_file; do

@@ -604,46 +604,69 @@ Use `--list` to browse before installing, `--skill <name>` to install individual
 - 🟡 Patch: keep the upstream skill, but add a repository-specific guard or overlay
 - 🔵 Manual: keep installed, but use only by explicit invocation
 - 🟣 Bundled: managed through the Spec Kit import flow rather than `scripts/config/skills.yaml`
+- 🟠 Mode-gated: imported and supported, but active only when the repository workflow mode selects that lifecycle lane
 
 ### Adoption progress
 
-| Rank | Skill                            | Status | Strategy                    | Notes              |
-| ---- | -------------------------------- | ------ | --------------------------- | ------------------ |
-| 1    | `systematic-debugging`           | ✅     | 🟢 Full                     | Core debugger      |
-| 2    | `test-driven-development`        | ✅     | 🟢 Full                     | Primary TDD        |
-| 3    | `verification-before-completion` | ✅     | 🟢 Full                     | Completion gate    |
-| 4    | All `speckit-*` skills           | ✅     | 🟣 Bundled                  | Spec Kit workflow  |
-| 7    | `security-and-hardening`         | ✅     | 🟢 Full                     | Security default   |
-| 10   | `incremental-implementation`     | ✅     | 🟡 Patch, non-Spec Kit only | Standalone only    |
-| 20   | `find-bugs`                      | ✅     | 🟢 Full                     | Main review skill  |
-| 37   | `spec-to-code-compliance`        | ✅     | 🟢 Full                     | Spec compliance    |
-| 6    | `using-git-worktrees`            | ✅     | 🔵 Manual                   | Manual only        |
-| 14   | `writing-skills`                 | ✅     | 🔵 Manual                   | Skills maintenance |
+| Rank | Skill                            | Status | Strategy      | Auto-invoke | Mode Guard | Patch | Notes                     |
+| ---- | -------------------------------- | ------ | ------------- | ----------- | ---------- | ----- | ------------------------- |
+| 1    | `systematic-debugging`           | ✅     | 🟢 Full       | Yes         | No         | No    | Core debugger             |
+| 2    | `test-driven-development`        | ✅     | 🟢 Full       | Yes         | No         | No    | Primary TDD               |
+| 3    | `verification-before-completion` | ✅     | 🟢 Full       | Yes         | No         | No    | Completion gate           |
+| 4    | All `speckit-*` skills           | ✅     | 🟣 Bundled    | Blocked     | Yes        | Yes   | Spec Kit workflow         |
+| 7    | `security-and-hardening`         | ✅     | 🟢 Full       | Yes         | No         | No    | Security default          |
+| 10   | `incremental-implementation`     | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers discipline    |
+| 20   | `find-bugs`                      | ✅     | 🟢 Full       | Yes         | No         | No    | Main review skill         |
+| 37   | `spec-to-code-compliance`        | ✅     | 🟢 Full       | Yes         | No         | No    | Spec compliance           |
+| 5    | `writing-plans`                  | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers lane          |
+| 6    | `using-git-worktrees`            | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers cross-cutting |
+| 16   | `subagent-driven-development`    | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers lane          |
+| 19   | `requesting-code-review`         | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers review        |
+| 21   | `brainstorming`                  | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers entry         |
+| 22   | `dispatching-parallel-agents`    | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers orchestration |
+| 23   | `executing-plans`                | ✅     | 🟠 Mode-gated | Yes         | Yes        | Yes   | Superpowers execution     |
+| 24   | `receiving-code-review`          | ✅     | 🟠 Mode-gated | Blocked     | Yes        | Yes   | Superpowers review        |
+| 25   | `finishing-a-development-branch` | ✅     | 🟠 Mode-gated | Blocked     | Yes        | Yes   | Superpowers finish        |
+| 14   | `writing-skills`                 | ✅     | 🔵 Manual     | Blocked     | No         | No    | Skills maintenance        |
 
 Adoption notes:
 
 - ✅ `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `security-and-hardening`, `find-bugs`, and `spec-to-code-compliance` are imported and kept as full upstream skills.
 - ✅ All `speckit-*` skills are bundled through `make specify` and remain the primary Spec Kit workflow.
-- ✅ `incremental-implementation` is imported, but patched with a repository guard so it is used only for standalone, non-Spec Kit work.
-- ✅ `using-git-worktrees` and `writing-skills` are imported, but should stay manual rather than automatically active.
+- ✅ `incremental-implementation` is imported through `scripts/config/skills.yaml` and now uses the standard workflow-mode guard, so it runs only in the `superpowers` lane.
+- ✅ The Superpowers workflow lane is now imported through `scripts/config/skills.yaml`, including `brainstorming`, `writing-plans`, `dispatching-parallel-agents`, `executing-plans`, `subagent-driven-development`, `requesting-code-review`, `receiving-code-review`, and `finishing-a-development-branch`.
+- ✅ Those Superpowers workflow skills, plus `incremental-implementation`, are intentionally mode-gated rather than always active. Use `make workflow-status` to inspect the current lane and `make workflow-use mode=speckit|superpowers` to switch lanes.
+- ✅ `using-git-worktrees` and `brainstorming` are now auto-invocable with a mode guard, so the agent triggers them automatically in the `superpowers` lane.
+- ✅ `writing-skills` remains manual (explicit invocation only).
 
 ### Recommended core set with Spec Kit
 
-| Rank | Skill                            | Status      | Recommended adoption       |
-| ---- | -------------------------------- | ----------- | -------------------------- |
-| 1    | `systematic-debugging`           | ✅ Imported | Keep active                |
-| 2    | `test-driven-development`        | ✅ Imported | Keep active                |
-| 3    | `verification-before-completion` | ✅ Imported | Keep active                |
-| 7    | `security-and-hardening`         | ✅ Imported | Keep active                |
-| 10   | `incremental-implementation`     | ✅ Imported | Keep patched, non-Spec Kit |
-| 20   | `find-bugs`                      | ✅ Imported | Keep active                |
-| 37   | `spec-to-code-compliance`        | ✅ Imported | Keep active                |
+| Rank | Skill                            | Status      | Recommended adoption |
+| ---- | -------------------------------- | ----------- | -------------------- |
+| 1    | `systematic-debugging`           | ✅ Imported | Keep active          |
+| 2    | `test-driven-development`        | ✅ Imported | Keep active          |
+| 3    | `verification-before-completion` | ✅ Imported | Keep active          |
+| 7    | `security-and-hardening`         | ✅ Imported | Keep active          |
+| 20   | `find-bugs`                      | ✅ Imported | Keep active          |
+| 37   | `spec-to-code-compliance`        | ✅ Imported | Keep active          |
 
 Core-set notes:
 
 - ✅ The imported core set is already in place for this repository.
-- 🟡 `incremental-implementation` remains part of the stack, but only behind the non-Spec Kit guard.
+- 🟠 `incremental-implementation` now sits outside the Spec Kit core and only activates in the `superpowers` lane.
 - 🟣 The Spec Kit path for planned work remains `speckit-plan` → `speckit-tasks` → `speckit-implement`.
+
+### Recommended workflow lanes
+
+- `speckit`: all `speckit-*` skills, plus the shared full-adoption core set.
+- `superpowers`: `brainstorming`, `writing-plans`, `dispatching-parallel-agents`, `executing-plans`, `subagent-driven-development`, `incremental-implementation`, `requesting-code-review`, `receiving-code-review`, `finishing-a-development-branch`, plus the shared full-adoption core set.
+
+Lane notes:
+
+- Use one workflow family per session or worktree.
+- `incremental-implementation` now follows the same workflow-mode switch as the rest of the `superpowers` lane.
+- The repository now supports both lanes explicitly, so the recommendation is no longer to avoid these Superpowers skills entirely.
+- The constraint is mode isolation, not non-adoption. Keep Spec Kit and Superpowers lifecycle commands separated by the workflow-mode switch.
 
 ### Compatible specialist skills
 
@@ -675,35 +698,32 @@ Core-set notes:
 | General review     | `code-review-and-quality`; `find-bugs`; Sentry `code-review`                                    | Choose `find-bugs`                                                                  |
 | Browser automation | `playwright-cli`; `webapp-testing`                                                              | Choose `playwright-cli`; add `browser-testing-with-devtools` separately if required |
 
-### Do not combine as automatically activated skills
+### Do not combine in the same active workflow lane
 
-These compete directly with Spec Kit:
+These should not run as peers inside one active session or worktree because they represent alternative lifecycle coordinators:
 
-| Rank | Skill                         | Reason                                        |
-| ---- | ----------------------------- | --------------------------------------------- |
-| 5    | `writing-plans`               | Duplicates `speckit-plan` and `speckit-tasks` |
-| 16   | `subagent-driven-development` | Competes with `speckit-implement`             |
-| 17   | `planning-and-task-breakdown` | Duplicates `speckit-tasks`                    |
-| 63   | `OpenSpec`                    | Alternative specification framework           |
-| 76   | `spec-driven-development`     | Alternative end-to-end specification workflow |
+- Rank 5, `writing-plans`: alternative planning lane to `speckit-plan` and `speckit-tasks`.
+- Rank 16, `subagent-driven-development`: alternative execution lane to `speckit-implement`.
+- Rank 17, `planning-and-task-breakdown`: duplicates `speckit-tasks`.
+- Rank 63, `OpenSpec`: alternative specification framework.
+- Rank 76, `spec-driven-development`: alternative end-to-end specification workflow.
 
 ### Keep manually invocable
 
-| Rank | Skill                           | Reason                                                                               |
-| ---- | ------------------------------- | ------------------------------------------------------------------------------------ |
-| 6    | `using-git-worktrees`           | May conflict with Spec Kit’s feature-branch handling                                 |
-| 8    | `grill-with-docs`               | Overlaps with specification and clarification                                        |
-| 19   | `requesting-code-review`        | Useful as an explicit review gate, but should not interrupt every task automatically |
-| 28   | `api-to-agent-cli`              | Special-purpose workflow                                                             |
-| 40   | `skill-scanner`                 | Use when adding or updating skills                                                   |
-| 58   | `wa-review`                     | Run explicitly for an AWS architecture review                                        |
-| 69   | `git-workflow-and-versioning`   | Its trunk-based assumptions may conflict with Spec Kit feature branches              |
-| 72   | `code-simplification`           | Could expand work beyond the approved specification                                  |
-| 73   | `doubt-driven-development`      | Valuable for high-risk decisions but too intrusive by default                        |
-| 74   | `improve-codebase-architecture` | Periodic architecture assessment, not normal implementation                          |
-| 77   | `context-engineering`           | Project-setup and maintenance activity                                               |
-| 80   | `shipping-and-launch`           | Invoke during release preparation                                                    |
-| 81   | `open-sourcing`                 | Invoke only when preparing a public release                                          |
+| Rank | Skill | Reason |
+| ---- | ----- | ------ |
+
+| 8 | `grill-with-docs` | Overlaps with specification and clarification |
+| 28 | `api-to-agent-cli` | Special-purpose workflow |
+| 40 | `skill-scanner` | Use when adding or updating skills |
+| 58 | `wa-review` | Run explicitly for an AWS architecture review |
+| 69 | `git-workflow-and-versioning` | Its trunk-based assumptions may conflict with Spec Kit feature branches |
+| 72 | `code-simplification` | Could expand work beyond the approved specification |
+| 73 | `doubt-driven-development` | Valuable for high-risk decisions but too intrusive by default |
+| 74 | `improve-codebase-architecture` | Periodic architecture assessment, not normal implementation |
+| 77 | `context-engineering` | Project-setup and maintenance activity |
+| 80 | `shipping-and-launch` | Invoke during release preparation |
+| 81 | `open-sourcing` | Invoke only when preparing a public release |
 
 Use this frontmatter for those skills in VS Code Copilot:
 
@@ -732,17 +752,30 @@ disable-model-invocation: true
 ```text
 All speckit-* skills
 
+Shared active core:
+
 systematic-debugging
 test-driven-development
 verification-before-completion
 security-and-hardening
-incremental-implementation
 find-bugs
 spec-to-code-compliance
 
-Manual but already imported:
+Mode-gated in `superpowers`:
+
+brainstorming
+writing-plans
+dispatching-parallel-agents
+executing-plans
+subagent-driven-development
+incremental-implementation
+requesting-code-review
+receiving-code-review
+finishing-a-development-branch
 using-git-worktrees
+
+Manual but already imported:
 writing-skills
 ```
 
-Then add stack-specific and security-analysis skills only where the project actually needs them. For this repository, the main adjustment is to keep `incremental-implementation` installed but patched for standalone work only, and to keep `using-git-worktrees` and `writing-skills` installed as manual tools rather than automatically active skills.
+Then add stack-specific and security-analysis skills only where the project actually needs them. For this repository, the full Superpowers lane is mode-gated and auto-invocable, with `brainstorming` and `using-git-worktrees` now included. Only `writing-skills` remains manual.

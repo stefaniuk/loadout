@@ -20,7 +20,8 @@
 #      - scripts/skill-patches/skills/<name>.patch.md
 #      - scripts/skill-patches/templates/<name>-template.patch.md
 #
-#   2. Optionally configure the injection point below.
+#   2. Configure the injection point below. Keep defaults as the fallback rule,
+#      but declare the current per-skill intent explicitly in `overrides`.
 #
 #   3. Optionally configure frontmatter field overrides below.
 #
@@ -31,13 +32,38 @@ defaults:
   templates: after-frontmatter
 
 overrides:
+  # Superpowers skills
+  brainstorming/SKILL.md: after-frontmatter
+  dispatching-parallel-agents/SKILL.md: after-frontmatter
+  executing-plans/SKILL.md: after-frontmatter
+  finishing-a-development-branch/SKILL.md: after-frontmatter
   incremental-implementation/SKILL.md: after-frontmatter
-  speckit-plan/SKILL.md: replace-before-section:## User Input
-  speckit-tasks/SKILL.md: replace-before-section:## User Input
-  speckit-implement/SKILL.md: replace-before-section:## User Input
+  receiving-code-review/SKILL.md: after-frontmatter
+  requesting-code-review/SKILL.md: after-frontmatter
+  subagent-driven-development/SKILL.md: after-frontmatter
+  using-git-worktrees/SKILL.md: after-frontmatter
+  writing-plans/SKILL.md: after-frontmatter
+  # Spec Kit skills
+  speckit-analyze/SKILL.md: after-frontmatter
+  speckit-checklist/SKILL.md: after-frontmatter
+  speckit-clarify/SKILL.md: after-frontmatter
+  speckit-constitution/SKILL.md: after-frontmatter
+  speckit-converge/SKILL.md: after-frontmatter
+  speckit-implement/SKILL.md: after-frontmatter
+  speckit-plan/SKILL.md: after-frontmatter
+  speckit-specify/SKILL.md: after-frontmatter
+  speckit-tasks/SKILL.md: after-frontmatter
+  speckit-taskstoissues/SKILL.md: after-frontmatter
 
 frontmatter:
-  # Spec Kit skills: user-invocable only (no agent auto-invocation)
+  # Superpowers skills
+  finishing-a-development-branch/SKILL.md:
+    disable-model-invocation: true
+  receiving-code-review/SKILL.md:
+    disable-model-invocation: true
+  writing-skills/SKILL.md:
+    disable-model-invocation: true
+  # Spec Kit skills
   speckit-analyze/SKILL.md:
     disable-model-invocation: true
   speckit-checklist/SKILL.md:

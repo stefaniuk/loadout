@@ -35,6 +35,35 @@ make lint && make test
 
 `make config` is idempotent - it can be re-run safely after pulling updates.
 
+## Select the active workflow
+
+This repository can host both lifecycle families at once, but only one should be active in a given session or worktree.
+
+Check the current mode:
+
+```bash
+make workflow-status
+```
+
+Switch to Spec Kit:
+
+```bash
+make workflow-use mode=speckit
+```
+
+Switch to Superpowers:
+
+```bash
+make workflow-use mode=superpowers
+```
+
+The selection is stored locally in `.copilot/workflow-mode.json` and is ignored by git. After switching, start a fresh chat session so the SessionStart hook injects the correct workflow banner.
+
+Use one workflow family per session or worktree:
+
+- `speckit` mode: use `speckit-*` skills and review prompts.
+- `superpowers` mode: use the imported Superpowers workflow skills such as `/brainstorming`, `/writing-plans`, `/executing-plans`, `/subagent-driven-development`, `/requesting-code-review`, and `/receiving-code-review`.
+
 ## First run + expected output
 
 After `make config`, run both quality gates:
@@ -70,13 +99,15 @@ After the copy completes, review `git status` in the target repository, commit t
 
 ## Plugin installation path
 
-The repository can be installed directly as a VS Code agent plugin, providing skills, agents, and hooks without invoking `make apply`:
+The repository can be installed directly as a VS Code agent plugin, providing skills, hooks, and any repo-scoped custom agents without invoking `make apply`:
 
 1. Open VS Code with Copilot agent mode enabled.
 2. Run `Cmd+Shift+P` → **Chat: Install Plugin From Source**.
 3. Enter the repository URL: `https://github.com/stefaniuk/loadout`.
 
 After installation, skills like `/enforcement-audit` and `/architecture-docs` appear as slash commands, and speckit skills (`/speckit-specify`, `/speckit-plan`, etc.) become available.
+
+If you also install the Superpowers workflow skills, set the active lane locally with `make workflow-use ...` before you start work. The plugin install does not remove the need to choose one workflow family per session.
 
 > **Note:** Plugin installation provides skills, agents, and hooks only. For project-specific instructions, templates, and include baselines, use `make apply`.
 
@@ -107,7 +138,7 @@ Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `
 | Token          | Categories included                                                                                                                                                                 |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `all`          | Everything (default; equivalent to omitting `subset`)                                                                                                                               |
-| `agents`       | `.github/agents/` (all agents and personas)                                                                                                                                         |
+| `agents`       | `.github/agents/` (custom agent files, or the placeholder README when no agents are shipped)                                                                                        |
 | `hooks`        | `.github/hooks/` and `scripts/hooks/`                                                                                                                                               |
 | `instructions` | `.github/instructions/` (plus tech files when language flags are set)                                                                                                               |
 | `prompts`      | `.github/prompts/` (plus tech enforcement prompts when language flags are set)                                                                                                      |

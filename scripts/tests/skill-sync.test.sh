@@ -27,6 +27,7 @@ function main() {
   local tests=( \
     test-skill-sync-copies-skills-without-patches \
     test-skill-sync-applies-default-skill-patch \
+    test-skill-sync-patch-only-is-idempotent \
     test-skill-sync-applies-per-skill-replacement-patch \
     test-skill-sync-skips-patches-when-patch-false \
     test-skill-sync-applies-frontmatter-overrides \
@@ -420,6 +421,25 @@ function test-skill-sync-applies-default-skill-patch() {
   [[ -n "${patch_line}" ]] || return 1
   [[ -n "${heading_line}" ]] || return 1
   [[ "${patch_line}" -lt "${heading_line}" ]] || return 1
+
+  return 0
+}
+
+function test-skill-sync-patch-only-is-idempotent() {
+
+  local fixture_dir
+  fixture_dir=$(run-skill-sync-fixture "patch-only-idempotent")
+
+  local skill_file="${fixture_dir}/.github/skills/additive-skill/SKILL.md"
+  local first_pass_file="${fixture_dir}/first-pass.md"
+  cp "${skill_file}" "${first_pass_file}"
+
+  PATH="${fixture_dir}/bin:${PATH}" \
+    patch_only=true \
+    name="additive-skill" \
+    "${fixture_dir}/scripts/skill-sync.sh" > "${fixture_dir}/patch-only.log" 2>&1 || return 1
+
+  diff -u "${first_pass_file}" "${skill_file}" > /dev/null || return 1
 
   return 0
 }

@@ -36,7 +36,9 @@ test: # Run fast local test suite (apply + specify + subagent-hooks + install). 
 	bash ./scripts/tests/apply.test.sh && echo "apply: ok"
 	bash ./scripts/tests/specify.test.sh && echo "specify: ok"
 	bash ./scripts/tests/skill-sync.test.sh && echo "skill-sync: ok"
+	bash ./scripts/tests/session-start-hook.test.sh && echo "session-start-hook: ok"
 	bash ./scripts/tests/subagent-hooks.test.sh && echo "subagent-hooks: ok"
+	bash ./scripts/tests/workflow-mode.test.sh && echo "workflow-mode: ok"
 	$(MAKE) test-install
 
 test-import: # Run import wrapper tests (slower; included in `test-all` and CI) @Testing
@@ -49,8 +51,14 @@ test-all: # Run the whole test suite (fast + import); used by the CI/CD workflow
 test-install: # Run install/uninstall wrapper tests @Testing
 	bash ./scripts/tests/install.test.sh && echo "install: ok"
 
+test-session-start-hook: # Run SessionStart hook smoke tests @Testing
+	bash ./scripts/tests/session-start-hook.test.sh && echo "session-start-hook: ok"
+
 test-skill-sync: # Run external skill sync tests @Testing
 	bash ./scripts/tests/skill-sync.test.sh && echo "skill-sync: ok"
+
+test-workflow-mode: # Run workflow mode command-surface tests @Testing
+	bash ./scripts/tests/workflow-mode.test.sh && echo "workflow-mode: ok"
 
 clone-rt: # Clone the repository template into .github/skills/repository-template @Operations
 	.github/skills/repository-template/scripts/git-clone-repository-template.sh
@@ -68,6 +76,16 @@ skill-add: # Add a new external skill to config and sync it; mandatory: name=[na
 
 specify: # Fetch upstream spec-kit and apply local patches; optional: patch=[true|false] @Operations
 	patch="$(or $(patch),true)" ./scripts/specify.sh
+
+workflow-status: # Print the active local workflow mode; optional: LOADOUT_WORKFLOW_MODE_FILE=[path] @Operations
+	./scripts/hooks/workflow-mode.sh status
+
+workflow-switch: # Flip the active local workflow mode between superpowers and speckit; optional: LOADOUT_WORKFLOW_MODE_FILE=[path] @Operations
+	./scripts/hooks/workflow-mode.sh switch
+
+workflow-use: # Set the active local workflow mode; mandatory: mode=[speckit|superpowers]; optional: LOADOUT_WORKFLOW_MODE_FILE=[path] @Operations
+	$(if $(mode),,$(error mode is required. Usage: make workflow-use mode=speckit))
+	./scripts/hooks/workflow-mode.sh use "$(mode)"
 
 apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean|revert=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright=[true] @Operations
 	$(if $(dest),,$(error dest is required. Usage: make apply dest=/path/to/destination))
@@ -113,6 +131,11 @@ ${VERBOSE}.SILENT: \
 	skill-sync \
 	specify \
 	test \
+	test-session-start-hook \
 	test-skill-sync \
 	test-all \
 	test-import \
+	test-workflow-mode \
+	workflow-switch \
+	workflow-status \
+	workflow-use \

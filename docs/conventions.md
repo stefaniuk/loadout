@@ -83,7 +83,7 @@ Per-artefact slug constraints:
 
 - Instruction pack: tech slug; must match the language-pack `<tech>` exactly when the file is part of a pack. Example: `python`, `playwright-typescript`.
 - Prompt: mandatory **prefix.** (see table below) followed by a descriptive kebab-case slug. Example: `enforce.python`, `dev.implement-logging`.
-- Agent: persona slug under `personas/`, matching the role expressed in the file name. Example: `implementer`, `reviewer`.
+- Agent: kebab-case or namespaced slug matching the file name under `.github/agents/`. Examples: `docs-review`, `workflow.release-check`.
 - Skill: folder name only; kebab-case noun-phrase describing the capability. Example: `code-review`, `enforcement-audit`.
 - Include fragment: `<topic>` kebab-case noun-phrase with suffix `.include.md` and no leading underscore. Example: `quality-gates-baseline.include.md`.
 - Pack ID: `language-pack.<tech>` where `<tech>` matches the instruction slug. Example: `language-pack.reactjs`.
@@ -111,7 +111,7 @@ Adding a new prefix requires an ADR.
 | Instruction include  | `<topic>.include.md`                  | `.github/instructions/includes/`  | Shared baseline fragments referenced from instruction packs       |
 | Prompt               | `<prefix>.<slug>.prompt.md`           | `.github/prompts/`                | Invokable as slash command `/<prefix>.<slug>`                     |
 | Prompt include       | `<topic>.include.md`                  | `.github/prompts/includes/`       | Currently a reserved scaffold; see directory README before adding |
-| Agent (persona)      | `<slug>.agent.md`                     | `.github/agents/personas/`        | General-purpose roles                                             |
+| Agent                | `<slug>.agent.md`                     | `.github/agents/`                 | Optional custom roles                                             |
 | Skill (spec-kit)     | `SKILL.md`                            | `.github/skills/speckit-<step>/`  | Upstream-managed via `make specify`                               |
 | Skill                | `SKILL.md` (+ `assets/`, `examples/`) | `.github/skills/<slug>/`          | Folder-based; `SKILL.md` is mandatory                             |
 | Hook                 | `<name>.json`                         | `.github/hooks/`                  | Lifecycle hooks (Preview); see [hooks.json](../hooks.json)        |
@@ -252,7 +252,7 @@ Practical consequences in this repository:
 
 Independently of the per-tech _language packs_, the repository's artefacts are also split into two **plugin packs**, which describe the spec-kit boundary for selective install:
 
-- **Core pack** - all language packs, foundation packs, persona agents, util/dev/architecture prompts, hooks, and skills (with the caveat noted below).
+- **Core pack** - all language packs, foundation packs, any custom agents, util/dev/architecture prompts, hooks, and skills (with the caveat noted below).
 - **Speckit pack** (optional sub-pack) - every `speckit-*` skill, the `review.speckit-*` review prompts, and the entire `.specify/` tree (constitution, templates, scripts).
 
 To install only one pack, use the `make apply subset=…` flag (see [onboarding.md#subset-selection](onboarding.md#subset-selection)).
@@ -264,7 +264,7 @@ To install only one pack, use the `make apply subset=…` flag (see [onboarding.
 | Artefact                                     | Pack                                          |
 | -------------------------------------------- | --------------------------------------------- |
 | `.github/skills/speckit-*/SKILL.md`          | speckit                                       |
-| `.github/agents/**` (personas)               | core                                          |
+| `.github/agents/**` (custom agents / README) | core                                          |
 | `.github/prompts/review.speckit-*.prompt.md` | speckit                                       |
 | `.github/prompts/**` (everything else)       | core                                          |
 | `.github/instructions/**`                    | core                                          |

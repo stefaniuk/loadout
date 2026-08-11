@@ -420,7 +420,7 @@ function test-apply-subset-agents-only() {
 
   local d="${SUBSET_AGENTS_DEST}"
   [[ -d "${d}/.github/agents" ]] || return 1
-  [[ $(find "${d}/.github/agents" -name "*.md" -type f | wc -l | tr -d ' ') -gt 0 ]] || return 1
+  [[ -f "${d}/.github/agents/README.md" ]] || return 1
   [[ ! -d "${d}/.github/prompts" ]] || return 1
   [[ ! -d "${d}/.github/skills" ]] || return 1
   [[ ! -f "${d}/.github/copilot-instructions.md" ]] || return 1
@@ -431,6 +431,7 @@ function test-apply-subset-prompts-and-agents() {
 
   local d="${SUBSET_PROMPTS_AGENTS_DEST}"
   [[ -d "${d}/.github/agents" ]] || return 1
+  [[ -f "${d}/.github/agents/README.md" ]] || return 1
   [[ -d "${d}/.github/prompts" ]] || return 1
   [[ -f "${d}/.github/prompts/enforce.shell.prompt.md" ]] || return 1
   [[ ! -d "${d}/.github/skills" ]] || return 1

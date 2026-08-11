@@ -2,7 +2,7 @@
 
 > Linked from the [README](../README.md) under **How it works** and **Spec-kit lifecycle**. See also [docs/onboarding.md](onboarding.md) for the contributor walkthrough.
 
-This document holds the deep architectural reference for the prompt library: the six-layer customisation model, the artefact type decision matrix, the spec-kit lifecycle, governance gates, and commit conventions per lifecycle stage.
+This document holds the deep architectural reference for the prompt library: the six-layer customisation model, the artefact type decision matrix, the workflow-mode switch, the spec-kit lifecycle, governance gates, and commit conventions per lifecycle stage.
 
 ## Six-layer customisation model
 
@@ -16,7 +16,7 @@ The prompt library is organised into six customisation layers. Each layer builds
 │  Layer 4: Skills (reusable capabilities)    │
 │  .github/skills/*/SKILL.md                  │
 ├─────────────────────────────────────────────┤
-│  Layer 3: Agents (personas + handoffs)      │
+│  Layer 3: Agents (custom agents + handoffs) │
 │  .github/agents/*.agent.md                  │
 ├─────────────────────────────────────────────┤
 │  Layer 2: Prompts (one-off tasks)           │
@@ -38,9 +38,30 @@ Each layer in detail:
 - **Layer 0 - Governance.** The project constitution, ADRs, and [.github/copilot-instructions.md](../.github/copilot-instructions.md) set non-negotiable rules. Every other layer must honour them. Changes here are infrequent and reviewed deliberately.
 - **Layer 1 - Instructions.** Coding standards scoped by file glob (for example `**/*.py`, `**/Dockerfile`). Copilot loads them automatically when relevant files are open, so they shape every suggestion. Shared baselines live in `.github/instructions/includes/`.
 - **Layer 2 - Prompts.** One-off, copy-runnable tasks (documentation reviews, enforcement passes, utility commands). They reference instructions and skills but are invoked explicitly.
-- **Layer 3 - Agents.** Persistent personas with tool restrictions and handoff chains. Repository personas such as `implementer`, `reviewer`, and `release-manager` live here.
-- **Layer 4 - Skills.** Reusable multi-step capabilities bundled with helper scripts and resources. This layer includes the Spec Kit ceremonies (`speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement`) alongside capabilities such as `architecture-docs`, `enforcement-audit`, and `code-review`.
+- **Layer 3 - Agents.** Optional custom agents with tool restrictions and handoff chains. This repository currently ships only [`.github/agents/README.md`](../.github/agents/README.md) and keeps its active workflow lanes skill-based.
+- **Layer 4 - Skills.** Reusable multi-step capabilities bundled with helper scripts and resources. This layer includes the Spec Kit ceremonies (`speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement`) and the imported Superpowers workflow skills (`brainstorming`, `writing-plans`, `dispatching-parallel-agents`, `executing-plans`, `subagent-driven-development`, review skills, `finishing-a-development-branch`), alongside capabilities such as `architecture-docs`, `enforcement-audit`, and `code-review`.
 - **Layer 5 - Hooks.** Deterministic automation that runs without an LLM in the loop: lint, format, link checks, and quality gates wired into the agent environment.
+
+## Workflow mode switch
+
+The repository supports two mutually exclusive lifecycle families in the same codebase:
+
+- **Spec Kit** for specification-first work via `speckit-*` skills and review prompts.
+- **Superpowers** for standalone design, planning, execution, and review via the imported workflow skills.
+
+Only one family should be active in a given session or worktree. The active mode is stored locally in `.copilot/workflow-mode.json`, changed with `make workflow-use mode=speckit` or `make workflow-use mode=superpowers`, and read by the SessionStart hook through `scripts/hooks/workflow-mode.sh`.
+
+Why an explicit switch is used instead of branch-name inference:
+
+- It is visible and reversible.
+- It works without renaming branches or worktrees.
+- It lets both skill families stay installed while still keeping the agent on one lane.
+
+Enforcement is layered:
+
+- The SessionStart hook injects a mode-specific cheatsheet.
+- `.github/copilot-instructions.md` declares the one-lane-per-session rule.
+- Patched workflow skills contain mode guards so the inactive family refuses to proceed and points back to `make workflow-use ...`.
 
 ## Artefact type decision matrix
 
@@ -160,16 +181,14 @@ Why the gates matter:
 
 The customisation catalogue distinguishes two roles:
 
-- **Coordinators** drive a lifecycle stage end-to-end, write artefacts, and are user-invocable through their slash command. Examples: `/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement`, `/speckit-converge`, plus the personas `implementer`, `reviewer`, `release-manager`.
+- **Coordinators** drive a lifecycle stage end-to-end, write artefacts, and are user-invocable through their slash command. Examples: `/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement`, `/speckit-converge`, `/brainstorming`, `/writing-plans`, `/executing-plans`, and `/subagent-driven-development`.
 - **Workers** are read-only or single-writer skills or agents that a coordinator delegates to for a bounded analysis. They are marked with `subagent: true` in their frontmatter; some additionally set `user-invocable: false` so they only run when explicitly handed off to.
 
 Customisations currently marked as subagent workers:
 
 - [`speckit-analyze`](../.github/skills/speckit-analyze/SKILL.md) - Non-destructive cross-artefact consistency check; should only be reached through the spec-kit pipeline.
 - [`speckit-checklist`](../.github/skills/speckit-checklist/SKILL.md) - Appends checklist files (single-writer). Useful directly as well as via handoff.
-- [`personas/planner`](../.github/agents/personas/planner.agent.md) - `subagent: true`, `user-invocable: false`. Explicitly read-only planner persona; runs as a worker for an orchestrating implementer or human-driven workflow.
-
-Coordinators such as `speckit-clarify`, `personas/implementer`, `personas/reviewer`, and `personas/release-manager` are **not** marked as subagents: they own writes, decisions, or rollout gates and remain user-invocable.
+  The repository does not currently ship any custom agents under `.github/agents/`; the worker/coordinator split is expressed through skills and hooks instead.
 
 The repository ships two lifecycle hooks that align with this worker/coordinator split:
 
@@ -180,7 +199,7 @@ Both hooks append structured records to `${COPILOT_PROMPT_LOG_DIR:-~/.local/stat
 
 **Guardrails.** Workers are constrained to read-only tool sets or to a single-writer responsibility; coordinators are the only agents that orchestrate handoffs and trigger the `Stop` quality gate. This keeps the blast radius of a subagent invocation small and auditable.
 
-**Discovery caveat.** VS Code's agent loader may not recurse into subdirectories - see the discovery note in [`.github/agents/personas/README.md`](../.github/agents/personas/README.md). The `subagent` marker is informational metadata that the repository's own tooling reads; it does not change how VS Code resolves the file at runtime.
+**Discovery caveat.** If this repository later adds custom agents, prefer placing them directly under `.github/agents/` unless a downstream runtime is known to support nested discovery. The `subagent` marker is informational metadata that the repository's own tooling reads; it does not change how VS Code resolves the file at runtime.
 
 ## Commit conventions per lifecycle stage
 

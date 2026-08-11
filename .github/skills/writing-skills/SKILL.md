@@ -1,6 +1,7 @@
 ---
 name: writing-skills
 description: Use when creating new skills, editing existing skills, or verifying skills work before deployment
+disable-model-invocation: true
 ---
 
 # Writing Skills
@@ -103,10 +104,8 @@ skills/
   - Keep under 500 characters if possible
 
 ```markdown
----
 name: Skill-Name-With-Hyphens
 description: Use when [specific triggering conditions and symptoms]
----
 
 # Skill Name
 
