@@ -69,6 +69,7 @@ Before marking `plan.md` as complete, verify:
 - [ ] Show & Tell subsections are placed at the end of each phase or user story
 - [ ] Show & Tell steps are specific enough for AI Assistant to execute and validate without ambiguity
 
+
 ## User Input
 
 ```text

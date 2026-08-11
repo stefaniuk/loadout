@@ -50,6 +50,7 @@ Before marking implementation as complete, verify:
 - [ ] Repository-template capabilities are present and up to date (see [.github/skills/repository-template/SKILL.md](/.github/skills/repository-template/SKILL.md))
 - [ ] The repository's canonical local quality gates pass with zero errors and zero warnings
 
+
 ## User Input
 
 ```text
