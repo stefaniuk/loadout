@@ -89,3 +89,43 @@ skills:
     path: plugins/spec-to-code-compliance/skills/spec-to-code-compliance
     ref: main
     sha: e6066e7db1fd57cb35f9a534781ceec595327feb
+  - name: api-and-interface-design
+    repo: https://github.com/addyosmani/agent-skills.git
+    path: skills/api-and-interface-design
+    ref: main
+    sha: 7676817c12a1317454ae3898a0c5c1eacf5dd3d5
+  - name: ci-cd-and-automation
+    repo: https://github.com/addyosmani/agent-skills.git
+    path: skills/ci-cd-and-automation
+    ref: main
+    sha: 7676817c12a1317454ae3898a0c5c1eacf5dd3d5
+  - name: documentation-and-adrs
+    repo: https://github.com/addyosmani/agent-skills.git
+    path: skills/documentation-and-adrs
+    ref: main
+    sha: 7676817c12a1317454ae3898a0c5c1eacf5dd3d5
+  - name: playwright-cli
+    repo: https://github.com/microsoft/playwright-cli.git
+    path: skills/playwright-cli
+    ref: main
+    sha: e2d8f311f38a4828fc44a1026481481442ed962b
+  - name: browser-testing-with-devtools
+    repo: https://github.com/addyosmani/agent-skills.git
+    path: skills/browser-testing-with-devtools
+    ref: main
+    sha: 7676817c12a1317454ae3898a0c5c1eacf5dd3d5
+  - name: property-based-testing
+    repo: https://github.com/trailofbits/skills.git
+    path: plugins/property-based-testing/skills/property-based-testing
+    ref: main
+    sha: e6066e7db1fd57cb35f9a534781ceec595327feb
+  - name: mutation-testing
+    repo: https://github.com/trailofbits/skills.git
+    path: plugins/mutation-testing/skills/mutation-testing
+    ref: main
+    sha: e6066e7db1fd57cb35f9a534781ceec595327feb
+  - name: mcp-builder
+    repo: https://github.com/anthropics/skills.git
+    path: skills/mcp-builder
+    ref: main
+    sha: f17010c9bb483898c1d9c9f42dde2b3a98889434

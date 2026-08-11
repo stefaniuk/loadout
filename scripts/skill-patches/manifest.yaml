@@ -84,3 +84,12 @@ frontmatter:
     disable-model-invocation: true
   speckit-taskstoissues/SKILL.md:
     disable-model-invocation: true
+  # Cross-cutting skills
+  browser-testing-with-devtools/SKILL.md:
+    disable-model-invocation: true
+  documentation-and-adrs/SKILL.md:
+    disable-model-invocation: true
+  mcp-builder/SKILL.md:
+    disable-model-invocation: true
+  mutation-testing/SKILL.md:
+    disable-model-invocation: true

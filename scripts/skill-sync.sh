@@ -105,6 +105,7 @@ function main() {
   update-editorconfig-ignore
   update-markdownlint-ignore
   update-prettier-ignore
+  update-lychee-ignore
   return 0
 }
 
@@ -123,6 +124,67 @@ function update-markdownlint-ignore() {
 # Update .prettierignore with entries for all synced skill directories.
 function update-prettier-ignore() {
   update-ignore-file "${REPO_ROOT}/scripts/config/.prettierignore"
+}
+
+# Update lychee.toml exclude_path with entries for all synced skill directories.
+function update-lychee-ignore() {
+  local lychee_file="${REPO_ROOT}/scripts/config/lychee.toml"
+  local marker_begin="  # begin: synced skills"
+  local marker_end="  # end: synced skills"
+
+  local entries
+  entries=$(yq -r '.skills[].name' "$CONFIG_FILE" | sort)
+  local block="${marker_begin}"
+  while IFS= read -r skill_name; do
+    block="${block}"$'\n'"  \".github/skills/${skill_name}\","
+  done <<< "$entries"
+  block="${block}"$'\n'"${marker_end}"
+
+  if grep -q "$marker_begin" "$lychee_file" 2>/dev/null; then
+    local tmp
+    tmp=$(mktemp)
+    local skip=0
+    while IFS= read -r line; do
+      if [[ "$line" == *"$marker_begin"* ]]; then
+        skip=1
+        continue
+      fi
+      if [[ "$line" == *"$marker_end"* ]]; then
+        skip=0
+        continue
+      fi
+      if [[ "$skip" -eq 0 ]]; then
+        printf '%s\n' "$line" >> "$tmp"
+      fi
+    done < "$lychee_file"
+    mv "$tmp" "$lychee_file"
+  fi
+
+  # Replace the exclude_path array with marker-delimited content
+  local tmp2
+  tmp2=$(mktemp)
+  local in_exclude_path=0
+  while IFS= read -r line; do
+    if [[ "$line" == "exclude_path"* ]]; then
+      in_exclude_path=1
+      printf '%s\n' "exclude_path = [" >> "$tmp2"
+      printf '%s\n' "$block" >> "$tmp2"
+      if [[ "$line" == *"]"* ]]; then
+        printf '%s\n' "]" >> "$tmp2"
+        in_exclude_path=0
+      fi
+      continue
+    fi
+    if [[ "$in_exclude_path" -eq 1 ]]; then
+      if [[ "$line" == *"]"* ]]; then
+        printf '%s\n' "]" >> "$tmp2"
+        in_exclude_path=0
+      fi
+      continue
+    fi
+    printf '%s\n' "$line" >> "$tmp2"
+  done < "$lychee_file"
+  mv "$tmp2" "$lychee_file"
 }
 
 # Update a given ignore file with entries for all synced skill directories.

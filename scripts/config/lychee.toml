@@ -6,8 +6,25 @@ exclude = [
   "docs/prompt-reports/**",
 ]
 exclude_path = [
+  # begin: synced skills
+  ".github/skills/api-and-interface-design",
+  ".github/skills/brainstorming",
+  ".github/skills/browser-testing-with-devtools",
+  ".github/skills/ci-cd-and-automation",
   ".github/skills/dispatching-parallel-agents",
+  ".github/skills/documentation-and-adrs",
   ".github/skills/executing-plans",
+  ".github/skills/find-bugs",
+  ".github/skills/finishing-a-development-branch",
+  ".github/skills/incremental-implementation",
+  ".github/skills/mcp-builder",
+  ".github/skills/mutation-testing",
+  ".github/skills/playwright-cli",
+  ".github/skills/property-based-testing",
+  ".github/skills/receiving-code-review",
+  ".github/skills/requesting-code-review",
+  ".github/skills/security-and-hardening",
+  ".github/skills/spec-to-code-compliance",
   ".github/skills/subagent-driven-development",
   ".github/skills/systematic-debugging",
   ".github/skills/test-driven-development",
@@ -15,4 +32,5 @@ exclude_path = [
   ".github/skills/verification-before-completion",
   ".github/skills/writing-plans",
   ".github/skills/writing-skills",
+  # end: synced skills
 ]

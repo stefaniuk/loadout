@@ -628,6 +628,14 @@ Use `--list` to browse before installing, `--skill <name>` to install individual
 | 24   | `receiving-code-review`          | ✅     | 🟠 Mode-gated | Blocked     | Yes        | Yes   | Superpowers review        |
 | 25   | `finishing-a-development-branch` | ✅     | 🟠 Mode-gated | Blocked     | Yes        | Yes   | Superpowers finish        |
 | 14   | `writing-skills`                 | ✅     | 🔵 Manual     | Blocked     | No         | No    | Skills maintenance        |
+| 15   | `playwright-cli`                 | ✅     | 🟢 Full       | Yes         | No         | No    | Browser automation        |
+| 29   | `api-and-interface-design`       | ✅     | 🟢 Full       | Yes         | No         | No    | Contract-first design     |
+| 34   | `property-based-testing`         | ✅     | 🟢 Full       | Yes         | No         | No    | Invariant testing         |
+| 41   | `ci-cd-and-automation`           | ✅     | 🟢 Full       | Yes         | No         | No    | Pipeline guidance         |
+| 36   | `mutation-testing`               | ✅     | 🔵 Manual     | Blocked     | No         | No    | Test-suite measurement    |
+| 67   | `browser-testing-with-devtools`  | ✅     | 🔵 Manual     | Blocked     | No         | No    | DevTools MCP companion    |
+| 78   | `mcp-builder`                    | ✅     | 🔵 Manual     | Blocked     | No         | No    | MCP server creation       |
+| 79   | `documentation-and-adrs`         | ✅     | 🔵 Manual     | Blocked     | No         | No    | ADR guidance              |
 
 Adoption notes:
 
