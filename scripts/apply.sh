@@ -16,8 +16,8 @@ set -euo pipefail
 #   subset=<csv>            # Restrict copy to named categories (comma-separated). Valid tokens:
 #                           #   agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, mcp, all
 #                           # Omitted or 'all' preserves the default full-copy behaviour byte-for-byte.
-#                           # The 'speckit' token narrows skills/prompts copy functions to speckit-* skills and
-#                           # review.speckit-* prompts only when used WITHOUT 'skills'/'prompts' respectively.
+#                           # The 'speckit' token narrows the prompts copy to review.speckit-* prompts only
+#                           # when used WITHOUT 'prompts'.
 #                           # The 'mcp' token is opt-in only: MCP assets are NOT copied by default and NOT
 #                           # included by 'all'. They are copied only when 'mcp' is named explicitly in the
 #                           # subset csv (e.g. subset=all,mcp or subset=mcp).
@@ -43,10 +43,12 @@ set -euo pipefail
 #   - Utility prompts (util.*)
 #   - Shared includes (baselines)
 #   - Default templates (Makefile, Dockerfile, compose.yaml, shell-script)
-#   - Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
+#   - All skills under .github/skills/
 #   - copilot-instructions.md
 #   - .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
-#   - scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
+#   - scripts/hooks/ (hook executables, e.g. session-start-cheatsheet.sh, stop-gate.sh; chmod +x)
+#   - scripts/loadout.mk plus a managed Makefile include block for downstream repos
+#     that already use repository-template's Makefile + scripts/init.mk
 #   - pull_request_template.md (if not already present)
 #   - constitution.md
 #   - .specify/scripts/python
@@ -54,7 +56,6 @@ set -euo pipefail
 #   - ADR-nnn_Any_Decision_Record_Template.md
 #   - Tech_Radar.md
 #   - docs/prompt-reports/
-#   - project.code-workspace (if not already present)
 #   - .gitignore content (managed section with begin/end markers)
 #
 # Opt-in only (requires explicit subset token):
@@ -83,6 +84,7 @@ COPILOT_PROMPTS_DIR="${REPO_ROOT}/.github/prompts"
 COPILOT_SKILLS_DIR="${REPO_ROOT}/.github/skills"
 COPILOT_INSTRUCTIONS_MD_FILE="${REPO_ROOT}/.github/copilot-instructions.md"
 HOOK_SCRIPTS_DIR="${REPO_ROOT}/scripts/hooks"
+LOADOUT_MAKEFILE_MODULE="${REPO_ROOT}/scripts/loadout.mk"
 
 SPECIFY_MEMORY="${REPO_ROOT}/.specify/memory"
 SPECIFY_SCRIPTS_PYTHON="${REPO_ROOT}/.specify/scripts/python"
@@ -95,12 +97,14 @@ DOCS_ARCHITECTURE="${REPO_ROOT}/docs/prompt-reports"
 MCP_VSCODE_EXAMPLE="${REPO_ROOT}/.vscode/mcp.json.example"
 MCP_GITHUB_DIR="${REPO_ROOT}/.github/mcp"
 MCP_DOC="${REPO_ROOT}/docs/mcp.md"
-WORKSPACE_FILE="${REPO_ROOT}/project.code-workspace"
 GITIGNORE_LOADOUT="${REPO_ROOT}/.gitignore.loadout"
 
 # Begin/end markers for managed .gitignore content
 GITIGNORE_BEGIN_MARKER="# >>> loadout managed content - DO NOT EDIT BELOW THIS LINE >>>"
 GITIGNORE_END_MARKER="# <<< loadout managed content - DO NOT EDIT ABOVE THIS LINE <<<"
+LOADOUT_MAKEFILE_BEGIN_MARKER="# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>"
+LOADOUT_MAKEFILE_END_MARKER="# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<"
+LOADOUT_MAKEFILE_FILE_MARKER="# loadout-managed: scripts/loadout.mk"
 
 # Default instruction files (glue layer)
 DEFAULT_INSTRUCTIONS=("docker" "makefile" "readme" "shell")
@@ -110,9 +114,6 @@ DEFAULT_PROMPT_PATTERNS=("architecture.*" "dev.implement-*" "enforce.docker" "en
 
 # Default templates (glue layer)
 DEFAULT_TEMPLATES=("Makefile.template" "Dockerfile.template" "compose.yaml.template" "shell-script.template.sh")
-
-# Default skills
-DEFAULT_SKILLS=("repository-template" "enforcement-audit" "architecture-docs" "code-review" "spec-consolidation" "system-documentation")
 
 # All technology switches (for iteration)
 ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "playwright")
@@ -135,8 +136,7 @@ SUBSET_SPECKIT=true
 SUBSET_MCP=false
 # True only when subset was explicitly set (used to gate observability messages).
 SUBSET_EXPLICIT=false
-# Narrowing flags - true when subset contains 'speckit' but not the broader category.
-SPECKIT_NARROW_SKILLS=false
+# Narrowing flag - true when subset contains 'speckit' but not 'prompts'.
 SPECKIT_NARROW_PROMPTS=false
 
 # ==============================================================================
@@ -305,16 +305,6 @@ function get-tech-template() {
   esac
 }
 
-# Get skill directory name for a technology.
-# Arguments:
-#   $1=[technology name]
-function get-tech-skill() {
-
-  case "$1" in
-    *) echo "" ;;
-  esac
-}
-
 # Parse the optional `subset` env var and populate SUBSET_* and
 # SPECKIT_NARROW_* flags. An empty/unset `subset` preserves the default
 # behaviour (all flags true, SUBSET_EXPLICIT=false). Validation is strict -
@@ -399,11 +389,8 @@ function parse-subset() {
   [[ "${seen}" == *" speckit "* ]] && SUBSET_SPECKIT=true
   [[ "${seen}" == *" mcp "* ]] && SUBSET_MCP=true
 
-  # Speckit narrowing: when the caller asked for speckit but NOT the broader
-  # category, restrict skills to speckit-* and prompts to review.speckit-*.
-  if [[ "${SUBSET_SPECKIT}" == "true" && "${SUBSET_SKILLS}" != "true" ]]; then
-    SPECKIT_NARROW_SKILLS=true
-  fi
+  # Speckit narrowing: when the caller asked for speckit but NOT prompts,
+  # restrict prompts to review.speckit-*.
   if [[ "${SUBSET_SPECKIT}" == "true" && "${SUBSET_PROMPTS}" != "true" ]]; then
     SPECKIT_NARROW_PROMPTS=true
   fi
@@ -454,7 +441,7 @@ function copilot-apply() {
   else
     subset-skip "prompts"
   fi
-  if [[ "${SUBSET_SKILLS}" == "true" || "${SUBSET_SPECKIT}" == "true" ]]; then
+  if [[ "${SUBSET_SKILLS}" == "true" ]]; then
     copilot-copy-skills "${destination}"
   else
     subset-skip "skills"
@@ -465,11 +452,6 @@ function copilot-apply() {
     subset-skip "copilot-instructions.md"
   fi
   copy-shared-resources "${destination}"
-  if [[ "${SUBSET_PROJECT}" == "true" ]]; then
-    update-vscode-settings "${destination}"
-  else
-    subset-skip "vscode-settings"
-  fi
 
   return 0
 }
@@ -500,7 +482,7 @@ function copy-shared-resources() {
     subset-skip "docs"
   fi
   if [[ "${SUBSET_PROJECT}" == "true" ]]; then
-    copy-workspace-file "${destination}"
+    copy-loadout-make-integration "${destination}"
   else
     subset-skip "project-files"
   fi
@@ -644,6 +626,8 @@ function revert-shared-resources() {
 
   local dest="$1"
 
+  revert-loadout-make-integration "${dest}"
+
   # Remove .specify directory
   if [[ -d "${dest}/.specify" ]]; then
     print-info "Removing ${dest}/.specify"
@@ -667,14 +651,6 @@ function revert-shared-resources() {
       print-info "Removing ${dest}/docs/prompt-reports"
       rm -rf "${dest:?}/docs/prompt-reports"
     fi
-  fi
-
-  # Remove managed VS Code settings properties
-  if [[ -f "${dest}/.vscode/settings.json" ]]; then
-    print-info "Removing loadout properties from VS Code settings"
-    remove-vscode-json-property "${dest}/.vscode/settings.json" "chat.skillRecommendations"
-    remove-vscode-json-property "${dest}/.vscode/settings.json" "chat.promptFilesRecommendations"
-    remove-vscode-json-property "${dest}/.vscode/settings.json" "chat.tools.terminal.autoApprove"
   fi
 
   # Remove managed .gitignore section
@@ -718,6 +694,132 @@ function revert-shared-resources() {
       rmdir "${dir}"
     fi
   done
+
+  return 0
+}
+
+# Copy scripts/loadout.mk and patch a compatible downstream root Makefile.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copy-loadout-make-integration() {
+
+  local dest="$1"
+  local dest_makefile="${dest}/Makefile"
+  local dest_loadout_module="${dest}/scripts/loadout.mk"
+
+  if ! destination-has-compatible-root-makefile "${dest}"; then
+    print-info "Skipping loadout Makefile integration (destination does not have repository-template Makefile + scripts/init.mk)"
+    return 0
+  fi
+
+  if [[ -f "${dest_makefile}" ]] && ! grep -qF "${LOADOUT_MAKEFILE_BEGIN_MARKER}" "${dest_makefile}" && grep -qF "include scripts/loadout.mk" "${dest_makefile}"; then
+    print-info "Skipping loadout Makefile integration (destination Makefile already includes scripts/loadout.mk outside the managed block)"
+    return 0
+  fi
+
+  if [[ -f "${dest_loadout_module}" ]] && ! grep -qF "${LOADOUT_MAKEFILE_FILE_MARKER}" "${dest_loadout_module}"; then
+    print-info "Skipping loadout Makefile integration (destination scripts/loadout.mk exists and is not loadout-managed)"
+    return 0
+  fi
+
+  mkdir -p "${dest}/scripts"
+  print-info "Copying scripts/loadout.mk to ${dest}/scripts"
+  cp "${LOADOUT_MAKEFILE_MODULE}" "${dest_loadout_module}"
+
+  update-loadout-make-include "${dest_makefile}"
+
+  return 0
+}
+
+# Check whether a destination repository has the repository-template root Makefile surface.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function destination-has-compatible-root-makefile() {
+
+  local dest="$1"
+  local dest_makefile="${dest}/Makefile"
+  local dest_init_mk="${dest}/scripts/init.mk"
+
+  if [[ ! -f "${dest_makefile}" ]] || [[ ! -f "${dest_init_mk}" ]]; then
+    return 1
+  fi
+
+  if ! grep -Eq '^[[:space:]]*include[[:space:]]+scripts/init\.mk([[:space:]]*(#.*)?)?$' "${dest_makefile}"; then
+    return 1
+  fi
+
+  return 0
+}
+
+# Insert or refresh the managed loadout include block in a downstream Makefile.
+# Arguments (provided as function parameters):
+#   $1=[path to the destination Makefile]
+function update-loadout-make-include() {
+
+  local dest_makefile="$1"
+  local stripped_makefile
+  local updated_makefile
+
+  stripped_makefile=$(mktemp)
+  updated_makefile=$(mktemp)
+
+  if grep -qF "${LOADOUT_MAKEFILE_BEGIN_MARKER}" "${dest_makefile}"; then
+    awk -v begin="${LOADOUT_MAKEFILE_BEGIN_MARKER}" -v end="${LOADOUT_MAKEFILE_END_MARKER}" '
+      $0 == begin { skip = 1; next }
+      $0 == end { skip = 0; next }
+      !skip { print }
+    ' "${dest_makefile}" > "${stripped_makefile}"
+  else
+    cp "${dest_makefile}" "${stripped_makefile}"
+  fi
+
+  if ! awk -v begin="${LOADOUT_MAKEFILE_BEGIN_MARKER}" -v include_line="include scripts/loadout.mk" -v end="${LOADOUT_MAKEFILE_END_MARKER}" '
+    {
+      print
+      if (!inserted && $0 ~ /^[[:space:]]*include[[:space:]]+scripts\/init\.mk([[:space:]]*(#.*)?)?$/) {
+        print begin
+        print include_line
+        print end
+        inserted = 1
+      }
+    }
+    END { exit inserted ? 0 : 1 }
+  ' "${stripped_makefile}" > "${updated_makefile}"; then
+    rm -f "${stripped_makefile}" "${updated_makefile}"
+    print-error "Could not find 'include scripts/init.mk' in ${dest_makefile}"
+  fi
+
+  mv "${updated_makefile}" "${dest_makefile}"
+  rm -f "${stripped_makefile}"
+
+  return 0
+}
+
+# Remove the managed loadout Makefile integration from a downstream repository.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function revert-loadout-make-integration() {
+
+  local dest="$1"
+  local dest_makefile="${dest}/Makefile"
+  local dest_loadout_module="${dest}/scripts/loadout.mk"
+  local stripped_makefile
+
+  if [[ -f "${dest_makefile}" ]] && grep -qF "${LOADOUT_MAKEFILE_BEGIN_MARKER}" "${dest_makefile}"; then
+    print-info "Removing loadout managed Makefile include from ${dest_makefile}"
+    stripped_makefile=$(mktemp)
+    awk -v begin="${LOADOUT_MAKEFILE_BEGIN_MARKER}" -v end="${LOADOUT_MAKEFILE_END_MARKER}" '
+      $0 == begin { skip = 1; next }
+      $0 == end { skip = 0; next }
+      !skip { print }
+    ' "${dest_makefile}" > "${stripped_makefile}"
+    mv "${stripped_makefile}" "${dest_makefile}"
+  fi
+
+  if [[ -f "${dest_loadout_module}" ]] && grep -qF "${LOADOUT_MAKEFILE_FILE_MARKER}" "${dest_loadout_module}"; then
+    print-info "Removing ${dest_loadout_module}"
+    rm -f "${dest_loadout_module}"
+  fi
 
   return 0
 }
@@ -860,8 +962,7 @@ function copilot-copy-prompts() {
   done
 }
 
-# Copy copilot skills files to the destination.
-# Copies default skills always, technology-specific ones based on switches.
+# Copy all copilot skills to the destination.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function copilot-copy-skills() {
@@ -871,38 +972,12 @@ function copilot-copy-skills() {
 
   print-info "Copying skills files to ${dest_skills}"
 
-  # When narrowing to speckit only, copy only speckit-* skills.
-  if [[ "${SPECKIT_NARROW_SKILLS:-false}" == "true" ]]; then
-    local skill_dir
-    for skill_dir in "${COPILOT_SKILLS_DIR}"/speckit-*/; do
-      [[ -d "$skill_dir" ]] || continue
-      local skill_name
-      skill_name=$(basename "$skill_dir")
-      copy-directory-excluding-git "${skill_dir}" "${dest_skills}/${skill_name}"
-    done
-    return 0
-  fi
-
-  # Copy default skills
-  for skill in "${DEFAULT_SKILLS[@]}"; do
-    local skill_dir="${COPILOT_SKILLS_DIR}/${skill}"
-    if [[ -d "${skill_dir}" ]]; then
-      copy-directory-excluding-git "${skill_dir}" "${dest_skills}/${skill}"
-    fi
-  done
-
-  # Copy technology-specific skills
-  for tech in "${ALL_TECHS[@]}"; do
-    if is-tech-enabled "${tech}"; then
-      local skill
-      skill=$(get-tech-skill "${tech}")
-      if [[ -n "${skill}" ]]; then
-        local skill_dir="${COPILOT_SKILLS_DIR}/${skill}"
-        if [[ -d "${skill_dir}" ]]; then
-          copy-directory-excluding-git "${skill_dir}" "${dest_skills}/${skill}"
-        fi
-      fi
-    fi
+  local skill_dir
+  for skill_dir in "${COPILOT_SKILLS_DIR}"/*/; do
+    [[ -d "$skill_dir" ]] || continue
+    local skill_name
+    skill_name=$(basename "$skill_dir")
+    copy-directory-excluding-git "${skill_dir}" "${dest_skills}/${skill_name}"
   done
 }
 
@@ -936,6 +1011,8 @@ function copilot-copy-hooks() {
     return 0
   fi
   cp "${hooks[@]}" "${dest}/"
+
+  return 0
 }
 
 # Copy scripts/hooks/ to the destination.
@@ -1052,21 +1129,6 @@ function copy-docs-architecture() {
   fi
 }
 
-# Copy project.code-workspace to the destination if it does not already exist.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function copy-workspace-file() {
-
-  local dest_file="$1/project.code-workspace"
-
-  if [[ -f "${dest_file}" ]]; then
-    print-info "Skipping project.code-workspace (already exists)"
-  else
-    print-info "Copying project.code-workspace to $1"
-    cp "${WORKSPACE_FILE}" "$1/"
-  fi
-}
-
 # Update .gitignore with loadout managed content.
 # Creates .gitignore if it doesn't exist, or updates the managed section if it does.
 # Arguments (provided as function parameters):
@@ -1119,178 +1181,6 @@ function update-gitignore() {
       } >> "${dest_gitignore}"
     fi
   fi
-
-  return 0
-}
-
-# Update .vscode/settings.json with loadout settings.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function update-vscode-settings() {
-
-  local dest="$1"
-  local settings_dir="${dest}/.vscode"
-  local settings_file="${settings_dir}/settings.json"
-
-  mkdir -p "${settings_dir}"
-
-  if [[ ! -f "${settings_file}" || ! -s "${settings_file}" ]]; then
-    print-info "Creating VS Code settings: ${settings_file}"
-    cat <<'EOF' > "${settings_file}"
-{
-  "chat.skillRecommendations": {
-    "speckit-constitution": true,
-    "speckit-specify": true,
-    "speckit-plan": true,
-    "speckit-tasks": true,
-    "speckit-implement": true
-  },
-  "chat.tools.terminal.autoApprove": {
-    ".specify/scripts/python/": true
-  }
-}
-EOF
-    return 0
-  fi
-
-  # Always remove existing sections before adding them back
-  remove-vscode-json-property "${settings_file}" "chat.skillRecommendations"
-  remove-vscode-json-property "${settings_file}" "chat.tools.terminal.autoApprove"
-
-  # Prepare content to insert (always both sections)
-  local insert_file
-  insert_file=$(mktemp)
-
-  cat <<'EOF' >> "${insert_file}"
-  "chat.skillRecommendations": {
-    "speckit-constitution": true,
-    "speckit-specify": true,
-    "speckit-plan": true,
-    "speckit-tasks": true,
-    "speckit-implement": true
-  },
-  "chat.tools.terminal.autoApprove": {
-    ".specify/scripts/python/": true
-  }
-EOF
-
-  local last_brace_line
-  last_brace_line=$(awk '/}/ { line=NR } END { print line }' "${settings_file}")
-
-  if [[ -z "${last_brace_line}" ]]; then
-    rm -f "${insert_file}"
-    print-error "Invalid ${settings_file}: missing closing brace"
-  fi
-
-  local prev_line_num
-  prev_line_num=$(awk -v last="${last_brace_line}" 'NR < last { if ($0 ~ /[^[:space:]]/) { line=NR } } END { print line }' "${settings_file}")
-
-  local needs_comma=0
-  if [[ -n "${prev_line_num}" ]]; then
-    local prev_line
-    prev_line=$(sed -n "${prev_line_num}p" "${settings_file}")
-    if [[ "${prev_line}" =~ ^[[:space:]]*\{[[:space:]]*$ ]]; then
-      needs_comma=0
-    elif [[ "${prev_line}" =~ ,[[:space:]]*$ ]]; then
-      needs_comma=0
-    else
-      needs_comma=1
-    fi
-  fi
-
-  local temp_file
-  temp_file=$(mktemp)
-
-  awk -v insert_file="${insert_file}" -v insert_line="${last_brace_line}" -v prev_line="${prev_line_num}" -v needs_comma="${needs_comma}" '
-    NR == prev_line && needs_comma == 1 {
-      sub(/[[:space:]]*$/, "", $0)
-      print $0 ","
-      next
-    }
-    NR == insert_line {
-      while ((getline line < insert_file) > 0) { print line }
-      close(insert_file)
-      print $0
-      next
-    }
-    { print }
-  ' "${settings_file}" > "${temp_file}"
-
-  mv "${temp_file}" "${settings_file}"
-  rm -f "${insert_file}"
-
-  print-info "Updated VS Code settings: ${settings_file}"
-
-  return 0
-}
-
-# Remove a JSON property from a VS Code settings file.
-# Arguments (provided as function parameters):
-#   $1=[settings file path]
-#   $2=[property name without quotes]
-function remove-vscode-json-property() {
-
-  local file="$1"
-  local property="$2"
-
-  # If property doesn't exist, nothing to do
-  if ! grep -q "\"${property}\"" "$file" 2>/dev/null; then
-    return 0
-  fi
-
-  local temp_file
-  temp_file=$(mktemp)
-
-  awk -v prop="\"${property}\"" '
-    BEGIN { skip = 0; depth = 0; skip_comma = 0 }
-    {
-      # Check if this line starts the property we want to remove
-      if (!skip && match($0, prop "[[:space:]]*:[[:space:]]*\\{")) {
-        skip = 1
-        depth = 0
-        # Count braces on the same line
-        rest_of_line = substr($0, RSTART + RLENGTH)
-        for (i = 1; i <= length(rest_of_line); i++) {
-          c = substr(rest_of_line, i, 1)
-          if (c == "{") depth++
-          else if (c == "}") depth--
-        }
-        # If property closes on same line, stop skipping
-        if (depth < 0) {
-          skip = 0
-          skip_comma = 1
-        }
-        next
-      }
-
-      # While inside the property, track brace depth
-      if (skip) {
-        for (i = 1; i <= length($0); i++) {
-          c = substr($0, i, 1)
-          if (c == "{") depth++
-          else if (c == "}") depth--
-        }
-        # When depth goes negative, we have closed the property
-        if (depth < 0) {
-          skip = 0
-          skip_comma = 1
-        }
-        next
-      }
-
-      # Skip a trailing comma line if needed
-      if (skip_comma) {
-        skip_comma = 0
-        if ($0 ~ /^[[:space:]]*,[[:space:]]*$/) {
-          next
-        }
-      }
-
-      print
-    }
-  ' "$file" > "$temp_file"
-
-  mv "$temp_file" "$file"
 
   return 0
 }
@@ -1383,12 +1273,14 @@ Other options:
 Always copied (default/glue layer):
     .github/copilot-instructions.md
     .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
-    scripts/hooks/ (hook executables, e.g. post-edit-lint.sh, stop-gate.sh; chmod +x)
+    scripts/hooks/ (hook executables, e.g. session-start-cheatsheet.sh, stop-gate.sh; chmod +x)
+    scripts/loadout.mk plus a managed Makefile include block for downstream repos
+      that already use repository-template's Makefile + scripts/init.mk
     Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
     Spec-kit agents, prompts, templates and constitution
     Shell, Docker, Makefile instructions and prompts
     docs/prompt-reports/, ADR template, Tech_Radar.md
-    project.code-workspace and managed .gitignore section
+    managed .gitignore section
 
 Examples:
     $(basename "$0") /path/to/my-project

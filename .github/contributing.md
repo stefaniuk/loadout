@@ -469,9 +469,9 @@ allowed-tools: []
 
 ### 🪝 Hooks Quickstart
 
-**When to choose this artefact.** You need to **automate the inner feedback loop** - run a script on `SessionStart`, after every edit (`PostToolUse`), or block the agent from finishing (`Stop`). See [docs/architecture.md](../docs/architecture.md) and the existing [`hooks.json`](../hooks.json).
+**When to choose this artefact.** You need to **automate the inner feedback loop** - run a script on `SessionStart`, after every edit (`PostToolUse`), or block the agent from finishing (`Stop`). See [docs/architecture.md](../docs/architecture.md) and the existing [`.github/hooks/quality-gates.json`](../.github/hooks/quality-gates.json).
 
-**Minimal starter template** - add to the root [`hooks.json`](../hooks.json):
+**Minimal starter template** - add to [`.github/hooks/quality-gates.json`](../.github/hooks/quality-gates.json):
 
 ```jsonc
 {

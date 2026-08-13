@@ -142,7 +142,7 @@ They are in the `assets/` subtree under this skill.
 | [Docker Support](#8-docker-support-dockerpodman)                | Container build/run/lint     | `scripts/docker/`, `scripts/config/hadolint.yaml`                              |
 | [GitHub Actions CI/CD](#9-github-actions-cicd)                  | Pipeline workflows           | `.github/workflows/`, `.github/actions/`                                       |
 | [Dependabot](#10-dependabot)                                    | Automated dependency updates | `.github/dependabot.yaml`                                                      |
-| [VS Code Integration](#11-vs-code-integration)                  | Editor configuration         | `.vscode/`, `project.code-workspace`                                           |
+| [VS Code Integration](#11-vs-code-integration)                  | Editor configuration         | `.vscode/`                                                                     |
 | [Tool Version Management](#12-tool-version-management-asdf)     | Reproducible toolchain       | `.tool-versions`                                                               |
 | [GitHub Repository Templates](#13-github-repository-templates)  | Issue/PR/security templates  | `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md`                  |
 | [Documentation Structure](#14-documentation-structure-markdown) | ADRs and guides              | `docs/adr/`, `docs/guides/`                                                    |
@@ -952,7 +952,6 @@ yq eval '.updates[].package-ecosystem' .github/dependabot.yaml
 
 - [`.vscode/extensions.json`](assets/.vscode/extensions.json) - Recommended extensions
 - [`.vscode/settings.json`](assets/.vscode/settings.json) - Workspace settings
-- [`project.code-workspace`](assets/project.code-workspace) - Multi-root workspace file
 
 **Recommended extensions**:
 
@@ -987,12 +986,10 @@ yq eval '.updates[].package-ecosystem' .github/dependabot.yaml
 # Check VS Code config files exist
 test -f .vscode/settings.json && echo "settings.json OK"
 test -f .vscode/extensions.json && echo "extensions.json OK"
-test -f project.code-workspace && echo "workspace file OK"
 
 # Validate JSON syntax
 jq '.' .vscode/settings.json > /dev/null && echo "settings.json valid"
 jq '.' .vscode/extensions.json > /dev/null && echo "extensions.json valid"
-jq '.' project.code-workspace > /dev/null && echo "workspace file valid"
 
 # List recommended extensions
 jq -r '.recommendations[]' .vscode/extensions.json
@@ -1001,7 +998,7 @@ jq -r '.recommendations[]' .vscode/extensions.json
 # Success indicator: Extension list displayed
 ```
 
-**To adopt**: Copy `.vscode/` directory and `project.code-workspace`
+**To adopt**: Copy `.vscode/` directory
 
 **To remove**: Delete the files
 
@@ -1293,18 +1290,17 @@ All source files are located in the [`assets/`](assets/) directory. Copy them to
 
 ### Root Files
 
-| File                                                             | Purpose                         | Capability              |
-| ---------------------------------------------------------------- | ------------------------------- | ----------------------- |
-| [`assets/.editorconfig`](assets/.editorconfig)                   | File formatting rules           | File Format Checking    |
-| [`assets/.gitattributes`](assets/.gitattributes)                 | Git file handling               | Core                    |
-| [`assets/.gitignore`](assets/.gitignore)                         | Git ignore patterns             | Core                    |
-| [`assets/.tool-versions`](assets/.tool-versions)                 | Tool version pins               | Tool Version Management |
-| [`assets/.vscode/`](assets/.vscode/)                             | VS Code settings and extensions | VS Code Integration     |
-| [`assets/LICENCE.md`](assets/LICENCE.md)                         | MIT licence                     | Core                    |
-| [`assets/Makefile`](assets/Makefile)                             | Project make targets            | Core Make System        |
-| [`assets/README.md`](assets/README.md)                           | Template README                 | Core                    |
-| [`assets/project.code-workspace`](assets/project.code-workspace) | VS Code workspace               | VS Code Integration     |
-| [`assets/VERSION`](assets/VERSION)                               | Project version                 | Core                    |
+| File                                             | Purpose                         | Capability              |
+| ------------------------------------------------ | ------------------------------- | ----------------------- |
+| [`assets/.editorconfig`](assets/.editorconfig)   | File formatting rules           | File Format Checking    |
+| [`assets/.gitattributes`](assets/.gitattributes) | Git file handling               | Core                    |
+| [`assets/.gitignore`](assets/.gitignore)         | Git ignore patterns             | Core                    |
+| [`assets/.tool-versions`](assets/.tool-versions) | Tool version pins               | Tool Version Management |
+| [`assets/.vscode/`](assets/.vscode/)             | VS Code settings and extensions | VS Code Integration     |
+| [`assets/LICENCE.md`](assets/LICENCE.md)         | MIT licence                     | Core                    |
+| [`assets/Makefile`](assets/Makefile)             | Project make targets            | Core Make System        |
+| [`assets/README.md`](assets/README.md)           | Template README                 | Core                    |
+| [`assets/VERSION`](assets/VERSION)               | Project version                 | Core                    |
 
 ### Documentation Directory
 

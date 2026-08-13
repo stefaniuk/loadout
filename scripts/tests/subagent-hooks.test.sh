@@ -21,8 +21,9 @@ function main() {
 
   test-suite-setup
   local tests=( \
-    test_hooks_json_contains_subagent_events \
+    test_quality_gates_json_omits_post_tool_use_gate \
     test_quality_gates_json_contains_subagent_events \
+    test_root_hooks_json_is_removed \
     test_subagent_start_script_is_executable \
     test_subagent_stop_script_is_executable \
     test_subagent_start_emits_valid_json \
@@ -65,19 +66,26 @@ function test-suite-teardown() {
 
 # ==============================================================================
 
-function test_hooks_json_contains_subagent_events() {
+function test_quality_gates_json_omits_post_tool_use_gate() {
 
-  jq -e '.hooks.SubagentStart | type == "array" and length > 0 and (.[0].command | type == "string")' hooks.json > /dev/null || return 1
-  jq -e '.hooks.SubagentStop  | type == "array" and length > 0 and (.[0].command | type == "string")' hooks.json > /dev/null || return 1
+  jq -e 'has("hooks") and (.hooks | has("PostToolUse") | not)' .github/hooks/quality-gates.json > /dev/null || return 1
 
   return 0
 }
 
+# ==============================================================================
+
 function test_quality_gates_json_contains_subagent_events() {
 
-  local file=".github/hooks/quality-gates.json"
-  jq -e '.hooks.SubagentStart | type == "array" and length > 0 and (.[0].command | type == "string")' "$file" > /dev/null || return 1
-  jq -e '.hooks.SubagentStop  | type == "array" and length > 0 and (.[0].command | type == "string")' "$file" > /dev/null || return 1
+  jq -e '.hooks.SubagentStart | type == "array" and length > 0 and (.[0].command | type == "string")' .github/hooks/quality-gates.json > /dev/null || return 1
+  jq -e '.hooks.SubagentStop  | type == "array" and length > 0 and (.[0].command | type == "string")' .github/hooks/quality-gates.json > /dev/null || return 1
+
+  return 0
+}
+
+function test_root_hooks_json_is_removed() {
+
+  [[ ! -e "hooks.json" ]] || return 1
 
   return 0
 }

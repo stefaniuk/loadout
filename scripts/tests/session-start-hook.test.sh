@@ -24,6 +24,8 @@ function main() {
     test_session_start_script_is_executable \
     test_session_start_emits_default_superpowers_context \
     test_session_start_emits_superpowers_context_when_mode_file_requests_it \
+    test_session_start_defers_quality_gates_to_stop_hook \
+    test_copilot_instructions_defer_quality_gates_to_stop_hook \
   )
   local status=0
   for test in "${tests[@]}"; do
@@ -101,6 +103,25 @@ EOF
   echo "$out" | jq -e '.additionalContext | contains("dispatching-parallel-agents")' > /dev/null || return 1
   echo "$out" | jq -e '.additionalContext | contains("finishing-a-development-branch")' > /dev/null || return 1
   ! echo "$out" | jq -e '.additionalContext | contains("/speckit-specify")' > /dev/null || return 1
+
+  return 0
+}
+
+function test_session_start_defers_quality_gates_to_stop_hook() {
+
+  local out
+  out=$(echo '{}' | ./scripts/hooks/session-start-cheatsheet.sh) || return 1
+
+  echo "$out" | jq -e '.additionalContext | contains("Stop hook")' > /dev/null || return 1
+  ! echo "$out" | jq -e '.additionalContext | contains("always run `make lint` and `make test` before declaring done")' > /dev/null || return 1
+
+  return 0
+}
+
+function test_copilot_instructions_defer_quality_gates_to_stop_hook() {
+
+  grep -qF 'The Stop hook is the canonical enforcement for local quality gates.' .github/copilot-instructions.md || return 1
+  ! grep -qE 'make lint|make test' .specify/memory/constitution.md || return 1
 
   return 0
 }

@@ -14,13 +14,6 @@
         "timeout": 10000
       }
     ],
-    "PostToolUse": [
-      {
-        "type": "command",
-        "command": "./scripts/hooks/post-edit-lint.sh",
-        "timeout": 60000
-      }
-    ],
     "Stop": [
       {
         "type": "command",

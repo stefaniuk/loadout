@@ -42,7 +42,8 @@ Artefact types (when to use):
   - Skills        → reusable multi-step capabilities with assets
   - Hooks         → deterministic gates (lint/format/test)
 
-Quality gates: always run `make lint` and `make test` before declaring done.
+Quality gates: the Stop hook enforces `make lint` and `make test` once on changed turns.
+Only rerun them manually when diagnosing a failure or when hooks are unavailable.
 EOF
 
   return 0
@@ -75,7 +76,8 @@ Cross-cutting skills:
 Guardrail: use one workflow family per session. When Superpowers mode is active,
 do not use `/speckit-*` commands in the same session.
 
-Quality gates: always run `make lint` and `make test` before declaring done.
+Quality gates: the Stop hook enforces `make lint` and `make test` once on changed turns.
+Only rerun them manually when diagnosing a failure or when hooks are unavailable.
 EOF
 
   return 0

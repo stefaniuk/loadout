@@ -15,6 +15,7 @@ set -euo pipefail
 
 TEMP_DIR=""
 REPO_ROOT=""
+SPECIFY_FIXTURE=""
 
 function main() {
 
@@ -48,6 +49,7 @@ function main() {
 function test-specify-suite-setup() {
 
   TEMP_DIR=$(mktemp -d)
+  SPECIFY_FIXTURE=$(run-specify-fixture "shared")
 
   return 0
 }
@@ -272,27 +274,23 @@ function run-specify-fixture() {
 
 function test-specify-passes-skills-init-option() {
 
-  local fixture_dir
-  fixture_dir=$(run-specify-fixture "skills-option")
-
-  grep -qF -- "--integration-options=--skills" "${fixture_dir}/specify-calls.log" || return 1
+  grep -qF -- "--integration-options=--skills" "${SPECIFY_FIXTURE}/specify-calls.log" || return 1
 
   return 0
 }
 
 function test-specify-replaces-patched-skill-prologues() {
 
-  local fixture_dir
-  fixture_dir=$(run-specify-fixture "replace-prologue")
+  local d="${SPECIFY_FIXTURE}"
 
-  grep -qF "/speckit-tasks" "${fixture_dir}/.github/skills/speckit-plan/SKILL.md" || return 1
-  ! grep -qF "/speckit.tasks" "${fixture_dir}/.github/skills/speckit-plan/SKILL.md" || return 1
+  grep -qF "/speckit-tasks" "${d}/.github/skills/speckit-plan/SKILL.md" || return 1
+  ! grep -qF "/speckit.tasks" "${d}/.github/skills/speckit-plan/SKILL.md" || return 1
 
-  grep -qF "/speckit-implement" "${fixture_dir}/.github/skills/speckit-tasks/SKILL.md" || return 1
-  ! grep -qF "/speckit.implement" "${fixture_dir}/.github/skills/speckit-tasks/SKILL.md" || return 1
+  grep -qF "/speckit-implement" "${d}/.github/skills/speckit-tasks/SKILL.md" || return 1
+  ! grep -qF "/speckit.implement" "${d}/.github/skills/speckit-tasks/SKILL.md" || return 1
 
-  grep -qF "Follow TDD: write failing test first" "${fixture_dir}/.github/skills/speckit-implement/SKILL.md" || return 1
-  ! grep -qF "Old implementation instructions" "${fixture_dir}/.github/skills/speckit-implement/SKILL.md" || return 1
+  grep -qF "Follow TDD: write failing test first" "${d}/.github/skills/speckit-implement/SKILL.md" || return 1
+  ! grep -qF "Old implementation instructions" "${d}/.github/skills/speckit-implement/SKILL.md" || return 1
 
   return 0
 }

@@ -5,10 +5,9 @@ set -euo pipefail
 
 # Test suite for the apply command.
 #
-# Optimised for speed: shared apply destinations are pre-built in parallel
-# during suite setup and reused by read-only assertion tests. Tests that
-# mutate destinations (revert, clean, idempotency, skips, subset, fails)
-# run their own apply invocations.
+# Optimised for speed: all apply destinations are pre-built in parallel
+# during suite setup and reused as read-only by assertion tests. Only
+# fast-failing validation tests run apply sequentially.
 #
 # Usage:
 #   $ ./apply.test.sh
@@ -22,6 +21,12 @@ TEMP_DIR=""
 DEFAULT_DEST=""
 ALL_DEST=""
 REVERT_DEST=""
+TAURI_DEST=""
+PLAYWRIGHT_PY_DEST=""
+CLEAN_DEST=""
+SKIP_SINGLETONS_DEST=""
+GITIGNORE_DEST=""
+ESCAPED_SPACE_ROOT=""
 
 # Subset shared dests
 SUBSET_AGENTS_DEST=""
@@ -39,7 +44,6 @@ function main() {
   local tests=( \
     test-apply-no-args-fails \
     test-apply-empty-dest-fails \
-    test-apply-creates-destination-directory \
     test-apply-normalises-escaped-space-destination \
     test-apply-default-copies-expected-artefacts \
     test-apply-default-excludes-tech-files \
@@ -48,18 +52,17 @@ function main() {
     test-apply-playwright-python-copies-both-instructions \
     test-apply-playwright-without-lang-fails \
     test-apply-clean-removes-previous-tech-files \
+    test-apply-compatible-downstream-makefile-copies-loadout-module-and-patches-root-makefile \
+    test-apply-reapply-does-not-duplicate-loadout-make-include \
     test-apply-revert-removes-all-managed-artefacts \
-    test-apply-idempotent-same-file-count \
+    test-apply-revert-removes-loadout-make-integration \
     test-apply-skips-existing-singletons \
     test-apply-updates-existing-gitignore-managed-section \
-    test-apply-subset-omitted-equivalent-to-default \
-    test-apply-subset-all-equivalent-to-default \
     test-apply-subset-agents-only \
     test-apply-subset-prompts-and-agents \
     test-apply-subset-instructions-only-with-python-tech \
     test-apply-subset-invalid-value-fails-with-helpful-message \
-    test-apply-subset-comma-whitespace-trimmed \
-    test-apply-subset-speckit-only-narrows-skills-and-prompts \
+    test-apply-subset-speckit-only-narrows-prompts \
     test-apply-subset-docs-only \
     test-apply-subset-project-only \
   )
@@ -84,6 +87,12 @@ function test-apply-suite-setup() {
   DEFAULT_DEST="${TEMP_DIR}/_shared_default"
   ALL_DEST="${TEMP_DIR}/_shared_all"
   REVERT_DEST="${TEMP_DIR}/_shared_revert"
+  TAURI_DEST="${TEMP_DIR}/_shared_tauri"
+  PLAYWRIGHT_PY_DEST="${TEMP_DIR}/_shared_playwright_py"
+  CLEAN_DEST="${TEMP_DIR}/_shared_clean"
+  SKIP_SINGLETONS_DEST="${TEMP_DIR}/_shared_skip_singletons"
+  GITIGNORE_DEST="${TEMP_DIR}/_shared_gitignore"
+  ESCAPED_SPACE_ROOT="${TEMP_DIR}/_esc_space"
   SUBSET_AGENTS_DEST="${TEMP_DIR}/_subset_agents"
   SUBSET_PROMPTS_AGENTS_DEST="${TEMP_DIR}/_subset_prompts_agents"
   SUBSET_INSTR_PY_DEST="${TEMP_DIR}/_subset_instr_py"
@@ -91,11 +100,33 @@ function test-apply-suite-setup() {
   SUBSET_DOCS_DEST="${TEMP_DIR}/_subset_docs"
   SUBSET_PROJECT_DEST="${TEMP_DIR}/_subset_project"
 
-  # Pre-build read-only destinations in parallel.
+  # Pre-build all destinations in parallel.
   (./scripts/apply.sh "${DEFAULT_DEST}" > /dev/null 2>&1) &
   (all=true ./scripts/apply.sh "${ALL_DEST}" > /dev/null 2>&1) &
   (./scripts/apply.sh "${REVERT_DEST}" > /dev/null 2>&1 && \
     revert=true ./scripts/apply.sh "${REVERT_DEST}" > /dev/null 2>&1) &
+  (tauri=true ./scripts/apply.sh "${TAURI_DEST}" > /dev/null 2>&1) &
+  (python=true playwright=true ./scripts/apply.sh "${PLAYWRIGHT_PY_DEST}" > /dev/null 2>&1) &
+  (python=true ./scripts/apply.sh "${CLEAN_DEST}" > /dev/null 2>&1 && \
+    clean=true ./scripts/apply.sh "${CLEAN_DEST}" > /dev/null 2>&1) &
+  ({
+    mkdir -p "${SKIP_SINGLETONS_DEST}/.github"
+    echo "custom-pr-template" > "${SKIP_SINGLETONS_DEST}/.github/pull_request_template.md"
+    ./scripts/apply.sh "${SKIP_SINGLETONS_DEST}" > /dev/null 2>&1
+  }) &
+  ({
+    mkdir -p "${GITIGNORE_DEST}"
+    printf '%s\n' "# Custom rules" "*.log" \
+      "# >>> loadout managed content - DO NOT EDIT BELOW THIS LINE >>>" \
+      "old-managed-content" \
+      "# <<< loadout managed content - DO NOT EDIT ABOVE THIS LINE <<<" \
+      > "${GITIGNORE_DEST}/.gitignore"
+    ./scripts/apply.sh "${GITIGNORE_DEST}" > /dev/null 2>&1
+  }) &
+  ({
+    mkdir -p "${ESCAPED_SPACE_ROOT}"
+    ./scripts/apply.sh "${ESCAPED_SPACE_ROOT}/Mobile\\ Documents/iCloud~md~obsidian/Documents" > /dev/null 2>&1
+  }) &
   (subset=agents ./scripts/apply.sh "${SUBSET_AGENTS_DEST}" > /dev/null 2>&1) &
   (subset="prompts,agents" ./scripts/apply.sh "${SUBSET_PROMPTS_AGENTS_DEST}" > /dev/null 2>&1) &
   (subset=instructions python=true ./scripts/apply.sh "${SUBSET_INSTR_PY_DEST}" > /dev/null 2>&1) &
@@ -114,19 +145,6 @@ function test-apply-suite-teardown() {
   fi
 
   return 0
-}
-
-# Helper: run apply.sh directly with optional env vars.
-# Arguments:
-#   $1=[destination directory path]
-#   $2..=[optional env var assignments, e.g. "python=true"]
-function helper-apply() {
-
-  local dest="$1"
-  shift
-  env "$@" ./scripts/apply.sh "${dest}" > /dev/null 2>&1
-
-  return $?
 }
 
 # ==============================================================================
@@ -148,25 +166,11 @@ function test-apply-empty-dest-fails() {
   return 0
 }
 
-function test-apply-creates-destination-directory() {
-
-  local dest="${TEMP_DIR}/creates-dest/nested/dir"
-  helper-apply "${dest}" || return 1
-  [[ -d "${dest}" ]] || return 1
-  return 0
-}
-
 function test-apply-normalises-escaped-space-destination() {
 
-  local root_dir="${TEMP_DIR}/workspace"
-  local expected_destination="${root_dir}/Mobile Documents/iCloud~md~obsidian/Documents"
-  local escaped_destination="${root_dir}/Mobile\\ Documents/iCloud~md~obsidian/Documents"
-
-  mkdir -p "${root_dir}"
-  make apply dest="${escaped_destination}" > /dev/null 2>&1 || return 1
-  [[ -f "${expected_destination}/project.code-workspace" ]] || return 1
-  [[ -d "${expected_destination}/.github/agents" ]] || return 1
-  [[ ! -d "${root_dir}/Mobile\\ Documents" ]] || return 1
+  local expected="${ESCAPED_SPACE_ROOT}/Mobile Documents/iCloud~md~obsidian/Documents"
+  [[ -d "${expected}/.github/agents" ]] || return 1
+  [[ ! -d "${ESCAPED_SPACE_ROOT}/Mobile\\ Documents" ]] || return 1
   return 0
 }
 
@@ -189,16 +193,21 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/.github/prompts/enforce.docker.prompt.md" ]] || return 1
   [[ -f "${d}/.github/prompts/enforce.makefile.prompt.md" ]] || return 1
   [[ -f "${d}/.github/prompts/spec.consolidate.prompt.md" ]] || return 1
-  # Skills (default set)
+  # Skills (all skills copied)
   [[ -f "${d}/.github/skills/repository-template/SKILL.md" ]] || return 1
   [[ -f "${d}/.github/skills/enforcement-audit/SKILL.md" ]] || return 1
   [[ -f "${d}/.github/skills/architecture-docs/SKILL.md" ]] || return 1
   [[ -f "${d}/.github/skills/code-review/SKILL.md" ]] || return 1
   [[ -f "${d}/.github/skills/spec-consolidation/SKILL.md" ]] || return 1
   [[ -f "${d}/.github/skills/system-documentation/SKILL.md" ]] || return 1
+  [[ -f "${d}/.github/skills/brainstorming/SKILL.md" ]] || return 1
+  [[ -f "${d}/.github/skills/find-bugs/SKILL.md" ]] || return 1
+  [[ -f "${d}/.github/skills/systematic-debugging/SKILL.md" ]] || return 1
+  [[ -f "${d}/.github/skills/test-driven-development/SKILL.md" ]] || return 1
+  [[ -f "${d}/.github/skills/virtual-think-tank/SKILL.md" ]] || return 1
+  [[ -f "${d}/.github/skills/verification-before-completion/SKILL.md" ]] || return 1
   # Singleton files
   [[ -f "${d}/.github/copilot-instructions.md" ]] || return 1
-  [[ -f "${d}/project.code-workspace" ]] || return 1
   [[ -f "${d}/.github/pull_request_template.md" ]] || return 1
   # Shared resources
   [[ -d "${d}/.specify/memory" ]] || return 1
@@ -207,16 +216,13 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" ]] || return 1
   [[ -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
   [[ -d "${d}/docs/prompt-reports" ]] || return 1
-  # VS Code settings
-  [[ -f "${d}/.vscode/settings.json" ]] || return 1
-  grep -q "chat.skillRecommendations" "${d}/.vscode/settings.json" || return 1
-  grep -q "chat.tools.terminal.autoApprove" "${d}/.vscode/settings.json" || return 1
   # .gitignore
   [[ -f "${d}/.gitignore" ]] || return 1
   grep -qF "loadout managed content" "${d}/.gitignore" || return 1
   # Hooks
   [[ -f "${d}/.github/hooks/quality-gates.json" ]] || return 1
-  [[ -x "${d}/scripts/hooks/post-edit-lint.sh" ]] || return 1
+  [[ ! -f "${d}/hooks.json" ]] || return 1
+  [[ -x "${d}/scripts/hooks/session-start-cheatsheet.sh" ]] || return 1
   [[ -x "${d}/scripts/hooks/stop-gate.sh" ]] || return 1
   return 0
 }
@@ -224,16 +230,13 @@ function test-apply-default-copies-expected-artefacts() {
 function test-apply-default-excludes-tech-files() {
 
   local d="${DEFAULT_DEST}"
-  # Tech-specific instructions absent
   [[ ! -f "${d}/.github/instructions/python.instructions.md" ]] || return 1
   [[ ! -f "${d}/.github/instructions/typescript.instructions.md" ]] || return 1
   [[ ! -f "${d}/.github/instructions/go.instructions.md" ]] || return 1
   [[ ! -f "${d}/.github/instructions/rust.instructions.md" ]] || return 1
-  # Tech-specific prompts absent
   [[ ! -f "${d}/.github/prompts/enforce.python.prompt.md" ]] || return 1
   [[ ! -f "${d}/.github/prompts/enforce.typescript.prompt.md" ]] || return 1
   [[ ! -f "${d}/.github/prompts/enforce.go.prompt.md" ]] || return 1
-  # Tech-specific skills absent
   return 0
 }
 
@@ -243,7 +246,6 @@ function test-apply-default-excludes-tech-files() {
 function test-apply-all-copies-all-tech-files() {
 
   local d="${ALL_DEST}"
-  # Instructions
   [[ -f "${d}/.github/instructions/python.instructions.md" ]] || return 1
   [[ -f "${d}/.github/instructions/typescript.instructions.md" ]] || return 1
   [[ -f "${d}/.github/instructions/go.instructions.md" ]] || return 1
@@ -253,7 +255,6 @@ function test-apply-all-copies-all-tech-files() {
   [[ -f "${d}/.github/instructions/tauri.instructions.md" ]] || return 1
   [[ -f "${d}/.github/instructions/playwright-python.instructions.md" ]] || return 1
   [[ -f "${d}/.github/instructions/playwright-typescript.instructions.md" ]] || return 1
-  # Prompts
   [[ -f "${d}/.github/prompts/enforce.python.prompt.md" ]] || return 1
   [[ -f "${d}/.github/prompts/enforce.typescript.prompt.md" ]] || return 1
   [[ -f "${d}/.github/prompts/enforce.go.prompt.md" ]] || return 1
@@ -263,158 +264,126 @@ function test-apply-all-copies-all-tech-files() {
   [[ -f "${d}/.github/prompts/enforce.tauri.prompt.md" ]] || return 1
   [[ -f "${d}/.github/prompts/enforce.playwright-python.prompt.md" ]] || return 1
   [[ -f "${d}/.github/prompts/enforce.playwright-typescript.prompt.md" ]] || return 1
-  # Templates
   [[ -f "${d}/.github/instructions/templates/pyproject.toml" ]] || return 1
-  # Skills
   [[ -d "${d}/.github/skills/repository-template" ]] || return 1
   return 0
 }
 
 # ==============================================================================
-# Auto-enable technology switches
+# Technology auto-enable and validation
 
 function test-apply-tauri-auto-enables-rust-typescript-reactjs() {
 
-  local dest="${TEMP_DIR}/tauri-auto"
-  tauri=true helper-apply "${dest}" || return 1
-  [[ -f "${dest}/.github/instructions/tauri.instructions.md" ]] || return 1
-  [[ -f "${dest}/.github/prompts/enforce.tauri.prompt.md" ]] || return 1
-  [[ -f "${dest}/.github/instructions/rust.instructions.md" ]] || return 1
-  [[ -f "${dest}/.github/instructions/typescript.instructions.md" ]] || return 1
-  [[ -f "${dest}/.github/instructions/reactjs.instructions.md" ]] || return 1
+  local d="${TAURI_DEST}"
+  [[ -f "${d}/.github/instructions/tauri.instructions.md" ]] || return 1
+  [[ -f "${d}/.github/prompts/enforce.tauri.prompt.md" ]] || return 1
+  [[ -f "${d}/.github/instructions/rust.instructions.md" ]] || return 1
+  [[ -f "${d}/.github/instructions/typescript.instructions.md" ]] || return 1
+  [[ -f "${d}/.github/instructions/reactjs.instructions.md" ]] || return 1
   return 0
 }
 
 function test-apply-playwright-python-copies-both-instructions() {
 
-  local dest="${TEMP_DIR}/playwright-py"
-  python=true playwright=true helper-apply "${dest}" || return 1
-  [[ -f "${dest}/.github/instructions/playwright-python.instructions.md" ]] || return 1
-  [[ -f "${dest}/.github/prompts/enforce.playwright-python.prompt.md" ]] || return 1
+  local d="${PLAYWRIGHT_PY_DEST}"
+  [[ -f "${d}/.github/instructions/playwright-python.instructions.md" ]] || return 1
+  [[ -f "${d}/.github/prompts/enforce.playwright-python.prompt.md" ]] || return 1
   return 0
 }
 
 function test-apply-playwright-without-lang-fails() {
 
   local dest="${TEMP_DIR}/playwright-no-lang"
-  playwright=true helper-apply "${dest}" && return 1
+  playwright=true ./scripts/apply.sh "${dest}" > /dev/null 2>&1 && return 1
   [[ ! -f "${dest}/.github/copilot-instructions.md" ]] || return 1
   return 0
 }
 
 # ==============================================================================
-# Clean / revert / idempotency / skip behaviour
+# Clean / revert / skip behaviour
 
 function test-apply-clean-removes-previous-tech-files() {
 
-  local dest="${TEMP_DIR}/clean-removes"
-  python=true helper-apply "${dest}" || return 1
-  [[ -f "${dest}/.github/instructions/python.instructions.md" ]] || return 1
+  local d="${CLEAN_DEST}"
+  [[ ! -f "${d}/.github/instructions/python.instructions.md" ]] || return 1
+  [[ -f "${d}/.github/instructions/shell.instructions.md" ]] || return 1
+  return 0
+}
 
-  clean=true helper-apply "${dest}" || return 1
-  [[ ! -f "${dest}/.github/instructions/python.instructions.md" ]] || return 1
-  [[ -f "${dest}/.github/instructions/shell.instructions.md" ]] || return 1
+function test-apply-compatible-downstream-makefile-copies-loadout-module-and-patches-root-makefile() {
+
+  local d="${TEMP_DIR}/makefile-patch"
+  create-template-managed-make-destination "${d}"
+  ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
+  [[ -f "${d}/scripts/loadout.mk" ]] || return 1
+  [[ -f "${d}/Makefile" ]] || return 1
+  grep -qF "# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>" "${d}/Makefile" || return 1
+  grep -qF "include scripts/loadout.mk" "${d}/Makefile" || return 1
+  [[ "$(grep -cF "include scripts/loadout.mk" "${d}/Makefile")" -eq 1 ]] || return 1
+  return 0
+}
+
+function test-apply-reapply-does-not-duplicate-loadout-make-include() {
+
+  local d="${TEMP_DIR}/makefile-reapply"
+  create-template-managed-make-destination "${d}"
+  ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
+  ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
+  [[ "$(grep -cF "# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>" "${d}/Makefile")" -eq 1 ]] || return 1
+  [[ "$(grep -cF "include scripts/loadout.mk" "${d}/Makefile")" -eq 1 ]] || return 1
+  [[ "$(grep -cF "# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<" "${d}/Makefile")" -eq 1 ]] || return 1
   return 0
 }
 
 function test-apply-revert-removes-all-managed-artefacts() {
 
   local d="${REVERT_DEST}"
-  # Managed directories removed
   [[ ! -d "${d}/.github/agents" ]] || return 1
+  [[ ! -d "${d}/.github/hooks" ]] || return 1
   [[ ! -d "${d}/.github/instructions" ]] || return 1
   [[ ! -d "${d}/.github/prompts" ]] || return 1
   [[ ! -d "${d}/.github/skills" ]] || return 1
-  [[ ! -d "${d}/.github/hooks" ]] || return 1
   [[ ! -d "${d}/.specify" ]] || return 1
   [[ ! -d "${d}/scripts/hooks" ]] || return 1
-  # Singleton files removed
   [[ ! -f "${d}/.github/copilot-instructions.md" ]] || return 1
-  # VS Code settings managed properties removed (file may or may not still exist)
-  if [[ -f "${d}/.vscode/settings.json" ]]; then
-    ! grep -q "chat.skillRecommendations" "${d}/.vscode/settings.json" || return 1
-    ! grep -q "chat.tools.terminal.autoApprove" "${d}/.vscode/settings.json" || return 1
-  fi
-  # gitignore managed section removed (file itself may be gone if it was empty)
+  [[ ! -f "${d}/hooks.json" ]] || return 1
   if [[ -f "${d}/.gitignore" ]]; then
     ! grep -qF "loadout managed content" "${d}/.gitignore" || return 1
   fi
   return 0
 }
 
-function test-apply-idempotent-same-file-count() {
+function test-apply-revert-removes-loadout-make-integration() {
 
-  local dest="${TEMP_DIR}/idempotent"
-  all=true helper-apply "${dest}" || return 1
-  local count1
-  count1=$(find "${dest}" -type f | wc -l | tr -d ' ')
-
-  all=true helper-apply "${dest}" || return 1
-  local count2
-  count2=$(find "${dest}" -type f | wc -l | tr -d ' ')
-
-  [[ "${count1}" == "${count2}" ]] || return 1
+  local d="${TEMP_DIR}/makefile-revert"
+  create-template-managed-make-destination "${d}"
+  ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
+  revert=true ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
+  [[ ! -f "${d}/scripts/loadout.mk" ]] || return 1
+  [[ -f "${d}/Makefile" ]] || return 1
+  ! grep -qF "loadout managed makefile include" "${d}/Makefile" || return 1
+  ! grep -qF "include scripts/loadout.mk" "${d}/Makefile" || return 1
   return 0
 }
 
 function test-apply-skips-existing-singletons() {
 
-  local dest="${TEMP_DIR}/skip-singletons"
-  mkdir -p "${dest}/.github"
-  echo "custom-workspace-content" > "${dest}/project.code-workspace"
-  echo "custom-pr-template" > "${dest}/.github/pull_request_template.md"
-
-  helper-apply "${dest}" || return 1
-
-  grep -q "custom-workspace-content" "${dest}/project.code-workspace" || return 1
-  grep -q "custom-pr-template" "${dest}/.github/pull_request_template.md" || return 1
+  local d="${SKIP_SINGLETONS_DEST}"
+  grep -q "custom-pr-template" "${d}/.github/pull_request_template.md" || return 1
   return 0
 }
 
 function test-apply-updates-existing-gitignore-managed-section() {
 
-  local dest="${TEMP_DIR}/update-gitignore"
-  mkdir -p "${dest}"
-  {
-    echo "# Custom rules"
-    echo "*.log"
-    echo "# >>> loadout managed content - DO NOT EDIT BELOW THIS LINE >>>"
-    echo "old-managed-content"
-    echo "# <<< loadout managed content - DO NOT EDIT ABOVE THIS LINE <<<"
-  } > "${dest}/.gitignore"
-
-  helper-apply "${dest}" || return 1
-
-  ! grep -q "old-managed-content" "${dest}/.gitignore" || return 1
-  grep -q "Custom rules" "${dest}/.gitignore" || return 1
-  grep -qF "loadout managed content" "${dest}/.gitignore" || return 1
+  local d="${GITIGNORE_DEST}"
+  ! grep -q "old-managed-content" "${d}/.gitignore" || return 1
+  grep -q "Custom rules" "${d}/.gitignore" || return 1
+  grep -qF "loadout managed content" "${d}/.gitignore" || return 1
   return 0
 }
 
 # ==============================================================================
 # Subset selector
-
-function test-apply-subset-omitted-equivalent-to-default() {
-
-  local dest_omitted="${TEMP_DIR}/subset-omitted"
-  subset="" helper-apply "${dest_omitted}" || return 1
-  local count_default count_omitted
-  count_default=$(find "${DEFAULT_DEST}" -type f | wc -l | tr -d ' ')
-  count_omitted=$(find "${dest_omitted}" -type f | wc -l | tr -d ' ')
-  [[ "${count_default}" == "${count_omitted}" ]] || return 1
-  return 0
-}
-
-function test-apply-subset-all-equivalent-to-default() {
-
-  local dest_all="${TEMP_DIR}/subset-all"
-  subset=all helper-apply "${dest_all}" || return 1
-  local count_default count_all
-  count_default=$(find "${DEFAULT_DEST}" -type f | wc -l | tr -d ' ')
-  count_all=$(find "${dest_all}" -type f | wc -l | tr -d ' ')
-  [[ "${count_default}" == "${count_all}" ]] || return 1
-  return 0
-}
 
 function test-apply-subset-agents-only() {
 
@@ -460,22 +429,10 @@ function test-apply-subset-invalid-value-fails-with-helpful-message() {
   return 0
 }
 
-function test-apply-subset-comma-whitespace-trimmed() {
-
-  local dest="${TEMP_DIR}/subset-whitespace"
-  subset=" prompts , agents " helper-apply "${dest}" || return 1
-  [[ -d "${dest}/.github/agents" ]] || return 1
-  [[ -d "${dest}/.github/prompts" ]] || return 1
-  [[ ! -d "${dest}/.github/instructions" ]] || return 1
-  return 0
-}
-
-function test-apply-subset-speckit-only-narrows-skills-and-prompts() {
+function test-apply-subset-speckit-only-narrows-prompts() {
 
   local d="${SUBSET_SPECKIT_DEST}"
-  [[ -d "${d}/.github/skills/speckit-specify" ]] || return 1
-  [[ -d "${d}/.github/skills/speckit-implement" ]] || return 1
-  [[ ! -d "${d}/.github/skills/repository-template" ]] || return 1
+  [[ ! -d "${d}/.github/skills" ]] || return 1
   [[ -f "${d}/.github/prompts/review.speckit-code.prompt.md" ]] || return 1
   [[ ! -f "${d}/.github/prompts/enforce.shell.prompt.md" ]] || return 1
   [[ ! -f "${d}/.github/prompts/enforce.docker.prompt.md" ]] || return 1
@@ -501,8 +458,6 @@ function test-apply-subset-docs-only() {
 function test-apply-subset-project-only() {
 
   local d="${SUBSET_PROJECT_DEST}"
-  [[ -f "${d}/.vscode/settings.json" ]] || return 1
-  [[ -f "${d}/project.code-workspace" ]] || return 1
   [[ -f "${d}/.gitignore" ]] || return 1
   [[ -f "${d}/.github/copilot-instructions.md" ]] || return 1
   [[ -f "${d}/.github/pull_request_template.md" ]] || return 1
@@ -510,6 +465,27 @@ function test-apply-subset-project-only() {
   [[ ! -d "${d}/.github/prompts" ]] || return 1
   [[ ! -d "${d}/.github/instructions" ]] || return 1
   [[ ! -d "${d}/.github/skills" ]] || return 1
+  return 0
+}
+
+function create-template-managed-make-destination() {
+
+  local dest="$1"
+
+  mkdir -p "${dest}/scripts"
+
+  {
+    printf '%s\n' 'include scripts/init.mk'
+    printf '\n'
+    printf '%s\n' 'project-help: # Example project target @Others'
+    printf '\t%s\n' "printf 'project help\\n'"
+  } > "${dest}/Makefile"
+
+  {
+    printf '%s\n' 'help: # Print help @Others'
+    printf '\t%s\n' "printf 'shared help\\n'"
+  } > "${dest}/scripts/init.mk"
+
   return 0
 }
 

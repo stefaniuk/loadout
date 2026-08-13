@@ -1,4 +1,5 @@
 include scripts/init.mk
+include scripts/loadout.mk
 
 # ==============================================================================
 # Project targets
@@ -16,7 +17,7 @@ lint-markdown-links: # Check markdown links @Quality
 	output=$$(check=all ./scripts/quality/check-markdown-links.sh 2>&1) && echo "markdown links: ok" || { echo "$$output"; exit 1; }
 
 lint-shell: # Check shell scripts @Quality
-	$(MAKE) check-shell-lint
+	FORCE_USE_DOCKER=false $(MAKE) check-shell-lint
 
 lint-customisations: # Validate customisation artefact frontmatter and naming @Quality
 	./scripts/quality/validate-customisations.sh
@@ -33,13 +34,21 @@ lint: # Run linter to check code style and errors @Quality
 	$(MAKE) lint-mcp
 
 test: # Run fast local test suite (apply + specify + subagent-hooks + install). Slower tests run in CI via `test-all` @Testing
-	bash ./scripts/tests/apply.test.sh && echo "apply: ok"
-	bash ./scripts/tests/specify.test.sh && echo "specify: ok"
-	bash ./scripts/tests/skill-sync.test.sh && echo "skill-sync: ok"
-	bash ./scripts/tests/session-start-hook.test.sh && echo "session-start-hook: ok"
-	bash ./scripts/tests/subagent-hooks.test.sh && echo "subagent-hooks: ok"
-	bash ./scripts/tests/workflow-mode.test.sh && echo "workflow-mode: ok"
-	$(MAKE) test-install
+	@bash -c '\
+		d=$$(mktemp -d); trap "rm -rf $$d" EXIT; \
+		bash ./scripts/tests/apply.test.sh > "$$d/apply.log" 2>&1 & p1=$$!; \
+		bash ./scripts/tests/specify.test.sh > "$$d/specify.log" 2>&1 & p2=$$!; \
+		bash ./scripts/tests/skill-sync.test.sh > "$$d/sync.log" 2>&1 & p3=$$!; \
+		ret=0; \
+		wait $$p1 && echo "apply: ok" || { echo "apply: FAIL"; cat "$$d/apply.log"; ret=1; }; \
+		wait $$p2 && echo "specify: ok" || { echo "specify: FAIL"; cat "$$d/specify.log"; ret=1; }; \
+		wait $$p3 && echo "skill-sync: ok" || { echo "skill-sync: FAIL"; cat "$$d/sync.log"; ret=1; }; \
+		[ $$ret -eq 0 ] || exit 1; \
+		bash ./scripts/tests/session-start-hook.test.sh > /dev/null 2>&1 && echo "session-start-hook: ok" || exit 1; \
+		bash ./scripts/tests/subagent-hooks.test.sh > /dev/null 2>&1 && echo "subagent-hooks: ok" || exit 1; \
+		bash ./scripts/tests/workflow-mode.test.sh > /dev/null 2>&1 && echo "workflow-mode: ok" || exit 1; \
+		bash ./scripts/tests/install.test.sh > /dev/null 2>&1 && echo "install: ok" || exit 1 \
+	'
 
 test-import: # Run import wrapper tests (slower; included in `test-all` and CI) @Testing
 	bash ./scripts/tests/import.test.sh && echo "import: ok"
@@ -76,16 +85,6 @@ skill-add: # Add a new external skill to config and sync it; mandatory: name=[na
 
 specify: # Fetch upstream spec-kit and apply local patches; optional: patch=[true|false] @Operations
 	patch="$(or $(patch),true)" ./scripts/specify.sh
-
-workflow-status: # Print the active local workflow mode; optional: LOADOUT_WORKFLOW_MODE_FILE=[path] @Operations
-	./scripts/hooks/workflow-mode.sh status
-
-workflow-switch: # Flip the active local workflow mode between superpowers and speckit; optional: LOADOUT_WORKFLOW_MODE_FILE=[path] @Operations
-	./scripts/hooks/workflow-mode.sh switch
-
-workflow-use: # Set the active local workflow mode; mandatory: mode=[speckit|superpowers]; optional: LOADOUT_WORKFLOW_MODE_FILE=[path] @Operations
-	$(if $(mode),,$(error mode is required. Usage: make workflow-use mode=speckit))
-	./scripts/hooks/workflow-mode.sh use "$(mode)"
 
 apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean|revert=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright=[true] @Operations
 	$(if $(dest),,$(error dest is required. Usage: make apply dest=/path/to/destination))
@@ -136,6 +135,3 @@ ${VERBOSE}.SILENT: \
 	test-all \
 	test-import \
 	test-workflow-mode \
-	workflow-switch \
-	workflow-status \
-	workflow-use \

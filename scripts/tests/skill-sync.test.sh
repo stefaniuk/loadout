@@ -15,6 +15,9 @@ set -euo pipefail
 
 TEMP_DIR=""
 REPO_ROOT=""
+UPSTREAM_DIR=""
+PATCHED_FIXTURE=""
+UNPATCHED_FIXTURE=""
 
 function main() {
 
@@ -52,6 +55,15 @@ function main() {
 function test-skill-sync-suite-setup() {
 
   TEMP_DIR=$(mktemp -d)
+  UPSTREAM_DIR="${TEMP_DIR}/_upstream"
+  create-upstream-skill-repo "${UPSTREAM_DIR}"
+
+  PATCHED_FIXTURE=$(run-skill-sync-fixture "patched" "true") &
+  UNPATCHED_FIXTURE=$(run-skill-sync-fixture "unpatched" "false") &
+  wait
+  # Subshell assignments don't propagate; re-derive from names.
+  PATCHED_FIXTURE="${TEMP_DIR}/patched"
+  UNPATCHED_FIXTURE="${TEMP_DIR}/unpatched"
 
   return 0
 }
@@ -71,7 +83,6 @@ function test-skill-sync-suite-teardown() {
 function create-skill-sync-fixture-repo() {
 
   local fixture_dir="$1"
-  local upstream_dir="${fixture_dir}/upstream-skills"
 
   mkdir -p "${fixture_dir}/scripts/config"
   mkdir -p "${fixture_dir}/scripts/skill-patches/skills"
@@ -80,11 +91,10 @@ function create-skill-sync-fixture-repo() {
   cp "${REPO_ROOT}/scripts/skill-sync.sh" "${fixture_dir}/scripts/skill-sync.sh"
   cp "${REPO_ROOT}/scripts/skill-patches/patch.lib.sh" "${fixture_dir}/scripts/skill-patches/patch.lib.sh"
 
-  create-skill-sync-config "${fixture_dir}" "${upstream_dir}"
+  create-skill-sync-config "${fixture_dir}" "${UPSTREAM_DIR}"
   create-skill-sync-manifest "${fixture_dir}"
   create-skill-sync-patches "${fixture_dir}"
   create-yq-stub "${fixture_dir}/bin/yq"
-  create-upstream-skill-repo "${upstream_dir}"
 
   chmod +x "${fixture_dir}/scripts/skill-sync.sh" "${fixture_dir}/bin/yq"
 
@@ -397,8 +407,7 @@ function run-skill-sync-fixture() {
 
 function test-skill-sync-copies-skills-without-patches() {
 
-  local fixture_dir
-  fixture_dir=$(run-skill-sync-fixture "vanilla-copy")
+  local fixture_dir="${PATCHED_FIXTURE}"
 
   grep -qF "Original content." "${fixture_dir}/.github/skills/vanilla-skill/SKILL.md" || return 1
   ! grep -qF "Local Patch" "${fixture_dir}/.github/skills/vanilla-skill/SKILL.md" || return 1
@@ -408,8 +417,7 @@ function test-skill-sync-copies-skills-without-patches() {
 
 function test-skill-sync-applies-default-skill-patch() {
 
-  local fixture_dir
-  fixture_dir=$(run-skill-sync-fixture "default-patch")
+  local fixture_dir="${PATCHED_FIXTURE}"
 
   grep -qF "This line should be injected after the front matter." "${fixture_dir}/.github/skills/additive-skill/SKILL.md" || return 1
 
@@ -427,8 +435,7 @@ function test-skill-sync-applies-default-skill-patch() {
 
 function test-skill-sync-patch-only-is-idempotent() {
 
-  local fixture_dir
-  fixture_dir=$(run-skill-sync-fixture "patch-only-idempotent")
+  local fixture_dir="${PATCHED_FIXTURE}"
 
   local skill_file="${fixture_dir}/.github/skills/additive-skill/SKILL.md"
   local first_pass_file="${fixture_dir}/first-pass.md"
@@ -446,8 +453,7 @@ function test-skill-sync-patch-only-is-idempotent() {
 
 function test-skill-sync-applies-per-skill-replacement-patch() {
 
-  local fixture_dir
-  fixture_dir=$(run-skill-sync-fixture "replacement-patch")
+  local fixture_dir="${PATCHED_FIXTURE}"
 
   grep -qF "Patched overview for Spec Kit compatibility." "${fixture_dir}/.github/skills/incremental-implementation/SKILL.md" || return 1
   ! grep -qF "Original content that should be replaced." "${fixture_dir}/.github/skills/incremental-implementation/SKILL.md" || return 1
@@ -458,8 +464,7 @@ function test-skill-sync-applies-per-skill-replacement-patch() {
 
 function test-skill-sync-skips-patches-when-patch-false() {
 
-  local fixture_dir
-  fixture_dir=$(run-skill-sync-fixture "bypass" "false")
+  local fixture_dir="${UNPATCHED_FIXTURE}"
 
   grep -qF "Original content that should be replaced." "${fixture_dir}/.github/skills/incremental-implementation/SKILL.md" || return 1
   ! grep -qF "Patched overview for Spec Kit compatibility." "${fixture_dir}/.github/skills/incremental-implementation/SKILL.md" || return 1

@@ -385,29 +385,29 @@ function test-import-detects-and-round-trips-singletons-and-hooks() {
   local dest
   dest=$(helper-apply-copilot "singletons-and-hooks")
   track-repo-file-state ".github/hooks/quality-gates.json"
-  track-repo-file-state "scripts/hooks/post-edit-lint.sh"
+  track-repo-file-state "scripts/hooks/session-start-cheatsheet.sh"
   track-repo-file-state "scripts/hooks/stop-gate.sh"
 
   local marker
   marker="SINGLETON-HOOK-MARKER-$(date +%s)"
   printf '\n' >> "${dest}/.github/hooks/quality-gates.json"
-  echo "# ${marker}" >> "${dest}/scripts/hooks/post-edit-lint.sh"
+  echo "# ${marker}" >> "${dest}/scripts/hooks/session-start-cheatsheet.sh"
   echo "# ${marker}" >> "${dest}/scripts/hooks/stop-gate.sh"
 
   # Dry-run detection covers all three paths
   local output
   output=$(./scripts/import.sh "${dest}" 2>&1)
   echo "${output}" | grep -q "quality-gates.json" || return 1
-  echo "${output}" | grep -q "post-edit-lint.sh" || return 1
+  echo "${output}" | grep -q "session-start-cheatsheet.sh" || return 1
   echo "${output}" | grep -q "stop-gate.sh" || return 1
 
   # Force import round-trips the changes
   force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
   diff -q "${dest}/.github/hooks/quality-gates.json" "${REPO_ROOT}/.github/hooks/quality-gates.json" > /dev/null 2>&1 || return 1
-  grep -q "${marker}" "${REPO_ROOT}/scripts/hooks/post-edit-lint.sh" || return 1
+  grep -q "${marker}" "${REPO_ROOT}/scripts/hooks/session-start-cheatsheet.sh" || return 1
   grep -q "${marker}" "${REPO_ROOT}/scripts/hooks/stop-gate.sh" || return 1
   # Executable bits preserved
-  [[ -x "${REPO_ROOT}/scripts/hooks/post-edit-lint.sh" ]] || return 1
+  [[ -x "${REPO_ROOT}/scripts/hooks/session-start-cheatsheet.sh" ]] || return 1
   [[ -x "${REPO_ROOT}/scripts/hooks/stop-gate.sh" ]] || return 1
 
   return 0

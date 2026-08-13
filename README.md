@@ -172,7 +172,7 @@ These are the top-level paths most contributors need to recognise first.
 ├── scripts/      # Apply, import, install, and quality helpers
 ├── tests/        # Repository tests
 ├── Makefile      # Main entrypoint for setup, validation, and apply workflows
-└── hooks.json    # Root lifecycle hook bindings
+└── .github/      # Agents, instructions, prompts, skills, hooks, and repo governance files
 ```
 
 ## Licence

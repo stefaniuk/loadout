@@ -93,7 +93,6 @@ What gets copied:
 - `.specify/scripts/python`, `.specify/templates`
 - `docs/adr/ADR-nnn_Any_Decision_Record_Template.md`
 - `docs/prompt-reports/`, `docs/.gitignore`
-- `project.code-workspace` (only if missing in the target)
 
 After the copy completes, review `git status` in the target repository, commit the changes, and run `make lint && make test` to confirm everything wires up correctly.
 
@@ -145,7 +144,7 @@ Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `
 | `skills`       | `.github/skills/` (plus tech skills when language flags are set)                                                                                                                    |
 | `specify`      | `.specify/memory`, `.specify/scripts/python`, `.specify/templates`                                                                                                                  |
 | `docs`         | `docs/adr/` template + Tech Radar, `docs/prompt-reports/`                                                                                                                           |
-| `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `project.code-workspace`, `.vscode/settings.json`, `.gitignore`, hook scripts                          |
+| `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `.vscode/settings.json`, `.gitignore`, hook scripts                                                    |
 | `speckit`      | Narrows `skills` to `speckit-*` and `prompts` to `review.speckit-*` files, and pulls in the `.specify/*` content. Combine with `skills` or `prompts` to widen back to the full set. |
 | `mcp`          | Opt-in MCP example pack: `.vscode/mcp.json.example`, `.github/mcp/` per-server READMEs, and `docs/mcp.md`. Included by default and by `all`; otherwise only when listed explicitly. |
 

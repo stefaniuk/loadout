@@ -71,8 +71,5 @@ docs/mcp.md
 # Workspace configuration
 # ------------------------------------------------------------------------------
 
-# VS Code workspace file (only copied if not present)
-# project.code-workspace
-
 # Local active workflow selection (session/worktree scoped)
 .copilot/workflow-mode.json

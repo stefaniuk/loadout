@@ -30,7 +30,8 @@ This file is the authoritative instruction source for routine GitHub Copilot wor
 
 ## Repository verification policy
 
-After source code changes, satisfy the repository's canonical local quality gates. If hooks already enforce them, do not rerun the same commands unless diagnosing a failure.
+The Stop hook is the canonical enforcement for local quality gates.
+When that hook is active, do not rerun the same commands manually unless diagnosing a failure or the hook is unavailable.
 
 ## Communication style
 

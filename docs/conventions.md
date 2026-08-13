@@ -104,18 +104,18 @@ Adding a new prefix requires an ADR.
 
 ## File extension and location matrix
 
-| Artefact             | Extension / file form                 | Canonical location                | Notes                                                             |
-| -------------------- | ------------------------------------- | --------------------------------- | ----------------------------------------------------------------- |
-| Instruction pack     | `<slug>.instructions.md`              | `.github/instructions/`           | Carries `applyTo` glob; auto-applied to matching files            |
-| Instruction template | `*.instructions.md`                   | `.github/instructions/templates/` | Scaffolds used by automation; never auto-loaded                   |
-| Instruction include  | `<topic>.include.md`                  | `.github/instructions/includes/`  | Shared baseline fragments referenced from instruction packs       |
-| Prompt               | `<prefix>.<slug>.prompt.md`           | `.github/prompts/`                | Invokable as slash command `/<prefix>.<slug>`                     |
-| Prompt include       | `<topic>.include.md`                  | `.github/prompts/includes/`       | Currently a reserved scaffold; see directory README before adding |
-| Agent                | `<slug>.agent.md`                     | `.github/agents/`                 | Optional custom roles                                             |
-| Skill (spec-kit)     | `SKILL.md`                            | `.github/skills/speckit-<step>/`  | Upstream-managed via `make specify`                               |
-| Skill                | `SKILL.md` (+ `assets/`, `examples/`) | `.github/skills/<slug>/`          | Folder-based; `SKILL.md` is mandatory                             |
-| Hook                 | `<name>.json`                         | `.github/hooks/`                  | Lifecycle hooks (Preview); see [hooks.json](../hooks.json)        |
-| ADR                  | `ADR-NNN[a-z]?_*.md`                  | `docs/adr/`                       | Cluster letters reserved for language-pack ADRs                   |
+| Artefact             | Extension / file form                 | Canonical location                | Notes                                                              |
+| -------------------- | ------------------------------------- | --------------------------------- | ------------------------------------------------------------------ |
+| Instruction pack     | `<slug>.instructions.md`              | `.github/instructions/`           | Carries `applyTo` glob; auto-applied to matching files             |
+| Instruction template | `*.instructions.md`                   | `.github/instructions/templates/` | Scaffolds used by automation; never auto-loaded                    |
+| Instruction include  | `<topic>.include.md`                  | `.github/instructions/includes/`  | Shared baseline fragments referenced from instruction packs        |
+| Prompt               | `<prefix>.<slug>.prompt.md`           | `.github/prompts/`                | Invokable as slash command `/<prefix>.<slug>`                      |
+| Prompt include       | `<topic>.include.md`                  | `.github/prompts/includes/`       | Currently a reserved scaffold; see directory README before adding  |
+| Agent                | `<slug>.agent.md`                     | `.github/agents/`                 | Optional custom roles                                              |
+| Skill (spec-kit)     | `SKILL.md`                            | `.github/skills/speckit-<step>/`  | Upstream-managed via `make specify`                                |
+| Skill                | `SKILL.md` (+ `assets/`, `examples/`) | `.github/skills/<slug>/`          | Folder-based; `SKILL.md` is mandatory                              |
+| Hook                 | `<name>.json`                         | `.github/hooks/`                  | Lifecycle hooks; see [config](../.github/hooks/quality-gates.json) |
+| ADR                  | `ADR-NNN[a-z]?_*.md`                  | `docs/adr/`                       | Cluster letters reserved for language-pack ADRs                    |
 
 ## Frontmatter schema by artefact type
 
@@ -269,7 +269,7 @@ To install only one pack, use the `make apply subset=…` flag (see [onboarding.
 | `.github/prompts/**` (everything else)       | core                                          |
 | `.github/instructions/**`                    | core                                          |
 | `.github/skills/**`                          | core (note: `code-review` references speckit) |
-| `.github/hooks/**`, `hooks.json`             | core                                          |
+| `.github/hooks/**`, `scripts/hooks/**`       | core                                          |
 | `.specify/**`                                | speckit                                       |
 
 ### Recommended profiles
