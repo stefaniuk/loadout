@@ -5,5 +5,5 @@ cd .github/skills/repository-template || exit 1
 rm -rf assets
 git clone https://github.com/stefaniuk/repository-template.git assets
 cd assets || exit 1
-git pull origin custom
-git checkout custom
+git pull origin v2
+git checkout v2

@@ -114,12 +114,12 @@ flowchart TD
   constitution["/speckit-constitution"] --> specify["/speckit-specify"]
 
   specify --> needClarification{Need clarification?}
-  specify -.- specifyNote["💡 Example: Transform the product requirements document #file:PRD.md into a formal specification of the XXX feature"]
+  specify -.- specifyNote["💡 Example: Transform #file:docs/prd.md into a formal specification for the product. Extract user journeys, functional requirements, non-functional requirements, acceptance criteria, constraints, error cases, and explicit non-goals. Flag anything ambiguous instead of inventing it."]
   needClarification -- Yes --> clarify["/speckit-clarify"]
   clarify --> specify
   needClarification -- No --> plan["/speckit-plan"]
   plan -.- planNote["💡 Example (run +1): Run again to verify all items on the Plan Completion Checklist are satisfied"]
-  plan -.- planNote2["💡 Example: Use Python, uv and pytest as the implementation technologies"]
+  plan -.- planNote2["💡 Example: Use the requirements from the generated spec. Optimise for this repository's specification-first workflow, deterministic behaviour, TDD, and explicit contracts. Choose the implementation stack, architecture boundaries, storage approach, interfaces, test strategy, and rollout approach."]
 
   plan --> domainCoverage{Anything missing?}
   domainCoverage -- Yes --> checklist["/speckit-checklist"]

@@ -115,6 +115,7 @@ You **MUST** adhere to the following mandatory requirements when creating a deve
 ## Show & Tell Sections (Mandatory)
 
 - State pass/fail criteria clearly so steps cannot be skipped or missed during `/speckit-implement`
+- If no repository-template capabilities apply, `plan.md` states `Not required for this scope`
 EOF
 
   cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/speckit-tasks.patch.md"
@@ -124,18 +125,36 @@ You **MUST** adhere to the following mandatory requirements when generating deve
 
 - **Next phase:** Implementation (`/speckit-implement`)
 
+## Feature Class Detection
+
+This skill is best suited to multi-phase features with clear user stories, dependencies, and independently testable outcomes.
+
+- For narrow repository-internal changes such as make targets, scripts, docs, or patch maintenance, keep the task structure deliberately small
+- Do not invent extra phases, user stories, or contracts solely to mimic a larger application workflow
+
 ## Show & Tell Sections (Mandatory)
 
 AI Assistant **MUST** execute every Show & Tell step during `/speckit-implement` and validate that the expected result is achieved.
+
+### Feature Scope Note
+
+- Use the smallest task structure that still maps cleanly to the approved specification
 EOF
 
   cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/speckit-implement.patch.md"
 You **MUST** adhere to the following mandatory requirements when implementing features.
 
+**Prerequisite:** This skill assumes `tasks.md` already exists. If `tasks.md` does not exist, stop and tell the user to run `/speckit-tasks` first.
+
+## Scope Notes
+
+- For infrastructure, scripts, documentation, or reporting tools, use lightweight validation that stays explicit and deterministic
+- If project setup or ignore-file guidance does not apply to the feature scope, skip that work instead of inventing application-style setup tasks
+
 ## Implementation Process (Mandatory)
 
 1. Work through tasks in `tasks.md` sequentially
-2. Follow TDD: write failing test first, then implement, then refactor
+2. For code tasks, follow TDD: write failing test first, then implement, then refactor
 EOF
 
   return 0
@@ -285,11 +304,14 @@ function test-specify-replaces-patched-skill-prologues() {
 
   grep -qF "/speckit-tasks" "${d}/.github/skills/speckit-plan/SKILL.md" || return 1
   ! grep -qF "/speckit.tasks" "${d}/.github/skills/speckit-plan/SKILL.md" || return 1
+  grep -qF "Not required for this scope" "${d}/.github/skills/speckit-plan/SKILL.md" || return 1
 
   grep -qF "/speckit-implement" "${d}/.github/skills/speckit-tasks/SKILL.md" || return 1
   ! grep -qF "/speckit.implement" "${d}/.github/skills/speckit-tasks/SKILL.md" || return 1
+  grep -qF "Do not invent extra phases, user stories, or contracts" "${d}/.github/skills/speckit-tasks/SKILL.md" || return 1
 
-  grep -qF "Follow TDD: write failing test first" "${d}/.github/skills/speckit-implement/SKILL.md" || return 1
+  grep -qF "If \`tasks.md\` does not exist, stop and tell the user to run \`/speckit-tasks\` first" "${d}/.github/skills/speckit-implement/SKILL.md" || return 1
+  grep -qF "For code tasks, follow TDD" "${d}/.github/skills/speckit-implement/SKILL.md" || return 1
   ! grep -qF "Old implementation instructions" "${d}/.github/skills/speckit-implement/SKILL.md" || return 1
 
   return 0
