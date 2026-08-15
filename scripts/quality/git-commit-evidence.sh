@@ -9,7 +9,7 @@ set -euo pipefail
 #   $ PER_FILE_CAP=800 ./scripts/quality/git-commit-evidence.sh
 #
 # Output:
-#   docs/prompt-reports/git-commit-message-diff-YYYYMMDD-<slug>.report.txt
+#   .copilot/analysis/git-commit-message-diff-YYYYMMDD-<slug>.report.txt
 #
 # The report captures git status, recent log, stat summaries, and per-file
 # diffs (capped) for staged or unstaged changes. Branch diffs are never
@@ -18,9 +18,10 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+ANALYSIS_DIR=".copilot/analysis"
 _date=$(date -u +%Y%m%d)
 _slug=$(git rev-parse --abbrev-ref HEAD | tr '/' '-' | tr -cd 'A-Za-z0-9_-')
-_report="docs/prompt-reports/git-commit-message-diff-${_date}-${_slug}.report.txt"
+_report="${ANALYSIS_DIR}/git-commit-message-diff-${_date}-${_slug}.report.txt"
 _per_file_cap=${PER_FILE_CAP:-400}
 
 mkdir -p "$(dirname "$_report")"

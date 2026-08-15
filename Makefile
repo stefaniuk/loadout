@@ -96,7 +96,8 @@ import: # Import changed prompt files from a destination repository; mandatory: 
 
 
 clean:: # Remove project-specific generated files (main) @Operations
-	rm -f docs/prompt-reports/*.{md,txt}
+	find .copilot/analysis -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
+	rm -rf docs/superpowers
 	rm -rf .github/skills/repository-template/assets
 	find . \( \
 		-name ".coverage" -o \

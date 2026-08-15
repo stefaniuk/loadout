@@ -27,5 +27,5 @@ The wider documentation system also reserves canonical homes for `docs/reference
 
 ## Generated inventories and reports
 
-- `docs/prompt-reports/` is evidence-only. Keep normative guidance in canonical docs instead.
+- `.copilot/analysis/` holds local ephemeral analysis artefacts for Copilot-assisted work. Keep normative guidance in canonical docs instead.
 - Update this page when the documentation set gains a new canonical area or audience index.

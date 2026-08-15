@@ -14,15 +14,15 @@ This skill generates architecture documentation following a structured six-step 
 
 Resolve the step from the user's input (`$ARGUMENTS`). Match against the table below.
 
-| Step | Slug                     | Output path                                  | Dependencies |
-| ---- | ------------------------ | -------------------------------------------- | ------------ |
-| 01   | repository-map           | `docs/prompt-reports/repository-map.md`      | None         |
-| 02   | component-catalogue      | `docs/prompt-reports/component-*.md`         | Step 01      |
-| 03   | runtime-flows            | `docs/prompt-reports/runtime-flow-*.md`      | Steps 01–02  |
-| 04   | domain-analysis          | `docs/prompt-reports/domain-*.md`            | Steps 01–03  |
-| 05   | c4-model                 | `docs/prompt-reports/*.c4`                   | Steps 01–04  |
-| 06   | infrastructure-diagram   | `docs/prompt-reports/cloud-infrastructure.*` | Steps 01–05  |
-| all  | (all steps sequentially) | All of the above                             | None         |
+| Step | Slug                     | Output path                           | Dependencies |
+| ---- | ------------------------ | ------------------------------------- | ------------ |
+| 01   | repository-map           | `.copilot/analysis/repository-map.md` | None         |
+| 02   | component-catalogue      | `.copilot/analysis/component-*.md`    | Step 01      |
+| 03   | runtime-flows            | `.copilot/analysis/runtime-flow-*.md` | Steps 01–02  |
+| 04   | domain-analysis          | `.copilot/analysis/domain-*.md`       | Steps 01–03  |
+| 05   | c4-model                 | `.copilot/analysis/likec4/**`         | Steps 01–04  |
+| 06   | infrastructure-diagram   | `.copilot/analysis/infrastructure/**` | Steps 01–05  |
+| all  | (all steps sequentially) | All of the above                      | None         |
 
 If "all" is specified, run steps 01 through 06 in sequence. If a single step is specified, check that its dependency outputs exist before proceeding.
 
@@ -35,7 +35,7 @@ Before starting any step:
 
 ## Goal
 
-Produce accurate, evidence-based architecture documentation for the repository. Each step targets a specific output artefact. Update the `docs/prompt-reports/README.md` index after each step.
+Produce accurate, evidence-based architecture documentation for the repository. Each step targets a specific output artefact. Update the `.copilot/analysis/README.md` index after each step.
 
 ## Workflow Per Step
 
@@ -69,7 +69,7 @@ After producing the output for any step:
 
 1. Validate all evidence links resolve to real files and line ranges.
 2. Use **Unknown from code - {action}** for anything that cannot be determined from the codebase.
-3. Update the `docs/prompt-reports/README.md` index to include the new artefact.
+3. Update the `.copilot/analysis/README.md` index to include the new artefact.
 
 ## Output Requirements
 

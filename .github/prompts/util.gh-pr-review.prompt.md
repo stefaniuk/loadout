@@ -7,7 +7,7 @@ description: Generate pull request review using architecture overview context
 - Read the [constitution](../../.specify/memory/constitution.md) and honour its non-negotiable rules.
 - Read the Pull Request template at [pull_request_template.md](../pull_request_template.md) only to understand the author's reporting structure; the review output uses its own structure defined below.
 - Read the technology-specific instructions **only for languages actually touched on this branch** (look at the stat in the bounded report; do not preload every instruction file). For example [python.instructions.md](../instructions/python.instructions.md), [shell.instructions.md](../instructions/shell.instructions.md), [makefile.instructions.md](../instructions/makefile.instructions.md).
-- Load design context (`docs/prompt-reports/repository-map.md`, `component-*.md`, `runtime-flow-*.md`, `domain-*.md`, `c4-*.dsl`, `*-infrastructure.*`) **only if those files actually exist** and only when the diff materially touches the components they describe. Do not block the review on missing design context.
+- Load design context (`.copilot/analysis/repository-map.md`, `component-*.md`, `runtime-flow-*.md`, `domain-*.md`, `c4-*.dsl`, `*-infrastructure.*`) **only if those files actually exist** and only when the diff materially touches the components they describe. Do not block the review on missing design context.
 
 ## Goal 🎯
 
@@ -17,7 +17,7 @@ Act as a senior peer reviewer for the pull request that merges this branch into 
 2. **Surface merge-blockers first** - correctness, safety, security, contract, and data-integrity issues.
 3. **Coach, don't nitpick** - every finding is actionable, prioritised, and evidence-backed; lower-severity items are suggestions, not demands.
 
-The reviewer's deliverable is a Markdown report saved under `docs/prompt-reports/gh-pr-review-YYYYMMDD-<slug>.report.md` (where `<slug>` is `pr-<number>` when a PR is known, otherwise the sanitised branch name; this prevents collisions when several PRs are reviewed on the same day) and an overall verdict (Approve / Request changes / Comment).
+The reviewer's deliverable is a Markdown report saved under `.copilot/analysis/gh-pr-review-YYYYMMDD-<slug>.report.md` (where `<slug>` is `pr-<number>` when a PR is known, otherwise the sanitised branch name; this prevents collisions when several PRs are reviewed on the same day) and an overall verdict (Approve / Request changes / Comment).
 
 ### Quality bar (apply to every finding)
 
@@ -61,9 +61,9 @@ PR_REF=123 TOP_N_FILES=30 PER_FILE_CAP=600 INTENT_BODY_CAP=600 bash scripts/qual
 
 The script outputs paths for:
 
-- `docs/prompt-reports/gh-pr-review-intent-YYYYMMDD-<slug>.report.txt` (intent)
-- `docs/prompt-reports/gh-pr-review-diff-YYYYMMDD-<slug>.report.txt` (diff evidence)
-- `docs/prompt-reports/gh-pr-review-YYYYMMDD-<slug>.report.md` (review output target)
+- `.copilot/analysis/gh-pr-review-intent-YYYYMMDD-<slug>.report.txt` (intent)
+- `.copilot/analysis/gh-pr-review-diff-YYYYMMDD-<slug>.report.txt` (diff evidence)
+- `.copilot/analysis/gh-pr-review-YYYYMMDD-<slug>.report.md` (review output target)
 
 Read the intent file once and extract:
 
@@ -81,7 +81,7 @@ If the report shows no `main...HEAD` differences, output **"No diff vs main, not
 
 Do this **before** triage so the triage step can narrow to what actually changed since the last review.
 
-1. The output path was derived in §A as `$_review_file` (`docs/prompt-reports/gh-pr-review-YYYYMMDD-<slug>.report.md`). Look for that exact file and for any earlier `gh-pr-review-*-<slug>.report.md` files for the same PR/branch.
+1. The output path was derived in §A as `$_review_file` (`.copilot/analysis/gh-pr-review-YYYYMMDD-<slug>.report.md`). Look for that exact file and for any earlier `gh-pr-review-*-<slug>.report.md` files for the same PR/branch.
 2. If no prior review exists, plan a **full** review using the structure in §6.
 3. If one or more prior reviews exist:
    - Read the most recent one as the baseline.
@@ -253,7 +253,7 @@ Do not use **Unknown from code** inside a finding; if evidence is missing, raise
 
 ### 5) Write or update the review file (required)
 
-- Path: `$_review_file` as derived in §A - `docs/prompt-reports/gh-pr-review-YYYYMMDD-<slug>.report.md` where `<slug>` is `pr-<n>` when a PR number is known, otherwise the sanitised branch name. This keeps same-day reviews of different PRs from colliding.
+- Path: `$_review_file` as derived in §A - `.copilot/analysis/gh-pr-review-YYYYMMDD-<slug>.report.md` where `<slug>` is `pr-<n>` when a PR number is known, otherwise the sanitised branch name. This keeps same-day reviews of different PRs from colliding.
 - New file: write the full review using the structure in §6.
 - Existing file (incremental review): append `## Review update – YYYY-MM-DD hh:mm:ss UTC` containing only the delta - newly changed areas, ✅ Resolved (with evidence), 🔴 Still open, 🆕 New. Do not overwrite earlier sections.
 - End the file with the overall verdict (§7) and a `Generated:` footer.

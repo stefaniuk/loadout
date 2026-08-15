@@ -723,7 +723,7 @@ Rules:
 
 - [TF-DOC-005] C4 diagrams must be stored in-repo as LikeC4 source files (`.c4` or `.likec4`) and remain reviewable in PRs.
 - [TF-DOC-006] Unless a more specific repository prompt explicitly requires a different format, any non-C4 diagram must be authored in Mermaid, either as fenced `mermaid` blocks in Markdown or as standalone Mermaid source files stored in-repo.
-- [TF-DOC-007] Link diagrams from a stable index page (for example `docs/prompt-reports/README.md`) so they are discoverable.
+- [TF-DOC-007] Link diagrams from a stable analysis index page (for example `.copilot/analysis/README.md`) so they are discoverable.
 
 ### 17.4 Traceability to Terraform
 

@@ -59,6 +59,8 @@ make workflow-use mode=superpowers
 
 The selection is stored locally in `.copilot/workflow-mode.json` and is ignored by git. After switching, start a fresh chat session so the SessionStart hook injects the correct workflow banner.
 
+Copilot also uses `.copilot/analysis/` as a tracked local scaffold for ephemeral analysis output. The nested `.gitignore` in that directory ignores generated files while keeping the scaffold itself in git history.
+
 Use one workflow family per session or worktree:
 
 - `speckit` mode: use `speckit-*` skills and review prompts.
@@ -92,7 +94,7 @@ What gets copied:
 - `scripts/hooks/`
 - `.specify/scripts/python`, `.specify/templates`
 - `docs/adr/ADR-nnn_Any_Decision_Record_Template.md`
-- `docs/prompt-reports/`, `docs/.gitignore`
+- `.copilot/analysis/.gitignore`
 
 After the copy completes, review `git status` in the target repository, commit the changes, and run `make lint && make test` to confirm everything wires up correctly.
 
@@ -143,8 +145,8 @@ Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `
 | `prompts`      | `.github/prompts/` (plus tech enforcement prompts when language flags are set)                                                                                                      |
 | `skills`       | `.github/skills/` (plus tech skills when language flags are set)                                                                                                                    |
 | `specify`      | `.specify/memory`, `.specify/scripts/python`, `.specify/templates`                                                                                                                  |
-| `docs`         | `docs/adr/` template + Tech Radar, `docs/prompt-reports/`                                                                                                                           |
-| `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `.vscode/settings.json`, `.gitignore`, hook scripts                                                    |
+| `docs`         | `docs/adr/` template + Tech Radar                                                                                                                                                   |
+| `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `.vscode/settings.json`, `.gitignore`, `.copilot/analysis/.gitignore`, hook scripts                    |
 | `speckit`      | Narrows `skills` to `speckit-*` and `prompts` to `review.speckit-*` files, and pulls in the `.specify/*` content. Combine with `skills` or `prompts` to widen back to the full set. |
 | `mcp`          | Opt-in MCP example pack: `.vscode/mcp.json.example`, `.github/mcp/` per-server READMEs, and `docs/mcp.md`. Included by default and by `all`; otherwise only when listed explicitly. |
 
@@ -232,7 +234,7 @@ Run `make specify` after:
 - Modifying files in `scripts/skill-patches/`
 - Wanting to reset speckit skills to their canonical patched state
 
-### Prerequisites
+### Specify prerequisites
 
 The `specify` CLI must be installed. See [github/spec-kit](https://github.com/github/spec-kit) for installation instructions. `yq` is also required for YAML parsing.
 
@@ -309,7 +311,7 @@ make skill-patch name=incremental-implementation
 4. The `.markdownlintignore` managed section is updated with all synced skill directories (sorted alphabetically).
 5. Synced skill directories are excluded from shellcheck automatically.
 
-### Prerequisites
+### Skill sync prerequisites
 
 `yq` is required for YAML manipulation. Install via `brew install yq`.
 

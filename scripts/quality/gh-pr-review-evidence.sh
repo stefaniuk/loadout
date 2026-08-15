@@ -9,8 +9,8 @@ set -euo pipefail
 #   $ PR_REF=123 TOP_N_FILES=30 PER_FILE_CAP=600 ./scripts/quality/gh-pr-review-evidence.sh
 #
 # Output:
-#   docs/prompt-reports/gh-pr-review-intent-YYYYMMDD-<slug>.report.txt
-#   docs/prompt-reports/gh-pr-review-diff-YYYYMMDD-<slug>.report.txt
+#   .copilot/analysis/gh-pr-review-intent-YYYYMMDD-<slug>.report.txt
+#   .copilot/analysis/gh-pr-review-diff-YYYYMMDD-<slug>.report.txt
 #
 # The intent report captures PR metadata (title, body, labels) or falls back
 # to commit log. The diff report captures stat, dirstat, and top-N per-file
@@ -19,6 +19,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+ANALYSIS_DIR=".copilot/analysis"
 _date=$(date -u +%Y%m%d)
 _pr_ref=${PR_REF:-}
 _intent_body_cap=${INTENT_BODY_CAP:-400}
@@ -34,9 +35,9 @@ else
   _slug=$(git rev-parse --abbrev-ref HEAD | tr '/' '-' | tr -cd 'A-Za-z0-9_-')
 fi
 
-_intent_file="docs/prompt-reports/gh-pr-review-intent-${_date}-${_slug}.report.txt"
-_report="docs/prompt-reports/gh-pr-review-diff-${_date}-${_slug}.report.txt"
-_review_file="docs/prompt-reports/gh-pr-review-${_date}-${_slug}.report.md"
+_intent_file="${ANALYSIS_DIR}/gh-pr-review-intent-${_date}-${_slug}.report.txt"
+_report="${ANALYSIS_DIR}/gh-pr-review-diff-${_date}-${_slug}.report.txt"
+_review_file="${ANALYSIS_DIR}/gh-pr-review-${_date}-${_slug}.report.md"
 
 mkdir -p "$(dirname "$_intent_file")"
 : > "$_intent_file"

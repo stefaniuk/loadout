@@ -4,9 +4,9 @@ Build a repository map that documents architecture, technology stack, and repo-l
 
 ## Goal
 
-Create (or update): `docs/prompt-reports/repository-map.md`.
+Create (or update): `.copilot/analysis/repository-map.md`.
 
-Also ensure it is linked from the architecture overview at `docs/prompt-reports/README.md`.
+Also ensure it is linked from the architecture overview at `.copilot/analysis/README.md`.
 
 ## Configuration (optional, evidence-first)
 
@@ -29,7 +29,7 @@ If not set, auto-detect from code/config. Do **not** guess.
    - **Generated/vendor** (ignore for mapping unless referenced by build)
 2. Record which directories appear to be **generated/vendor** and should be treated as _non-authoritative_.
 3. Run `make clean` (if present), followed by `scc .` from the repository root to capture a lines-of-code breakdown by language.
-   - Store the raw output in `docs/prompt-reports/loc-report.txt`.
+   - Store the raw output in `.copilot/analysis/loc-report.txt`.
    - Summarise the top languages (by lines) in `repository-map.md` under a short **Size and language mix** section.
    - If `scc` is not available, record **Unknown from code - install scc or provide equivalent LOC output** and continue.
 

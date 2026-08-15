@@ -61,11 +61,11 @@ scripts/hooks/
 docs/adr/ADR-nnn_Any_Decision_Record_Template.md
 docs/adr/Tech_Radar.md
 
-# Prompt reports (research notes, marketplace submission, PR diffs)
-docs/prompt-reports/
-
 # MCP documentation (opt-in via subset=mcp)
 docs/mcp.md
+
+# Superpowers local planning and design artefacts
+docs/superpowers/
 
 # ------------------------------------------------------------------------------
 # Workspace configuration

@@ -7,7 +7,7 @@ description: Create pull request content from the current branch changes
 - Read the [constitution](../../.specify/memory/constitution.md) and honour its non-negotiable rules.
 - Read the Pull Request template at [pull_request_template.md](../pull_request_template.md) so the generated content mirrors it exactly.
 - Read the technology-specific instructions **only for languages actually touched on this branch** (look at the stat in the report; do not preload every instruction file). For example [python.instructions.md](../instructions/python.instructions.md), [shell.instructions.md](../instructions/shell.instructions.md), [makefile.instructions.md](../instructions/makefile.instructions.md).
-- Review the design context under `docs/prompt-reports/` only when it materially helps describe affected components.
+- Review the design context under `.copilot/analysis/` only when it materially helps describe affected components.
 
 ## Goal 🎯
 
@@ -30,7 +30,7 @@ Never expand the full `git diff main...HEAD` into the report; it does not scale 
 
 ### A. Capture a bounded evidence report
 
-Run the evidence script **once** from the repository root. It writes a bounded report to `docs/prompt-reports/gh-pr-content-diff-YYYYMMDD-<slug>.report.txt` (where `<slug>` is `pr-<number>` when a PR is known, otherwise the sanitised branch name). Per-file diffs are capped and only the top-N largest changes are inlined.
+Run the evidence script **once** from the repository root. It writes a bounded report to `.copilot/analysis/gh-pr-content-diff-YYYYMMDD-<slug>.report.txt` (where `<slug>` is `pr-<number>` when a PR is known, otherwise the sanitised branch name). Per-file diffs are capped and only the top-N largest changes are inlined.
 
 ```bash
 bash scripts/quality/gh-pr-content-evidence.sh
@@ -53,7 +53,7 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
 
 ### B. Summarise behavioural impact
 
-1. Enumerate the files, components, and flows touched (map component names to `docs/prompt-reports/*` only when it adds value).
+1. Enumerate the files, components, and flows touched (map component names to `.copilot/analysis/*` only when it adds value).
 2. Identify change categories (bug fix, feature, refactor, documentation, tooling) and note any public interfaces affected.
 3. Record configuration, schema, or dependency updates.
 4. Capture open questions as **Unknown from code – {action needed}**.
@@ -67,7 +67,7 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
 ### D. Detect prior content and determine output file
 
 1. Define the output file path for today, using the same `_date`/`_slug` derivation as §A:
-   - `docs/prompt-reports/gh-pr-content-YYYYMMDD-<slug>.report.md` (where `<slug>` is `pr-<number>` when a PR is known, otherwise the sanitised branch name). This prevents same-day runs on different PRs/branches from overwriting each other.
+   - `.copilot/analysis/gh-pr-content-YYYYMMDD-<slug>.report.md` (where `<slug>` is `pr-<number>` when a PR is known, otherwise the sanitised branch name). This prevents same-day runs on different PRs/branches from overwriting each other.
 2. If the file already exists:
    - Read it fully.
    - Compare against the current diff to identify what has changed since the last run.
@@ -107,7 +107,7 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
 8. **Call out follow-ups**
    - If additional work is deferred, list it succinctly (for example documentation gaps, pending ADRs) under Description or Context as bullet points.
 9. **Write the output file (required)**
-   - Write all generated PR content to `docs/prompt-reports/gh-pr-content-YYYYMMDD-<slug>.report.md` (compute `<slug>` exactly as in §A: `pr-<number>` when a PR is known, otherwise the sanitised branch name).
+   - Write all generated PR content to `.copilot/analysis/gh-pr-content-YYYYMMDD-<slug>.report.md` (compute `<slug>` exactly as in §A: `pr-<number>` when a PR is known, otherwise the sanitised branch name).
    - If the file exists, overwrite it with the updated content.
    - Include a **Generated** footer with the current timestamp.
 
@@ -115,7 +115,7 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
 
 ## Output requirements 📋
 
-- Write the generated content to `docs/prompt-reports/gh-pr-content-YYYYMMDD-<slug>.report.md` (slug as derived in §A).
+- Write the generated content to `.copilot/analysis/gh-pr-content-YYYYMMDD-<slug>.report.md` (slug as derived in §A).
 - Produce copy-ready raw Markdown using the structure below (include the title and every section in order).
 - Replace placeholder ellipses with actual content; never leave template instructions in the final text.
 - Use workspace-relative Markdown links (for example `[scripts/apply.sh](scripts/apply.sh#L10-L40)`).

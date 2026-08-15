@@ -31,7 +31,7 @@ The branch-wide diff (`main...HEAD`) is otherwise **context only**: stat + recen
 
 ### A. Capture a bounded evidence report
 
-Run the evidence script **once** from the repository root. It writes a bounded report to `docs/prompt-reports/git-commit-message-diff-YYYYMMDD-<slug>.report.txt` (where `<slug>` is the sanitised current branch name, so per-branch runs do not overwrite each other). Per-file diffs are capped to keep large changes from blowing up the context.
+Run the evidence script **once** from the repository root. It writes a bounded report to `.copilot/analysis/git-commit-message-diff-YYYYMMDD-<slug>.report.txt` (where `<slug>` is the sanitised current branch name, so per-branch runs do not overwrite each other). Per-file diffs are capped to keep large changes from blowing up the context.
 
 ```bash
 bash scripts/quality/git-commit-evidence.sh
@@ -119,13 +119,13 @@ Omit the `Testing` and `Breaking changes` lines entirely when they do not apply.
 
 ### 5) Write the output file (required)
 
-- Write the same content emitted in step 4 to `docs/prompt-reports/git-commit-message-YYYYMMDD-<slug>.report.md` (compute `<slug>` exactly as in §A: the sanitised current branch name).
+- Write the same content emitted in step 4 to `.copilot/analysis/git-commit-message-YYYYMMDD-<slug>.report.md` (compute `<slug>` exactly as in §A: the sanitised current branch name).
 - If the file exists, overwrite it with the updated content.
 - Include a **Generated** footer with the current UTC timestamp.
 
 ## Output requirements 📋
 
-- Write the generated content to `docs/prompt-reports/git-commit-message-YYYYMMDD-<slug>.report.md` (slug as derived in §A) **and** print the same content inline for copy/paste.
+- Write the generated content to `.copilot/analysis/git-commit-message-YYYYMMDD-<slug>.report.md` (slug as derived in §A) **and** print the same content inline for copy/paste.
 - Ground every statement in the **in-scope** diff (staged > unstaged > branch fallback); if evidence is missing, record **Unknown from code – {suggested action}**.
 - When using the branch-fallback mode, the **Overview** must state explicitly that the message summarises the branch because no staged or unstaged changes were present.
 - When unstaged-only mode is used, the **Overview** must note that nothing is staged yet and suggest `git add` for the relevant files.

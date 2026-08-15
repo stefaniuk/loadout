@@ -30,7 +30,7 @@
 - **Evidence first.** Prefer current code, configuration, contracts, scripts,
   prompts, skills, agents, hooks, and tests over stale Markdown when sources
   disagree.
-- **No normative docs in reports.** `docs/prompt-reports/` stores evidence,
+- **No normative docs in reports.** `.copilot/analysis/` stores evidence,
   research, and reports only. Do not move canonical repo guidance there.
 - **No task-derived authority.** `tasks.md` is never a canonical source.
   Inspect `plan.md` only narrowly when technical context cannot be recovered

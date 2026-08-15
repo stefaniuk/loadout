@@ -81,6 +81,9 @@ are first-class artefacts. See
 ├── specs/
 │   ├── NNN-feature-name/
 │   └── product/
+├── .copilot/
+│   ├── analysis/
+│   └── workflow-mode.json
 └── docs/
     ├── README.md
     ├── architecture.md
@@ -98,9 +101,11 @@ are first-class artefacts. See
     │   └── README.md
     ├── users/
     │   └── README.md
-    ├── prompt-reports/
     └── prompts/
 ```
+
+`.copilot/analysis/` is workspace-local evidence output. It is not part of the
+canonical documentation tree under `docs/`.
 
 ## Step resolution
 
@@ -217,7 +222,7 @@ If an expected anchor is missing, apply these fallback rules:
    derived, not canonical feature history.
 6. **ADR discipline stays intact.** Use ADRs only for long-lived technical
    decisions with alternatives and consequences.
-7. **`docs/prompt-reports/` is evidence-only.** Do not place normative docs
+7. **`.copilot/analysis/` is evidence-only.** Do not place normative docs
    there.
 8. **`plan.md` is narrow context only.** `tasks.md` is never a documentation
    source.

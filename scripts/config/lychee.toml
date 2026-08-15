@@ -3,7 +3,7 @@ offline = true
 accept = [200]
 exclude = [
   ".github/skills/repository-template/assets/**",
-  "docs/prompt-reports/**",
+  ".copilot/analysis/**",
 ]
 exclude_path = [
   # begin: synced skills

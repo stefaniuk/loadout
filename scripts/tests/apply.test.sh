@@ -215,7 +215,8 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -d "${d}/.specify/templates" ]] || return 1
   [[ -f "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" ]] || return 1
   [[ -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
-  [[ -d "${d}/docs/prompt-reports" ]] || return 1
+  [[ -f "${d}/.copilot/analysis/.gitignore" ]] || return 1
+  [[ "$(find "${d}/docs" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')" -eq 1 ]] || return 1
   # .gitignore
   [[ -f "${d}/.gitignore" ]] || return 1
   grep -qF "loadout managed content" "${d}/.gitignore" || return 1
@@ -344,6 +345,7 @@ function test-apply-revert-removes-all-managed-artefacts() {
   [[ ! -d "${d}/.github/prompts" ]] || return 1
   [[ ! -d "${d}/.github/skills" ]] || return 1
   [[ ! -d "${d}/.specify" ]] || return 1
+  [[ ! -d "${d}/.copilot" ]] || return 1
   [[ ! -d "${d}/scripts/hooks" ]] || return 1
   [[ ! -f "${d}/.github/copilot-instructions.md" ]] || return 1
   [[ ! -f "${d}/hooks.json" ]] || return 1
@@ -449,7 +451,8 @@ function test-apply-subset-docs-only() {
   local d="${SUBSET_DOCS_DEST}"
   [[ -f "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" ]] || return 1
   [[ -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
-  [[ -d "${d}/docs/prompt-reports" ]] || return 1
+  [[ "$(find "${d}/docs" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')" -eq 1 ]] || return 1
+  [[ ! -d "${d}/.copilot" ]] || return 1
   [[ ! -d "${d}/.github/agents" ]] || return 1
   [[ ! -d "${d}/.github/prompts" ]] || return 1
   return 0
@@ -459,6 +462,7 @@ function test-apply-subset-project-only() {
 
   local d="${SUBSET_PROJECT_DEST}"
   [[ -f "${d}/.gitignore" ]] || return 1
+  [[ -f "${d}/.copilot/analysis/.gitignore" ]] || return 1
   [[ -f "${d}/.github/copilot-instructions.md" ]] || return 1
   [[ -f "${d}/.github/pull_request_template.md" ]] || return 1
   [[ ! -d "${d}/.github/agents" ]] || return 1

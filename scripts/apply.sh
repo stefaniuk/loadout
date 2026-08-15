@@ -55,7 +55,7 @@ set -euo pipefail
 #   - .specify/templates
 #   - ADR-nnn_Any_Decision_Record_Template.md
 #   - Tech_Radar.md
-#   - docs/prompt-reports/
+#   - .copilot/analysis/.gitignore
 #   - .gitignore content (managed section with begin/end markers)
 #
 # Opt-in only (requires explicit subset token):
@@ -93,7 +93,7 @@ SPECIFY_TEMPLATES="${REPO_ROOT}/.specify/templates"
 PULL_REQUEST_TEMPLATE="${REPO_ROOT}/.github/pull_request_template.md"
 ADR_TEMPLATE="${REPO_ROOT}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
 ADR_TECH_RADAR="${REPO_ROOT}/docs/adr/Tech_Radar.md"
-DOCS_ARCHITECTURE="${REPO_ROOT}/docs/prompt-reports"
+COPILOT_ANALYSIS_DIR="${REPO_ROOT}/.copilot/analysis"
 MCP_VSCODE_EXAMPLE="${REPO_ROOT}/.vscode/mcp.json.example"
 MCP_GITHUB_DIR="${REPO_ROOT}/.github/mcp"
 MCP_DOC="${REPO_ROOT}/docs/mcp.md"
@@ -477,11 +477,11 @@ function copy-shared-resources() {
   fi
   if [[ "${SUBSET_DOCS}" == "true" ]]; then
     copy-adr-template "${destination}"
-    copy-docs-architecture "${destination}"
   else
     subset-skip "docs"
   fi
   if [[ "${SUBSET_PROJECT}" == "true" ]]; then
+    copy-copilot-analysis "${destination}"
     copy-loadout-make-integration "${destination}"
   else
     subset-skip "project-files"
@@ -643,13 +643,13 @@ function revert-shared-resources() {
     fi
   done
 
-  # Remove docs/prompt-reports directory if empty or only contains .gitkeep
-  if [[ -d "${dest}/docs/prompt-reports" ]]; then
-    local arch_contents
-    arch_contents=$(ls -A "${dest}/docs/prompt-reports" 2>/dev/null)
-    if [[ -z "${arch_contents}" ]] || [[ "${arch_contents}" == ".gitkeep" ]]; then
-      print-info "Removing ${dest}/docs/prompt-reports"
-      rm -rf "${dest:?}/docs/prompt-reports"
+  # Remove .copilot/analysis directory if empty or only contains .gitignore.
+  if [[ -d "${dest}/.copilot/analysis" ]]; then
+    local analysis_contents
+    analysis_contents=$(ls -A "${dest}/.copilot/analysis" 2>/dev/null)
+    if [[ -z "${analysis_contents}" ]] || [[ "${analysis_contents}" == ".gitignore" ]]; then
+      print-info "Removing ${dest}/.copilot/analysis"
+      rm -rf "${dest:?}/.copilot/analysis"
     fi
   fi
 
@@ -688,7 +688,7 @@ function revert-shared-resources() {
   fi
 
   # Clean up empty parent directories
-  for dir in "${dest}/.github" "${dest}/docs/adr" "${dest}/docs" "${dest}/.vscode" "${dest}/scripts"; do
+  for dir in "${dest}/.github" "${dest}/docs/adr" "${dest}/docs" "${dest}/.vscode" "${dest}/scripts" "${dest}/.copilot"; do
     if [[ -d "${dir}" ]] && [[ -z "$(ls -A "${dir}" 2>/dev/null)" ]]; then
       print-info "Removing empty directory ${dir}"
       rmdir "${dir}"
@@ -1105,28 +1105,18 @@ function copy-adr-template() {
   return 0
 }
 
-# Copy docs/prompt-reports directory to the destination.
-# Only copies .gitkeep if the destination directory is empty or doesn't exist.
+# Copy the tracked .copilot/analysis scaffold to the destination.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
-function copy-docs-architecture() {
+function copy-copilot-analysis() {
 
-  local dest="$1/docs/prompt-reports"
+  local dest="$1/.copilot/analysis"
   mkdir -p "${dest}"
 
-  print-info "Copying docs/prompt-reports to ${dest}"
+  print-info "Copying .copilot/analysis scaffold to ${dest}"
+  cp -R "${COPILOT_ANALYSIS_DIR}/." "${dest}/"
 
-  # Check if destination directory has any files (excluding hidden files that start with .)
-  local file_count
-  file_count=$(find "${dest}" -maxdepth 1 -type f ! -name ".*" 2>/dev/null | wc -l | tr -d ' ')
-
-  if [[ "${file_count}" -eq 0 ]]; then
-    # Directory is empty, copy everything including .gitkeep
-    cp -R "${DOCS_ARCHITECTURE}/." "${dest}/"
-  else
-    # Directory has files, copy everything except .gitkeep
-    find "${DOCS_ARCHITECTURE}" -maxdepth 1 -type f ! -name ".gitkeep" -exec cp {} "${dest}/" \; 2>/dev/null || true
-  fi
+  return 0
 }
 
 # Update .gitignore with loadout managed content.
@@ -1279,7 +1269,7 @@ Always copied (default/glue layer):
     Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
     Spec-kit agents, prompts, templates and constitution
     Shell, Docker, Makefile instructions and prompts
-    docs/prompt-reports/, ADR template, Tech_Radar.md
+    .copilot/analysis/.gitignore, ADR template, Tech_Radar.md
     managed .gitignore section
 
 Examples:

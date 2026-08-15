@@ -143,7 +143,7 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
 
 ## 7. Standard links 🔗
 
-- [RD-LNK-001] Include relative links to `LICENCE.md`, `./github/contributing.md`, `./github/SECURITY.md`, `./github/CODE_OF_CONDUCT.md`, and key docs entry points (for example files in the `docs/prompt-reports` directory) whenever those files exist.
+- [RD-LNK-001] Include relative links to `LICENCE.md`, `./github/contributing.md`, `./github/SECURITY.md`, `./github/CODE_OF_CONDUCT.md`, and key canonical docs entry points (for example `docs/README.md`, `docs/architecture.md`, or `docs/onboarding.md`) whenever those files exist.
 - [RD-LNK-002] Use relative links for every in-repo reference, ensuring they work on forks and mirrors without modification.
 
 ## 8. Badges (optional) 🎖️

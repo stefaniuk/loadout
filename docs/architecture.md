@@ -51,6 +51,11 @@ The repository supports two mutually exclusive lifecycle families in the same co
 
 Only one family should be active in a given session or worktree. The active mode is stored locally in `.copilot/workflow-mode.json`, changed with `make workflow-use mode=speckit` or `make workflow-use mode=superpowers`, and read by the SessionStart hook through `scripts/hooks/workflow-mode.sh`.
 
+The `.copilot/` directory now has two distinct roles:
+
+- `.copilot/workflow-mode.json` is ignored local workflow state.
+- `.copilot/analysis/` is a tracked scaffold for ignored local analysis output such as bounded diffs, review notes, and architecture evidence.
+
 Why an explicit switch is used instead of branch-name inference:
 
 - It is visible and reversible.
@@ -118,7 +123,6 @@ flowchart TD
   needClarification -- Yes --> clarify["/speckit-clarify"]
   clarify --> specify
   needClarification -- No --> plan["/speckit-plan"]
-  plan -.- planNote["💡 Example (run +1): Run again to verify all items on the Plan Completion Checklist are satisfied"]
   plan -.- planNote2["💡 Example: Use the requirements from the generated spec. Optimise for this repository's specification-first workflow, deterministic behaviour, TDD, and explicit contracts. Choose the implementation stack, architecture boundaries, storage approach, interfaces, test strategy, and rollout approach."]
 
   plan --> domainCoverage{Anything missing?}
@@ -126,7 +130,6 @@ flowchart TD
   checklist --> plan
   checklist -.- checklistNote["💡 Example: Create a checklist for building, assembling and testing the deployment artefacts of all the components being implemented"]
   domainCoverage -- No --> tasks["/speckit-tasks"]
-  tasks -.- tasksNote["💡 Example (run +1): Run again to verify all items on the Tasks Completion Checklist items are satisfied"]
 
   tasks --> consistency{Need consistency check?}
   consistency -- Yes --> analyze["/speckit-analyze"]

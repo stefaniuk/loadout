@@ -141,6 +141,6 @@ LikeC4 fails silently on syntax errors - invalid elements are dropped without di
 ## 7. File conventions 📁
 
 - [LC4-STY-001] Use the `.likec4` extension for LikeC4 source files (`.c4` also works but `.likec4` is unambiguous).
-- [LC4-STY-002] Place architecture diagrams under `docs/prompt-reports/`.
+- [LC4-STY-002] Place temporary architecture diagrams under `.copilot/analysis/`.
 - [LC4-STY-003] Use a single `workspace.likec4` file for small projects; split into multiple files for larger models.
 - [LC4-STY-004] Add a comment header with inputs and evidence pointers at the top of each file.

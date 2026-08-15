@@ -9,7 +9,7 @@ set -euo pipefail
 #   $ PR_REF=123 TOP_N_FILES=30 PER_FILE_CAP=600 ./scripts/quality/gh-pr-content-evidence.sh
 #
 # Output:
-#   docs/prompt-reports/gh-pr-content-diff-YYYYMMDD-<slug>.report.txt
+#   .copilot/analysis/gh-pr-content-diff-YYYYMMDD-<slug>.report.txt
 #
 # The report captures commit log, stat, dirstat, top-N per-file diffs (capped),
 # and any pending staged/unstaged changes.
@@ -17,6 +17,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+ANALYSIS_DIR=".copilot/analysis"
 _date=$(date -u +%Y%m%d)
 _pr_ref=${PR_REF:-}
 _pr_num=$( (command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1 \
@@ -26,7 +27,7 @@ if [[ -n "$_pr_num" ]]; then
 else
   _slug=$(git rev-parse --abbrev-ref HEAD | tr '/' '-' | tr -cd 'A-Za-z0-9_-')
 fi
-_report="docs/prompt-reports/gh-pr-content-diff-${_date}-${_slug}.report.txt"
+_report="${ANALYSIS_DIR}/gh-pr-content-diff-${_date}-${_slug}.report.txt"
 _top_n=${TOP_N_FILES:-20}
 _per_file_cap=${PER_FILE_CAP:-400}
 

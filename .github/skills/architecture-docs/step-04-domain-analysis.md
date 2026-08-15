@@ -4,18 +4,18 @@ Document domains, bounded contexts, and integration patterns (DDD-style, evidenc
 
 ## Goal
 
-Create (or update) domain analysis documents at `docs/prompt-reports/domain-*.md`.
+Create (or update) domain analysis documents at `.copilot/analysis/domain-*.md`.
 
-Also ensure they are linked from the architecture overview at `docs/prompt-reports/README.md`.
+Also ensure they are linked from the architecture overview at `.copilot/analysis/README.md`.
 
 ## Discovery (run before writing)
 
 ### A. Refresh what is already known
 
 1. Re-read:
-   - `docs/prompt-reports/repository-map.md`
-   - `docs/prompt-reports/component-*.md`
-   - `docs/prompt-reports/runtime-flow-*.md`
+   - `.copilot/analysis/repository-map.md`
+   - `.copilot/analysis/component-*.md`
+   - `.copilot/analysis/runtime-flow-*.md`
 2. Extract into working notes:
    - Component ownership (who owns which data/processes)
    - Datastores and entities each component owns
@@ -52,7 +52,7 @@ If domain boundaries are not explicit, record them as **Unknown from code - prop
 
 ### 2) Create one document per domain
 
-For each domain, create `docs/prompt-reports/domain-[XXX]-[name].md`, where:
+For each domain, create `.copilot/analysis/domain-[XXX]-[name].md`, where:
 
 - `[XXX]` is a stable numeric order
 - `[name]` is short and meaningful (kebab-case)
@@ -136,7 +136,7 @@ For each integration, capture:
 
 ### 3) Build a context map
 
-In `docs/prompt-reports/README.md`, add (or update) a **Domain Context Map** section with a single diagram showing all domains and the integration patterns between them.
+In `.copilot/analysis/README.md`, add (or update) a **Domain Context Map** section with a single diagram showing all domains and the integration patterns between them.
 
 Use a Mermaid flowchart:
 
@@ -151,7 +151,7 @@ Annotate each edge with the integration pattern.
 
 ### 4) Update the index
 
-Update `docs/prompt-reports/README.md` with a **Domain Analysis** section linking to every domain document (in `[XXX]` order), plus the context map.
+Update `.copilot/analysis/README.md` with a **Domain Analysis** section linking to every domain document (in `[XXX]` order), plus the context map.
 
 ### 5) Keep unknowns visible (no guessing)
 
