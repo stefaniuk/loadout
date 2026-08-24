@@ -28,9 +28,16 @@ You **MUST** adhere to the following mandatory requirements when generating deve
 
 **Base requirements:** Follow all rules in [copilot-instructions.md](/.github/copilot-instructions.md), particularly:
 
-- Repository Tooling
-- Test-Driven Development
+- Repository tooling
+- Test-driven development
 - Repository verification policy
+
+## Feature Class Detection
+
+This skill is best suited to multi-phase features with clear user stories, dependencies, and independently testable outcomes.
+
+- For narrow repository-internal changes such as make targets, scripts, docs, or patch maintenance, keep the task structure deliberately small
+- Do not invent extra phases, user stories, or contracts solely to mimic a larger application workflow
 
 ## Show & Tell Sections (Mandatory)
 
@@ -51,8 +58,13 @@ AI Assistant **MUST** execute every Show & Tell step during `/speckit-implement`
 - Every step must include explicit pass/fail criteria
 - If a step fails, update tasks and/or implementation, then re-run the step
 - Do not mark a phase or user story complete until all Show & Tell steps pass
+- For infrastructure, scripts, documentation, or reporting tools, lightweight Show & Tell steps are acceptable when they stay explicit and verifiable
 
 This requirement is non-optional and must not be skipped or missed.
+
+### Feature Scope Note
+
+- Use the smallest task structure that still maps cleanly to the approved specification
 
 **Format example:**
 
@@ -61,7 +73,7 @@ This requirement is non-optional and must not be skipped or missed.
 
 ```bash
 # Start the development server
-make run
+make run # or `make up`
 
 # Expected: Server running at http://localhost:3000
 ```
