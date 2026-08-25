@@ -14,10 +14,6 @@
 # Instructions (shell, docker, makefile, readme, and technology-specific)
 .github/instructions/
 
-# MCP server bindings (opt-in via subset=mcp)
-.github/mcp/
-.vscode/mcp.json.example
-
 # Prompts (architecture, enforce, review, speckit, util)
 .github/prompts/
 
@@ -44,9 +40,6 @@
 # Cross-agent baseline and hook executables
 # ------------------------------------------------------------------------------
 
-# Cross-agent always-on instructions (copied to destination repo root)
-AGENTS.md
-
 # Hook executables invoked by .github/hooks/*.json
 scripts/hooks/
 
@@ -60,9 +53,6 @@ scripts/hooks/
 # ADR template
 docs/adr/ADR-nnn_Any_Decision_Record_Template.md
 docs/adr/Tech_Radar.md
-
-# MCP documentation (opt-in via subset=mcp)
-docs/mcp.md
 
 # Superpowers local planning and design artefacts
 docs/superpowers/

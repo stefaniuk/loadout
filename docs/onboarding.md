@@ -148,7 +148,6 @@ Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `
 | `docs`         | `docs/adr/` template + Tech Radar                                                                                                                                                   |
 | `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `.vscode/settings.json`, `.gitignore`, `.copilot/analysis/.gitignore`, hook scripts                    |
 | `speckit`      | Narrows `skills` to `speckit-*` and `prompts` to `review.speckit-*` files, and pulls in the `.specify/*` content. Combine with `skills` or `prompts` to widen back to the full set. |
-| `mcp`          | Opt-in MCP example pack: `.vscode/mcp.json.example`, `.github/mcp/` per-server READMEs, and `docs/mcp.md`. Included by default and by `all`; otherwise only when listed explicitly. |
 
 Examples:
 

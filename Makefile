@@ -22,16 +22,12 @@ lint-shell: # Check shell scripts @Quality
 lint-customisations: # Validate customisation artefact frontmatter and naming @Quality
 	./scripts/quality/validate-customisations.sh
 
-lint-mcp: # Validate .vscode/mcp.json.example syntax @Quality
-	./scripts/quality/check-mcp-json.sh
-
 lint: # Run linter to check code style and errors @Quality
 	$(MAKE) lint-file-format
 	$(MAKE) lint-markdown-format
 	$(MAKE) lint-markdown-links
 	$(MAKE) lint-shell
 	$(MAKE) lint-customisations
-	$(MAKE) lint-mcp
 
 test: # Run fast local test suite (apply + specify + subagent-hooks + install). Slower tests run in CI via `test-all` @Testing
 	@bash -c '\
@@ -124,7 +120,6 @@ ${VERBOSE}.SILENT: \
 	lint-file-format \
 	lint-markdown-format \
 	lint-markdown-links \
-	lint-mcp \
 	lint-shell \
 	skill-add \
 	skill-patch \

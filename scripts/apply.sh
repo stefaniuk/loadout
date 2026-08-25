@@ -14,13 +14,10 @@ set -euo pipefail
 #   clean=true              # Remove destination .github/{agents,instructions,prompts,skills} before copying, default is 'false'
 #   revert=true             # Remove all loadout-managed artifacts from destination and exit, default is 'false'
 #   subset=<csv>            # Restrict copy to named categories (comma-separated). Valid tokens:
-#                           #   agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, mcp, all
+#                           #   agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, all
 #                           # Omitted or 'all' preserves the default full-copy behaviour byte-for-byte.
 #                           # The 'speckit' token narrows the prompts copy to review.speckit-* prompts only
 #                           # when used WITHOUT 'prompts'.
-#                           # The 'mcp' token is opt-in only: MCP assets are NOT copied by default and NOT
-#                           # included by 'all'. They are copied only when 'mcp' is named explicitly in the
-#                           # subset csv (e.g. subset=all,mcp or subset=mcp).
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
 # Technology switches (default is 'false' for all, set to 'true' to include):
@@ -58,9 +55,6 @@ set -euo pipefail
 #   - .copilot/analysis/.gitignore
 #   - .gitignore content (managed section with begin/end markers)
 #
-# Opt-in only (requires explicit subset token):
-#   - MCP example pack (.vscode/mcp.json.example, .github/mcp/, docs/mcp.md) - subset=mcp
-#
 # Exit codes:
 #   0 - All files copied successfully
 #   1 - Missing or invalid arguments
@@ -94,9 +88,6 @@ PULL_REQUEST_TEMPLATE="${REPO_ROOT}/.github/pull_request_template.md"
 ADR_TEMPLATE="${REPO_ROOT}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
 ADR_TECH_RADAR="${REPO_ROOT}/docs/adr/Tech_Radar.md"
 COPILOT_ANALYSIS_DIR="${REPO_ROOT}/.copilot/analysis"
-MCP_VSCODE_EXAMPLE="${REPO_ROOT}/.vscode/mcp.json.example"
-MCP_GITHUB_DIR="${REPO_ROOT}/.github/mcp"
-MCP_DOC="${REPO_ROOT}/docs/mcp.md"
 GITIGNORE_LOADOUT="${REPO_ROOT}/.gitignore.loadout"
 
 # Begin/end markers for managed .gitignore content
@@ -119,7 +110,7 @@ DEFAULT_TEMPLATES=("Makefile.template" "Dockerfile.template" "compose.yaml.templ
 ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "playwright")
 
 # Valid subset selector tokens (closed set).
-SUBSET_VALID_TOKENS=("agents" "hooks" "instructions" "prompts" "skills" "specify" "docs" "project" "speckit" "mcp" "all")
+SUBSET_VALID_TOKENS=("agents" "hooks" "instructions" "prompts" "skills" "specify" "docs" "project" "speckit" "all")
 
 # Subset category flags - populated by parse-subset. Default (no subset) enables all.
 SUBSET_AGENTS=true
@@ -131,9 +122,6 @@ SUBSET_SPECIFY=true
 SUBSET_DOCS=true
 SUBSET_PROJECT=true
 SUBSET_SPECKIT=true
-# MCP is opt-in only: NOT copied by default and NOT enabled by 'all'. It is
-# included only when the subset csv explicitly contains 'mcp'.
-SUBSET_MCP=false
 # True only when subset was explicitly set (used to gate observability messages).
 SUBSET_EXPLICIT=false
 # Narrowing flag - true when subset contains 'speckit' but not 'prompts'.
@@ -329,7 +317,6 @@ function parse-subset() {
   SUBSET_DOCS=false
   SUBSET_PROJECT=false
   SUBSET_SPECKIT=false
-  SUBSET_MCP=false
 
   local -a tokens=()
   local token lc trimmed valid match
@@ -358,7 +345,7 @@ function parse-subset() {
       fi
     done
     if [[ "${valid}" != "true" ]]; then
-      echo "[apply] ERROR: invalid subset value '${lc}'. Valid values: agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, mcp, all." >&2
+      echo "[apply] ERROR: invalid subset value '${lc}'. Valid values: agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, all." >&2
       exit 1
     fi
     seen="${seen}${lc} "
@@ -374,7 +361,6 @@ function parse-subset() {
     SUBSET_DOCS=true
     SUBSET_PROJECT=true
     SUBSET_SPECKIT=true
-    # MCP remains opt-in even with 'all'; require explicit 'mcp' token.
     return 0
   fi
 
@@ -387,7 +373,6 @@ function parse-subset() {
   [[ "${seen}" == *" docs "* ]] && SUBSET_DOCS=true
   [[ "${seen}" == *" project "* ]] && SUBSET_PROJECT=true
   [[ "${seen}" == *" speckit "* ]] && SUBSET_SPECKIT=true
-  [[ "${seen}" == *" mcp "* ]] && SUBSET_MCP=true
 
   # Speckit narrowing: when the caller asked for speckit but NOT prompts,
   # restrict prompts to review.speckit-*.
@@ -495,11 +480,6 @@ function copy-shared-resources() {
     update-gitignore "${destination}"
   else
     subset-skip "gitignore"
-  fi
-  if [[ "${SUBSET_MCP}" == "true" ]]; then
-    copy-mcp-assets "${destination}"
-  else
-    subset-skip "mcp"
   fi
 
   return 0
@@ -671,20 +651,6 @@ function revert-shared-resources() {
       rm -f "${temp_file}" "${dest}/.gitignore"
       print-info "Removed empty .gitignore"
     fi
-  fi
-
-  # Remove MCP example pack
-  if [[ -f "${dest}/.vscode/mcp.json.example" ]]; then
-    print-info "Removing ${dest}/.vscode/mcp.json.example"
-    rm -f "${dest}/.vscode/mcp.json.example"
-  fi
-  if [[ -d "${dest}/.github/mcp" ]]; then
-    print-info "Removing ${dest}/.github/mcp"
-    rm -rf "${dest:?}/.github/mcp"
-  fi
-  if [[ -f "${dest}/docs/mcp.md" ]]; then
-    print-info "Removing ${dest}/docs/mcp.md"
-    rm -f "${dest}/docs/mcp.md"
   fi
 
   # Clean up empty parent directories
@@ -1192,40 +1158,6 @@ function update-gitignore() {
   return 0
 }
 
-# Copy MCP example pack to the destination.
-# Distributes .vscode/mcp.json.example, .github/mcp/ (per-server READMEs) and
-# docs/mcp.md. The .example suffix prevents VS Code from auto-loading the
-# config so the explicit trust prompt remains in effect.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function copy-mcp-assets() {
-
-  local dest="$1"
-
-  if [[ -f "${MCP_VSCODE_EXAMPLE}" ]]; then
-    local dest_vscode="${dest}/.vscode"
-    mkdir -p "${dest_vscode}"
-    print-info "Copying .vscode/mcp.json.example to ${dest_vscode}"
-    cp "${MCP_VSCODE_EXAMPLE}" "${dest_vscode}/"
-  fi
-
-  if [[ -d "${MCP_GITHUB_DIR}" ]]; then
-    local dest_mcp="${dest}/.github/mcp"
-    mkdir -p "${dest_mcp}"
-    print-info "Copying .github/mcp to ${dest_mcp}"
-    copy-directory-excluding-git "${MCP_GITHUB_DIR}" "${dest_mcp}"
-  fi
-
-  if [[ -f "${MCP_DOC}" ]]; then
-    local dest_docs="${dest}/docs"
-    mkdir -p "${dest_docs}"
-    print-info "Copying docs/mcp.md to ${dest_docs}"
-    cp "${MCP_DOC}" "${dest_docs}/"
-  fi
-
-  return 0
-}
-
 # Copy a directory without bringing across any nested .git metadata.
 # Arguments (provided as function parameters):
 #   $1=[source directory path]
@@ -1273,7 +1205,7 @@ Other options:
     revert=true             Remove all loadout-managed artifacts and exit
     subset=<csv>            Restrict copy to named categories (comma-separated).
                             Valid tokens: agents, hooks, instructions, prompts,
-                            skills, specify, docs, project, speckit, mcp, all.
+                            skills, specify, docs, project, speckit, all.
                             Omitted or 'all' preserves full-copy behaviour.
     VERBOSE=true            Show all executed commands
 

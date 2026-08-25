@@ -13,7 +13,6 @@ Use the links below to pick the right level of detail. Generated files stay gene
 - [onboarding.md](onboarding.md) explains setup paths, first-run validation, selective installs, and contributor flow.
 - [architecture.md](architecture.md) explains the customisation model, lifecycle, governance gates, and hook boundaries.
 - [conventions.md](conventions.md) defines naming, placement, frontmatter, and ADR rules.
-- [mcp.md](mcp.md) documents the optional MCP example pack, trust model, and secret-handling rules.
 - `docs/adr/` stores long-lived architecture and tooling decisions, including the [Tech Radar](adr/Tech_Radar.md).
 
 The wider documentation system also reserves canonical homes for `docs/reference/`, `docs/how-to/`, `docs/tutorials/`, `docs/explanation/`, `docs/operations/`, `docs/developers/`, and `docs/users/`. Create those areas only when the repository ships matching surfaces or evidence-backed content.
@@ -22,7 +21,6 @@ The wider documentation system also reserves canonical homes for `docs/reference
 
 - Contributors starting work should begin with [onboarding.md](onboarding.md), [conventions.md](conventions.md), and [../.github/contributing.md](../.github/contributing.md).
 - Maintainers changing architecture or tooling should read [architecture.md](architecture.md), `docs/adr/`, and the [Tech Radar](adr/Tech_Radar.md).
-- Teams evaluating optional MCP servers should read [mcp.md](mcp.md) before copying the example configuration.
 - Readers browsing the shipped asset surface should use the root [README](../README.md).
 
 ## Generated inventories and reports

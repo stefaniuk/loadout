@@ -1,6 +1,6 @@
 # loadout
 
-A specification-first GitHub Copilot customisation toolkit for teams that want reusable prompts, instructions, agents, skills, hooks, and MCP examples to behave consistently across repositories.
+A specification-first GitHub Copilot customisation toolkit for teams that want reusable prompts, instructions, agents, skills, and hooks to behave consistently across repositories.
 
 ## Why this project exists
 
@@ -49,14 +49,12 @@ The repository collects the files and helper scripts needed to run a specificati
 - Instruction packs for languages and tools such as Python, TypeScript, Go, Rust, Docker, Terraform, and Make.
 - Prompts and workflow skills for specification-first and Superpowers-based planning, implementation, review, and convergence workflows.
 - Reusable skills for documentation, code review, enforcement audits, repository templating, and framework-specific setup.
-- Deterministic hooks and quality scripts for markdown, links, shell, MCP config, and customisation metadata.
-- Optional MCP example packs with trust guidance and least-privilege defaults.
+- Deterministic hooks and quality scripts for markdown, links, shell, and customisation metadata.
 
 ### Non-goals
 
 - It is not a runtime replacement for GitHub Copilot or VS Code.
 - It does not replace the language-specific build, lint, or test tooling inside a downstream repository.
-- It does not auto-enable MCP servers or inline secrets into workspace configuration.
 
 ## How it solves the problem
 
@@ -85,7 +83,7 @@ The README covers the workflows most people need first. Use the docs for the ful
 
 ### Configuration
 
-Run `make config` when you want a local working copy ready for validation and contribution. When you apply the toolkit to another repository, pass the destination through `dest=/path/to/repo`. Use `subset=` and the language flags, such as `python=true`, when you only want part of the toolkit. MCP examples stay opt-in and are shipped as `.example` files.
+Run `make config` when you want a local working copy ready for validation and contribution. When you apply the toolkit to another repository, pass the destination through `dest=/path/to/repo`. Use `subset=` and the language flags, such as `python=true`, when you only want part of the toolkit.
 
 ### Common workflows
 
@@ -138,7 +136,6 @@ Further reading: [docs/onboarding.md#selective-install](docs/onboarding.md#selec
 ### Examples
 
 - Read the naming and placement rules in [docs/conventions.md](docs/conventions.md).
-- Review the optional MCP pack in [docs/mcp.md](docs/mcp.md).
 
 ## Documentation
 
@@ -168,7 +165,7 @@ These are the top-level paths most contributors need to recognise first.
 .
 ├── .github/      # Agents, instructions, prompts, skills, hooks, and repo governance files
 ├── .specify/     # Project constitution and spec-kit templates
-├── docs/         # Architecture, onboarding, ADRs, and MCP guidance
+├── docs/         # Architecture, onboarding, and ADRs
 ├── scripts/      # Apply, import, install, and quality helpers
 ├── tests/        # Repository tests
 ├── Makefile      # Main entrypoint for setup, validation, and apply workflows

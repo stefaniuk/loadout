@@ -33,7 +33,6 @@ Out of scope:
 
 - Issues in downstream consumer repositories caused by misconfiguration.
 - Issues in GitHub Copilot or VS Code themselves (report to the upstream vendor).
-- Third-party MCP servers integrated by consumers.
 
 ## Responsible disclosure
 
