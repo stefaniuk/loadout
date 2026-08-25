@@ -1114,7 +1114,24 @@ function copy-copilot-analysis() {
   mkdir -p "${dest}"
 
   print-info "Copying .copilot/analysis scaffold to ${dest}"
-  cp -R "${COPILOT_ANALYSIS_DIR}/." "${dest}/"
+
+  # Copy only the git-tracked scaffold, not locally generated (git-ignored)
+  # analysis artefacts, so a later revert can cleanly remove the directory.
+  local copied=false
+  if command -v git > /dev/null 2>&1; then
+    local file rel
+    while IFS= read -r -d '' file; do
+      rel="${file#.copilot/analysis/}"
+      mkdir -p "${dest}/$(dirname "${rel}")"
+      cp "${REPO_ROOT}/${file}" "${dest}/${rel}"
+      copied=true
+    done < <(git -C "${REPO_ROOT}" ls-files -z -- .copilot/analysis 2>/dev/null)
+  fi
+
+  if [[ "${copied}" == false ]]; then
+    # Fallback when git metadata is unavailable: copy just the scaffold file.
+    [[ -f "${COPILOT_ANALYSIS_DIR}/.gitignore" ]] && cp "${COPILOT_ANALYSIS_DIR}/.gitignore" "${dest}/"
+  fi
 
   return 0
 }

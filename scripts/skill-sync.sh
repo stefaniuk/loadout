@@ -132,6 +132,11 @@ function update-lychee-ignore() {
   local marker_begin="  # begin: synced skills"
   local marker_end="  # end: synced skills"
 
+  # Only update an existing config; never fabricate a partial lychee.toml.
+  if [[ ! -f "$lychee_file" ]]; then
+    return 0
+  fi
+
   local entries
   entries=$(yq -r '.skills[].name' "$CONFIG_FILE" | sort)
   local block="${marker_begin}"
