@@ -2,7 +2,7 @@
 # Add entries here and run `make skill-sync` to fetch them.
 # Only `name`, `repo`, and `path` are required. The `ref` defaults to `main`
 # and `sha` is populated automatically on first sync.
-# Shared local skill patches live under scripts/skill-patches/.
+# Shared local skill patches live under scripts/config/skill-patches/.
 skills:
   # Superpowers skills
   - name: brainstorming

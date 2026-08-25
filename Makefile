@@ -17,7 +17,7 @@ lint-markdown-links: # Check markdown links @Quality
 	output=$$(check=all ./scripts/quality/check-markdown-links.sh 2>&1) && echo "markdown links: ok" || { echo "$$output"; exit 1; }
 
 lint-shell: # Check shell scripts @Quality
-	FORCE_USE_DOCKER=false $(MAKE) check-shell-lint
+	$(MAKE) check-shell-lint
 
 lint-customisations: # Validate customisation artefact frontmatter and naming @Quality
 	./scripts/quality/validate-customisations.sh
@@ -29,44 +29,26 @@ lint: # Run linter to check code style and errors @Quality
 	$(MAKE) lint-shell
 	$(MAKE) lint-customisations
 
-test: # Run fast local test suite (apply + specify + subagent-hooks + install). Slower tests run in CI via `test-all` @Testing
+test: # Run comprehensive test suite @Testing
 	@bash -c '\
 		d=$$(mktemp -d); trap "rm -rf $$d" EXIT; \
-		bash ./scripts/tests/apply.test.sh > "$$d/apply.log" 2>&1 & p1=$$!; \
-		bash ./scripts/tests/specify.test.sh > "$$d/specify.log" 2>&1 & p2=$$!; \
-		bash ./scripts/tests/skill-sync.test.sh > "$$d/sync.log" 2>&1 & p3=$$!; \
-		ret=0; \
-		wait $$p1 && echo "apply: ok" || { echo "apply: FAIL"; cat "$$d/apply.log"; ret=1; }; \
-		wait $$p2 && echo "specify: ok" || { echo "specify: FAIL"; cat "$$d/specify.log"; ret=1; }; \
-		wait $$p3 && echo "skill-sync: ok" || { echo "skill-sync: FAIL"; cat "$$d/sync.log"; ret=1; }; \
-		[ $$ret -eq 0 ] || exit 1; \
-		bash ./scripts/tests/session-start-hook.test.sh > /dev/null 2>&1 && echo "session-start-hook: ok" || exit 1; \
-		bash ./scripts/tests/subagent-hooks.test.sh > /dev/null 2>&1 && echo "subagent-hooks: ok" || exit 1; \
-		bash ./scripts/tests/workflow-mode.test.sh > /dev/null 2>&1 && echo "workflow-mode: ok" || exit 1; \
-		bash ./scripts/tests/install.test.sh > /dev/null 2>&1 && echo "install: ok" || exit 1 \
+		tests="apply speckit-sync import skill-sync session-start-hook subagent-hooks workflow-mode revert skill-remove"; \
+		pids=""; \
+		for t in $$tests; do \
+			bash ./scripts/tests/$$t.test.sh > "$$d/$$t.log" 2>&1 & \
+			pids="$$pids $$t:$$!"; \
+		done; \
+		status=0; \
+		for entry in $$pids; do \
+			t=$${entry%%:*}; p=$${entry##*:}; \
+			if wait "$$p"; then echo "$$t: ok"; \
+			else echo "$$t: FAIL"; cat "$$d/$$t.log"; status=1; fi; \
+		done; \
+		exit $$status \
 	'
 
-test-import: # Run import wrapper tests (slower; included in `test-all` and CI) @Testing
-	bash ./scripts/tests/import.test.sh && echo "import: ok"
-
-test-all: # Run the whole test suite (fast + import); used by the CI/CD workflow @Testing
-	$(MAKE) test
-	$(MAKE) test-import
-
-test-install: # Run install/uninstall wrapper tests @Testing
-	bash ./scripts/tests/install.test.sh && echo "install: ok"
-
-test-session-start-hook: # Run SessionStart hook smoke tests @Testing
-	bash ./scripts/tests/session-start-hook.test.sh && echo "session-start-hook: ok"
-
-test-skill-sync: # Run external skill sync tests @Testing
-	bash ./scripts/tests/skill-sync.test.sh && echo "skill-sync: ok"
-
-test-workflow-mode: # Run workflow mode command-surface tests @Testing
-	bash ./scripts/tests/workflow-mode.test.sh && echo "workflow-mode: ok"
-
-clone-rt: # Clone the repository template into .github/skills/repository-template @Operations
-	.github/skills/repository-template/scripts/git-clone-repository-template.sh
+speckit-sync: # Fetch upstream spec-kit and apply local patches; optional: patch=[true|false] @Operations
+	patch="$(or $(patch),true)" ./scripts/speckit-sync.sh
 
 skill-sync: # Fetch/update external skills declared in scripts/config/skills.yaml and apply local patches; optional: name=[skill], patch=[true|false] @Operations
 	name="$(name)" patch="$(or $(patch),true)" ./scripts/skill-sync.sh
@@ -79,10 +61,17 @@ skill-add: # Add a new external skill to config and sync it; mandatory: name=[na
 	name="$(name)" repo="$(repo)" path="$(path)" ref="$(or $(ref),main)" ./scripts/skill-add.sh
 	name="$(name)" ./scripts/skill-sync.sh
 
-specify: # Fetch upstream spec-kit and apply local patches; optional: patch=[true|false] @Operations
-	patch="$(or $(patch),true)" ./scripts/specify.sh
+skill-remove: # Remove an external skill from config and delete its synced directory; mandatory: name=[name] @Operations
+	$(if $(name),,$(error Usage: make skill-remove name=my-skill))
+	name="$(name)" ./scripts/skill-remove.sh
 
-apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean|revert=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright=[true] @Operations
+rt-clone: # Clone the repository template into .github/skills/repository-template @Operations
+	.github/skills/repository-template/scripts/git-clone-repository-template.sh
+
+rt-remove: # Remove the cloned repository template assets from .github/skills/repository-template @Operations
+	rm -rf .github/skills/repository-template/assets
+
+apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright=[true] @Operations
 	$(if $(dest),,$(error dest is required. Usage: make apply dest=/path/to/destination))
 	./scripts/apply.sh "$(dest)"
 
@@ -90,6 +79,9 @@ import: # Import changed prompt files from a destination repository; mandatory: 
 	$(if $(dest),,$(error dest is required. Usage: make import dest=/path/to/destination))
 	./scripts/import.sh "$(dest)"
 
+revert: # Remove all loadout-managed artifacts from a destination repository (opposite of apply); mandatory: dest=[path]; optional: dry-run=[true|false] @Operations
+	$(if $(dest),,$(error dest is required. Usage: make revert dest=/path/to/destination))
+	./scripts/revert.sh --dest "$(dest)" $(if $(filter true,$(dry-run)),--dry-run)
 
 clean:: # Remove project-specific generated files (main) @Operations
 	find .copilot/analysis -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
@@ -104,14 +96,13 @@ clean:: # Remove project-specific generated files (main) @Operations
 
 config:: # Configure development environment (main) @Configuration
 	$(MAKE) _install-dependencies
-	$(MAKE) clone-rt
+	$(MAKE) rt-clone
 
 # ==============================================================================
 
 ${VERBOSE}.SILENT: \
 	apply \
 	clean \
-	clone-rt \
 	config \
 	format \
 	import \
@@ -121,13 +112,12 @@ ${VERBOSE}.SILENT: \
 	lint-markdown-format \
 	lint-markdown-links \
 	lint-shell \
+	revert \
+	rt-clone \
+	rt-remove \
 	skill-add \
 	skill-patch \
+	skill-remove \
 	skill-sync \
-	specify \
+	speckit-sync \
 	test \
-	test-session-start-hook \
-	test-skill-sync \
-	test-all \
-	test-import \
-	test-workflow-mode \

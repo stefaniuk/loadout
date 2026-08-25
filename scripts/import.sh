@@ -28,7 +28,8 @@ set -euo pipefail
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# LOADOUT_IMPORT_REPO_ROOT overrides the target repo root (test-only isolation).
+REPO_ROOT="${LOADOUT_IMPORT_REPO_ROOT:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 
 # Global arrays populated by collect-* functions
 CHANGED_FILES=()

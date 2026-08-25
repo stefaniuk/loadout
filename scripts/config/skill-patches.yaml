@@ -1,7 +1,7 @@
 # Shared Skill Patch Manifest
 #
 # Defines the local patch rules for both upstream Spec Kit skills imported via
-# scripts/specify.sh and third-party skills synced via scripts/skill-sync.sh.
+# scripts/speckit-sync.sh and third-party skills synced via scripts/skill-sync.sh.
 #
 # Injection Strategies:
 #   after-frontmatter              - Inject immediately after YAML front matter
@@ -17,15 +17,15 @@
 
 # Usage:
 #   1. Create a patch file in the appropriate subdirectory:
-#      - scripts/skill-patches/skills/<name>.patch.md
-#      - scripts/skill-patches/templates/<name>-template.patch.md
+#      - scripts/config/skill-patches/<name>.patch.md
+#      - scripts/config/skill-patches/<name>-template.patch.md
 #
 #   2. Configure the injection point below. Keep defaults as the fallback rule,
 #      but declare the current per-skill intent explicitly in `overrides`.
 #
 #   3. Optionally configure frontmatter field overrides below.
 #
-#   4. Run: make specify or make skill-sync
+#   4. Run: make speckit-sync or make skill-sync
 
 defaults:
   skills: after-frontmatter

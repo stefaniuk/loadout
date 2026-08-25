@@ -5,6 +5,10 @@ set -euo pipefail
 
 # Test suite for the import command.
 #
+# Optimised for speed: every test runs against its own isolated copy of the
+# repo (via LOADOUT_IMPORT_REPO_ROOT) and its own applied destination, so the
+# whole suite runs in parallel and never mutates the real repository.
+#
 # Usage:
 #   $ ./import.test.sh
 #
@@ -15,8 +19,24 @@ set -euo pipefail
 
 TEMP_DIR=""
 REPO_ROOT=""
-SHARED_APPLY_SRC=""
-TRACKED_REPO_FILES=()
+REPO_SNAPSHOT=""
+REPO_SNAPSHOT_FULL=""
+
+# Import-relevant subtree of the repo (mirrors the paths import.sh compares).
+IMPORT_PATHS=(
+  ".github/copilot-instructions.md"
+  ".github/agents"
+  ".github/hooks"
+  ".github/instructions"
+  ".github/prompts"
+  ".github/skills"
+  ".specify/memory/constitution.md"
+  ".specify/scripts/python"
+  ".specify/templates"
+  "docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+  "docs/adr/Tech_Radar.md"
+  "scripts/hooks"
+)
 
 function main() {
 
@@ -25,6 +45,7 @@ function main() {
 
   test-import-suite-setup
   trap test-import-suite-teardown EXIT INT TERM
+
   local tests=( \
     test-import-no-args-fails \
     test-import-empty-source-fails \
@@ -39,16 +60,31 @@ function main() {
     test-import-ignores-generated-skill-assets \
     test-import-detects-and-round-trips-singletons-and-hooks \
   )
-  local status=0
+
+  local log_dir="${TEMP_DIR}/logs"
+  mkdir -p "${log_dir}"
+
+  local pids=() names=()
   for test in "${tests[@]}"; do
-    {
-      echo -n "$test"
-      # shellcheck disable=SC2015
-      run-test-with-cleanup "$test" && echo " PASS" || { echo " FAIL"; status=$((status + 1)); }
-    }
+    ("${test}") > "${log_dir}/${test}.log" 2>&1 &
+    pids+=("$!")
+    names+=("${test}")
   done
+
+  local status=0 i
+  for i in "${!pids[@]}"; do
+    echo -n "${names[$i]}"
+    # shellcheck disable=SC2015
+    if wait "${pids[$i]}"; then
+      echo " PASS"
+    else
+      echo " FAIL"
+      cat "${log_dir}/${names[$i]}.log"
+      status=$((status + 1))
+    fi
+  done
+
   echo "Total: ${#tests[@]}, Passed: $(( ${#tests[@]} - status )), Failed: $status"
-  test-import-suite-teardown
   [ $status -gt 0 ] && return 1 || return 0
 }
 
@@ -57,17 +93,25 @@ function main() {
 function test-import-suite-setup() {
 
   TEMP_DIR=$(mktemp -d)
-  # Pre-build a single shared apply destination; individual tests fast-copy
-  # it rather than re-running apply.sh, which dominates wall time.
-  SHARED_APPLY_SRC="${TEMP_DIR}/_shared_apply"
-  ./scripts/apply.sh "${SHARED_APPLY_SRC}" > /dev/null 2>&1
+
+  # Full snapshot of the repo's import-relevant subtree, used only by the
+  # round-trip fidelity test which imports a full apply.sh output.
+  REPO_SNAPSHOT_FULL="${TEMP_DIR}/_repo_snapshot_full"
+  build-repo-snapshot "${REPO_SNAPSHOT_FULL}"
+
+  # Lite snapshot: skills trimmed to the only one referenced by file-based
+  # tests. This keeps each import.sh diff cheap (5 vs 240 skill files) and is
+  # the default destination/repo template for all other tests. A fresh dest and
+  # repo start byte-identical, so a clean import reports no changes.
+  REPO_SNAPSHOT="${TEMP_DIR}/_repo_snapshot"
+  cp -R "${REPO_SNAPSHOT_FULL}" "${REPO_SNAPSHOT}"
+  find "${REPO_SNAPSHOT}/.github/skills" -mindepth 1 -maxdepth 1 -type d \
+    ! -name repository-template -exec rm -rf {} +
 
   return 0
 }
 
 function test-import-suite-teardown() {
-
-  restore-tracked-repo-files
 
   if [[ -n "${TEMP_DIR}" ]] && [[ -d "${TEMP_DIR}" ]]; then
     rm -rf "${TEMP_DIR}"
@@ -76,97 +120,47 @@ function test-import-suite-teardown() {
   return 0
 }
 
-# Run a single test and always restore tracked repo files afterwards.
+# Build an isolated copy of the repo's import-relevant subtree.
 # Arguments:
-#   $1=[test function name]
-function run-test-with-cleanup() {
+#   $1=[destination snapshot directory]
+function build-repo-snapshot() {
 
-  local test_name="$1"
-  local status=0
+  local dst="$1"
+  local rel
 
-  TRACKED_REPO_FILES=()
-
-  if "${test_name}"; then
-    status=0
-  else
-    status=$?
-  fi
-
-  restore-tracked-repo-files
-
-  return ${status}
-}
-
-# Track the current repo state for a file so it can be restored after tests.
-# Arguments:
-#   $1=[relative file path under repo root]
-function track-repo-file-state() {
-
-  local rel_path="$1"
-  local backup_path="${TEMP_DIR}/repo-backups/${rel_path}"
-
-  if is-repo-file-tracked "${rel_path}"; then
-    return 0
-  fi
-
-  mkdir -p "$(dirname "${backup_path}")"
-
-  if [[ -f "${REPO_ROOT}/${rel_path}" ]]; then
-    cp "${REPO_ROOT}/${rel_path}" "${backup_path}"
-  else
-    : > "${backup_path}.missing"
-  fi
-
-  TRACKED_REPO_FILES+=("${rel_path}")
+  for rel in "${IMPORT_PATHS[@]}"; do
+    if [[ -e "${REPO_ROOT}/${rel}" ]]; then
+      mkdir -p "${dst}/$(dirname "${rel}")"
+      cp -R "${REPO_ROOT}/${rel}" "${dst}/${rel}"
+    fi
+  done
 
   return 0
 }
 
-# Check whether a repo file is already tracked for restoration.
+# Provide a fresh destination for a test (isolated copy of the repo snapshot).
+# A fresh dest starts identical to a fresh repo, so unmodified imports are clean.
 # Arguments:
-#   $1=[relative file path under repo root]
-function is-repo-file-tracked() {
+#   $1=[unique key]
+function make-dest() {
 
-  local rel_path="$1"
-  local tracked_path
-
-  for tracked_path in "${TRACKED_REPO_FILES[@]}"; do
-    if [[ "${tracked_path}" == "${rel_path}" ]]; then
-      return 0
-    fi
-  done
-
-  return 1
-}
-
-# Restore all tracked repo files to their original state.
-function restore-tracked-repo-files() {
-
-  local rel_path
-  for rel_path in "${TRACKED_REPO_FILES[@]}"; do
-    local backup_path="${TEMP_DIR}/repo-backups/${rel_path}"
-    local repo_path="${REPO_ROOT}/${rel_path}"
-
-    if [[ -f "${backup_path}.missing" ]]; then
-      rm -f "${repo_path}"
-    elif [[ -f "${backup_path}" ]]; then
-      mkdir -p "$(dirname "${repo_path}")"
-      cp "${backup_path}" "${repo_path}"
-    fi
-  done
-
-  TRACKED_REPO_FILES=()
-
-  return 0
-}
-
-# Helper: provide a fresh destination by cloning the shared apply cache.
-# This is ~5x faster than re-running apply.sh per test.
-function helper-apply-copilot() {
-
-  local dest="${TEMP_DIR}/$1"
-  cp -R "${SHARED_APPLY_SRC}" "${dest}"
+  local dest="${TEMP_DIR}/$1/dest"
+  mkdir -p "${TEMP_DIR}/$1"
+  cp -R "${REPO_SNAPSHOT}" "${dest}"
   echo "${dest}"
+
+  return 0
+}
+
+# Provide a fresh isolated repo snapshot for a test to import into.
+# Arguments:
+#   $1=[unique key]
+function make-repo() {
+
+  local repo="${TEMP_DIR}/$1/repo"
+  mkdir -p "${TEMP_DIR}/$1"
+  cp -R "${REPO_SNAPSHOT}" "${repo}"
+  echo "${repo}"
 
   return 0
 }
@@ -175,16 +169,19 @@ function helper-apply-copilot() {
 
 function test-import-dry-run-shows-no-changes-for-fresh-apply() {
 
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "dry-run-fresh")
+  # Round-trip fidelity: apply.sh output imported against the repo snapshot
+  # must report no changes. The apply runs here (overlapped with other tests)
+  # rather than serially in setup.
+  local dest repo
+  dest="${TEMP_DIR}/dry-run-fresh/applied"
+  mkdir -p "${TEMP_DIR}/dry-run-fresh"
+  ./scripts/apply.sh "${dest}" > /dev/null 2>&1
+  repo="${TEMP_DIR}/dry-run-fresh/repo"
+  cp -R "${REPO_SNAPSHOT_FULL}" "${repo}"
 
-  # Act
   local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
+  output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
 
-  # Assert
-  # No changed or new files after a fresh apply
   echo "${output}" | grep -q "No changes detected" || return 1
 
   return 0
@@ -192,18 +189,17 @@ function test-import-dry-run-shows-no-changes-for-fresh-apply() {
 
 function test-import-force-does-not-copy-unchanged-file() {
 
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "no-copy-unchanged")
+  local dest repo
+  dest=$(make-dest "no-copy-unchanged")
+  repo=$(make-repo "no-copy-unchanged")
+  local target="${repo}/.github/instructions/shell.instructions.md"
   local before_hash
-  before_hash=$(shasum "${REPO_ROOT}/.github/instructions/shell.instructions.md" | cut -d' ' -f1)
+  before_hash=$(shasum "${target}" | cut -d' ' -f1)
 
-  # Act
-  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+  LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
 
-  # Assert
   local after_hash
-  after_hash=$(shasum "${REPO_ROOT}/.github/instructions/shell.instructions.md" | cut -d' ' -f1)
+  after_hash=$(shasum "${target}" | cut -d' ' -f1)
   [[ "${before_hash}" == "${after_hash}" ]] || return 1
 
   return 0
@@ -211,51 +207,43 @@ function test-import-force-does-not-copy-unchanged-file() {
 
 function test-import-new-true-imports-new-files() {
 
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "new-files")
+  local dest repo
+  dest=$(make-dest "new-files")
+  repo=$(make-repo "new-files")
   local new_file=".github/prompts/enforce.brand-new.prompt.md"
-  track-repo-file-state "${new_file}"
   echo "# Brand new prompt" > "${dest}/${new_file}"
 
-  # Act
-  force=true new=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+  LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true new=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
 
-  # Assert
-  [[ -f "${REPO_ROOT}/${new_file}" ]] || return 1
+  [[ -f "${repo}/${new_file}" ]] || return 1
 
   return 0
 }
 
 function test-import-ignores-generated-skill-assets() {
 
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "ignore-generated-assets")
+  local dest repo
+  dest=$(make-dest "ignore-generated-assets")
+  repo=$(make-repo "ignore-generated-assets")
   local generated_file=".github/skills/repository-template/assets/generated.txt"
-  track-repo-file-state "${generated_file}"
   mkdir -p "${dest}/.github/skills/repository-template/assets"
   echo "generated" > "${dest}/${generated_file}"
 
-  # Act
   local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
-  force=true new=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+  output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
+  LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true new=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
 
-  # Assert
   ! echo "${output}" | grep -q "${generated_file}" || return 1
-  [[ ! -f "${REPO_ROOT}/${generated_file}" ]] || return 1
+  [[ ! -f "${repo}/${generated_file}" ]] || return 1
 
   return 0
 }
 
 function test-import-no-args-fails() {
 
-  # Arrange / Act
   local output
   output=$(./scripts/import.sh 2>&1) && return 1
 
-  # Assert
   echo "${output}" | grep -qi "usage" || return 1
 
   return 0
@@ -263,11 +251,9 @@ function test-import-no-args-fails() {
 
 function test-import-empty-source-fails() {
 
-  # Arrange / Act
   local output
   output=$(./scripts/import.sh "" 2>&1) && return 1
 
-  # Assert
   echo "${output}" | grep -qi "empty" || return 1
 
   return 0
@@ -275,11 +261,9 @@ function test-import-empty-source-fails() {
 
 function test-import-nonexistent-source-fails() {
 
-  # Arrange / Act
   local output
   output=$(./scripts/import.sh "/nonexistent/path" 2>&1) && return 1
 
-  # Assert
   echo "${output}" | grep -qi "does not exist" || return 1
 
   return 0
@@ -287,18 +271,16 @@ function test-import-nonexistent-source-fails() {
 
 function test-import-new-false-does-not-import-new-files() {
 
-  # Arrange
-  local dest
-  dest=$(helper-apply-copilot "new-false")
+  local dest repo
+  dest=$(make-dest "new-false")
+  repo=$(make-repo "new-false")
   local new_file=".github/prompts/enforce.brand-new-skip.prompt.md"
-  track-repo-file-state "${new_file}"
   echo "# Brand new prompt" > "${dest}/${new_file}"
 
-  # Act - force=true but new=false (default)
-  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+  # force=true but new=false (default)
+  LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
 
-  # Assert - new file should NOT have been imported
-  [[ ! -f "${REPO_ROOT}/${new_file}" ]] || return 1
+  [[ ! -f "${repo}/${new_file}" ]] || return 1
 
   return 0
 }
@@ -308,8 +290,9 @@ function test-import-new-false-does-not-import-new-files() {
 # summary.
 function test-import-dry-run-detects-modifications-across-tracked-types() {
 
-  local dest
-  dest=$(helper-apply-copilot "detect-modifications")
+  local dest repo
+  dest=$(make-dest "detect-modifications")
+  repo=$(make-repo "detect-modifications")
   echo "# Modified instruction" >> "${dest}/.github/instructions/shell.instructions.md"
   echo "# Modified skill" >> "${dest}/.github/skills/repository-template/SKILL.md"
   echo "# Modified prompt" >> "${dest}/.github/prompts/enforce.shell.prompt.md"
@@ -317,7 +300,7 @@ function test-import-dry-run-detects-modifications-across-tracked-types() {
   echo "# Modified constitution" >> "${dest}/.specify/memory/constitution.md"
 
   local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
+  output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
 
   echo "${output}" | grep -q "shell.instructions.md" || return 1
   echo "${output}" | grep -q "repository-template/SKILL.md" || return 1
@@ -333,21 +316,21 @@ function test-import-dry-run-detects-modifications-across-tracked-types() {
 # validate the new-files summary count.
 function test-import-dry-run-detects-new-files() {
 
-  local dest
-  dest=$(helper-apply-copilot "detect-new-files")
+  local dest repo
+  dest=$(make-dest "detect-new-files")
+  repo=$(make-repo "detect-new-files")
   # Top-level new prompt
   echo "# New prompt" > "${dest}/.github/prompts/enforce.custom.prompt.md"
   # Nested new file inside includes/
   local nested_dir=".github/instructions/includes/sub"
   mkdir -p "${dest}/${nested_dir}"
   echo "# Nested include" > "${dest}/${nested_dir}/nested.md"
-  # Singleton file that is missing from REPO_ROOT
-  track-repo-file-state ".github/copilot-instructions.md"
-  rm -f "${REPO_ROOT}/.github/copilot-instructions.md"
+  # Singleton file that is missing from the repo snapshot
+  rm -f "${repo}/.github/copilot-instructions.md"
   echo "# New singleton copy" >> "${dest}/.github/copilot-instructions.md"
 
   local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
+  output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
 
   echo "${output}" | grep -q "enforce.custom.prompt.md" || return 1
   echo "${output}" | grep -q "nested.md" || return 1
@@ -360,19 +343,18 @@ function test-import-dry-run-detects-new-files() {
 # Consolidated: force=true must round-trip changes for one or more files.
 function test-import-force-copies-changed-files-back() {
 
-  local dest
-  dest=$(helper-apply-copilot "force-copy")
-  track-repo-file-state ".github/instructions/shell.instructions.md"
-  track-repo-file-state ".github/instructions/docker.instructions.md"
+  local dest repo
+  dest=$(make-dest "force-copy")
+  repo=$(make-repo "force-copy")
   local marker
   marker="IMPORT-TEST-MARKER-$(date +%s)"
   echo "# ${marker}" >> "${dest}/.github/instructions/shell.instructions.md"
   echo "# ${marker}" >> "${dest}/.github/instructions/docker.instructions.md"
 
-  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+  LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
 
-  grep -q "${marker}" "${REPO_ROOT}/.github/instructions/shell.instructions.md" || return 1
-  grep -q "${marker}" "${REPO_ROOT}/.github/instructions/docker.instructions.md" || return 1
+  grep -q "${marker}" "${repo}/.github/instructions/shell.instructions.md" || return 1
+  grep -q "${marker}" "${repo}/.github/instructions/docker.instructions.md" || return 1
 
   return 0
 }
@@ -382,11 +364,9 @@ function test-import-force-copies-changed-files-back() {
 # bit.
 function test-import-detects-and-round-trips-singletons-and-hooks() {
 
-  local dest
-  dest=$(helper-apply-copilot "singletons-and-hooks")
-  track-repo-file-state ".github/hooks/quality-gates.json"
-  track-repo-file-state "scripts/hooks/session-start-cheatsheet.sh"
-  track-repo-file-state "scripts/hooks/stop-gate.sh"
+  local dest repo
+  dest=$(make-dest "singletons-and-hooks")
+  repo=$(make-repo "singletons-and-hooks")
 
   local marker
   marker="SINGLETON-HOOK-MARKER-$(date +%s)"
@@ -396,19 +376,19 @@ function test-import-detects-and-round-trips-singletons-and-hooks() {
 
   # Dry-run detection covers all three paths
   local output
-  output=$(./scripts/import.sh "${dest}" 2>&1)
+  output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
   echo "${output}" | grep -q "quality-gates.json" || return 1
   echo "${output}" | grep -q "session-start-cheatsheet.sh" || return 1
   echo "${output}" | grep -q "stop-gate.sh" || return 1
 
   # Force import round-trips the changes
-  force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
-  diff -q "${dest}/.github/hooks/quality-gates.json" "${REPO_ROOT}/.github/hooks/quality-gates.json" > /dev/null 2>&1 || return 1
-  grep -q "${marker}" "${REPO_ROOT}/scripts/hooks/session-start-cheatsheet.sh" || return 1
-  grep -q "${marker}" "${REPO_ROOT}/scripts/hooks/stop-gate.sh" || return 1
+  LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+  diff -q "${dest}/.github/hooks/quality-gates.json" "${repo}/.github/hooks/quality-gates.json" > /dev/null 2>&1 || return 1
+  grep -q "${marker}" "${repo}/scripts/hooks/session-start-cheatsheet.sh" || return 1
+  grep -q "${marker}" "${repo}/scripts/hooks/stop-gate.sh" || return 1
   # Executable bits preserved
-  [[ -x "${REPO_ROOT}/scripts/hooks/session-start-cheatsheet.sh" ]] || return 1
-  [[ -x "${REPO_ROOT}/scripts/hooks/stop-gate.sh" ]] || return 1
+  [[ -x "${repo}/scripts/hooks/session-start-cheatsheet.sh" ]] || return 1
+  [[ -x "${repo}/scripts/hooks/stop-gate.sh" ]] || return 1
 
   return 0
 }

@@ -12,7 +12,6 @@ set -euo pipefail
 #
 # Options:
 #   clean=true              # Remove destination .github/{agents,instructions,prompts,skills} before copying, default is 'false'
-#   revert=true             # Remove all loadout-managed artifacts from destination and exit, default is 'false'
 #   subset=<csv>            # Restrict copy to named categories (comma-separated). Valid tokens:
 #                           #   agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, all
 #                           # Omitted or 'all' preserves the default full-copy behaviour byte-for-byte.
@@ -64,12 +63,17 @@ set -euo pipefail
 #   $ python=true ./scripts/apply.sh ../my-project
 #   $ all=true ./scripts/apply.sh ~/projects/my-app
 #   $ python=true playwright=true ./scripts/apply.sh ~/projects/my-app
-#   $ revert=true ./scripts/apply.sh ~/projects/my-app  # remove all managed artifacts
+#
+# To remove loadout-managed artifacts from a destination, use scripts/revert.sh
+# (or `make revert dest=...`) instead - this script has no revert path.
 
 # ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/common.lib.sh"
 
 COPILOT_AGENTS_DIR="${REPO_ROOT}/.github/agents"
 COPILOT_HOOKS_DIR="${REPO_ROOT}/.github/hooks"
@@ -89,13 +93,6 @@ ADR_TEMPLATE="${REPO_ROOT}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
 ADR_TECH_RADAR="${REPO_ROOT}/docs/adr/Tech_Radar.md"
 COPILOT_ANALYSIS_DIR="${REPO_ROOT}/.copilot/analysis"
 GITIGNORE_LOADOUT="${REPO_ROOT}/.gitignore.loadout"
-
-# Begin/end markers for managed .gitignore content
-GITIGNORE_BEGIN_MARKER="# >>> loadout managed content - DO NOT EDIT BELOW THIS LINE >>>"
-GITIGNORE_END_MARKER="# <<< loadout managed content - DO NOT EDIT ABOVE THIS LINE <<<"
-LOADOUT_MAKEFILE_BEGIN_MARKER="# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>"
-LOADOUT_MAKEFILE_END_MARKER="# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<"
-LOADOUT_MAKEFILE_FILE_MARKER="# loadout-managed: scripts/loadout.mk"
 
 # Default instruction files (glue layer)
 DEFAULT_INSTRUCTIONS=("docker" "makefile" "readme" "shell")
@@ -172,52 +169,10 @@ function main() {
   print-enabled-technologies
   echo
 
-  if is-arg-true "${revert:-false}"; then
-    revert-loadout "${destination}"
-    echo
-    echo "Done. Loadout artifacts reverted from ${destination}"
-    return 0
-  fi
-
   copilot-apply "${destination}"
 
   echo
   echo "Done. Assets copied to ${destination}"
-}
-
-# ==============================================================================
-
-# Normalise a destination path passed via make or the shell.
-# Converts common escaped spaces to literal spaces, expands a leading home
-# directory marker, and resolves relative paths against the current directory.
-# Arguments:
-#   $1=[destination directory path]
-function normalise-destination-path() {
-
-  local destination="$1"
-
-  destination="${destination//\\ / }"
-
-  if [[ "${destination}" == \~ ]]; then
-    destination="${HOME}"
-  elif [[ "${destination:0:2}" == \~/* ]]; then
-    destination="${HOME}/${destination:2}"
-  fi
-
-  if [[ "${destination}" != /* ]]; then
-    local destination_dir
-    local destination_dir_abs
-    destination_dir="$(dirname "${destination}")"
-    if destination_dir_abs=$(cd "$(pwd)" && cd "${destination_dir}" 2>/dev/null && pwd); then
-      destination="${destination_dir_abs}/$(basename "${destination}")"
-    else
-      destination="$(pwd)/${destination}"
-    fi
-  fi
-
-  printf '%s\n' "${destination}"
-
-  return 0
 }
 
 # ==============================================================================
@@ -550,120 +505,6 @@ function copilot-clean-directories() {
   return 0
 }
 
-# Remove all loadout-managed artifacts from the destination.
-# This undoes what a previous apply has done.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function revert-loadout() {
-
-  local dest="$1"
-
-  echo "Reverting prompt files from: ${dest}"
-  echo
-
-  revert-copilot "${dest}"
-  revert-shared-resources "${dest}"
-
-  return 0
-}
-
-# Remove copilot-specific loadout-managed artifacts from the destination.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function revert-copilot() {
-
-  local dest="$1"
-
-  # Remove .github directories
-  local github_dirs=("agents" "hooks" "instructions" "prompts" "skills")
-  for dir in "${github_dirs[@]}"; do
-    if [[ -d "${dest}/.github/${dir}" ]]; then
-      print-info "Removing ${dest}/.github/${dir}"
-      rm -rf "${dest:?}/.github/${dir}"
-    fi
-  done
-
-  # Remove copilot-instructions.md
-  if [[ -f "${dest}/.github/copilot-instructions.md" ]]; then
-    print-info "Removing ${dest}/.github/copilot-instructions.md"
-    rm -f "${dest}/.github/copilot-instructions.md"
-  fi
-
-  # Remove hook scripts (scripts/hooks/ is fully managed by loadout;
-  # any user-authored files placed there will be removed on revert)
-  if [[ -d "${dest}/scripts/hooks" ]]; then
-    print-info "Removing ${dest}/scripts/hooks"
-    rm -rf "${dest:?}/scripts/hooks"
-  fi
-
-  return 0
-}
-
-# Remove shared loadout-managed artifacts from the destination.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function revert-shared-resources() {
-
-  local dest="$1"
-
-  revert-loadout-make-integration "${dest}"
-
-  # Remove .specify directory
-  if [[ -d "${dest}/.specify" ]]; then
-    print-info "Removing ${dest}/.specify"
-    rm -rf "${dest:?}/.specify"
-  fi
-
-  # Remove ADR template files
-  local adr_files=("ADR-nnn_Any_Decision_Record_Template.md" "Tech_Radar.md")
-  for file in "${adr_files[@]}"; do
-    if [[ -f "${dest}/docs/adr/${file}" ]]; then
-      print-info "Removing ${dest}/docs/adr/${file}"
-      rm -f "${dest}/docs/adr/${file}"
-    fi
-  done
-
-  # Remove .copilot/analysis directory if empty or only contains .gitignore.
-  if [[ -d "${dest}/.copilot/analysis" ]]; then
-    local analysis_contents
-    analysis_contents=$(ls -A "${dest}/.copilot/analysis" 2>/dev/null)
-    if [[ -z "${analysis_contents}" ]] || [[ "${analysis_contents}" == ".gitignore" ]]; then
-      print-info "Removing ${dest}/.copilot/analysis"
-      rm -rf "${dest:?}/.copilot/analysis"
-    fi
-  fi
-
-  # Remove managed .gitignore section
-  if [[ -f "${dest}/.gitignore" ]] && grep -qF "${GITIGNORE_BEGIN_MARKER}" "${dest}/.gitignore"; then
-    print-info "Removing loadout managed content from .gitignore"
-    local temp_file
-    temp_file=$(mktemp)
-    awk -v begin="${GITIGNORE_BEGIN_MARKER}" -v end="${GITIGNORE_END_MARKER}" '
-      $0 == begin { skip = 1; next }
-      $0 == end { skip = 0; next }
-      !skip { print }
-    ' "${dest}/.gitignore" > "${temp_file}"
-    # Remove trailing blank lines
-    sed -i '' -e :a -e '/^\n*$/{$d;N;ba' -e '}' "${temp_file}" 2>/dev/null || sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "${temp_file}"
-    if [[ -s "${temp_file}" ]]; then
-      mv "${temp_file}" "${dest}/.gitignore"
-    else
-      rm -f "${temp_file}" "${dest}/.gitignore"
-      print-info "Removed empty .gitignore"
-    fi
-  fi
-
-  # Clean up empty parent directories
-  for dir in "${dest}/.github" "${dest}/docs/adr" "${dest}/docs" "${dest}/.vscode" "${dest}/scripts" "${dest}/.copilot"; do
-    if [[ -d "${dir}" ]] && [[ -z "$(ls -A "${dir}" 2>/dev/null)" ]]; then
-      print-info "Removing empty directory ${dir}"
-      rmdir "${dir}"
-    fi
-  done
-
-  return 0
-}
-
 # Copy scripts/loadout.mk and patch a compatible downstream root Makefile.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
@@ -757,35 +598,6 @@ function update-loadout-make-include() {
 
   mv "${updated_makefile}" "${dest_makefile}"
   rm -f "${stripped_makefile}"
-
-  return 0
-}
-
-# Remove the managed loadout Makefile integration from a downstream repository.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function revert-loadout-make-integration() {
-
-  local dest="$1"
-  local dest_makefile="${dest}/Makefile"
-  local dest_loadout_module="${dest}/scripts/loadout.mk"
-  local stripped_makefile
-
-  if [[ -f "${dest_makefile}" ]] && grep -qF "${LOADOUT_MAKEFILE_BEGIN_MARKER}" "${dest_makefile}"; then
-    print-info "Removing loadout managed Makefile include from ${dest_makefile}"
-    stripped_makefile=$(mktemp)
-    awk -v begin="${LOADOUT_MAKEFILE_BEGIN_MARKER}" -v end="${LOADOUT_MAKEFILE_END_MARKER}" '
-      $0 == begin { skip = 1; next }
-      $0 == end { skip = 0; next }
-      !skip { print }
-    ' "${dest_makefile}" > "${stripped_makefile}"
-    mv "${stripped_makefile}" "${dest_makefile}"
-  fi
-
-  if [[ -f "${dest_loadout_module}" ]] && grep -qF "${LOADOUT_MAKEFILE_FILE_MARKER}" "${dest_loadout_module}"; then
-    print-info "Removing ${dest_loadout_module}"
-    rm -f "${dest_loadout_module}"
-  fi
 
   return 0
 }
@@ -1202,7 +1014,6 @@ Technology switches (set to 'true' to include):
 
 Other options:
     clean=true              Remove destination directories before copying
-    revert=true             Remove all loadout-managed artifacts and exit
     subset=<csv>            Restrict copy to named categories (comma-separated).
                             Valid tokens: agents, hooks, instructions, prompts,
                             skills, specify, docs, project, speckit, all.
@@ -1225,8 +1036,10 @@ Examples:
     $(basename "$0") /path/to/my-project
     python=true $(basename "$0") ../my-project
     all=true clean=true $(basename "$0") ~/projects/my-app
-    revert=true $(basename "$0") ~/projects/my-app
     python=true playwright=true $(basename "$0") ~/projects/my-app
+
+To remove loadout-managed artifacts from a destination, use scripts/revert.sh
+(or 'make revert dest=...') instead - this script has no revert path.
 EOF
 }
 
@@ -1237,14 +1050,6 @@ function print-error() {
 
   echo "Error: $1" >&2
   exit 1
-}
-
-# Print an informational message.
-# Arguments:
-#   $1=[message to display]
-function print-info() {
-
-  echo "→ $1"
 }
 
 # ==============================================================================

@@ -646,7 +646,7 @@ Use `--list` to browse before installing, `--skill <name>` to install individual
 Adoption notes:
 
 - ✅ `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `security-and-hardening`, `find-bugs`, and `spec-to-code-compliance` are imported and kept as full upstream skills.
-- ✅ All `speckit-*` skills are bundled through `make specify` and remain the primary Spec Kit workflow.
+- ✅ All `speckit-*` skills are bundled through `make speckit-sync` and remain the primary Spec Kit workflow.
 - ✅ `incremental-implementation` is imported through `scripts/config/skills.yaml` and now uses the standard workflow-mode guard, so it runs only in the `superpowers` lane.
 - ✅ The Superpowers workflow lane is now imported through `scripts/config/skills.yaml`, including `brainstorming`, `writing-plans`, `dispatching-parallel-agents`, `executing-plans`, `subagent-driven-development`, `requesting-code-review`, `receiving-code-review`, and `finishing-a-development-branch`.
 - ✅ `semgrep`, `supply-chain-risk-auditor`, `insecure-defaults`, `sharp-edges`, `gha-security-review`, and `skill-scanner` are now imported as manual-only specialist skills for shell, CI, and skill supply-chain review.

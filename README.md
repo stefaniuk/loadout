@@ -166,7 +166,7 @@ These are the top-level paths most contributors need to recognise first.
 ├── .github/      # Agents, instructions, prompts, skills, hooks, and repo governance files
 ├── .specify/     # Project constitution and spec-kit templates
 ├── docs/         # Architecture, onboarding, and ADRs
-├── scripts/      # Apply, import, install, and quality helpers
+├── scripts/      # Apply, import, and quality helpers
 ├── tests/        # Repository tests
 ├── Makefile      # Main entrypoint for setup, validation, and apply workflows
 └── .github/      # Agents, instructions, prompts, skills, hooks, and repo governance files

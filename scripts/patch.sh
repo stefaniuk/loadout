@@ -6,7 +6,7 @@ set -euo pipefail
 # skill and template files.
 #
 # Usage:
-#   $ source ./patch.lib.sh
+#   $ source ./patch.sh
 
 # ==============================================================================
 

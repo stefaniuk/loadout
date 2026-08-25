@@ -3,10 +3,10 @@
 
 set -euo pipefail
 
-# Test suite for the specify patching workflow.
+# Test suite for the speckit-sync patching workflow.
 #
 # Usage:
-#   $ ./scripts/tests/specify.test.sh
+#   $ ./scripts/tests/speckit-sync.test.sh
 #
 # Arguments (provided as environment variables):
 #   VERBOSE=true  # Show all the executed commands, default is 'false'
@@ -15,19 +15,19 @@ set -euo pipefail
 
 TEMP_DIR=""
 REPO_ROOT=""
-SPECIFY_FIXTURE=""
+SPECKIT_SYNC_FIXTURE=""
 
 function main() {
 
   REPO_ROOT="$(git rev-parse --show-toplevel)"
   cd "${REPO_ROOT}"
 
-  test-specify-suite-setup
-  trap test-specify-suite-teardown EXIT INT TERM
+  test-speckit-sync-suite-setup
+  trap test-speckit-sync-suite-teardown EXIT INT TERM
 
   local tests=( \
-    test-specify-passes-skills-init-option \
-    test-specify-replaces-patched-skill-prologues \
+    test-speckit-sync-passes-skills-init-option \
+    test-speckit-sync-replaces-patched-skill-prologues \
   )
   local status=0
 
@@ -46,15 +46,15 @@ function main() {
 
 # ==============================================================================
 
-function test-specify-suite-setup() {
+function test-speckit-sync-suite-setup() {
 
   TEMP_DIR=$(mktemp -d)
-  SPECIFY_FIXTURE=$(run-specify-fixture "shared")
+  SPECKIT_SYNC_FIXTURE=$(run-speckit-sync-fixture "shared")
 
   return 0
 }
 
-function test-specify-suite-teardown() {
+function test-speckit-sync-suite-teardown() {
 
   if [[ -n "${TEMP_DIR}" ]] && [[ -d "${TEMP_DIR}" ]]; then
     rm -rf "${TEMP_DIR}"
@@ -63,39 +63,39 @@ function test-specify-suite-teardown() {
   return 0
 }
 
-# Create a temporary repository fixture for exercising scripts/specify.sh.
+# Create a temporary repository fixture for exercising scripts/speckit-sync.sh.
 # Arguments:
 #   $1=[fixture directory]
-function create-specify-fixture-repo() {
+function create-speckit-sync-fixture-repo() {
 
   local fixture_dir="$1"
 
   mkdir -p "${fixture_dir}/scripts"
-  mkdir -p "${fixture_dir}/scripts/skill-patches/skills"
+  mkdir -p "${fixture_dir}/scripts/config/skill-patches"
   mkdir -p "${fixture_dir}/bin"
 
-  cp "${REPO_ROOT}/scripts/specify.sh" "${fixture_dir}/scripts/specify.sh"
-  cp "${REPO_ROOT}/scripts/skill-patches/patch.lib.sh" "${fixture_dir}/scripts/skill-patches/patch.lib.sh"
-  create-specify-skill-patch-fixture "${fixture_dir}"
+  cp "${REPO_ROOT}/scripts/speckit-sync.sh" "${fixture_dir}/scripts/speckit-sync.sh"
+  cp "${REPO_ROOT}/scripts/patch.sh" "${fixture_dir}/scripts/patch.sh"
+  create-speckit-sync-skill-patch-fixture "${fixture_dir}"
 
   create-specify-stub "${fixture_dir}/bin/specify"
   create-curl-stub "${fixture_dir}/bin/curl"
 
-  chmod +x "${fixture_dir}/scripts/specify.sh" \
+  chmod +x "${fixture_dir}/scripts/speckit-sync.sh" \
     "${fixture_dir}/bin/specify" \
     "${fixture_dir}/bin/curl"
 
   return 0
 }
 
-# Create the unified local patch fixture consumed by scripts/specify.sh.
+# Create the unified local patch fixture consumed by scripts/speckit-sync.sh.
 # Arguments:
 #   $1=[fixture directory]
-function create-specify-skill-patch-fixture() {
+function create-speckit-sync-skill-patch-fixture() {
 
   local fixture_dir="$1"
 
-  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/manifest.yaml"
+  cat <<'EOF' > "${fixture_dir}/scripts/config/skill-patches.yaml"
 defaults:
   skills: after-frontmatter
 
@@ -105,7 +105,7 @@ overrides:
   speckit-implement/SKILL.md: replace-before-section:## User Input
 EOF
 
-  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/speckit-plan.patch.md"
+  cat <<'EOF' > "${fixture_dir}/scripts/config/skill-patches/speckit-plan.patch.md"
 You **MUST** adhere to the following mandatory requirements when creating a development plan.
 
 **Workflow context:**
@@ -118,7 +118,7 @@ You **MUST** adhere to the following mandatory requirements when creating a deve
 - If no repository-template capabilities apply, `plan.md` states `Not required for this scope`
 EOF
 
-  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/speckit-tasks.patch.md"
+  cat <<'EOF' > "${fixture_dir}/scripts/config/skill-patches/speckit-tasks.patch.md"
 You **MUST** adhere to the following mandatory requirements when generating development tasks.
 
 **Workflow context:**
@@ -141,7 +141,7 @@ AI Assistant **MUST** execute every Show & Tell step during `/speckit-implement`
 - Use the smallest task structure that still maps cleanly to the approved specification
 EOF
 
-  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/speckit-implement.patch.md"
+  cat <<'EOF' > "${fixture_dir}/scripts/config/skill-patches/speckit-implement.patch.md"
 You **MUST** adhere to the following mandatory requirements when implementing features.
 
 **Prerequisite:** This skill assumes `tasks.md` already exists. If `tasks.md` does not exist, stop and tell the user to run `/speckit-tasks` first.
@@ -268,21 +268,21 @@ EOF
   return 0
 }
 
-# Run scripts/specify.sh inside a fixture repository.
+# Run scripts/speckit-sync.sh inside a fixture repository.
 # Arguments:
 #   $1=[fixture name]
 # Returns:
 #   Fixture directory path (via stdout)
-function run-specify-fixture() {
+function run-speckit-sync-fixture() {
 
   local fixture_name="$1"
   local fixture_dir="${TEMP_DIR}/${fixture_name}"
 
-  create-specify-fixture-repo "${fixture_dir}"
+  create-speckit-sync-fixture-repo "${fixture_dir}"
 
   SPECIFY_CALL_LOG="${fixture_dir}/specify-calls.log" \
     PATH="${fixture_dir}/bin:${PATH}" \
-    "${fixture_dir}/scripts/specify.sh" > "${fixture_dir}/run.log" 2>&1
+    "${fixture_dir}/scripts/speckit-sync.sh" > "${fixture_dir}/run.log" 2>&1
 
   echo "${fixture_dir}"
 
@@ -291,16 +291,16 @@ function run-specify-fixture() {
 
 # ==============================================================================
 
-function test-specify-passes-skills-init-option() {
+function test-speckit-sync-passes-skills-init-option() {
 
-  grep -qF -- "--integration-options=--skills" "${SPECIFY_FIXTURE}/specify-calls.log" || return 1
+  grep -qF -- "--integration-options=--skills" "${SPECKIT_SYNC_FIXTURE}/specify-calls.log" || return 1
 
   return 0
 }
 
-function test-specify-replaces-patched-skill-prologues() {
+function test-speckit-sync-replaces-patched-skill-prologues() {
 
-  local d="${SPECIFY_FIXTURE}"
+  local d="${SPECKIT_SYNC_FIXTURE}"
 
   grep -qF "/speckit-tasks" "${d}/.github/skills/speckit-plan/SKILL.md" || return 1
   ! grep -qF "/speckit.tasks" "${d}/.github/skills/speckit-plan/SKILL.md" || return 1

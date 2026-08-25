@@ -84,12 +84,11 @@ function create-skill-sync-fixture-repo() {
 
   local fixture_dir="$1"
 
-  mkdir -p "${fixture_dir}/scripts/config"
-  mkdir -p "${fixture_dir}/scripts/skill-patches/skills"
+  mkdir -p "${fixture_dir}/scripts/config/skill-patches"
   mkdir -p "${fixture_dir}/bin"
 
   cp "${REPO_ROOT}/scripts/skill-sync.sh" "${fixture_dir}/scripts/skill-sync.sh"
-  cp "${REPO_ROOT}/scripts/skill-patches/patch.lib.sh" "${fixture_dir}/scripts/skill-patches/patch.lib.sh"
+  cp "${REPO_ROOT}/scripts/patch.sh" "${fixture_dir}/scripts/patch.sh"
 
   create-skill-sync-config "${fixture_dir}" "${UPSTREAM_DIR}"
   create-skill-sync-manifest "${fixture_dir}"
@@ -144,7 +143,7 @@ function create-skill-sync-manifest() {
 
   local fixture_dir="$1"
 
-  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/manifest.yaml"
+  cat <<'EOF' > "${fixture_dir}/scripts/config/skill-patches.yaml"
 defaults:
   skills: after-frontmatter
 
@@ -162,13 +161,13 @@ function create-skill-sync-patches() {
 
   local fixture_dir="$1"
 
-  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/additive-skill.patch.md"
+  cat <<'EOF' > "${fixture_dir}/scripts/config/skill-patches/additive-skill.patch.md"
 ## Local Patch
 
 This line should be injected after the front matter.
 EOF
 
-  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/skills/incremental-implementation.patch.md"
+  cat <<'EOF' > "${fixture_dir}/scripts/config/skill-patches/incremental-implementation.patch.md"
 # Incremental Implementation
 
 ## Overview
@@ -482,7 +481,7 @@ function test-skill-sync-applies-frontmatter-overrides() {
   local fixture_dir="${TEMP_DIR}/frontmatter-test"
   local skill_dir="${fixture_dir}/.github/skills/vanilla-skill"
   mkdir -p "${skill_dir}"
-  mkdir -p "${fixture_dir}/scripts/skill-patches/skills"
+  mkdir -p "${fixture_dir}/scripts/config/skill-patches"
 
   cat <<'EOF' > "${skill_dir}/SKILL.md"
 ---
@@ -495,7 +494,7 @@ description: Original description.
 Body content.
 EOF
 
-  cat <<'EOF' > "${fixture_dir}/scripts/skill-patches/manifest.yaml"
+  cat <<'EOF' > "${fixture_dir}/scripts/config/skill-patches.yaml"
 defaults:
   skills: after-frontmatter
 frontmatter:
@@ -505,12 +504,12 @@ frontmatter:
     description: null
 EOF
 
-  cp "${REPO_ROOT}/scripts/skill-patches/patch.lib.sh" "${fixture_dir}/scripts/skill-patches/patch.lib.sh"
-  source "${fixture_dir}/scripts/skill-patches/patch.lib.sh"
+  cp "${REPO_ROOT}/scripts/patch.sh" "${fixture_dir}/scripts/patch.sh"
+  source "${fixture_dir}/scripts/patch.sh"
 
   patch-apply-frontmatter \
     "${skill_dir}/SKILL.md" \
-    "${fixture_dir}/scripts/skill-patches/manifest.yaml" \
+    "${fixture_dir}/scripts/config/skill-patches.yaml" \
     "vanilla-skill/SKILL.md"
 
   grep -qF "userSkill: true" "${skill_dir}/SKILL.md" || return 1

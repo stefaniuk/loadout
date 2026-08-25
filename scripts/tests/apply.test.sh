@@ -36,6 +36,11 @@ SUBSET_SPECKIT_DEST=""
 SUBSET_DOCS_DEST=""
 SUBSET_PROJECT_DEST=""
 
+# Makefile-integration shared dests
+MAKE_PATCH_DEST=""
+MAKE_REAPPLY_DEST=""
+MAKE_REVERT_DEST=""
+
 function main() {
 
   cd "$(git rev-parse --show-toplevel)"
@@ -54,8 +59,8 @@ function main() {
     test-apply-clean-removes-previous-tech-files \
     test-apply-compatible-downstream-makefile-copies-loadout-module-and-patches-root-makefile \
     test-apply-reapply-does-not-duplicate-loadout-make-include \
-    test-apply-revert-removes-all-managed-artefacts \
-    test-apply-revert-removes-loadout-make-integration \
+    test-revert-removes-all-managed-artefacts \
+    test-revert-removes-loadout-make-integration \
     test-apply-skips-existing-singletons \
     test-apply-updates-existing-gitignore-managed-section \
     test-apply-subset-agents-only \
@@ -99,12 +104,15 @@ function test-apply-suite-setup() {
   SUBSET_SPECKIT_DEST="${TEMP_DIR}/_subset_speckit"
   SUBSET_DOCS_DEST="${TEMP_DIR}/_subset_docs"
   SUBSET_PROJECT_DEST="${TEMP_DIR}/_subset_project"
+  MAKE_PATCH_DEST="${TEMP_DIR}/_make_patch"
+  MAKE_REAPPLY_DEST="${TEMP_DIR}/_make_reapply"
+  MAKE_REVERT_DEST="${TEMP_DIR}/_make_revert"
 
   # Pre-build all destinations in parallel.
   (./scripts/apply.sh "${DEFAULT_DEST}" > /dev/null 2>&1) &
   (all=true ./scripts/apply.sh "${ALL_DEST}" > /dev/null 2>&1) &
   (./scripts/apply.sh "${REVERT_DEST}" > /dev/null 2>&1 && \
-    revert=true ./scripts/apply.sh "${REVERT_DEST}" > /dev/null 2>&1) &
+    bash ./scripts/revert.sh --dest "${REVERT_DEST}" > /dev/null 2>&1) &
   (tauri=true ./scripts/apply.sh "${TAURI_DEST}" > /dev/null 2>&1) &
   (python=true playwright=true ./scripts/apply.sh "${PLAYWRIGHT_PY_DEST}" > /dev/null 2>&1) &
   (python=true ./scripts/apply.sh "${CLEAN_DEST}" > /dev/null 2>&1 && \
@@ -133,6 +141,14 @@ function test-apply-suite-setup() {
   (subset=speckit ./scripts/apply.sh "${SUBSET_SPECKIT_DEST}" > /dev/null 2>&1) &
   (subset=docs ./scripts/apply.sh "${SUBSET_DOCS_DEST}" > /dev/null 2>&1) &
   (subset=project ./scripts/apply.sh "${SUBSET_PROJECT_DEST}" > /dev/null 2>&1) &
+  (create-template-managed-make-destination "${MAKE_PATCH_DEST}" && \
+    ./scripts/apply.sh "${MAKE_PATCH_DEST}" > /dev/null 2>&1) &
+  (create-template-managed-make-destination "${MAKE_REAPPLY_DEST}" && \
+    ./scripts/apply.sh "${MAKE_REAPPLY_DEST}" > /dev/null 2>&1 && \
+    ./scripts/apply.sh "${MAKE_REAPPLY_DEST}" > /dev/null 2>&1) &
+  (create-template-managed-make-destination "${MAKE_REVERT_DEST}" && \
+    ./scripts/apply.sh "${MAKE_REVERT_DEST}" > /dev/null 2>&1 && \
+    bash ./scripts/revert.sh --dest "${MAKE_REVERT_DEST}" > /dev/null 2>&1) &
   wait
 
   return 0
@@ -313,9 +329,7 @@ function test-apply-clean-removes-previous-tech-files() {
 
 function test-apply-compatible-downstream-makefile-copies-loadout-module-and-patches-root-makefile() {
 
-  local d="${TEMP_DIR}/makefile-patch"
-  create-template-managed-make-destination "${d}"
-  ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
+  local d="${MAKE_PATCH_DEST}"
   [[ -f "${d}/scripts/loadout.mk" ]] || return 1
   [[ -f "${d}/Makefile" ]] || return 1
   grep -qF "# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>" "${d}/Makefile" || return 1
@@ -326,17 +340,14 @@ function test-apply-compatible-downstream-makefile-copies-loadout-module-and-pat
 
 function test-apply-reapply-does-not-duplicate-loadout-make-include() {
 
-  local d="${TEMP_DIR}/makefile-reapply"
-  create-template-managed-make-destination "${d}"
-  ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
-  ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
+  local d="${MAKE_REAPPLY_DEST}"
   [[ "$(grep -cF "# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>" "${d}/Makefile")" -eq 1 ]] || return 1
   [[ "$(grep -cF "include scripts/loadout.mk" "${d}/Makefile")" -eq 1 ]] || return 1
   [[ "$(grep -cF "# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<" "${d}/Makefile")" -eq 1 ]] || return 1
   return 0
 }
 
-function test-apply-revert-removes-all-managed-artefacts() {
+function test-revert-removes-all-managed-artefacts() {
 
   local d="${REVERT_DEST}"
   [[ ! -d "${d}/.github/agents" ]] || return 1
@@ -355,12 +366,9 @@ function test-apply-revert-removes-all-managed-artefacts() {
   return 0
 }
 
-function test-apply-revert-removes-loadout-make-integration() {
+function test-revert-removes-loadout-make-integration() {
 
-  local d="${TEMP_DIR}/makefile-revert"
-  create-template-managed-make-destination "${d}"
-  ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
-  revert=true ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
+  local d="${MAKE_REVERT_DEST}"
   [[ ! -f "${d}/scripts/loadout.mk" ]] || return 1
   [[ -f "${d}/Makefile" ]] || return 1
   ! grep -qF "loadout managed makefile include" "${d}/Makefile" || return 1

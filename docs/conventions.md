@@ -112,7 +112,7 @@ Adding a new prefix requires an ADR.
 | Prompt               | `<prefix>.<slug>.prompt.md`           | `.github/prompts/`                | Invokable as slash command `/<prefix>.<slug>`                      |
 | Prompt include       | `<topic>.include.md`                  | `.github/prompts/includes/`       | Currently a reserved scaffold; see directory README before adding  |
 | Agent                | `<slug>.agent.md`                     | `.github/agents/`                 | Optional custom roles                                              |
-| Skill (spec-kit)     | `SKILL.md`                            | `.github/skills/speckit-<step>/`  | Upstream-managed via `make specify`                                |
+| Skill (spec-kit)     | `SKILL.md`                            | `.github/skills/speckit-<step>/`  | Upstream-managed via `make speckit-sync`                           |
 | Skill                | `SKILL.md` (+ `assets/`, `examples/`) | `.github/skills/<slug>/`          | Folder-based; `SKILL.md` is mandatory                              |
 | Hook                 | `<name>.json`                         | `.github/hooks/`                  | Lifecycle hooks; see [config](../.github/hooks/quality-gates.json) |
 | ADR                  | `ADR-NNN[a-z]?_*.md`                  | `docs/adr/`                       | Cluster letters reserved for language-pack ADRs                    |

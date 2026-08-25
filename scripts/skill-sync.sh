@@ -5,7 +5,7 @@ set -euo pipefail
 # Synchronise external agent skills declared in scripts/config/skills.yaml.
 # Clones each skill's directory from its upstream repository into
 # .github/skills/<name>/, applies any local patch from the shared
-# scripts/skill-patches/ tree, and pins the resolved commit SHA back into
+# scripts/config/skill-patches/ tree, and pins the resolved commit SHA back into
 # the config file.
 #
 # Usage:
@@ -28,9 +28,9 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 CONFIG_FILE="${SCRIPT_DIR}/config/skills.yaml"
 DEST_DIR="${REPO_ROOT}/.github/skills"
-PATCHES_DIR="${SCRIPT_DIR}/skill-patches"
-MANIFEST_FILE="${PATCHES_DIR}/manifest.yaml"
-PATCH_LIB="${PATCHES_DIR}/patch.lib.sh"
+PATCHES_DIR="${SCRIPT_DIR}/config/skill-patches"
+MANIFEST_FILE="${SCRIPT_DIR}/config/skill-patches.yaml"
+PATCH_LIB="${SCRIPT_DIR}/patch.sh"
 
 if [[ ! -f "${PATCH_LIB}" ]]; then
   echo "error: patch library not found: ${PATCH_LIB}" >&2
@@ -247,7 +247,7 @@ function patch-local-skill() {
   local dest_dir="$2"
   local patch=${patch:-true}
   local skill_file="${dest_dir}/SKILL.md"
-  local patch_file="${PATCHES_DIR}/skills/${skill_name}.patch.md"
+  local patch_file="${PATCHES_DIR}/${skill_name}.patch.md"
 
   if ! is-arg-true "${patch}"; then
     return 0

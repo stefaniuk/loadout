@@ -123,8 +123,9 @@ These per-tech flags correspond to the language packs documented in [docs/conven
 Additional flags:
 
 - `clean=true` - remove previously applied artefacts before copying.
-- `revert=true` - undo a previous apply in the target repo.
 - `subset=<csv>` - restrict the copy to named categories (see below).
+
+To undo a previous apply in the target repo, use `make revert dest=/path/to/target` instead (see [Revert](#revert)) - `make apply` has no revert option.
 
 Example - apply only the Python and Terraform packs to a target:
 
@@ -169,6 +170,16 @@ The repository is split into a default **core** plugin pack and an optional **sp
 
 For full argument details see `scripts/apply.sh --help` and the `apply` target in the [Makefile](../Makefile).
 
+## Revert
+
+The opposite of apply: remove all loadout-managed artefacts from a previously-applied target repository.
+
+```bash
+make revert dest=/absolute/path/to/target
+```
+
+Add `dry-run=true` to preview what would be removed without changing anything. This is the only supported way to revert a previous apply - `scripts/apply.sh` has no revert option. For full argument details see `scripts/revert.sh --help` and the `revert` target in the [Makefile](../Makefile).
+
 ## Import workflow from downstream repos
 
 The inverse of apply: pull improvements made in a project repository back into this source library.
@@ -201,15 +212,15 @@ new=true force=true make import dest=/path/to/project
 
 ## Syncing upstream Spec Kit
 
-The repository uses Spec Kit agents, prompts, and templates from the upstream [github/spec-kit](https://github.com/github/spec-kit) project. Local patches for both imported Spec Kit skills and synced third-party skills are maintained in `scripts/skill-patches/` and applied on top of the fetched upstream files.
+The repository uses Spec Kit agents, prompts, and templates from the upstream [github/spec-kit](https://github.com/github/spec-kit) project. Local patches for both imported Spec Kit skills and synced third-party skills are maintained in `scripts/config/skill-patches/` and applied on top of the fetched upstream files.
 
 ### Running sync
 
 ```bash
-make specify
+make speckit-sync
 ```
 
-This fetches the latest Spec Kit files, applies local patches declared in `scripts/skill-patches/manifest.yaml`, and writes the patched output to:
+This fetches the latest Spec Kit files, applies local patches declared in `scripts/config/skill-patches.yaml`, and writes the patched output to:
 
 - `.github/skills/speckit-*/` (speckit skill definitions)
 - `.specify/templates/` (plan, spec, tasks templates)
@@ -222,24 +233,24 @@ The resolved Spec Kit version is recorded in `.specify/.speckit-version`.
 Preview what would change without modifying files:
 
 ```bash
-dry_run=true make specify
+dry_run=true make speckit-sync
 ```
 
 ### When to run
 
-Run `make specify` after:
+Run `make speckit-sync` after:
 
 - Pulling updates to this repository (upstream Spec Kit may have changed)
-- Modifying files in `scripts/skill-patches/`
+- Modifying files in `scripts/config/skill-patches/`
 - Wanting to reset speckit skills to their canonical patched state
 
-### Specify prerequisites
+### Speckit-sync prerequisites
 
 The `specify` CLI must be installed. See [github/spec-kit](https://github.com/github/spec-kit) for installation instructions. `yq` is also required for YAML parsing.
 
 ## Managing external skills
 
-Third-party agent skills can be cloned into `.github/skills/` from upstream repositories. A YAML manifest at `scripts/config/skills.yaml` declares which skills to fetch, and three make targets manage the lifecycle. The same patch engine and manifest used by `make specify` patch every upstream skill through the shared `scripts/skill-patches/skills/` directory.
+Third-party agent skills can be cloned into `.github/skills/` from upstream repositories. A YAML manifest at `scripts/config/skills.yaml` declares which skills to fetch, and three make targets manage the lifecycle. The same patch engine and manifest used by `make speckit-sync` patch every upstream skill through the shared `scripts/config/skill-patches/` directory.
 
 ### Configuration
 
@@ -268,7 +279,15 @@ make skill-sync
 make skill-add name=writing-plans repo=https://github.com/obra/superpowers.git path=skills/writing-plans
 ```
 
-Both append the skill to `.github/skills/<name>/`, apply any local `SKILL.md` patch from `scripts/skill-patches/skills/`, pin the resolved commit SHA in the manifest, and update lint exclusions.
+Both append the skill to `.github/skills/<name>/`, apply any local `SKILL.md` patch from `scripts/config/skill-patches/`, pin the resolved commit SHA in the manifest, and update lint exclusions.
+
+### Removing a skill
+
+```bash
+make skill-remove name=writing-plans
+```
+
+This removes the matching entry from `scripts/config/skills.yaml` and deletes the synced `.github/skills/<name>/` directory, if present. It does not touch `scripts/config/skill-patches.yaml`. If a patch file exists at `scripts/config/skill-patches/<name>.patch.md`, review and remove it, along with its matching entry under `overrides:` in `scripts/config/skill-patches.yaml`, manually.
 
 ### Updating skills
 
@@ -305,7 +324,7 @@ make skill-patch name=incremental-implementation
 ### What happens during sync
 
 1. Each skill is shallow-cloned using git sparse checkout (only the declared path).
-2. If `scripts/skill-patches/skills/<name>.patch.md` exists, it is injected into the synced `SKILL.md` using the shared rules from `scripts/skill-patches/manifest.yaml` that also apply to imported Spec Kit skills.
+2. If `scripts/config/skill-patches/<name>.patch.md` exists, it is injected into the synced `SKILL.md` using the shared rules from `scripts/config/skill-patches.yaml` that also apply to imported Spec Kit skills.
 3. The resolved commit SHA is written back to `scripts/config/skills.yaml`.
 4. The `.markdownlintignore` managed section is updated with all synced skill directories (sorted alphabetically).
 5. Synced skill directories are excluded from shellcheck automatically.

@@ -6,7 +6,7 @@ set -euo pipefail
 # patched files in the effective locations.
 #
 # Usage:
-#   $ [options] ./scripts/specify.sh
+#   $ [options] ./scripts/speckit-sync.sh
 #
 # Options:
 #   patch=false             # Skip local patches and use vanilla upstream files, default is 'true'
@@ -26,9 +26,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-PATCHES_DIR="${SCRIPT_DIR}/skill-patches"
-MANIFEST_FILE="${PATCHES_DIR}/manifest.yaml"
-PATCH_LIB="${PATCHES_DIR}/patch.lib.sh"
+PATCHES_DIR="${SCRIPT_DIR}/config/skill-patches"
+MANIFEST_FILE="${SCRIPT_DIR}/config/skill-patches.yaml"
+PATCH_LIB="${SCRIPT_DIR}/patch.sh"
 
 if [[ ! -f "${PATCH_LIB}" ]]; then
   echo "error: patch library not found: ${PATCH_LIB}" >&2
@@ -255,7 +255,7 @@ function copy-scripts() {
 function patch-skills() {
   local temp_dir="$1"
   local source_dir="${temp_dir}/.github/skills"
-  local patches_dir="${PATCHES_DIR}/skills"
+  local patches_dir="${PATCHES_DIR}"
   local dry_run=${dry_run:-false}
 
   echo "  [skills]"
@@ -389,7 +389,7 @@ function patch-category() {
   local glob_pattern="$5"
 
   local source_dir="${temp_dir}/${source_subdir}"
-  local patches_subdir="${PATCHES_DIR}/${category}"
+  local patches_subdir="${PATCHES_DIR}"
   local dry_run=${dry_run:-false}
 
   echo "  [${category}]"
