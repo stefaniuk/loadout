@@ -106,6 +106,7 @@ function main() {
   update-markdownlint-ignore
   update-prettier-ignore
   update-lychee-ignore
+  emit-commit-message "$name" "$patch_only"
   return 0
 }
 
@@ -324,6 +325,67 @@ function sync-skill() {
   yq -i ".skills[$idx].ref = \"${ref}\" | .skills[$idx].sha = \"${resolved_sha}\"" "$CONFIG_FILE"
 
   echo "  copied to .github/skills/${skill_name}/ (sha: ${resolved_sha:0:7})"
+  return 0
+}
+
+# ==============================================================================
+
+# Emit a suggested git commit message based on actual changes detected in .github/skills/.
+# Assumes a clean tree before the run, so any pending change under .github/skills/
+# is attributed to this sync.
+# Arguments:
+#   $1=[skill name filter, empty string if syncing all]
+#   $2=[patch_only flag]
+function emit-commit-message() {
+  local name="$1"
+  local patch_only="$2"
+
+  # Detect changed skill directories in the working tree or index. The trailing
+  # '|| true' keeps a no-match grep (no changes) from tripping pipefail.
+  local changed_skills
+  changed_skills=$(git status --porcelain .github/skills/ 2>/dev/null \
+    | awk '{print $NF}' \
+    | grep -o '\.github/skills/[^/]*' \
+    | sed 's|\.github/skills/||' \
+    | sort -u || true)
+
+  # When filtering to a single skill, only report it if it actually changed.
+  if [[ -n "$name" ]]; then
+    if ! grep -qx "$name" <<< "$changed_skills"; then
+      return 0
+    fi
+    changed_skills="$name"
+  fi
+
+  if [[ -z "$changed_skills" ]]; then
+    return 0
+  fi
+
+  local count
+  count=$(grep -c . <<< "$changed_skills")
+
+  # Build a human-readable skill list, truncated after the first three.
+  local skill_list=" "
+  local shown=0
+  while IFS= read -r skill; do
+    if [[ -z "$skill" || $shown -ge 3 ]]; then
+      continue
+    fi
+    skill_list="${skill_list}${skill}, "
+    shown=$((shown + 1))
+  done <<< "$changed_skills"
+
+  if [[ "$count" -gt 3 ]]; then
+    skill_list="${skill_list}and $((count - 3)) more"
+  else
+    skill_list="${skill_list%%, }"
+  fi
+
+  if is-arg-true "$patch_only"; then
+    echo "    build(skills): apply local patches to${skill_list}"
+  else
+    echo "    build(skills): sync imported skill updates across${skill_list}"
+  fi
   return 0
 }
 
