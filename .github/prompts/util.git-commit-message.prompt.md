@@ -15,6 +15,8 @@ Produce three copy-ready outputs that describe the **next commit** the user is a
 2. A single-line conventional **Commit Message** (`type(scope): summary`) describing the dominant change in the commit being prepared.
 3. A **commit body** with an overview and highlights capturing intent and rationale (when evidenced), not just a restatement of file changes.
 
+These outputs are the **primary narrative source** for pull-request descriptions: [util.gh-pr-content.prompt.md](util.gh-pr-content.prompt.md) reads `git log main..HEAD` (commit subjects + bodies) as its first evidence tier. Write every commit so it stands alone **and** aggregates cleanly with its siblings into a PR description; Step 3 maps each body part to the PR section it feeds.
+
 ### Scope policy (non-negotiable) 🎯
 
 The commit message describes **the next commit**, so the authoritative evidence is, in order of precedence:
@@ -87,12 +89,12 @@ Follow these rules:
 
 ### 3) Write the change summary (copy-ready)
 
-Produce the commit body:
+Produce the commit body so each part maps onto the pull-request section it will feed (see Goal):
 
-- 1-2 sentence overview of the change impact.
-- Bullet list (max 7) with evidence-backed highlights referencing files/components.
-- A `Testing:` line with commands or checks run (or **Unknown from code, run {command}**). Omit entirely if no testing was possible.
-- A `Breaking changes:` line with explicit call-outs. Omit entirely if none exist.
+- 1-2 sentence overview of the change impact **and why it was needed** — feeds the PR Description prose and Context.
+- Bullet list (max 7) of evidence-backed highlights; each names the file or component changed **and its observable effect** — feeds the PR Description bullets, not just a restatement of the diff.
+- A `Testing:` line naming the **concrete commands run** so a reviewer can rerun them verbatim (or **Unknown from code, run {command}**) — feeds the PR "How to test it". Omit entirely if no testing was possible.
+- A `Breaking changes:` line with explicit call-outs — feeds the PR "Type of changes" (Breaking change). Omit entirely if none exist.
 
 ### 4) Compile the final output (copy-ready template)
 
@@ -126,6 +128,7 @@ Omit the `Testing` and `Breaking changes` lines entirely when they do not apply.
 ## Output requirements 📋
 
 - Write the generated content to `.copilot/analysis/git-commit-message-YYYYMMDD-<slug>.report.md` (slug as derived in §A) **and** print the same content inline for copy/paste.
+- Write every commit subject and body to be **self-contained and PR-ready** — readable in isolation and structured so `git log main..HEAD` can be turned into a PR description by [util.gh-pr-content.prompt.md](util.gh-pr-content.prompt.md) without re-reading the diff.
 - Ground every statement in the **in-scope** diff (staged > unstaged > branch fallback); if evidence is missing, record **Unknown from code – {suggested action}**.
 - When using the branch-fallback mode, the **Overview** must state explicitly that the message summarises the branch because no staged or unstaged changes were present.
 - When unstaged-only mode is used, the **Overview** must note that nothing is staged yet and suggest `git add` for the relevant files.

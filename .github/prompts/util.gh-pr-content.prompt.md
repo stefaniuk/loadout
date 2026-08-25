@@ -17,7 +17,7 @@ Craft a diff-driven pull request title and body, ready to copy/paste, that compa
 
 A PR description covers **everything between `main` and `HEAD`**, including any staged or unstaged work that will land in the next commit on this branch. Evidence precedence is:
 
-1. **Commit subjects + bodies** (`git log main..HEAD`) - primary narrative; the branch authors already wrote it.
+1. **Commit subjects + bodies** (`git log main..HEAD`) - primary narrative; the branch authors already wrote it (ideally via [util.git-commit-message.prompt.md](util.git-commit-message.prompt.md), which structures each commit to feed these sections).
 2. **Diff overview** (`git diff --stat main...HEAD`, `--dirstat`) - structural scope and folder distribution.
 3. **Top-N per-file diffs**, capped, with explicit truncation markers - for the largest or most behaviour-bearing changes.
 4. **Staged / unstaged working-tree changes** - included as "pending in this branch but not yet committed" and called out separately in the description.
@@ -101,7 +101,8 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
    - Leave non-applicable items unchecked (`[ ]`). Never delete a line from the template.
 6. **Update the Checklist section**
    - Reflect actual work done (`[x]`) vs outstanding (`[ ]`).
-   - Always reference whether tests/docs were updated, style guidelines were followed, and collaboration mode (pair/mob/vibe) occurred.
+   - Tick "I have described how to test these changes in the section above" once the How to test it section is populated.
+   - Always reference whether tests/docs were updated, style guidelines were followed, and collaboration mode (pair or mob programming, AI-assisted sessions) occurred.
 7. **Populate "Sensitive Information Declaration"**
    - Confirm (`[x]`) only if you verified no PII/PID/sensitive data exists in the changes; otherwise leave unchecked and note required remediation.
 8. **Call out follow-ups**
@@ -158,10 +159,15 @@ After the script completes, **read `$_report`** (the per-PR or per-branch, per-d
 - [ ] I have followed the code style of the project
 - [ ] I have added tests to cover my changes
 - [ ] I have updated the documentation accordingly
+- [ ] I have described how to test these changes in the section above
 - [ ] This PR is a result of pair or mob programming
 - [ ] This PR is a result of AI-assisted development sessions
 
+---
+
 ## Sensitive Information Declaration
+
+To ensure the utmost confidentiality and protect your and others privacy, we kindly ask you to NOT including [PII (Personal Identifiable Information) / PID (Personal Identifiable Data)](https://digital.nhs.uk/data-and-information/keeping-data-safe-and-benefitting-the-public) or any other sensitive data in this PR (Pull Request) and the codebase changes. We will remove any PR that do contain any sensitive information. We really appreciate your cooperation in this matter.
 
 - [ ] I confirm that neither PII/PID nor sensitive data are included in this PR and the codebase changes.
 
