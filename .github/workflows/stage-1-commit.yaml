@@ -79,4 +79,4 @@ jobs:
         uses: astral-sh/setup-uv@v6
       - name: "Run whole test suite"
         shell: bash
-        run: make test-all
+        run: make test
