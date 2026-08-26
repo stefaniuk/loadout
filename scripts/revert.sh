@@ -167,14 +167,22 @@ function revert-shared-resources() {
     rm -rf "${dest:?}/.specify"
   fi
 
-  # Remove ADR template files
-  local adr_files=("ADR-nnn_Any_Decision_Record_Template.md" "Tech_Radar.md")
-  for file in "${adr_files[@]}"; do
-    if [[ -f "${dest}/docs/adr/${file}" ]]; then
-      print-info "Removing ${dest}/docs/adr/${file}"
-      rm -f "${dest}/docs/adr/${file}"
+  # Remove the ADR template, unless the destination owns it in its own git history
+  local adr_template_rel="docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+  if [[ -f "${dest}/${adr_template_rel}" ]]; then
+    if is-destination-owned "${dest}" "${adr_template_rel}"; then
+      print-info "Skipping ${dest}/${adr_template_rel} (destination-owned; tracked in destination git history)"
+    else
+      print-info "Removing ${dest}/${adr_template_rel}"
+      rm -f "${dest}/${adr_template_rel}"
     fi
-  done
+  fi
+
+  # Remove Tech Radar (always loadout-managed)
+  if [[ -f "${dest}/docs/adr/Tech_Radar.md" ]]; then
+    print-info "Removing ${dest}/docs/adr/Tech_Radar.md"
+    rm -f "${dest}/docs/adr/Tech_Radar.md"
+  fi
 
   # Remove .copilot/analysis directory if empty or only contains .gitignore.
   if [[ -d "${dest}/.copilot/analysis" ]]; then

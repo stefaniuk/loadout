@@ -5,6 +5,9 @@
 # GitHub Copilot configuration
 # ------------------------------------------------------------------------------
 
+# Copilot workspace files
+.copilot/
+
 # Agents (custom agent definitions or README placeholder)
 .github/agents/
 
@@ -23,8 +26,17 @@
 # Copilot instructions file
 .github/copilot-instructions.md
 
+# Superpowers local planning and design artefacts
+docs/superpowers/
+
+# Hook executables invoked by .github/hooks/*.json
+scripts/hooks/
+
+# Workflow configuration scripts
+scripts/loadout.mk
+
 # ------------------------------------------------------------------------------
-# Specify framework
+# GitHub Spec Kit framework
 # ------------------------------------------------------------------------------
 
 # Constitution
@@ -37,29 +49,12 @@
 .specify/templates/
 
 # ------------------------------------------------------------------------------
-# Cross-agent baseline and hook executables
-# ------------------------------------------------------------------------------
-
-# Hook executables invoked by .github/hooks/*.json
-scripts/hooks/
-
-# ------------------------------------------------------------------------------
 # Documentation
 # ------------------------------------------------------------------------------
 
-# Pull request template (only copied if not present)
-# .github/pull_request_template.md
+# Pull request template - entry is commented out per-destination if the file is already tracked in that repo's git history.
+.github/pull_request_template.md
 
-# ADR template
+# ADR template - entry is commented out per-destination if the file is already tracked in that repo's git history.
 docs/adr/ADR-nnn_Any_Decision_Record_Template.md
 docs/adr/Tech_Radar.md
-
-# Superpowers local planning and design artefacts
-docs/superpowers/
-
-# ------------------------------------------------------------------------------
-# Workspace configuration
-# ------------------------------------------------------------------------------
-
-# Local active workflow selection (session/worktree scoped)
-.copilot/workflow-mode.json

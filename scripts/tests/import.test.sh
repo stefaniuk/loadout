@@ -20,7 +20,6 @@ set -euo pipefail
 TEMP_DIR=""
 REPO_ROOT=""
 REPO_SNAPSHOT=""
-REPO_SNAPSHOT_FULL=""
 
 # Import-relevant subtree of the repo (mirrors the paths import.sh compares).
 IMPORT_PATHS=(
@@ -58,6 +57,7 @@ function main() {
     test-import-new-true-imports-new-files \
     test-import-new-false-does-not-import-new-files \
     test-import-ignores-generated-skill-assets \
+    test-import-skips-destination-owned-adr-template \
     test-import-detects-and-round-trips-singletons-and-hooks \
   )
 
@@ -94,19 +94,12 @@ function test-import-suite-setup() {
 
   TEMP_DIR=$(mktemp -d)
 
-  # Full snapshot of the repo's import-relevant subtree, used only by the
-  # round-trip fidelity test which imports a full apply.sh output.
-  REPO_SNAPSHOT_FULL="${TEMP_DIR}/_repo_snapshot_full"
-  build-repo-snapshot "${REPO_SNAPSHOT_FULL}"
-
-  # Lite snapshot: skills trimmed to the only one referenced by file-based
-  # tests. This keeps each import.sh diff cheap (5 vs 240 skill files) and is
-  # the default destination/repo template for all other tests. A fresh dest and
-  # repo start byte-identical, so a clean import reports no changes.
+  # Pre-build a faithful snapshot of the repo's import-relevant subtree. Tests
+  # copy it so imports round-trip into an isolated tree instead of the real repo.
+  # The snapshot doubles as the destination template: a fresh dest and repo
+  # start byte-identical, so a clean import reports no changes.
   REPO_SNAPSHOT="${TEMP_DIR}/_repo_snapshot"
-  cp -R "${REPO_SNAPSHOT_FULL}" "${REPO_SNAPSHOT}"
-  find "${REPO_SNAPSHOT}/.github/skills" -mindepth 1 -maxdepth 1 -type d \
-    ! -name repository-template -exec rm -rf {} +
+  build-repo-snapshot "${REPO_SNAPSHOT}"
 
   return 0
 }
@@ -176,8 +169,7 @@ function test-import-dry-run-shows-no-changes-for-fresh-apply() {
   dest="${TEMP_DIR}/dry-run-fresh/applied"
   mkdir -p "${TEMP_DIR}/dry-run-fresh"
   ./scripts/apply.sh "${dest}" > /dev/null 2>&1
-  repo="${TEMP_DIR}/dry-run-fresh/repo"
-  cp -R "${REPO_SNAPSHOT_FULL}" "${repo}"
+  repo=$(make-repo "dry-run-fresh")
 
   local output
   output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
@@ -235,6 +227,28 @@ function test-import-ignores-generated-skill-assets() {
 
   ! echo "${output}" | grep -q "${generated_file}" || return 1
   [[ ! -f "${repo}/${generated_file}" ]] || return 1
+
+  return 0
+}
+
+function test-import-skips-destination-owned-adr-template() {
+
+  local dest repo
+  dest=$(make-dest "owned-adr-template")
+  repo=$(make-repo "owned-adr-template")
+  local adr_rel="docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+
+  echo "# destination customised ADR template" >> "${dest}/${adr_rel}"
+  git -C "${dest}" init -q
+  git -C "${dest}" add -A
+  git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" commit -q -m "seed"
+
+  local output
+  output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
+  ! echo "${output}" | grep -q "${adr_rel}" || return 1
+
+  LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true new=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+  ! grep -q "destination customised ADR template" "${repo}/${adr_rel}" || return 1
 
   return 0
 }

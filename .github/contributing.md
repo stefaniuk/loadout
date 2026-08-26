@@ -480,7 +480,7 @@ allowed-tools: []
       {
         "type": "command",
         "command": "./scripts/hooks/<your-script>.sh",
-        "timeout": 60000,
+        "timeout": 10,
       },
     ],
   },
@@ -498,7 +498,7 @@ set -euo pipefail
 make lint
 ```
 
-**Required fields and naming constraints.** Supported events: `SessionStart`, `UserPromptSubmit`, `PostToolUse`, `Stop`. Each entry needs `type: "command"`, a `command` path, and a `timeout` (ms). Scripts must be POSIX-portable and idempotent.
+**Required fields and naming constraints.** Supported events: `SessionStart`, `UserPromptSubmit`, `PostToolUse`, `Stop`. Each entry needs `type: "command"`, a `command` path, and a `timeout` (seconds). Scripts must be POSIX-portable and idempotent.
 
 **Pre-PR validation checklist.**
 

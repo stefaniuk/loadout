@@ -4,35 +4,35 @@
       {
         "type": "command",
         "command": "./scripts/hooks/session-start-cheatsheet.sh",
-        "timeout": 10000
+        "timeout": 10
       }
     ],
     "UserPromptSubmit": [
       {
         "type": "command",
         "command": "./scripts/hooks/user-prompt-record.sh",
-        "timeout": 10000
+        "timeout": 10
       }
     ],
     "Stop": [
       {
         "type": "command",
         "command": "./scripts/hooks/stop-gate.sh",
-        "timeout": 60000
+        "timeout": 20
       }
     ],
     "SubagentStart": [
       {
         "type": "command",
         "command": "./scripts/hooks/subagent-start-context.sh",
-        "timeout": 10000
+        "timeout": 10
       }
     ],
     "SubagentStop": [
       {
         "type": "command",
         "command": "./scripts/hooks/subagent-stop-log.sh",
-        "timeout": 10000
+        "timeout": 10
       }
     ]
   }

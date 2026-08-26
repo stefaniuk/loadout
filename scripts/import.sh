@@ -31,6 +31,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # LOADOUT_IMPORT_REPO_ROOT overrides the target repo root (test-only isolation).
 REPO_ROOT="${LOADOUT_IMPORT_REPO_ROOT:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/common.lib.sh"
+
 # Global arrays populated by collect-* functions
 CHANGED_FILES=()
 NEW_FILES=()
@@ -159,14 +162,23 @@ function collect-shared-changes() {
 
 # Check whether a managed path should be excluded from import.
 # Arguments:
-#   $1=[relative file path]
+#   $1=[source directory]
+#   $2=[relative file path]
 function is-ignored-import-path() {
 
-  local path="$1"
+  local source_dir="$1"
+  local path="$2"
+  local owned_path
 
   case "${path}" in
     .github/skills/repository-template/assets/*) return 0 ;;
   esac
+
+  for owned_path in "${CONDITIONALLY_OWNED_PATHS[@]}"; do
+    if [[ "${path}" == "${owned_path}" ]] && is-destination-owned "${source_dir}" "${owned_path}"; then
+      return 0
+    fi
+  done
 
   return 1
 }
@@ -187,7 +199,7 @@ function compare-file() {
   local src_file="${source_dir}/${rel_path}"
   local repo_file="${REPO_ROOT}/${rel_path}"
 
-  if is-ignored-import-path "${rel_path}"; then
+  if is-ignored-import-path "${source_dir}" "${rel_path}"; then
     return 0
   fi
 
@@ -230,7 +242,7 @@ function compare-directory-files() {
     local rel_path="${rel_dir}/${bname}"
     local repo_file="${repo_dir}/${bname}"
 
-    if is-ignored-import-path "${rel_path}"; then
+    if is-ignored-import-path "${source_dir}" "${rel_path}"; then
       continue
     fi
 
@@ -267,7 +279,7 @@ function compare-directory-recursive() {
     local rel_path="${rel_dir}/${src_file#"${src_dir}/"}"
     local repo_file="${REPO_ROOT}/${rel_path}"
 
-    if is-ignored-import-path "${rel_path}"; then
+    if is-ignored-import-path "${source_dir}" "${rel_path}"; then
       continue
     fi
 
@@ -399,14 +411,6 @@ function print-error() {
 
   echo "Error: $1" >&2
   exit 1
-}
-
-# Print an informational message.
-# Arguments:
-#   $1=[message to display]
-function print-info() {
-
-  echo "→ $1"
 }
 
 # ==============================================================================

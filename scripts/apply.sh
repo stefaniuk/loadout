@@ -819,10 +819,13 @@ function copy-hook-scripts() {
 #   $1=[destination directory path]
 function copy-pull-request-template() {
 
-  local dest_file="$1/.github/pull_request_template.md"
+  local destination="$1"
+  local dest_file="${destination}/.github/pull_request_template.md"
   mkdir -p "$(dirname "${dest_file}")"
 
-  if [[ -f "${dest_file}" ]]; then
+  if is-destination-owned "${destination}" ".github/pull_request_template.md"; then
+    print-info "Skipping pull_request_template.md (destination-owned; tracked in destination git history)"
+  elif [[ -f "${dest_file}" ]]; then
     print-info "Skipping pull_request_template.md (already exists)"
   else
     print-info "Copying pull_request_template.md to ${dest_file}"
@@ -873,11 +876,18 @@ function copy-specify-templates() {
 #   $1=[destination directory path]
 function copy-adr-template() {
 
-  local dest="$1/docs/adr"
+  local destination="$1"
+  local dest="${destination}/docs/adr"
   mkdir -p "${dest}"
 
-  print-info "Copying ADR template files to ${dest}"
-  cp "${ADR_TEMPLATE}" "${dest}/"
+  if is-destination-owned "${destination}" "docs/adr/ADR-nnn_Any_Decision_Record_Template.md"; then
+    print-info "Skipping ADR-nnn_Any_Decision_Record_Template.md (destination-owned; tracked in destination git history)"
+  else
+    print-info "Copying ADR-nnn_Any_Decision_Record_Template.md to ${dest}"
+    cp "${ADR_TEMPLATE}" "${dest}/"
+  fi
+
+  print-info "Copying Tech_Radar.md to ${dest}"
   cp "${ADR_TECH_RADAR}" "${dest}/"
 
   return 0
@@ -914,6 +924,33 @@ function copy-copilot-analysis() {
   return 0
 }
 
+# Render .gitignore.loadout content for a specific destination, commenting
+# out any line that exactly matches a path this destination already owns.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function render-gitignore-content() {
+
+  local destination="$1"
+  local line owned_path is_owned
+
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    is_owned=false
+    for owned_path in "${CONDITIONALLY_OWNED_PATHS[@]}"; do
+      if [[ "${line}" == "${owned_path}" ]] && is-destination-owned "${destination}" "${owned_path}"; then
+        is_owned=true
+        break
+      fi
+    done
+    if [[ "${is_owned}" == "true" ]]; then
+      echo "# ${line}  # already tracked in this repo's git history; owned here, not managed by loadout"
+    else
+      echo "${line}"
+    fi
+  done < "${GITIGNORE_LOADOUT}"
+
+  return 0
+}
+
 # Update .gitignore with loadout managed content.
 # Creates .gitignore if it doesn't exist, or updates the managed section if it does.
 # Arguments (provided as function parameters):
@@ -922,7 +959,7 @@ function update-gitignore() {
 
   local dest_gitignore="$1/.gitignore"
   local source_content
-  source_content=$(cat "${GITIGNORE_LOADOUT}")
+  source_content=$(render-gitignore-content "$1")
 
   if [[ ! -f "${dest_gitignore}" ]]; then
     # No .gitignore exists, create it with markers and content

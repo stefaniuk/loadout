@@ -26,6 +26,8 @@ PLAYWRIGHT_PY_DEST=""
 CLEAN_DEST=""
 SKIP_SINGLETONS_DEST=""
 GITIGNORE_DEST=""
+OWNED_FILES_DEST=""
+OWNED_REVERT_DEST=""
 ESCAPED_SPACE_ROOT=""
 
 # Subset shared dests
@@ -63,6 +65,8 @@ function main() {
     test-revert-removes-loadout-make-integration \
     test-apply-skips-existing-singletons \
     test-apply-updates-existing-gitignore-managed-section \
+    test-apply-respects-git-tracked-destination-owned-files \
+    test-revert-respects-destination-owned-adr-template \
     test-apply-subset-agents-only \
     test-apply-subset-prompts-and-agents \
     test-apply-subset-instructions-only-with-python-tech \
@@ -97,6 +101,8 @@ function test-apply-suite-setup() {
   CLEAN_DEST="${TEMP_DIR}/_shared_clean"
   SKIP_SINGLETONS_DEST="${TEMP_DIR}/_shared_skip_singletons"
   GITIGNORE_DEST="${TEMP_DIR}/_shared_gitignore"
+  OWNED_FILES_DEST="${TEMP_DIR}/_shared_owned_files"
+  OWNED_REVERT_DEST="${TEMP_DIR}/_shared_owned_revert"
   ESCAPED_SPACE_ROOT="${TEMP_DIR}/_esc_space"
   SUBSET_AGENTS_DEST="${TEMP_DIR}/_subset_agents"
   SUBSET_PROMPTS_AGENTS_DEST="${TEMP_DIR}/_subset_prompts_agents"
@@ -134,6 +140,15 @@ function test-apply-suite-setup() {
   ({
     mkdir -p "${ESCAPED_SPACE_ROOT}"
     ./scripts/apply.sh "${ESCAPED_SPACE_ROOT}/Mobile\\ Documents/iCloud~md~obsidian/Documents" > /dev/null 2>&1
+  }) &
+  ({
+    seed-destination-owned-files "${OWNED_FILES_DEST}"
+    ./scripts/apply.sh "${OWNED_FILES_DEST}" > /dev/null 2>&1
+  }) &
+  ({
+    seed-destination-owned-files "${OWNED_REVERT_DEST}"
+    ./scripts/apply.sh "${OWNED_REVERT_DEST}" > /dev/null 2>&1
+    bash ./scripts/revert.sh --dest "${OWNED_REVERT_DEST}" > /dev/null 2>&1
   }) &
   (subset=agents ./scripts/apply.sh "${SUBSET_AGENTS_DEST}" > /dev/null 2>&1) &
   (subset="prompts,agents" ./scripts/apply.sh "${SUBSET_PROMPTS_AGENTS_DEST}" > /dev/null 2>&1) &
@@ -392,6 +407,32 @@ function test-apply-updates-existing-gitignore-managed-section() {
   return 0
 }
 
+function test-apply-respects-git-tracked-destination-owned-files() {
+
+  local d="${OWNED_FILES_DEST}"
+  # Pre-existing, git-tracked files are left untouched, not overwritten.
+  grep -q "custom-owned-pr-template" "${d}/.github/pull_request_template.md" || return 1
+  grep -q "custom-owned-adr-template" "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" || return 1
+  # Their .gitignore entries are commented out for this destination only.
+  grep -qF "# .github/pull_request_template.md" "${d}/.gitignore" || return 1
+  grep -qF "# docs/adr/ADR-nnn_Any_Decision_Record_Template.md" "${d}/.gitignore" || return 1
+  # Tech_Radar.md is not in the conditionally-owned set, so it stays managed.
+  [[ -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
+  grep -qF "docs/adr/Tech_Radar.md" "${d}/.gitignore" || return 1
+  ! grep -qF "# docs/adr/Tech_Radar.md" "${d}/.gitignore" || return 1
+  return 0
+}
+
+function test-revert-respects-destination-owned-adr-template() {
+
+  local d="${OWNED_REVERT_DEST}"
+  # Owned files survive revert; Tech_Radar.md (unowned) is removed as usual.
+  grep -q "custom-owned-pr-template" "${d}/.github/pull_request_template.md" || return 1
+  grep -q "custom-owned-adr-template" "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" || return 1
+  [[ ! -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
+  return 0
+}
+
 # ==============================================================================
 # Subset selector
 
@@ -477,6 +518,21 @@ function test-apply-subset-project-only() {
   [[ ! -d "${d}/.github/prompts" ]] || return 1
   [[ ! -d "${d}/.github/instructions" ]] || return 1
   [[ ! -d "${d}/.github/skills" ]] || return 1
+  return 0
+}
+
+function seed-destination-owned-files() {
+
+  local dest="$1"
+
+  mkdir -p "${dest}/.github" "${dest}/docs/adr"
+  echo "custom-owned-pr-template" > "${dest}/.github/pull_request_template.md"
+  echo "custom-owned-adr-template" > "${dest}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+
+  git -C "${dest}" init -q
+  git -C "${dest}" add -A
+  git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" commit -q -m "seed destination-owned files"
+
   return 0
 }
 

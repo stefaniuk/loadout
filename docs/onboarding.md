@@ -96,6 +96,8 @@ What gets copied:
 - `docs/adr/ADR-nnn_Any_Decision_Record_Template.md`
 - `.copilot/analysis/.gitignore`
 
+If `.github/pull_request_template.md` or `docs/adr/ADR-nnn_Any_Decision_Record_Template.md` is already tracked in the target repository's own git history, `apply`/`import`/`revert` leave it alone entirely - the target repo, not loadout, owns that file - and the matching `.gitignore` entry is commented out for that repository.
+
 After the copy completes, review `git status` in the target repository, commit the changes, and run `make lint && make test` to confirm everything wires up correctly.
 
 ## Plugin installation path
