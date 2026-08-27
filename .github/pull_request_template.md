@@ -37,9 +37,9 @@ test applies.
 Recommended structure:
   - "Prerequisites:" — any setup or install commands (for example: make config).
   - One numbered test per behaviour ("Test 1: ...", "Test 2: ..."), each with:
-      * the exact command(s) to run, inside a fenced bash code block;
-      * an "Expected:" line describing the correct result;
-      * a "Clean up:" step when the test changes the working tree
+      * "Commands:" — the exact command(s) to run, inside a fenced bash code block;
+      * "Expected:" — line describing the correct result;
+      * "Clean up:" — step when the test changes the working tree
         (for example: git checkout -- <file>).
 -->
 
@@ -56,7 +56,7 @@ Recommended structure:
 
 <!-- Go over all the following points, and put an `x` in all the boxes that apply. -->
 
-- [ ] I am familiar with the [contributing guidelines](./contributing.md)
+- [ ] I am familiar with the contributing guidelines
 - [ ] I have followed the code style of the project
 - [ ] I have added tests to cover my changes
 - [ ] I have updated the documentation accordingly

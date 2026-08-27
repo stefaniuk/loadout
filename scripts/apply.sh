@@ -717,6 +717,9 @@ function copilot-copy-prompts() {
     find "${COPILOT_PROMPTS_DIR}" -maxdepth 1 -name "${pattern}.prompt.md" -type f -exec cp {} "${dest_prompts}/" \; 2>/dev/null || true
   done
 
+  # Copy operational scripts (evidence gathering scripts and similar)
+  find "${COPILOT_PROMPTS_DIR}" -maxdepth 1 -name "*.sh" -type f -exec cp {} "${dest_prompts}/" \; 2>/dev/null || true
+
   # Skip technology-specific prompts when narrowing to speckit only.
   if [[ "${SPECKIT_NARROW_PROMPTS:-false}" == "true" ]]; then
     return 0

@@ -19,13 +19,15 @@ These outputs are the **primary narrative source** for pull-request descriptions
 
 ### Scope policy (non-negotiable) 🎯
 
-The commit message describes **the next commit**, so the authoritative evidence is, in order of precedence:
+The commit message describes **the next commit**, whose content is **only the staged changes**. This section describes evidence precedence only, it does not instruct you to run anything. The single sanctioned command runs once in §A; everything named below is a description of a block already present in the resulting report.
 
-1. **Staged changes** (`git diff --cached`) - primary evidence whenever they exist.
-2. **Unstaged working-tree changes** (`git diff`) - used only when nothing is staged; the output must note that nothing is staged yet.
-3. **Branch-wide diff** (`main...HEAD`) - used **only** when there are no staged or unstaged changes at all, in which case the output must state explicitly that it summarises the branch history rather than a new commit.
+The authoritative evidence is:
 
-The branch-wide diff (`main...HEAD`) is otherwise **context only**: stat + recent commit subjects, used to evaluate the current branch name and mirror tone. Never use it as the source of truth for the commit summary, and never expand it into a full per-line diff.
+1. **Staged changes** - the sole evidence for the commit, found in the report's staged-stat and staged-diff blocks. If a change is not staged it is not part of this commit.
+
+Unstaged working-tree changes are **deliberately excluded** and are not captured in the report. If nothing is staged, the report says so and you must output **"No staged changes – nothing to commit."** and stop.
+
+The branch-wide stat and recent commit subjects are **context only**, found in the report's branch-log block and used solely to evaluate the current branch name and mirror tone. Never use them as the source of truth for the commit summary, and never expand them into a full per-line diff.
 
 ---
 
@@ -36,29 +38,26 @@ The branch-wide diff (`main...HEAD`) is otherwise **context only**: stat + recen
 Run the evidence script **once** from the repository root. It writes a bounded report to `.copilot/analysis/git-commit-message-diff-YYYYMMDD-<slug>.report.txt` (where `<slug>` is the sanitised current branch name, so per-branch runs do not overwrite each other). Per-file diffs are capped to keep large changes from blowing up the context.
 
 ```bash
-bash scripts/quality/git-commit-evidence.sh
+bash .github/prompts/util.git-commit-message.sh
 ```
 
 To increase the per-file line cap (default 400):
 
 ```bash
-PER_FILE_CAP=800 bash scripts/quality/git-commit-evidence.sh
+PER_FILE_CAP=800 bash .github/prompts/util.git-commit-message.sh
 ```
 
 After the script completes, **read `$_report`** (the per-branch, per-day file written above) as the authoritative evidence. The report is bounded by design; a single read is sufficient and you must not re-run `git diff main...HEAD` for full content.
 
-1. Confirm branch state from `git rev-parse --abbrev-ref HEAD` and `git status -sb`.
-2. Determine the commit scope using the Scope policy above:
-   - Staged stat + staged content → primary evidence.
-   - Unstaged stat + unstaged content (only if nothing is staged) → primary evidence; note the lack of staging.
-   - Otherwise use `git diff --stat main...HEAD` and recent log → branch-summary mode.
-3. If the report shows no staged, unstaged, **and** no `main...HEAD` differences, output **"No changes detected – nothing to commit."** and stop.
+1. Confirm branch state from `git rev-parse --abbrev-ref HEAD` and `git status -sb`, and confirm the commit scope from the report's staged evidence blocks.
+2. Use the staged stat + staged content as the **sole** evidence for the next commit. Unstaged working-tree changes are out of scope and are not captured in the report.
+3. If the report shows no staged changes, output **"No staged changes – nothing to commit."** and stop.
 4. Mirror recent commit tone using `git log -5 --oneline`: match the prefix style (`type(scope):` vs `type:`), the summary voice (imperative, lowercase, no trailing period), and reuse a scope token that already appears in recent history when one fits.
-5. If a per-file capped diff was truncated (look for the `[...truncated: N more lines...]` marker), and you genuinely need more lines for one specific file, either rerun the script with `PER_FILE_CAP=<n>` or request only that file with `git --no-pager diff --cached -- <path>` (or unstaged equivalent). Do not expand more than necessary, and never expand the branch diff.
+5. If a per-file capped diff was truncated (look for the `[...truncated: N more lines...]` marker), and you genuinely need more lines for one specific file, either rerun the script with `PER_FILE_CAP=<n>` or request only that file with `git --no-pager diff --cached -- <path>`. Do not expand more than necessary, and never expand the branch diff.
 
 ### B. Classify the change
 
-1. Determine the dominant change type for Conventional Commits (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `build`, `ci`, `perf`, `revert`) from the **in-scope** changes only (staged > unstaged > branch fallback).
+1. Determine the dominant change type for Conventional Commits (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `build`, `ci`, `perf`, `revert`) from the **staged** changes only.
 2. Identify a `scope` by using the most relevant component, package, or directory touched in those changes (prefer values already used in the repo; fall back to a short directory name if unsure).
 3. Note any breaking changes or notable follow-ups visible in the in-scope diff.
 4. **Multi-thread split heuristic.** If the in-scope changes span two or more clearly unrelated top-level areas (for example a skill update _and_ a CI/tooling pin) with no shared intent, recommend splitting in **Highlights** and still emit one combined Conventional Commit line covering both threads.
@@ -69,13 +68,13 @@ After the script completes, **read `$_report`** (the per-branch, per-day file wr
 
 ### 1) Extract key evidence
 
-Work only from the in-scope changes determined by the Scope policy (staged > unstaged > branch fallback).
+Work only from the **staged** changes (the sole commit evidence).
 
 1. List the primary files/folders touched **in the in-scope changes** (not the whole branch).
 2. Summarise behavioural changes (APIs, CLIs, jobs, infra, docs) in plain language.
 3. Capture side effects (tests added, config changes, dependency updates).
 4. Record unknowns explicitly (**Unknown from code – {action}**).
-5. Note the current branch state (feature branch vs `main`/detached). If already on a feature branch, confirm whether its name matches the dominant change and suggest an improvement if not; otherwise, craft a new branch slug using `scope-short-description`. Branch-name suitability may reference the branch-wide stat/log from the report; the commit message itself must not.
+5. Note the current branch state (feature branch vs `main`/detached). If already on a feature branch, confirm whether its name matches the dominant change and suggest an improvement if not; otherwise, craft a new branch slug using `scope-short-description`. Branch-name suitability may reference the branch-wide stat/log from the report; the commit message itself must draw only on the staged changes.
 
 ### 2) Craft the Conventional Commit line
 
@@ -123,15 +122,14 @@ Omit the `Testing` and `Breaking changes` lines entirely when they do not apply.
 
 - Write the same content emitted in step 4 to `.copilot/analysis/git-commit-message-YYYYMMDD-<slug>.report.md` (compute `<slug>` exactly as in §A: the sanitised current branch name).
 - If the file exists, overwrite it with the updated content.
-- Include a **Generated** footer with the current UTC timestamp.
+- Include a **Generated** footer with the current London time in format `YYYY-MM-DD hh:mm:ss`.
 
 ## Output requirements 📋
 
 - Write the generated content to `.copilot/analysis/git-commit-message-YYYYMMDD-<slug>.report.md` (slug as derived in §A) **and** print the same content inline for copy/paste.
 - Write every commit subject and body to be **self-contained and PR-ready** — readable in isolation and structured so `git log main..HEAD` can be turned into a PR description by [util.gh-pr-content.prompt.md](util.gh-pr-content.prompt.md) without re-reading the diff.
-- Ground every statement in the **in-scope** diff (staged > unstaged > branch fallback); if evidence is missing, record **Unknown from code – {suggested action}**.
-- When using the branch-fallback mode, the **Overview** must state explicitly that the message summarises the branch because no staged or unstaged changes were present.
-- When unstaged-only mode is used, the **Overview** must note that nothing is staged yet and suggest `git add` for the relevant files.
+- Ground every statement in the **staged** diff; if evidence is missing, record **Unknown from code – {suggested action}**.
+- If nothing is staged, do not invent a commit: output **"No staged changes – nothing to commit."** and stop.
 - Ensure the branch suggestion covers both cases: re-affirm or improve the current feature branch name, or propose a new branch when working directly on `main`/detached `HEAD`.
 - Prefer British English and concise, active phrasing.
 - If multiple commits might be useful, mention that under **Highlights**, but still emit one Conventional Commit line for the in-scope changes.

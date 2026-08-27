@@ -135,6 +135,7 @@ function collect-copilot-changes() {
   compare-directory-recursive "${source_dir}" ".github/instructions/includes"
   compare-directory-files "${source_dir}" ".github/instructions/templates" "*"
   compare-directory-files "${source_dir}" ".github/prompts" "*.prompt.md"
+  compare-directory-files "${source_dir}" ".github/prompts" "*.sh"
   compare-directory-recursive "${source_dir}" ".github/skills"
 
   return 0

@@ -5,15 +5,15 @@ set -euo pipefail
 # Generate a bounded evidence report for crafting a conventional commit message.
 #
 # Usage:
-#   $ ./scripts/quality/git-commit-evidence.sh
-#   $ PER_FILE_CAP=800 ./scripts/quality/git-commit-evidence.sh
+#   $ .github/prompts/util.git-commit-message.sh
+#   $ PER_FILE_CAP=800 .github/prompts/util.git-commit-message.sh
 #
 # Output:
 #   .copilot/analysis/git-commit-message-diff-YYYYMMDD-<slug>.report.txt
 #
 # The report captures git status, recent log, stat summaries, and per-file
-# diffs (capped) for staged or unstaged changes. Branch diffs are never
-# expanded into full content.
+# diffs (capped) for the staged changes only. Unstaged working-tree changes
+# are deliberately excluded. Branch diffs are never expanded into full content.
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
@@ -39,7 +39,6 @@ for cmd in \
   "git status -sb" \
   "git log -5 --oneline" \
   "git diff --cached --stat" \
-  "git diff --stat" \
   "git diff --stat main...HEAD"; do
     printf '\n>>> %s\n' "$cmd" >> "$_report"
     eval "$cmd" >> "$_report" 2>&1
@@ -61,9 +60,9 @@ capture_file() {
         }' >> "$_report"
 }
 
-# Primary evidence: staged > unstaged > branch summary only.
+# Primary (and only) commit evidence: staged changes. Unstaged working-tree
+# changes are deliberately excluded - if it is not staged it is not committed.
 _staged=$(git diff --cached --name-only)
-_unstaged=$(git diff --name-only)
 
 if [[ -n "$_staged" ]]; then
   printf '\n>>> staged content (per file, capped %s lines each)\n' "$_per_file_cap" >> "$_report"
@@ -71,14 +70,8 @@ if [[ -n "$_staged" ]]; then
     [[ -z "$f" ]] && continue
     capture_file staged "$f" --cached --unified=3
   done <<< "$_staged"
-elif [[ -n "$_unstaged" ]]; then
-  printf '\n>>> unstaged content (no staged changes; per file, capped %s lines each)\n' "$_per_file_cap" >> "$_report"
-  while IFS= read -r f; do
-    [[ -z "$f" ]] && continue
-    capture_file unstaged "$f" --unified=3
-  done <<< "$_unstaged"
 else
-  printf '\n>>> no staged or unstaged changes - falling back to branch summary only\n' >> "$_report"
+  printf '\n>>> no staged changes - nothing to commit\n' >> "$_report"
 fi
 
 printf '\nReport: %s (%s bytes, %s lines)\n' \
