@@ -7,9 +7,20 @@ set -euo pipefail
 # Usage:
 #   $ .github/prompts/util.git-commit-message.sh
 #   $ PER_FILE_CAP=800 .github/prompts/util.git-commit-message.sh
+#   $ BASE_REF=long-lived-branch .github/prompts/util.git-commit-message.sh
 #
 # Output:
 #   .copilot/analysis/git-commit-message-diff-YYYYMMDD-<slug>.report.txt
+#
+# The base branch (used only for branch-naming context and tone, never as
+# commit evidence) is not assumed to be `main`: it is taken from BASE_REF if
+# set, otherwise an already-open PR's actual base ref, otherwise the
+# repository's default branch, otherwise `origin/HEAD`, falling back to
+# `main` only if none of these can be detected. This mirrors the base-branch
+# detection in util.gh-pr-content.sh so tone/context is drawn from the branch
+# this work will actually be merged into (for example a long-running
+# integration/stacked-PR trunk), not always the repo's nominal default -
+# which can differ even when a PR is already open against that trunk.
 #
 # The report captures git status, recent log, stat summaries, and per-file
 # diffs (capped) for the staged changes only. Unstaged working-tree changes
@@ -27,11 +38,39 @@ _per_file_cap=${PER_FILE_CAP:-400}
 mkdir -p "$(dirname "$_report")"
 : > "$_report"
 
-# Make sure main ref exists locally (for branch naming + tone only).
-if ! git show-ref --verify --quiet refs/heads/main; then
-  printf '\n>>> %s\n' "git fetch origin main:main" >> "$_report"
-  git fetch origin main:main >> "$_report" 2>&1 || true
+# Detect the base branch: explicit override, then an open PR's actual base,
+# then repo default branch, then origin/HEAD, falling back to 'main' as a
+# last resort. _base_source records which tier resolved it, for transparency
+# in the report.
+_base_ref=${BASE_REF:-}
+_base_source=""
+[[ -n "$_base_ref" ]] && _base_source="BASE_REF override"
+if [[ -z "$_base_ref" ]]; then
+  _base_ref=$( (command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1 \
+                && gh pr view --json baseRefName --jq .baseRefName) 2>/dev/null || true )
+  [[ -n "$_base_ref" ]] && _base_source="gh pr baseRefName"
 fi
+if [[ -z "$_base_ref" ]]; then
+  _base_ref=$( (command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1 \
+                && gh repo view --json defaultBranchRef --jq .defaultBranchRef.name) 2>/dev/null || true )
+  [[ -n "$_base_ref" ]] && _base_source="repo default branch"
+fi
+if [[ -z "$_base_ref" ]]; then
+  _base_ref=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##') || true
+  [[ -n "$_base_ref" ]] && _base_source="origin/HEAD"
+fi
+if [[ -z "$_base_ref" ]]; then
+  _base_ref="main"
+  _base_source="fallback default"
+fi
+
+# Make sure the base ref exists locally (for branch naming + tone only).
+if ! git rev-parse --verify --quiet "${_base_ref}^{commit}" >/dev/null 2>&1; then
+  printf '\n>>> %s\n' "git fetch origin $_base_ref:$_base_ref" >> "$_report"
+  git fetch origin "$_base_ref:$_base_ref" >> "$_report" 2>&1 || true
+fi
+
+printf '\n>>> base branch detected: %s (source: %s, context/tone only - never commit evidence)\n' "$_base_ref" "$_base_source" >> "$_report"
 
 # Cheap context.
 for cmd in \
@@ -39,7 +78,7 @@ for cmd in \
   "git status -sb" \
   "git log -5 --oneline" \
   "git diff --cached --stat" \
-  "git diff --stat main...HEAD"; do
+  "git diff --stat $_base_ref...HEAD"; do
     printf '\n>>> %s\n' "$cmd" >> "$_report"
     eval "$cmd" >> "$_report" 2>&1
 done

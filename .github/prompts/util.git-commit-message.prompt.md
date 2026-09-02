@@ -4,18 +4,18 @@ description: Generate conventional commit message and description from the curre
 
 **Mandatory preparation:**
 
-- Ensure the repository has the `main` branch locally (fetch it only if missing). `main` is used **only** for branch-naming context and tone, not as commit evidence.
+- The script in §A detects and fetches the repository's actual base branch (not assumed to be `main`) locally if missing. This base branch is used **only** for branch-naming context and tone, never as commit evidence.
 - Read language/tooling instructions that apply to the files actually staged or modified in the working tree (for example [python.instructions.md](../instructions/python.instructions.md), [typescript.instructions.md](../instructions/typescript.instructions.md), [makefile.instructions.md](../instructions/makefile.instructions.md), etc.). Do **not** load instructions for files that are only in already-committed history - they are out of scope.
 
 ## Goal 🎯
 
 Produce three copy-ready outputs that describe the **next commit** the user is about to make:
 
-1. A **Branch Name**: if already on a feature branch, report whether it is suitable (and suggest an improvement if not); if on `main`/detached `HEAD`, propose a new branch using `scope-short-description` (e.g. `auth-add-sso-callback`).
+1. A **Branch Name**: if already on a feature branch, report whether it is suitable (and suggest an improvement if not); if on the detected base branch (see §A) or detached `HEAD`, propose a new branch using `scope-short-description` (e.g. `auth-add-sso-callback`).
 2. A single-line conventional **Commit Message** (`type(scope): summary`) describing the dominant change in the commit being prepared.
 3. A **commit body** with an overview and highlights capturing intent and rationale (when evidenced), not just a restatement of file changes.
 
-These outputs are the **primary narrative source** for pull-request descriptions: [util.gh-pr-content.prompt.md](util.gh-pr-content.prompt.md) reads `git log main..HEAD` (commit subjects + bodies) as its first evidence tier. Write every commit so it stands alone **and** aggregates cleanly with its siblings into a PR description; Step 3 maps each body part to the PR section it feeds.
+These outputs are the **primary narrative source** for pull-request descriptions: [util.gh-pr-content.prompt.md](util.gh-pr-content.prompt.md) reads `git log <base>..HEAD` (commit subjects + bodies) as its first evidence tier. Write every commit so it stands alone **and** aggregates cleanly with its siblings into a PR description; Step 3 maps each body part to the PR section it feeds.
 
 ### Scope policy (non-negotiable) 🎯
 
@@ -29,6 +29,8 @@ Unstaged working-tree changes are **deliberately excluded** and are not captured
 
 The branch-wide stat and recent commit subjects are **context only**, found in the report's branch-log block and used solely to evaluate the current branch name and mirror tone. Never use them as the source of truth for the commit summary, and never expand them into a full per-line diff.
 
+The base branch behind that branch-wide stat is **never assumed to be `main`**: it is detected automatically (see §A) from an already-open PR's actual base ref, the repository's default branch, or `origin/HEAD`, falling back to `main` only if none of these can be determined. This matters most for repositories with a long-running integration branch (for example a stacked-PR trunk) that has diverged from the nominal default - mirroring tone against a stale or unrelated default branch produces misleading branch-naming and tone signals. Override it explicitly with `BASE_REF` when needed.
+
 ---
 
 ## Discovery (run before writing) 🔍
@@ -41,13 +43,14 @@ Run the evidence script **once** from the repository root. It writes a bounded r
 bash .github/prompts/util.git-commit-message.sh
 ```
 
-To increase the per-file line cap (default 400):
+To increase the per-file line cap (default 400) or override the detected base branch:
 
 ```bash
 PER_FILE_CAP=800 bash .github/prompts/util.git-commit-message.sh
+BASE_REF=long-lived-branch bash .github/prompts/util.git-commit-message.sh
 ```
 
-After the script completes, **read `$_report`** (the per-branch, per-day file written above) as the authoritative evidence. The report is bounded by design; a single read is sufficient and you must not re-run `git diff main...HEAD` for full content.
+After the script completes, **read `$_report`** (the per-branch, per-day file written above) as the authoritative evidence. The report's `>>> base branch detected: <base> (source: ...)` line records which branch was used for tone/context and which detection tier resolved it. The report is bounded by design; a single read is sufficient and you must not re-run `git diff <base>...HEAD` for full content.
 
 1. Confirm branch state from `git rev-parse --abbrev-ref HEAD` and `git status -sb`, and confirm the commit scope from the report's staged evidence blocks.
 2. Use the staged stat + staged content as the **sole** evidence for the next commit. Unstaged working-tree changes are out of scope and are not captured in the report.
@@ -74,7 +77,7 @@ Work only from the **staged** changes (the sole commit evidence).
 2. Summarise behavioural changes (APIs, CLIs, jobs, infra, docs) in plain language.
 3. Capture side effects (tests added, config changes, dependency updates).
 4. Record unknowns explicitly (**Unknown from code – {action}**).
-5. Note the current branch state (feature branch vs `main`/detached). If already on a feature branch, confirm whether its name matches the dominant change and suggest an improvement if not; otherwise, craft a new branch slug using `scope-short-description`. Branch-name suitability may reference the branch-wide stat/log from the report; the commit message itself must draw only on the staged changes.
+5. Note the current branch state (feature branch vs the detected base branch/detached `HEAD`). If already on a feature branch, confirm whether its name matches the dominant change and suggest an improvement if not; otherwise, craft a new branch slug using `scope-short-description`. Branch-name suitability may reference the branch-wide stat/log from the report; the commit message itself must draw only on the staged changes.
 
 ### 2) Craft the Conventional Commit line
 
@@ -127,10 +130,10 @@ Omit the `Testing` and `Breaking changes` lines entirely when they do not apply.
 ## Output requirements 📋
 
 - Write the generated content to `.copilot/analysis/git-commit-message-YYYYMMDD-<slug>.report.md` (slug as derived in §A) **and** print the same content inline for copy/paste.
-- Write every commit subject and body to be **self-contained and PR-ready** — readable in isolation and structured so `git log main..HEAD` can be turned into a PR description by [util.gh-pr-content.prompt.md](util.gh-pr-content.prompt.md) without re-reading the diff.
+- Write every commit subject and body to be **self-contained and PR-ready** — readable in isolation and structured so `git log <base>..HEAD` can be turned into a PR description by [util.gh-pr-content.prompt.md](util.gh-pr-content.prompt.md) without re-reading the diff.
 - Ground every statement in the **staged** diff; if evidence is missing, record **Unknown from code – {suggested action}**.
 - If nothing is staged, do not invent a commit: output **"No staged changes – nothing to commit."** and stop.
-- Ensure the branch suggestion covers both cases: re-affirm or improve the current feature branch name, or propose a new branch when working directly on `main`/detached `HEAD`.
+- Ensure the branch suggestion covers both cases: re-affirm or improve the current feature branch name, or propose a new branch when working directly on the detected base branch or detached `HEAD`.
 - Prefer British English and concise, active phrasing.
 - If multiple commits might be useful, mention that under **Highlights**, but still emit one Conventional Commit line for the in-scope changes.
 - Do not invent scopes, behaviours, or tests; rely solely on repository evidence.

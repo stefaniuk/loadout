@@ -25,6 +25,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+_cur_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+
 ANALYSIS_DIR=".copilot/analysis"
 _date=$(date -u +%Y%m%d)
 _pr_ref=${PR_REF:-}
@@ -48,7 +50,7 @@ fi
 if [[ -n "$_pr_num" ]]; then
   _slug="pr-$_pr_num"
 else
-  _slug=$(git rev-parse --abbrev-ref HEAD | tr '/' '-' | tr -cd 'A-Za-z0-9_-')
+  _slug=$(echo "$_cur_branch" | tr '/' '-' | tr -cd 'A-Za-z0-9_-')
 fi
 
 # Detect the base branch: explicit override, then PR's actual base, then repo
@@ -112,6 +114,31 @@ fi
 # know it disagrees with the PR that is actually open.
 if [[ "$_base_source" == "BASE_REF override" && -n "$_pr_base" && "$_pr_base" != "$_base_ref" ]]; then
   printf '\n>>> WARNING: BASE_REF=%s overrides the open PR'"'"'s actual base %s\n' "$_base_ref" "$_pr_base" >> "$_report"
+fi
+
+# Detect a closer stacked-PR parent: a local branch that is a strict ancestor
+# of HEAD and a strict descendant of the detected base means the true base is
+# narrower than the one just resolved (common when a branch stack is built on
+# a release/integration branch rather than the repo default, and no PR is open
+# yet for gh to report a base from). Pick the candidate furthest from the base
+# (closest to HEAD) when more than one qualifies.
+_stack_candidate=""
+_stack_candidate_ahead=0
+while IFS= read -r _b; do
+  [[ -z "$_b" || "$_b" == "$_cur_branch" || "$_b" == "$_base_ref" ]] && continue
+  git merge-base --is-ancestor "$_b" HEAD 2>/dev/null || continue
+  git merge-base --is-ancestor "$_base_ref" "$_b" 2>/dev/null || continue
+  git merge-base --is-ancestor "$_b" "$_base_ref" 2>/dev/null && continue
+  _ahead=$(git rev-list --count "$_base_ref".."$_b" 2>/dev/null || echo 0)
+  if (( _ahead > _stack_candidate_ahead )); then
+    _stack_candidate="$_b"
+    _stack_candidate_ahead=$_ahead
+  fi
+done < <(git for-each-ref --format='%(refname:short)' refs/heads/)
+
+if [[ -n "$_stack_candidate" ]]; then
+  printf '\n>>> WARNING: local branch %s sits between %s and HEAD (likely stacked-PR parent); if this PR targets %s rather than %s, rerun with BASE_REF=%s.\n' \
+    "$_stack_candidate" "$_base_ref" "$_stack_candidate" "$_base_ref" "$_stack_candidate" >> "$_report"
 fi
 
 # --- Part 1: Intent capture ---
@@ -215,7 +242,6 @@ fi
 
 # Staged changes count as part of the PR only when this working tree is checked
 # out on the PR's head branch. Unstaged working-tree changes are always excluded.
-_cur_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
 if [[ -z "$_pr_head" || "$_pr_head" == "$_cur_branch" ]]; then
   _staged=$(git diff --cached --name-only)
   if [[ -n "$_staged" ]]; then

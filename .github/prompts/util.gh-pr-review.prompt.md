@@ -91,7 +91,12 @@ The script outputs:
 - `.copilot/analysis/gh-pr-review-diff-YYYYMMDD-<slug>.report.txt` (diff evidence)
 - `.copilot/analysis/gh-pr-review-YYYYMMDD-<slug>.report.md` (review output target)
 
-After the script completes, **read both files** as the authoritative evidence. The diff report's `>>> base branch detected: <base> (source: ...)` line records which branch was used and which detection tier resolved it (an explicit `BASE_REF` override, the open PR's base, the repository default, or `origin/HEAD`); treat every `main` reference below as shorthand for that detected `<base>`. A `>>> WARNING:` line means `BASE_REF` was set but disagrees with the base of an actually-open PR - the override still wins, but call this out in the review so readers know why. If the script exits non-zero with a `>>> ERROR: base ref <base> cannot be resolved` line, the detected base is missing locally and could not be fetched: do not proceed on partial evidence; set `BASE_REF` to a valid branch or commit (or fetch the base) and rerun. The reports are bounded by design; a single read is sufficient. Do not re-run `git diff <base>...HEAD` or similar commands; the bounded report is complete.
+After the script completes, **read both files** as the authoritative evidence. The diff report's `>>> base branch detected: <base> (source: ...)` line records which branch was used and which detection tier resolved it (an explicit `BASE_REF` override, the open PR's base, the repository default, or `origin/HEAD`); treat every `main` reference below as shorthand for that detected `<base>`. Two distinct `>>> WARNING:` lines can appear:
+
+- `BASE_REF=... overrides the open PR's actual base ...` means `BASE_REF` was set but disagrees with the base of an actually-open PR - the override still wins, but call this out in the review so readers know why.
+- `local branch <candidate> sits between <base> and HEAD (likely stacked-PR parent) ...` means a local branch was found strictly between the detected base and `HEAD` - a common sign that the branch is part of a **stacked PR** built on a release/integration branch (or another branch in the stack) rather than the detected base. This happens most often before a PR is opened, when there is nothing for `gh pr view` to read and detection falls to the repository's default branch. If the named candidate is the branch this PR actually targets, rerun with `BASE_REF=<candidate>` - otherwise the review is judged against a wider diff that includes unrelated, already-integrated commits.
+
+If the script exits non-zero with a `>>> ERROR: base ref <base> cannot be resolved` line, the detected base is missing locally and could not be fetched: do not proceed on partial evidence; set `BASE_REF` to a valid branch or commit (or fetch the base) and rerun. The reports are bounded by design; a single read is sufficient. Do not re-run `git diff <base>...HEAD` or similar commands; the bounded report is complete.
 
 **Reading the intent file:** Extract the PR's stated **scope**, any linked issues/specs, and draft status.
 
@@ -287,7 +292,7 @@ Do not use **Unknown from code** inside a finding; if evidence is missing, raise
 ```markdown
 # PR Review - {pr title or branch name} - YYYY-MM-DD
 
-**Branch:** `{branch}` → `main` &nbsp;|&nbsp; **Commits:** {n} &nbsp;|&nbsp; **Stated intent:** {one-line summary from PR / log}
+**Branch:** `{branch}` → `{base}` &nbsp;|&nbsp; **Commits:** {n} &nbsp;|&nbsp; **Stated intent:** {one-line summary from PR / log}
 
 ## Scope & approach
 
