@@ -158,6 +158,7 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
 - [RD-MTN-002] Remove outdated or incorrect statements and replace them with evidence-backed information.
 - [RD-MTN-003] Add any missing required sections using repository evidence before considering the README complete.
 - [RD-MTN-004] Keep `TODO:` items visible and actionable until the underlying information is confirmed.
+- [RD-MTN-005] Integrate new information into the existing section that owns the topic. Do not add a parallel section that duplicates or re-explains established context; a single authoritative location beats layered notes that raise cognitive load.
 
 ## 10. Validation checklist ✅
 

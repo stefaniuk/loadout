@@ -8,6 +8,7 @@ This file is the authoritative instruction source for routine GitHub Copilot wor
 - Keep outputs deterministic, make side effects explicit, and surface errors.
 - If code and specification diverge, either fix the implementation or amend the specification with rationale.
 - Order code to follow the primary execution or call flow when that improves readability, and group widely shared utilities clearly.
+- When applying an update or observation to documentation or comments, fold it into the section that already owns that topic. Do not append a parallel section that restates context the reader must reconcile; prefer editing one authoritative place over layering.
 
 ## Test-driven development
 
