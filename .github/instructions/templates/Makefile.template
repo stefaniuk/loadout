@@ -63,8 +63,7 @@ unlink:: # Unlink the package/binary previously linked by `make link` (common) @
 # CI/CD GitHub actions/workflows targets
 # ==============================================================================
 
-dependencies: # Install production dependencies needed to build the project @Pipeline
-	# TODO: Install locked production dependencies required for the build step
+# CI/CD reuses `deps-prod` from the Development workflow targets above (MK-CI-005); do not redefine it here.
 
 build: # Build the project artefact @Pipeline
 	# TODO: Compile source code and package distributable artefact

@@ -31,13 +31,13 @@
    - Copied `assets/Makefile` → `Makefile`.
    - Copied `assets/scripts/init.mk` → `scripts/init.mk` (full file, no edits).
    - Verified `Makefile` includes `include scripts/init.mk` near the top.
-   - Added a `config::` target that calls `$(MAKE) _install-dependencies` to wire asdf-managed tools later.
+   - Added a `config::` target that calls `$(MAKE) _toolchain-install` to wire mise-managed tools later.
 2. **Pre-commit Hooks (capability 2)**:
    - Copied `assets/scripts/config/pre-commit.yaml` → `scripts/config/pre-commit.yaml`.
    - Copied `assets/scripts/quality/{scan-secrets.sh,check-file-format.sh,check-markdown-format.sh,check-markdown-links.sh}` → `scripts/quality/`.
    - Copied supporting configs: `scripts/config/{gitleaks.toml,.gitleaksignore,editorconfig-checker.json,markdownlint.yaml,.markdownlintignore,lychee.toml}`.
    - Created `.tool-versions` with `pre-commit 4.5.1`.
-   - Ran `make config` to install pre-commit via asdf.
+   - Ran `make config` to install pre-commit via mise.
    - Ran `make githooks-config` to install the git hook at `.git/hooks/pre-commit`.
 
 ## Output artefacts

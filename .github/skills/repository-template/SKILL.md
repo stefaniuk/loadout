@@ -45,16 +45,16 @@ When in doubt, follow the [Updating from the template repository](./SKILL.md#upd
 When adopting **any** capability from this skill, AI assistants **must** follow these rules:
 
 1. **Core Make System is a prerequisite** - Most capabilities depend on make targets defined in `scripts/init.mk`. If `scripts/init.mk` does not exist in the target repository, adopt the [Core Make System](#1-core-make-system-gnu-make) first.
-2. **Preserve `init.mk` in full** - Never partially copy `scripts/init.mk`. It contains interdependent targets (`_install-dependencies`, `githooks-config`, `clean`, etc.) that other capabilities rely on. Always copy the complete file.
+2. **Preserve `init.mk` in full** - Never partially copy `scripts/init.mk`. It contains interdependent targets (`_toolchain-install`, `githooks-config`, `clean`, etc.) that other capabilities rely on. Always copy the complete file.
 3. **Ensure `include scripts/init.mk`** - The repository's `Makefile` must contain `include scripts/init.mk` near the top. Without this, make targets from `init.mk` are unavailable.
-4. **Wire up `config::` for dependencies** - When adopting capabilities that require asdf-managed tools (pre-commit, gitleaks, etc.):
+4. **Wire up `config::` for toolchain tools** - When adopting capabilities that require mise-managed tools (pre-commit, gitleaks, etc.):
    - Add the tool to `.tool-versions`
-   - Ensure the `Makefile` has a `config::` target that calls `$(MAKE) _install-dependencies`
+   - Ensure the `Makefile` has a `config::` target that calls `$(MAKE) _toolchain-install`
    - Example:
 
      ```makefile
      config:: # Configure development environment @Configuration
-         $(MAKE) _install-dependencies
+         $(MAKE) _toolchain-install
      ```
 
 5. **Verify after adoption** - Always run the verification commands listed in each capability section to confirm correct integration.
@@ -79,13 +79,13 @@ When adopting **any** capability from this skill, AI assistants **must** follow 
 - **Supported via WSL**: Windows (WSL2 with a Linux distribution)
 - **Not supported**: Windows-native shells and PowerShell workflows
 - **Core tooling expectations**: GNU Make 3.82+ and a POSIX-compatible shell
-- **Optional tooling**: asdf for version pinning, Docker/Podman for container-related capabilities
+- **Optional tooling**: mise for version pinning, Docker/Podman for container-related capabilities
 
 ## Prerequisites ✅
 
 - **GNU Make 3.82+** (macOS users may need `brew install make` and to update `$PATH`)
 - **Docker or Podman** for container-related tasks
-- **asdf** for pinned tool versions (optional if you manage versions another way)
+- **mise** for pinned tool versions (optional if you manage versions another way)
 - **Python** required for Git hooks
 - **jq** for JSON processing in scripts
 - **GNU sed, GNU grep, GNU coreutils, GNU binutils** for script compatibility (especially on macOS)
@@ -93,7 +93,7 @@ When adopting **any** capability from this skill, AI assistants **must** follow 
 ## Troubleshooting 🛠️
 
 - **Make target not found**: Ensure `scripts/init.mk` exists and `include scripts/init.mk` is present near the top of `Makefile`.
-- **asdf command missing**: Install asdf or remove asdf-specific steps from the capability you are adopting.
+- **mise command missing**: Install mise or remove mise-specific steps from the capability you are adopting.
 - **Pre-commit hooks do not run**: Run `make githooks-config` and confirm `.git/hooks/pre-commit` exists.
 - **Docker checks fail**: Confirm Docker/Podman is installed and running, then rerun `make docker-lint`.
 
@@ -122,7 +122,7 @@ No. Use WSL2 with a Linux distribution if you are on Windows.
 **Can I adopt a single capability?**
 Yes. Each capability is modular; copy only the files it references.
 
-**Do I need asdf?**
+**Do I need mise?**
 Only for capabilities that rely on version pinning; it is optional otherwise.
 
 **Where do the source files live?**
@@ -143,7 +143,7 @@ They are in the `assets/` subtree under this skill.
 | [GitHub Actions CI/CD](#9-github-actions-cicd)                  | Pipeline workflows           | `.github/workflows/`, `.github/actions/`                                       |
 | [Dependabot](#10-dependabot)                                    | Automated dependency updates | `.github/dependabot.yaml`                                                      |
 | [VS Code Integration](#11-vs-code-integration)                  | Editor configuration         | `.vscode/`                                                                     |
-| [Tool Version Management](#12-tool-version-management-asdf)     | Reproducible toolchain       | `.tool-versions`                                                               |
+| [Tool Version Management](#12-tool-version-management-mise)     | Reproducible toolchain       | `.tool-versions`                                                               |
 | [GitHub Repository Templates](#13-github-repository-templates)  | Issue/PR/security templates  | `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md`                  |
 | [Documentation Structure](#14-documentation-structure-markdown) | ADRs and guides              | `docs/adr/`, `docs/guides/`                                                    |
 
@@ -198,11 +198,11 @@ make version-create-effective-file # Create .version from VERSION
 2. Ensure `Makefile` contains `include scripts/init.mk` near the top (after any variable definitions)
 3. Customise the `Makefile` with your project-specific targets
 4. Add `@Pipeline`, `@Operations`, `@Configuration`, `@Development`, `@Testing`, `@Quality`, or `@Others` annotations to target comments for categorisation
-5. Add a `config::` target that calls `$(MAKE) _install-dependencies` to ensure asdf tools are installed:
+5. Add a `config::` target that calls `$(MAKE) _toolchain-install` to ensure mise tools are installed:
 
    ```makefile
    config:: # Configure development environment @Configuration
-       $(MAKE) _install-dependencies
+       $(MAKE) _toolchain-install
    ```
 
 **Essential make targets from `init.mk`** (do not remove or modify):
@@ -218,8 +218,9 @@ make version-create-effective-file # Create .version from VERSION
 | `check-markdown-links`          | Check Markdown links                                                                                       |
 | `check-shell-lint`              | Lint shell scripts (fails on errors, excludes `.github/skills/repository-template/` and `.specify/` paths) |
 | `version-create-effective-file` | Create the `.version` file from `VERSION` placeholders                                                     |
-| `_install-dependencies`         | Install all tools from `.tool-versions` via asdf                                                           |
-| `_install-dependency`           | Install a single asdf tool                                                                                 |
+| `_toolchain-install`            | Install all tools from `.tool-versions` via mise                                                           |
+| `_toolchain-install-one`        | Install a single toolchain tool via mise                                                                   |
+| `toolchain-outdated`            | List newer upstream versions of the toolchain's tools pinned in `.tool-versions`                           |
 | `githooks-config`               | Install pre-commit hooks                                                                                   |
 | `githooks-run`                  | Run all pre-commit hooks                                                                                   |
 
@@ -286,14 +287,14 @@ make githooks-run      # Run all hooks manually
 2. Copy `scripts/config/pre-commit.yaml`
 3. Copy `scripts/quality/` and `scripts/config/` (the hooks call make targets backed by these scripts and configs)
 4. Add `pre-commit` to `.tool-versions` (e.g., `pre-commit 4.5.1`)
-5. Ensure `Makefile` has `config::` target that calls `$(MAKE) _install-dependencies`:
+5. Ensure `Makefile` has `config::` target that calls `$(MAKE) _toolchain-install`:
 
    ```makefile
    config:: # Configure development environment @Configuration
-       $(MAKE) _install-dependencies
+       $(MAKE) _toolchain-install
    ```
 
-6. Run `make config` to install pre-commit via asdf
+6. Run `make config` to install pre-commit via mise
 7. Run `make githooks-config` to install the git hooks
 
 **Verification** (run after adoption):
@@ -372,7 +373,7 @@ check=staged-changes ./scripts/quality/scan-secrets.sh
    # docker/ghcr.io/gitleaks/gitleaks v8.30.0@sha256:691af3c7c5a48b16f187ce3446d5f194838f91238f27270ed36eef6359a574d9 # SEE: https://github.com/gitleaks/gitleaks/pkgs/container/gitleaks
    ```
 
-4. Run `asdf install` to install gitleaks (if using native)
+4. Run `mise install` to install gitleaks (if using native)
 5. Add to `pre-commit.yaml` or run standalone
 
 **Verification** (run after adoption):
@@ -755,7 +756,7 @@ make docker-test-suite-run  # Run Docker test suite
 - OCI-compliant image labels (title, version, git info, build date)
 - Trusted registry allowlist in hadolint config
 - Test suite support with dgoss
-- **Docker image version pinning via `.tool-versions`** - see [Tool Version Management (asdf)](#12-tool-version-management-asdf) for the extended format
+- **Docker image version pinning via `.tool-versions`** - see [Tool Version Management (mise)](#12-tool-version-management-mise) for the extended format
 
 **Docker image versioning**:
 
@@ -765,7 +766,7 @@ Docker image versions can be pinned in `.tool-versions` using an extended commen
 # docker/ghcr.io/gitleaks/gitleaks v8.30.0@sha256:691af3c7c5a48b16f187ce3446d5f194838f91238f27270ed36eef6359a574d9 # SEE: https://github.com/gitleaks/gitleaks/pkgs/container/gitleaks
 ```
 
-See [section 12](#12-tool-version-management-asdf) for full format documentation.
+See [section 12](#12-tool-version-management-mise) for full format documentation.
 
 **To adopt**:
 
@@ -1004,7 +1005,7 @@ jq -r '.recommendations[]' .vscode/extensions.json
 
 ---
 
-### 12. Tool Version Management (asdf)
+### 12. Tool Version Management (mise)
 
 **Purpose**: Pin and manage tool versions consistently across the team, including Docker images.
 
@@ -1014,7 +1015,7 @@ jq -r '.recommendations[]' .vscode/extensions.json
 
 **How it solves it**: `.tool-versions` defines tool and Docker image versions, and shared scripts use those pins to ensure deterministic execution.
 
-**Dependencies**: asdf version manager
+**Dependencies**: mise toolchain manager
 
 **Source files** (in `assets/`):
 
@@ -1029,7 +1030,7 @@ pre-commit 4.5.1
 
 **Extended format for Docker images**:
 
-The `.tool-versions` file is extended beyond standard asdf usage to pin Docker image versions. These entries are formatted as comments (so asdf ignores them) and parsed by the `docker-get-image-version-and-pull` function in `scripts/docker/docker.lib.sh`.
+The `.tool-versions` file is extended beyond standard mise usage to pin Docker image versions. These entries are formatted as comments (so mise ignores them) and parsed by the `docker-get-image-version-and-pull` function in `scripts/docker/docker.lib.sh`.
 
 ```text
 # docker/<registry>/<image> <tag>@<digest> # SEE: <url>
@@ -1049,7 +1050,7 @@ The `.tool-versions` file is extended beyond standard asdf usage to pin Docker i
 
 | Component            | Description                                               | Example                     |
 | -------------------- | --------------------------------------------------------- | --------------------------- |
-| `# docker/`          | Prefix marker (comment for asdf, parsed by docker.lib.sh) | `# docker/`                 |
+| `# docker/`          | Prefix marker (comment for mise, parsed by docker.lib.sh) | `# docker/`                 |
 | `<registry>/<image>` | Full image name                                           | `ghcr.io/gitleaks/gitleaks` |
 | `<tag>`              | Version tag                                               | `v8.30.0`                   |
 | `@<digest>`          | Content-addressable SHA256 digest                         | `@sha256:691af3c7c...`      |
@@ -1064,8 +1065,8 @@ The `.tool-versions` file is extended beyond standard asdf usage to pin Docker i
 **Usage**:
 
 ```bash
-make config                             # Installs all asdf tools from .tool-versions
-make _install-dependency name=gitleaks # Install specific asdf tool
+make config                              # Installs all toolchain tools from .tool-versions via mise
+make _toolchain-install-one name=gitleaks # Install a specific toolchain tool
 
 # Docker images are pulled on-demand by scripts using docker-get-image-version-and-pull
 ```
@@ -1080,26 +1081,26 @@ make _install-dependency name=gitleaks # Install specific asdf tool
 **Verification** (run after adoption):
 
 ```bash
-# Check asdf is available
-asdf --version
+# Check mise is available
+mise --version
 
 # Check .tool-versions exists and has content
 test -f .tool-versions && cat .tool-versions
 
-# Verify asdf tools are installed at specified versions
-asdf current
+# Verify toolchain tools are installed at the pinned versions
+mise ls
 
-# Install all asdf tools (if not already installed)
-asdf install
+# Install all toolchain tools (if not already installed)
+mise install
 
-# Check a specific tool matches pinned version
-asdf current gitleaks
+# Check a specific tool matches the pinned version
+mise ls gitleaks
 
 # Check Docker entries exist
 grep "^# docker/" .tool-versions
 
 # Expected: All tools listed in .tool-versions are installed
-# Success indicator: `asdf current` shows all tools with matching versions
+# Success indicator: `mise ls` shows all tools with matching versions
 # Docker images are pulled automatically when scripts invoke docker-get-image-version-and-pull
 ```
 

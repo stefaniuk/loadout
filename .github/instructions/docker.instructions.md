@@ -28,13 +28,13 @@ They are **non-negotiable** unless an exception is explicitly documented (with r
 
 This section exists so humans and AI assistants can reliably apply the most important rules even when context is tight.
 
-- [DF-QR-001] **Pin base image versions**: never use `latest`; pin to specific version with digest where possible ([DF-FROM-001], [DF-FROM-002]).
+- [DF-QR-001] **Pin base image versions**: never use a literal `latest` tag anywhere in the Dockerfile, including in `ARG` defaults; pin to a specific version with digest where possible ([DF-FROM-001], [DF-FROM-002]).
 - [DF-QR-002] **Instruction order**: `FROM` → `ARG` → `ENV` → `RUN` (install) → `COPY` → `RUN` (configure) → `VOLUME` → `EXPOSE` → `WORKDIR` → `USER` → `CMD`/`ENTRYPOINT` → Metadata ([DF-STR-001]).
 - [DF-QR-003] **Multi-line RUN with `set -ex`**: start RUN blocks with `set -ex` or `set -ex;` for debugging and fail-fast behaviour ([DF-RUN-001], [DF-RUN-002]).
 - [DF-QR-004] **Build dependencies pattern**: define, install, use, then purge build dependencies in a single RUN layer ([DF-RUN-004]–[DF-RUN-006]).
 - [DF-QR-005] **Clean up in every RUN**: remove temp files, package manager caches, and build artefacts at the end of each RUN ([DF-RUN-007]).
 - [DF-QR-006] **Metadata at the end**: place OCI-compliant LABEL instructions at the very end of the Dockerfile ([DF-META-001]–[DF-META-003]).
-- [DF-QR-007] **Use `.tool-versions` for pinning**: define image versions in `.tool-versions` for reproducibility ([DF-FROM-003]).
+- [DF-QR-007] **Use `mise.toml` for pinning**: define image versions in `mise.toml`'s `[_.docker]`/`[tools]` tables and reference them through an `ARG ..._VERSION` default, for reproducibility ([DF-FROM-003]).
 - [DF-QR-008] **Lint with hadolint**: all Dockerfiles must pass hadolint with no errors or warnings ([DF-QG-001]).
 - [DF-QR-009] **Non-root user**: run containers as non-root where possible ([DF-SEC-001]).
 - [DF-QR-010] **Minimal layers**: combine related commands to reduce layer count and image size ([DF-OPT-001]).
@@ -100,15 +100,26 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
 
 ### 3.1 Version pinning (non-negotiable)
 
-- [DF-FROM-001] Never use `:latest` tag. Always pin to a specific version:
+- [DF-FROM-001] Never use a literal `:latest` tag, and never give an `ARG` version default the value `latest` either. Always pin to a specific, valid version so the Dockerfile builds correctly even without any build-time substitution:
 
   ```dockerfile
   # ❌ Bad - floating tag
   FROM python:latest
 
+  # ❌ Bad - floating tag hidden behind an ARG default
+  ARG PYTHON_VERSION=latest
+  FROM python:${PYTHON_VERSION}
+
   # ✅ Good - pinned version
   FROM python:3.12.1-alpine3.19
+
+  # ✅ Good - pinned version, parameterised through an ARG so the pin can be
+  # kept in sync with 'mise.toml' by the build tooling
+  ARG PYTHON_VERSION=3.12.1-alpine3.19
+  FROM python:${PYTHON_VERSION}
   ```
+
+  A literal `:latest` (with or without a `# hadolint ignore=DL3007` comment) is only ever caught by hadolint. Scanners that don't understand hadolint's inline-ignore syntax (for example Checkov, Trivy config, Snyk IaC, GitHub code scanning) and human reviewers still see the floating tag with no context, so it must never appear in a committed Dockerfile.
 
 - [DF-FROM-002] Where security is critical, pin to digest as well as tag:
 
@@ -116,13 +127,21 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
   FROM python:3.12.1-alpine3.19@sha256:abc123...
   ```
 
-- [DF-FROM-003] Define base image versions in the repository's `.tool-versions` file using the format:
+  When parameterised through an `ARG`, the tag and digest can be combined in the same default value:
 
-  ```plaintext
-  # docker/python 3.12.1-alpine3.19@sha256:abc123...
+  ```dockerfile
+  ARG PYTHON_VERSION=3.12.1-alpine3.19@sha256:abc123...
+  FROM python:${PYTHON_VERSION}
   ```
 
-  The build tooling will substitute `:latest` references with pinned versions from this file.
+- [DF-FROM-003] Define base image versions in the repository's `mise.toml` file, under the `[_.docker]` table (exact image name) or the `[tools]` table (fallback), for example:
+
+  ```toml
+  [_.docker]
+  "python" = "3.12.1-alpine3.19@sha256:abc123..."
+  ```
+
+  The build tooling rewrites the matching `ARG ..._VERSION=...` default in `Dockerfile.effective` to this pinned value, matched by the exact base image name in the `FROM image:${..._VERSION}` instruction. The `ARG` default committed to the source Dockerfile must already be a real, valid version, not a placeholder, so the substitution is an update rather than a requirement for the Dockerfile to build.
 
 ### 3.2 Base image selection criteria
 

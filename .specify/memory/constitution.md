@@ -328,6 +328,7 @@ Design architecture to enable fast, safe flow of change. The goal is not theoret
 
 - Tools, frameworks, and libraries are implementation details.
 - Specifications must not depend on a specific toolchain.
+- "Dependency" (§10.1) and "toolchain" (this section) are distinct terms and must not be used interchangeably; see the Makefile terminology note in [makefile.instructions.md §2](../../.github/instructions/makefile.instructions.md) for the concrete build-system split.
 - AI-assisted tools must follow the specification and this constitution, never infer beyond them.
 
 ---

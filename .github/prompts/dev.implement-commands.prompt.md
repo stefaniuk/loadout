@@ -69,7 +69,7 @@ After changes to Makefiles or scripts, run `make lint` and `make test` (or the r
 
 Each repository **must** provide these public targets with clear descriptions and categories:
 
-- `env` - create or manage language/runtime environments (for example asdf, venv, node).
+- `env` - create or manage language/runtime environments (for example venv, mise, node).
 - `deps` - install dependencies from lock files.
 - `build` - build or package artefacts.
 - `format` - apply formatters (may call multiple tools).

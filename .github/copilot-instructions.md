@@ -9,6 +9,8 @@ This file is the authoritative instruction source for routine GitHub Copilot wor
 - If code and specification diverge, either fix the implementation or amend the specification with rationale.
 - Order code to follow the primary execution or call flow when that improves readability, and group widely shared utilities clearly.
 - When applying an update or observation to documentation or comments, fold it into the section that already owns that topic. Do not append a parallel section that restates context the reader must reconcile; prefer editing one authoritative place over layering.
+- Do not `git add`/stage changes unless explicitly asked to.
+- Leave the working tree and the index (staged changes) exactly as they were before the prompt started, except for the changes the prompt actually asked for. Do not stage, unstage, or otherwise touch files unrelated to the request.
 
 ## Test-driven development
 

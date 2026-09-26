@@ -54,6 +54,13 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
 
 The build system must be **fully usable locally**, providing rapid feedback before CI.
 
+**Terminology.** This document distinguishes two things that are easy to conflate:
+
+- **Dependency / deps**: the shipped project's own runtime and dev packages (npm, uv/pip, Cargo, Go modules, etc.), pinned in a language lock file and installed by the language's own package manager. Always addressed as `deps`/`deps-prod`/`deps-update` ([MK-LCL-001]).
+- **Toolchain**: the CLI tools the build system itself needs to run (linters, formatters, runtimes, version managers such as `mise`), pinned in a tool-version file (e.g. `.tool-versions`) and installed by the toolchain manager, not the project's package manager.
+
+Never call a toolchain tool a "dependency"; keep the two vocabularies and their target names separate (see [MK-LCL-008]).
+
 ### 2.1 Single-command workflow (must exist)
 
 Provide repository-standard targets so an engineer can operate the repo quickly:
@@ -72,7 +79,7 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 
 ### 2.2 Clear, actionable errors
 
-- [MK-LCL-008] Any target that runs tools must produce clear, actionable errors when tools are missing (for example "install X via asdf" or "run make deps").
+- [MK-LCL-008] Any target that runs tools must produce clear, actionable errors when tools are missing. For a missing toolchain tool, point at the toolchain provisioning target (for example "run `make config`", or the manager's own install command such as `mise install`). For a missing application dependency, point at `make deps`. Do not conflate the two in one message.
 - [MK-LCL-009] Do not fail silently; prefer explicit prerequisite checks with helpful messages.
 
 ### 2.3 Script delegation (recommended)
@@ -217,7 +224,7 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 
 - [MK-CI-001] CI/CD workflows should call make targets (not duplicated inline bash).
 - [MK-CI-002] Pipeline targets should be stable and predictable. Common names include:
-  - `dependencies`, `build`, `test`, `publish`, `deploy`, `clean`
+  - `deps-prod` (reused from [MK-LCL-001], not a separate pipeline-only target), `build`, `test`, `publish`, `deploy`, `clean`
 - [MK-CI-003] Targets used in CI must be non-interactive.
 
 ### 8.2 Reproducibility
