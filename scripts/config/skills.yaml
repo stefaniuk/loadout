@@ -9,93 +9,93 @@ skills:
     repo: https://github.com/obra/superpowers.git
     path: skills/brainstorming
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: dispatching-parallel-agents
     repo: https://github.com/obra/superpowers.git
     path: skills/dispatching-parallel-agents
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: executing-plans
     repo: https://github.com/obra/superpowers.git
     path: skills/executing-plans
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: finishing-a-development-branch
     repo: https://github.com/obra/superpowers.git
     path: skills/finishing-a-development-branch
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: incremental-implementation
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/incremental-implementation
     ref: main
-    sha: bcab6a1b8503100e8618c3b4e32cc78de43de769
+    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
   - name: receiving-code-review
     repo: https://github.com/obra/superpowers.git
     path: skills/receiving-code-review
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: requesting-code-review
     repo: https://github.com/obra/superpowers.git
     path: skills/requesting-code-review
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: systematic-debugging
     repo: https://github.com/obra/superpowers.git
     path: skills/systematic-debugging
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: subagent-driven-development
     repo: https://github.com/obra/superpowers.git
     path: skills/subagent-driven-development
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: test-driven-development
     repo: https://github.com/obra/superpowers.git
     path: skills/test-driven-development
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: using-git-worktrees
     repo: https://github.com/obra/superpowers.git
     path: skills/using-git-worktrees
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: verification-before-completion
     repo: https://github.com/obra/superpowers.git
     path: skills/verification-before-completion
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: writing-plans
     repo: https://github.com/obra/superpowers.git
     path: skills/writing-plans
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   - name: writing-skills
     repo: https://github.com/obra/superpowers.git
     path: skills/writing-skills
     ref: main
-    sha: 5bf4e78011075bcfc0dc295f0724994cd123ee71
+    sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
   # Cross-cutting skills
   - name: api-and-interface-design
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/api-and-interface-design
     ref: main
-    sha: bcab6a1b8503100e8618c3b4e32cc78de43de769
+    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
   - name: browser-testing-with-devtools
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/browser-testing-with-devtools
     ref: main
-    sha: bcab6a1b8503100e8618c3b4e32cc78de43de769
+    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
   - name: ci-cd-and-automation
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/ci-cd-and-automation
     ref: main
-    sha: bcab6a1b8503100e8618c3b4e32cc78de43de769
+    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
   - name: documentation-and-adrs
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/documentation-and-adrs
     ref: main
-    sha: bcab6a1b8503100e8618c3b4e32cc78de43de769
+    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
   - name: find-bugs
     repo: https://github.com/getsentry/skills.git
     path: skills/find-bugs
@@ -110,17 +110,17 @@ skills:
     repo: https://github.com/trailofbits/skills.git
     path: plugins/insecure-defaults
     ref: main
-    sha: 32e34f8173796e3566a51aee877dc96bc5191f64
+    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
   - name: mcp-builder
     repo: https://github.com/anthropics/skills.git
     path: skills/mcp-builder
     ref: main
-    sha: 34040c9c568585f6929bedeaad110ad08f079624
+    sha: 33375500bcea98d610eb30ce10ac4e59b89c390d
   - name: mutation-testing
     repo: https://github.com/trailofbits/skills.git
     path: plugins/mutation-testing/skills/mutation-testing
     ref: main
-    sha: 32e34f8173796e3566a51aee877dc96bc5191f64
+    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
   - name: playwright-cli
     repo: https://github.com/microsoft/playwright-cli.git
     path: skills/playwright-cli
@@ -130,22 +130,22 @@ skills:
     repo: https://github.com/trailofbits/skills.git
     path: plugins/property-based-testing/skills/property-based-testing
     ref: main
-    sha: 32e34f8173796e3566a51aee877dc96bc5191f64
+    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
   - name: security-and-hardening
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/security-and-hardening
     ref: main
-    sha: bcab6a1b8503100e8618c3b4e32cc78de43de769
+    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
   - name: semgrep
     repo: https://github.com/trailofbits/skills.git
     path: plugins/static-analysis/skills/semgrep
     ref: main
-    sha: 32e34f8173796e3566a51aee877dc96bc5191f64
+    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
   - name: sharp-edges
     repo: https://github.com/trailofbits/skills.git
     path: plugins/sharp-edges
     ref: main
-    sha: 32e34f8173796e3566a51aee877dc96bc5191f64
+    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
   - name: skill-scanner
     repo: https://github.com/getsentry/skills.git
     path: skills/skill-scanner
@@ -155,9 +155,9 @@ skills:
     repo: https://github.com/trailofbits/skills.git
     path: plugins/spec-to-code-compliance/skills/spec-to-code-compliance
     ref: main
-    sha: 32e34f8173796e3566a51aee877dc96bc5191f64
+    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
   - name: supply-chain-risk-auditor
     repo: https://github.com/trailofbits/skills.git
     path: plugins/supply-chain-risk-auditor
     ref: main
-    sha: 32e34f8173796e3566a51aee877dc96bc5191f64
+    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
