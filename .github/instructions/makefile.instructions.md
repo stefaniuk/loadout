@@ -150,7 +150,7 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 ### 5.1 Fail-fast defaults (non-negotiable)
 
 - [MK-SH-001] Use bash consistently unless the repo explicitly documents another shell:
-  - `SHELL := /bin/bash`
+  - `SHELL := $(shell command -v bash)` selects Bash 5.2+ from `PATH` at Make startup, including with `.ONESHELL:`.
 - [MK-SH-002] Use a fail-fast shell mode (at least `-e`), and prefer:
   - `.ONESHELL:`
   - `.SHELLFLAGS := -ce` (and enable tracing in verbose mode, for example `-cex`)
