@@ -29,7 +29,7 @@ skills:
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/incremental-implementation
     ref: main
-    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
+    sha: a06bc63b3f8b829c14b0bbf53d99fefc39d58092
   - name: receiving-code-review
     repo: https://github.com/obra/superpowers.git
     path: skills/receiving-code-review
@@ -80,84 +80,84 @@ skills:
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/api-and-interface-design
     ref: main
-    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
+    sha: a06bc63b3f8b829c14b0bbf53d99fefc39d58092
   - name: browser-testing-with-devtools
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/browser-testing-with-devtools
     ref: main
-    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
+    sha: a06bc63b3f8b829c14b0bbf53d99fefc39d58092
   - name: ci-cd-and-automation
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/ci-cd-and-automation
     ref: main
-    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
+    sha: a06bc63b3f8b829c14b0bbf53d99fefc39d58092
   - name: documentation-and-adrs
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/documentation-and-adrs
     ref: main
-    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
+    sha: a06bc63b3f8b829c14b0bbf53d99fefc39d58092
   - name: find-bugs
     repo: https://github.com/getsentry/skills.git
     path: skills/find-bugs
     ref: main
-    sha: c2f99a5b04b4cd992ec3022d7c2c3e23e938d241
+    sha: d18b7aa8ba878354e5c348310230e652f7690f9c
   - name: gha-security-review
     repo: https://github.com/getsentry/skills.git
     path: skills/gha-security-review
     ref: main
-    sha: c2f99a5b04b4cd992ec3022d7c2c3e23e938d241
+    sha: d18b7aa8ba878354e5c348310230e652f7690f9c
   - name: insecure-defaults
     repo: https://github.com/trailofbits/skills.git
     path: plugins/insecure-defaults
     ref: main
-    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
+    sha: 82fe8226252622fa807643bdca1710901198553a
   - name: mcp-builder
     repo: https://github.com/anthropics/skills.git
     path: skills/mcp-builder
     ref: main
-    sha: 33375500bcea98d610eb30ce10ac4e59b89c390d
+    sha: 8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4
   - name: mutation-testing
     repo: https://github.com/trailofbits/skills.git
     path: plugins/mutation-testing/skills/mutation-testing
     ref: main
-    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
+    sha: 82fe8226252622fa807643bdca1710901198553a
   - name: playwright-cli
     repo: https://github.com/microsoft/playwright-cli.git
     path: skills/playwright-cli
     ref: main
-    sha: 74354ecc7a43da16d91a9bc54fa8db8283a3fcf5
+    sha: b85c7a736bb473bf55b584e54a09ffa698d6d871
   - name: property-based-testing
     repo: https://github.com/trailofbits/skills.git
     path: plugins/property-based-testing/skills/property-based-testing
     ref: main
-    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
+    sha: 82fe8226252622fa807643bdca1710901198553a
   - name: security-and-hardening
     repo: https://github.com/addyosmani/agent-skills.git
     path: skills/security-and-hardening
     ref: main
-    sha: 2686b620fc1fed2e8f60c704839c766b8594c6b6
+    sha: a06bc63b3f8b829c14b0bbf53d99fefc39d58092
   - name: semgrep
     repo: https://github.com/trailofbits/skills.git
     path: plugins/static-analysis/skills/semgrep
     ref: main
-    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
+    sha: 82fe8226252622fa807643bdca1710901198553a
   - name: sharp-edges
     repo: https://github.com/trailofbits/skills.git
     path: plugins/sharp-edges
     ref: main
-    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
+    sha: 82fe8226252622fa807643bdca1710901198553a
   - name: skill-scanner
     repo: https://github.com/getsentry/skills.git
     path: skills/skill-scanner
     ref: main
-    sha: c2f99a5b04b4cd992ec3022d7c2c3e23e938d241
+    sha: d18b7aa8ba878354e5c348310230e652f7690f9c
   - name: spec-to-code-compliance
     repo: https://github.com/trailofbits/skills.git
     path: plugins/spec-to-code-compliance/skills/spec-to-code-compliance
     ref: main
-    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
+    sha: 82fe8226252622fa807643bdca1710901198553a
   - name: supply-chain-risk-auditor
     repo: https://github.com/trailofbits/skills.git
     path: plugins/supply-chain-risk-auditor
     ref: main
-    sha: 0cc1c73a5e96749ab32d7ea5e14892fafa6972ae
+    sha: 82fe8226252622fa807643bdca1710901198553a
