@@ -9,8 +9,10 @@ set -euo pipefail
 #   $ [options] ./scripts/speckit-sync.sh
 #
 # Options:
-#   patch=false             # Skip local patches and use vanilla upstream files, default is 'true'
-#   dry_run=true            # Show what would change without modifying files, default is 'false'
+#   patch=false             # Skip local patches and use vanilla upstream
+#                           # files, default is 'true'
+#   dry_run=true            # Show what would change without modifying
+#                           # files, default is 'false'
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
 # Exit codes:

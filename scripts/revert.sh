@@ -136,7 +136,8 @@ function revert-copilot() {
     fi
   done
 
-  # Remove copilot-instructions.md, or restore the version the destination tracks
+  # Remove copilot-instructions.md, or restore the version the destination
+  # tracks
   revert-tracked-overwritten-paths "${dest}"
 
   # Remove hook files that older loadout versions installed
@@ -167,7 +168,8 @@ function revert-shared-resources() {
     rm -rf "${dest:?}/.specify"
   fi
 
-  # Remove the ADR template, unless the destination owns it in its own git history
+  # Remove the ADR template, unless the destination owns it in its own git
+  # history
   local adr_template_rel="docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
   if [[ -f "${dest}/${adr_template_rel}" ]]; then
     if is-destination-owned "${dest}" "${adr_template_rel}"; then

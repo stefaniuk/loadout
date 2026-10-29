@@ -3,17 +3,21 @@
 set -euo pipefail
 
 # Import changed prompt files from a destination repository back to this source.
-# This is the inverse of apply.sh - it pulls improvements made in a project back.
+# This is the inverse of apply.sh - it pulls improvements made in a project
+# back.
 #
 # Usage:
 #   $ [options] ./scripts/import.sh <source-directory>
 #
 # Arguments:
-#   source-directory        Project directory to import from (absolute or relative path)
+#   source-directory        Project directory to import from (absolute or
+#                           relative path)
 #
 # Options:
-#   force=true              # Copy changed files without prompting, default is 'false'
-#   new=true                # Also import new files that don't exist in source repo, default is 'false'
+#   force=true              # Copy changed files without prompting, default is
+#                           # 'false'
+#   new=true                # Also import new files that don't exist in source
+#                           # repo, default is 'false'
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
 # Exit codes:

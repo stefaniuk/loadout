@@ -4,8 +4,9 @@ set -euo pipefail
 
 # Remove an external skill entry from scripts/config/skills.yaml.
 # Deletes the already-synced .github/skills/<name>/ directory, if any.
-# Also removes any associated patch file at scripts/config/skill-patches/<name>.patch.md
-# and attempts to clean up the matching override entry in scripts/config/skill-patches.yaml.
+# Also removes any associated patch file at
+# scripts/config/skill-patches/<name>.patch.md and attempts to clean up the
+# matching override entry in scripts/config/skill-patches.yaml.
 #
 # Usage:
 #   $ name=<name> ./scripts/skill-remove.sh

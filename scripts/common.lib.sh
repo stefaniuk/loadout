@@ -37,8 +37,8 @@ TRACKED_OVERWRITTEN_PATHS=(
   ".github/copilot-instructions.md"
 )
 
-# Hook files that older loadout versions installed. The Copilot hooks now live in
-# repository-template, which owns '.github/hooks/'.
+# Hook files that older loadout versions installed. The Copilot hooks now
+# live in repository-template, which owns '.github/hooks/'.
 LEGACY_HOOK_FILES=(
   ".github/hooks/quality-gates.json"
   "scripts/hooks/_common.sh"

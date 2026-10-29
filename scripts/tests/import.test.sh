@@ -94,7 +94,8 @@ function test-import-suite-setup() {
   TEMP_DIR=$(mktemp -d)
 
   # Pre-build a faithful snapshot of the repo's import-relevant subtree. Tests
-  # copy it so imports round-trip into an isolated tree instead of the real repo.
+  # copy it so imports round-trip into an isolated tree instead of the real
+  # repo.
   # The snapshot doubles as the destination template: a fresh dest and repo
   # start byte-identical, so a clean import reports no changes.
   REPO_SNAPSHOT="${TEMP_DIR}/_repo_snapshot"
@@ -131,7 +132,8 @@ function build-repo-snapshot() {
 }
 
 # Provide a fresh destination for a test (isolated copy of the repo snapshot).
-# A fresh dest starts identical to a fresh repo, so unmodified imports are clean.
+# A fresh dest starts identical to a fresh repo, so unmodified imports are
+# clean.
 # Arguments:
 #   $1=[unique key]
 function make-dest() {

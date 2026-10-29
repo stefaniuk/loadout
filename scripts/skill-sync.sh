@@ -13,8 +13,10 @@ set -euo pipefail
 #
 # Options:
 #   name=<skill>            # Sync only the named skill, default syncs all
-#   patch=false             # Skip local patches and use vanilla upstream content, default is 'true'
-#   patch_only=true         # Reapply local patches without fetching upstream, default is 'false'
+#   patch=false             # Skip local patches and use vanilla upstream
+#                           # content, default is 'true'
+#   patch_only=true         # Reapply local patches without fetching
+#                           # upstream, default is 'false'
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
 # Exit codes:
@@ -359,9 +361,9 @@ function sync-skill() {
 
 # ==============================================================================
 
-# Emit a suggested git commit message based on actual changes detected in .github/skills/.
-# Assumes a clean tree before the run, so any pending change under .github/skills/
-# is attributed to this sync.
+# Emit a suggested git commit message based on actual changes detected in
+# .github/skills/. Assumes a clean tree before the run, so any pending change
+# under .github/skills/ is attributed to this sync.
 # Arguments:
 #   $1=[skill name filter, empty string if syncing all]
 #   $2=[patch_only flag]

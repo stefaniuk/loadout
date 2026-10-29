@@ -11,27 +11,37 @@ set -euo pipefail
 #   destination-directory   Target directory (absolute or relative path)
 #
 # Options:
-#   clean=true              # Remove destination .github/{agents,instructions,prompts,skills} before copying, default is 'false'
-#   subset=<csv>            # Restrict copy to named categories (comma-separated). Valid tokens:
-#                           #   agents, hooks, instructions, prompts, skills, specify, docs, project, speckit, all
-#                           # Omitted or 'all' preserves the default full-copy behaviour byte-for-byte.
-#                           # The 'speckit' token narrows the prompts copy to review.speckit-* prompts only
-#                           # when used WITHOUT 'prompts'.
+#   clean=true              # Remove destination
+#                           # .github/{agents,instructions,prompts,skills}
+#                           # before copying, default is 'false'
+#   subset=<csv>            # Restrict copy to named categories
+#                           # (comma-separated). Valid tokens: agents, hooks,
+#                           # instructions, prompts, skills, specify, docs,
+#                           # project, speckit, all
+#                           # Omitted or 'all' preserves the default
+#                           # full-copy behaviour byte-for-byte.
+#                           # The 'speckit' token narrows the prompts copy to
+#                           # review.speckit-* prompts only when used WITHOUT
+#                           # 'prompts'.
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 #
 # Technology switches (default is 'false' for all, set to 'true' to include):
 #   all=true                # Include all technology-specific files
 #   python=true             # Include Python instruction and enforcement prompt
-#   typescript=true         # Include TypeScript instruction and enforcement prompt
+#   typescript=true         # Include TypeScript instruction and enforcement
+#                           # prompt
 #   go=true                 # Include Go instruction and enforcement prompt
 #   reactjs=true            # Include ReactJS instruction and enforcement prompt
 #   rust=true               # Include Rust instruction and enforcement prompt
-#   terraform=true          # Include Terraform instruction and enforcement prompt
-#   tauri=true              # Include Tauri instruction and enforcement prompt (auto-enables rust, typescript, reactjs)
-#   playwright=true         # Include Playwright instruction and prompt (requires python or typescript)
+#   terraform=true          # Include Terraform instruction and enforcement
+#                           # prompt
+#   tauri=true              # Include Tauri instruction and enforcement prompt
+#                           # (auto-enables rust, typescript, reactjs)
+#   playwright=true         # Include Playwright instruction and prompt
+#                           # (requires python or typescript)
 #
 # Always copied (default/glue layer):
-#   - Agent markdown files under .github/agents (currently README placeholder only)
+#   - Agent markdown files under .github/agents (README placeholder only)
 #   - Shell, Docker, Makefile instructions and prompts
 #   - Development prompts (dev.implement-*)
 #   - Architecture documentation prompts (architecture.*)
@@ -110,7 +120,8 @@ ALL_TECHS=("python" "typescript" "go" "reactjs" "rust" "terraform" "tauri" "play
 # Valid subset selector tokens (closed set).
 SUBSET_VALID_TOKENS=("agents" "hooks" "instructions" "prompts" "skills" "specify" "docs" "project" "speckit" "all")
 
-# Subset category flags - populated by parse-subset. Default (no subset) enables all.
+# Subset category flags - populated by parse-subset. Default (no subset)
+# enables all.
 SUBSET_AGENTS=true
 SUBSET_HOOKS=true
 SUBSET_INSTRUCTIONS=true
@@ -120,7 +131,7 @@ SUBSET_SPECIFY=true
 SUBSET_DOCS=true
 SUBSET_PROJECT=true
 SUBSET_SPECKIT=true
-# True only when subset was explicitly set (used to gate observability messages).
+# True only when subset was explicitly set (gates observability messages).
 SUBSET_EXPLICIT=false
 # Narrowing flag - true when subset contains 'speckit' but not 'prompts'.
 SPECKIT_NARROW_PROMPTS=false
@@ -179,7 +190,7 @@ function main() {
 # ==============================================================================
 
 # Get instruction file name for a technology.
-# For playwright, returns the appropriate variant based on python/typescript being enabled.
+# For playwright, returns the variant for the enabled python or typescript.
 # Arguments:
 #   $1=[technology name]
 function get-tech-instruction() {
@@ -209,7 +220,7 @@ function get-tech-instruction() {
 }
 
 # Get prompt file name for a technology.
-# For playwright, returns the appropriate variant based on python/typescript being enabled.
+# For playwright, returns the variant for the enabled python or typescript.
 # Arguments:
 #   $1=[technology name]
 function get-tech-prompt() {
@@ -581,7 +592,8 @@ function copilot-copy-agents() {
 }
 
 # Copy copilot instruction files to the destination.
-# Copies default instructions always, technology-specific ones based on switches.
+# Copies default instructions always, technology-specific ones based on
+# switches.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function copilot-copy-instructions() {
@@ -897,7 +909,8 @@ function render-gitignore-content() {
 }
 
 # Update .gitignore with loadout managed content.
-# Creates .gitignore if it doesn't exist, or updates the managed section if it does.
+# Creates .gitignore if it doesn't exist, or updates the managed section if
+# it does.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function update-gitignore() {

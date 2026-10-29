@@ -6,10 +6,12 @@ set -euo pipefail
 # Does not fetch the skill; run `make skill-sync` afterwards.
 #
 # Usage:
-#   $ name=<name> repo=<repo-url> path=<path-in-repo> [ref=<branch>] ./scripts/skill-add.sh
+#   $ name=<name> repo=<repo-url> path=<path-in-repo> [ref=<branch>] \
+#       ./scripts/skill-add.sh
 #
 # Arguments:
-#   name=[skill name]       # Local directory name under .github/skills/external/
+#   name=[skill name]       # Local directory name under
+#                           # .github/skills/external/
 #   repo=[repository URL]   # Git clone URL (https)
 #   path=[path in repo]     # Subdirectory within the repository to copy
 #   ref=[branch or tag]     # Optional, defaults to 'main'

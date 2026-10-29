@@ -6,7 +6,8 @@ set -euo pipefail
 #
 # Usage:
 #   $ .github/prompts/util.gh-pr-content.sh
-#   $ PR_REF=123 TOP_N_FILES=30 PER_FILE_CAP=600 .github/prompts/util.gh-pr-content.sh
+#   $ PR_REF=123 TOP_N_FILES=30 PER_FILE_CAP=600 \
+#       .github/prompts/util.gh-pr-content.sh
 #   $ BASE_REF=develop .github/prompts/util.gh-pr-content.sh
 #
 # Output:
@@ -181,7 +182,8 @@ else
 fi
 
 # Staged changes count as part of the PR only when this working tree is checked
-# out on the PR's head branch. Unstaged working-tree changes are always excluded.
+# out on the PR's head branch. Unstaged working-tree changes are always
+# excluded.
 if [[ -z "$_pr_head" || "$_pr_head" == "$_cur_branch" ]]; then
   _staged=$(git diff --cached --name-only)
   if [[ -n "$_staged" ]]; then

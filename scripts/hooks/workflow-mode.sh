@@ -12,7 +12,8 @@ set -euo pipefail
 #
 # Arguments (provided as environment variables):
 #   LOADOUT_WORKFLOW_MODE_FILE=[path to workflow-mode.json, optional]
-#   VERBOSE=true                        # Show all the executed commands, default is 'false'
+#   VERBOSE=true                        # Show all the executed commands,
+#                                       # default is 'false'
 
 # ==============================================================================
 

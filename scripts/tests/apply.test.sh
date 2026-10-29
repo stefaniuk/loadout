@@ -536,7 +536,8 @@ function test-legacy-hook-cleanup-keeps-files-git-cannot-check() {
   return 0
 }
 
-# A linked '.github/hooks' points outside the destination, whose files are not loadout's.
+# A linked '.github/hooks' points outside the destination, whose files are not
+# loadout's.
 function test-legacy-hook-cleanup-keeps-files-behind-a-link() {
 
   local d="${TEMP_DIR}/_legacy_linked" outside="${TEMP_DIR}/_legacy_outside"
