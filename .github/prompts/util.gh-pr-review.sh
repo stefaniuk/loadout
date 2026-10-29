@@ -182,7 +182,15 @@ if [[ "$_gh_ok" -eq 0 ]]; then
     printf '\n--- subsequent commit subjects ---\n'
     git log --no-merges --reverse "$_base_ref"..HEAD --skip=1 --pretty=format:'%h %s' 2>&1
   } >> "$_intent_file"
-  for _f in CHANGELOG.md docs/CHANGELOG.md .github/pull_request_template.md; do
+  _intent_files=(CHANGELOG.md docs/CHANGELOG.md)
+  # One pull request template, whichever name it uses
+  for _f in .github/PULL_REQUEST_TEMPLATE.md .github/pull_request_template.md; do
+    if [[ -f "$_f" ]]; then
+      _intent_files+=("$_f")
+      break
+    fi
+  done
+  for _f in "${_intent_files[@]}"; do
     if [[ -f "$_f" ]]; then
       printf '\n--- %s (capped at %s lines) ---\n' "$_f" "$_intent_body_cap" >> "$_intent_file"
       truncate_body < "$_f" >> "$_intent_file"

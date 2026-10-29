@@ -115,18 +115,21 @@ What gets copied:
 
 - `.github/agents`, `.github/instructions`, `.github/prompts`, `.github/skills`
 - `.github/copilot-instructions.md`
-- `.github/pull_request_template.md` (only if missing in the target)
+- `.github/PULL_REQUEST_TEMPLATE.md` (only if the target has no pull request
+  template under any letter case)
 - `.specify/memory/constitution.md`
 - `scripts/hooks/`
 - `.specify/scripts/python`, `.specify/templates`
-- `docs/adr/ADR-nnn_Any_Decision_Record_Template.md`
+- `docs/adr/ADR-nnn_Any_Decision_Record_Template.md`,
+  `docs/adr/Technology_Recommendations.md` and `docs/adr/Tech_Radar.md`
 - `.copilot/analysis/.gitignore`
 
-If `.github/pull_request_template.md` or
-`docs/adr/ADR-nnn_Any_Decision_Record_Template.md` is already tracked in the
-target repository's own git history, `apply`/`import`/`revert` leave it alone
-entirely - the target repo, not loadout, owns that file - and the matching
-`.gitignore` entry is commented out for that repository.
+If the pull request template, the ADR template or
+`docs/adr/Technology_Recommendations.md` is already tracked in the target
+repository's own git history, as in a repository-template repository,
+`apply`/`import`/`revert` leave it alone entirely - the target repo, not
+loadout, owns that file - and the matching `.gitignore` entry is commented out
+for that repository.
 
 After the copy completes, review `git status` in the target repository, commit
 the changes, and run `make lint && make test` to confirm everything wires up
@@ -195,8 +198,8 @@ set.
 | `prompts`      | `.github/prompts/` (plus tech enforcement prompts when language flags are set)                                                                                                      |
 | `skills`       | `.github/skills/` (plus tech skills when language flags are set)                                                                                                                    |
 | `specify`      | `.specify/memory`, `.specify/scripts/python`, `.specify/templates`                                                                                                                  |
-| `docs`         | `docs/adr/` template + Tech Radar                                                                                                                                                   |
-| `project`      | Project glue: `.github/copilot-instructions.md`, `pull_request_template.md`, `.vscode/settings.json`, `.gitignore`, `.copilot/analysis/.gitignore`, hook scripts                    |
+| `docs`         | `docs/adr/` template, Technology Recommendations + Tech Radar                                                                                                                       |
+| `project`      | Project glue: `.github/copilot-instructions.md`, `PULL_REQUEST_TEMPLATE.md`, `.vscode/settings.json`, `.gitignore`, `.copilot/analysis/.gitignore`, hook scripts                    |
 | `speckit`      | Narrows `skills` to `speckit-*` and `prompts` to `review.speckit-*` files, and pulls in the `.specify/*` content. Combine with `skills` or `prompts` to widen back to the full set. |
 
 Examples:

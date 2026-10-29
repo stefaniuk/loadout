@@ -33,6 +33,7 @@ IMPORT_PATHS=(
   ".specify/templates"
   "docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
   "docs/adr/Tech_Radar.md"
+  "docs/adr/Technology_Recommendations.md"
   "scripts/hooks"
 )
 
@@ -315,6 +316,7 @@ function test-import-dry-run-detects-modifications-across-tracked-types() {
   echo "# Modified prompt" >> "${dest}/.github/prompts/enforce.shell.prompt.md"
   echo "# Modified setup script" >> "${dest}/.specify/scripts/python/setup_plan.py"
   echo "# Modified constitution" >> "${dest}/.specify/memory/constitution.md"
+  echo "# Modified recommendations" >> "${dest}/docs/adr/Technology_Recommendations.md"
 
   local output
   output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
@@ -324,7 +326,8 @@ function test-import-dry-run-detects-modifications-across-tracked-types() {
   echo "${output}" | grep -q "enforce.shell.prompt.md" || return 1
   echo "${output}" | grep -q ".specify/scripts/python/setup_plan.py" || return 1
   echo "${output}" | grep -q "constitution.md" || return 1
-  echo "${output}" | grep -q "Changed files (5)" || return 1
+  echo "${output}" | grep -q "docs/adr/Technology_Recommendations.md" || return 1
+  echo "${output}" | grep -q "Changed files (6)" || return 1
 
   return 0
 }

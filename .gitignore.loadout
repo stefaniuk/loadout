@@ -49,9 +49,15 @@ scripts/loadout.ext.mk
 # Documentation
 # ------------------------------------------------------------------------------
 
-# Pull request template - entry is commented out per-destination if the file is already tracked in that repo's git history.
+# Pull request template - entries are commented out per-destination if the file
+# is already tracked in that repo's git history. The lower-case name is the one
+# older loadout versions used.
+.github/PULL_REQUEST_TEMPLATE.md
 .github/pull_request_template.md
 
-# ADR template - entry is commented out per-destination if the file is already tracked in that repo's git history.
+# ADR template and the technology recommendations it links - entries are
+# commented out per-destination if the file is already tracked in that repo's
+# git history.
 docs/adr/ADR-nnn_Any_Decision_Record_Template.md
+docs/adr/Technology_Recommendations.md
 docs/adr/Tech_Radar.md

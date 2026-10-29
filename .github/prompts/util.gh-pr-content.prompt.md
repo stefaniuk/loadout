@@ -9,10 +9,11 @@ description: Create pull request content from the current branch changes
 - Read the [constitution](../../.specify/memory/constitution.md) and honour its
   non-negotiable rules.
 - Read the Pull Request template at
-  [pull_request_template.md](../pull_request_template.md). This file is the
-  **single source of truth** for the output structure; you must reproduce it
-  verbatim (see Output requirements) and never paraphrase or hard-code a copy of
-  it.
+  [PULL_REQUEST_TEMPLATE.md](../PULL_REQUEST_TEMPLATE.md), or
+  `.github/pull_request_template.md` in a repository that uses the lower-case
+  name. This file is the **single source of truth** for the output structure;
+  you must reproduce it verbatim (see Output requirements) and never paraphrase
+  or hard-code a copy of it.
 - Read the technology-specific instructions **only for languages actually
   touched on this branch** (look at the stat in the report; do not preload every
   instruction file). For example
@@ -27,7 +28,7 @@ description: Create pull request content from the current branch changes
 Craft a diff-driven pull request title and body, ready to copy/paste, that
 compares the current branch against its **detected base branch** (not assumed to
 be `main`), summarises behaviour, lists verification evidence, and fills every
-section of [pull_request_template.md](../pull_request_template.md).
+section of the Pull Request template.
 
 ### Scope policy (non-negotiable) 🎯
 
@@ -111,7 +112,7 @@ reference below as shorthand for that detected `<base>`. Two distinct
 
 - `BASE_REF=... overrides the open PR's actual base ...` means `BASE_REF` was
   set but disagrees with the base of an actually-open PR - the override still
-  wins, but call this out in the Description so reviewers know why.
+  wins, but call this out in the PR description so reviewers know why.
 - `local branch <candidate> sits between <base> and HEAD ...` means a local
   branch was found strictly between the detected base and `HEAD` - a common sign
   that the branch is part of a **stacked PR** built on a release/integration
@@ -121,7 +122,7 @@ reference below as shorthand for that detected `<base>`. Two distinct
   If the named candidate is the branch this PR actually targets, rerun with
   `BASE_REF=<candidate>` rather than trusting the wider diff - the wider diff
   pulls in unrelated, already-integrated commits and inflates the evidence
-  report and Description with more analysis than the PR needs.
+  report and the PR description with more analysis than the PR needs.
 
 If the script exits non-zero with a
 `>>> ERROR: base ref <base> cannot be resolved` line, the detected base is
@@ -134,11 +135,10 @@ report is bounded by design; a single read is sufficient and you must not re-run
    `git status -sb`, and confirm the detected base branch from the report's
    `>>> base branch detected:` line.
 2. Use the commit log block as the primary narrative - commits are already
-   grouped, dated, and authored. Distil them into the 1-3 sentence Description
-   summary and the reason each file changed.
+   grouped, dated, and authored. Distil them into the summary the template asks
+   for and the reason each file changed.
 3. Use the stat and dirstat blocks to enumerate the substantive files for the
-   Description's file-by-file bullets and to gauge scope and folder
-   distribution.
+   per-file change list and to gauge scope and folder distribution.
 4. Use the top-N per-file diffs to verify what the commit subjects claim. If a
    file you need was not in the top-N, request only that file with
    `git --no-pager diff <base>...HEAD -- <path>`. If a per-file capture was
@@ -147,7 +147,7 @@ report is bounded by design; a single read is sufficient and you must not re-run
    whole branch diff.
 5. If both committed-vs-base _and_ staged pending blocks are empty, stop and
    report **"No diff vs `<base>` – nothing to raise."**
-6. Mention any pending staged work explicitly in the Description so reviewers
+6. Mention any pending staged work explicitly in the PR description so reviewers
    know the PR is not yet final. If the report shows a `staged changes skipped`
    line, the current branch is not the PR head branch, so no staged work is
    attributed to this PR.
@@ -200,41 +200,35 @@ report is bounded by design; a single read is sufficient and you must not re-run
      `fix(ci): stabilise markdown lint`).
    - Mention breaking changes explicitly by adding `!` after the type/scope (for
      example `feat(api)!: ...`).
-2. **Populate the Description section**
-   - Fill it exactly as the template's `## Description` guidance comment
-     instructs: a 1-3 sentence summary, then a file-by-file bulleted list (each
-     a repository-relative link with what changed and why), then any notable
-     details, follow-ups, or out-of-scope items.
-3. **Populate the Context section**
-   - Answer every question in the template's `## Context` guidance comment (why
-     required, previous behaviour and why inadequate, alternatives/trade-offs,
-     and links to issue/ADR/discussion).
-4. **Populate the How to test it section**
-   - Follow the template's `## How to test it` guidance comment exactly: a
-     `Prerequisites:` line, one numbered `Test N:` per behaviour with the
-     command(s) in a fenced bash block, an `Expected:` line, and a `Clean up:`
-     step when the working tree changes. For docs-only or config-only changes,
-     state that and why no manual test applies.
-5. **Set the "Type of changes" checkboxes**
-   - Choose `x` for every applicable category (Refactoring, New feature,
-     Breaking change, Bug fix) based on the diff.
+2. **Populate every section from its guidance comment**
+   - Replace each `<!-- ... -->` guidance comment with exactly the content it
+     asks for, in the place it sits, including any summary the template asks for
+     before its first section.
+   - Link changed files with repository-relative paths, grouped as the guidance
+     asks, and say why each change matters.
+   - Answer every question a guidance comment asks, using the evidence report.
+     Say when something is unknown or has not been verified rather than
+     inventing it.
+3. **Describe validation**
+   - Follow the template's guidance on validation: give the exact commands from
+     §C with their results, and how a reviewer can repeat them. For docs-only or
+     config-only changes, state that and why no manual test applies.
+4. **Set the type of change checkboxes**
+   - Choose `x` for every category in the template's list that the diff shows.
    - Leave non-applicable items unchecked (`[ ]`). Never delete a line from the
      template.
-6. **Update the Checklist section**
-   - Reflect actual work done (`[x]`) vs outstanding (`[ ]`).
-   - Tick "I have described how to test these changes in the section above" once
-     the How to test it section is populated.
-   - Always reference whether tests/docs were updated, style guidelines were
-     followed, and collaboration mode (pair or mob programming, AI-assisted
-     sessions) occurred.
-7. **Populate "Sensitive Information Declaration"**
+5. **Update the checklist**
+   - Reflect actual work done (`[x]`) vs outstanding (`[ ]`), including whether
+     tests and docs were updated and whether the change was AI-assisted, where
+     the template asks.
+6. **Complete the sensitive information declaration**
    - Confirm (`[x]`) only if you verified no PII/PID/sensitive data exists in
      the changes; otherwise leave unchecked and note required remediation.
-8. **Call out follow-ups**
+7. **Call out follow-ups**
    - If additional work is deferred, list it succinctly (for example
-     documentation gaps, pending ADRs) under Description or Context as bullet
-     points.
-9. **Write the output file (required)**
+     documentation gaps, pending ADRs) in the section whose guidance asks for
+     follow-ups or out-of-scope items.
+8. **Write the output file (required)**
    - Write all generated PR content to
      `.copilot/analysis/gh-pr-content-YYYYMMDD-<slug>.report.md` (compute
      `<slug>` exactly as in §A: `pr-<number>` when a PR is known, otherwise the
@@ -250,13 +244,12 @@ report is bounded by design; a single read is sufficient and you must not re-run
 - Write the generated content to
   `.copilot/analysis/gh-pr-content-YYYYMMDD-<slug>.report.md` (slug as derived
   in §A) and print the same content inline for copy/paste.
-- **The single source of truth for the output structure is
-  [pull_request_template.md](../pull_request_template.md).** Read that file at
-  runtime and reproduce it verbatim as the skeleton: every heading, guidance
-  comment placeholder, checkbox, blank line, separator (`---`), and the
-  Sensitive Information Declaration wording must match the template
-  byte-for-byte. Do not hard-code or copy a skeleton into this prompt, and never
-  paraphrase, reorder, add, or drop a section.
+- **The single source of truth for the output structure is the Pull Request
+  template.** Read it at runtime and reproduce it verbatim as the skeleton:
+  every heading, guidance comment placeholder, checkbox, blank line, separator
+  (`---`), and the sensitive information declaration wording must match the
+  template byte-for-byte. Do not hard-code or copy a skeleton into this prompt,
+  and never paraphrase, reorder, add, or drop a section.
 - Fill in the body by replacing each `<!-- ... -->` guidance comment with the
   actual content that comment requests, then delete the comment. Leave every
   visible heading, checkbox, separator, and the declaration exactly as they
@@ -269,13 +262,11 @@ report is bounded by design; a single read is sufficient and you must not re-run
 - Use workspace-relative Markdown links (for example
   `[scripts/apply.sh](scripts/apply.sh#L10-L40)`) and keep content ASCII-only
   unless evidence requires Unicode.
-- **Enforcement (do before finalising):** compare your output against
-  [pull_request_template.md](../pull_request_template.md). Ignoring only the
-  filled-in content, the title line, and the footer, every heading, checkbox,
-  and separator must be identical to the template. If anything differs, fix it
-  so it matches exactly. If the template has since changed, re-read it and
-  reproduce the new version.
+- **Enforcement (do before finalising):** compare your output against the Pull
+  Request template. Ignoring only the filled-in content, the title line, and the
+  footer, every heading, checkbox, and separator must be identical to the
+  template. If anything differs, fix it so it matches exactly. If the template
+  has since changed, re-read it and reproduce the new version.
 
-Add additional sections **only** when
-[pull_request_template.md](../pull_request_template.md) itself gains them; the
-template's own order and content always govern the output.
+Add additional sections **only** when the Pull Request template itself gains
+them; the template's own order and content always govern the output.

@@ -271,13 +271,16 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/.github/skills/verification-before-completion/SKILL.md" ]] || return 1
   # Singleton files
   [[ -f "${d}/.github/copilot-instructions.md" ]] || return 1
-  [[ -f "${d}/.github/pull_request_template.md" ]] || return 1
+  # The file name is checked exactly, macOS file systems ignore case
+  [[ "$(list-pr-templates "${d}/.github")" == "PULL_REQUEST_TEMPLATE.md" ]] || return 1
+  cmp -s .github/PULL_REQUEST_TEMPLATE.md "${d}/.github/PULL_REQUEST_TEMPLATE.md" || return 1
   # Shared resources
   [[ -d "${d}/.specify/memory" ]] || return 1
   [[ -d "${d}/.specify/scripts/python" ]] || return 1
   [[ -d "${d}/.specify/templates" ]] || return 1
   [[ -f "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" ]] || return 1
   [[ -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
+  cmp -s docs/adr/Technology_Recommendations.md "${d}/docs/adr/Technology_Recommendations.md" || return 1
   [[ -f "${d}/.copilot/analysis/.gitignore" ]] || return 1
   [[ "$(find "${d}/docs" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')" -eq 1 ]] || return 1
   # .gitignore
@@ -395,8 +398,11 @@ function test-apply-template-destination-keeps-template-owned-files() {
     [[ "${f##*/}" != "pull_request_template.md" ]] || return 1
   done
   grep -qxF "template-pr-template" "${d}/.github/PULL_REQUEST_TEMPLATE.md" || return 1
+  grep -qF "# .github/PULL_REQUEST_TEMPLATE.md" "${d}/.gitignore" || return 1
   grep -qF "# .github/pull_request_template.md" "${d}/.gitignore" || return 1
   grep -qxF "template-adr-template" "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" || return 1
+  grep -qxF "template-technology-recommendations" "${d}/docs/adr/Technology_Recommendations.md" || return 1
+  grep -qF "# docs/adr/Technology_Recommendations.md" "${d}/.gitignore" || return 1
   # The tracked copilot-instructions.md is overwritten, and not ignored
   grep -qF "## Workflow mode" "${d}/.github/copilot-instructions.md" || return 1
   grep -qF "# .github/copilot-instructions.md" "${d}/.gitignore" || return 1
@@ -443,6 +449,7 @@ function test-revert-removes-all-managed-artefacts() {
   [[ ! -d "${d}/.copilot" ]] || return 1
   [[ ! -d "${d}/scripts/hooks" ]] || return 1
   [[ ! -f "${d}/.github/copilot-instructions.md" ]] || return 1
+  [[ ! -f "${d}/docs/adr/Technology_Recommendations.md" ]] || return 1
   [[ ! -f "${d}/hooks.json" ]] || return 1
   if [[ -f "${d}/.gitignore" ]]; then
     ! grep -qF "loadout managed content" "${d}/.gitignore" || return 1
@@ -462,7 +469,9 @@ function test-revert-restores-template-destination-to-clean-state() {
 function test-apply-skips-existing-singletons() {
 
   local d="${SKIP_SINGLETONS_DEST}"
-  grep -q "custom-pr-template" "${d}/.github/pull_request_template.md" || return 1
+  grep -qx "custom-pr-template" "${d}/.github/pull_request_template.md" || return 1
+  # A lower-case template from an older loadout is not duplicated
+  [[ "$(list-pr-templates "${d}/.github")" == "pull_request_template.md" ]] || return 1
   return 0
 }
 
@@ -483,7 +492,12 @@ function test-apply-respects-git-tracked-destination-owned-files() {
   grep -q "custom-owned-adr-template" "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" || return 1
   # Their .gitignore entries are commented out for this destination only.
   grep -qF "# .github/pull_request_template.md" "${d}/.gitignore" || return 1
+  grep -qF "# .github/PULL_REQUEST_TEMPLATE.md" "${d}/.gitignore" || return 1
   grep -qF "# docs/adr/ADR-nnn_Any_Decision_Record_Template.md" "${d}/.gitignore" || return 1
+  grep -qx "custom-owned-technology-recommendations" "${d}/docs/adr/Technology_Recommendations.md" || return 1
+  grep -qF "# docs/adr/Technology_Recommendations.md" "${d}/.gitignore" || return 1
+  # An owned lower-case template is not duplicated
+  [[ "$(list-pr-templates "${d}/.github")" == "pull_request_template.md" ]] || return 1
   # Tech_Radar.md is not in the conditionally-owned set, so it stays managed.
   [[ -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
   grep -qF "docs/adr/Tech_Radar.md" "${d}/.gitignore" || return 1
@@ -497,6 +511,7 @@ function test-revert-respects-destination-owned-adr-template() {
   # Owned files survive revert; Tech_Radar.md (unowned) is removed as usual.
   grep -q "custom-owned-pr-template" "${d}/.github/pull_request_template.md" || return 1
   grep -q "custom-owned-adr-template" "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" || return 1
+  grep -qx "custom-owned-technology-recommendations" "${d}/docs/adr/Technology_Recommendations.md" || return 1
   [[ ! -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
   return 0
 }
@@ -616,6 +631,7 @@ function test-apply-subset-docs-only() {
   local d="${SUBSET_DOCS_DEST}"
   [[ -f "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" ]] || return 1
   [[ -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
+  [[ -f "${d}/docs/adr/Technology_Recommendations.md" ]] || return 1
   [[ "$(find "${d}/docs" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')" -eq 1 ]] || return 1
   [[ ! -d "${d}/.copilot" ]] || return 1
   [[ ! -d "${d}/.github/agents" ]] || return 1
@@ -629,7 +645,7 @@ function test-apply-subset-project-only() {
   [[ -f "${d}/.gitignore" ]] || return 1
   [[ -f "${d}/.copilot/analysis/.gitignore" ]] || return 1
   [[ -f "${d}/.github/copilot-instructions.md" ]] || return 1
-  [[ -f "${d}/.github/pull_request_template.md" ]] || return 1
+  [[ "$(list-pr-templates "${d}/.github")" == "PULL_REQUEST_TEMPLATE.md" ]] || return 1
   [[ ! -d "${d}/.github/agents" ]] || return 1
   [[ ! -d "${d}/.github/prompts" ]] || return 1
   [[ ! -d "${d}/.github/instructions" ]] || return 1
@@ -644,6 +660,7 @@ function seed-destination-owned-files() {
   mkdir -p "${dest}/.github" "${dest}/docs/adr"
   echo "custom-owned-pr-template" > "${dest}/.github/pull_request_template.md"
   echo "custom-owned-adr-template" > "${dest}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+  echo "custom-owned-technology-recommendations" > "${dest}/docs/adr/Technology_Recommendations.md"
 
   git -C "${dest}" init -q
   git -C "${dest}" add -A
@@ -665,6 +682,22 @@ function seed-legacy-hook-files() {
   git -C "${dest}" init -q
   git -C "${dest}" add scripts/hooks/user-prompt-record.sh
   git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" -c commit.gpgsign=false commit -q -m "track a hook script"
+
+  return 0
+}
+
+# Print the names of the pull request templates in a '.github' directory, in
+# the case they have on disk, whatever the file system's case sensitivity.
+# Arguments:
+#   $1=[directory path]
+function list-pr-templates() {
+
+  local f
+  shopt -s nocaseglob nullglob
+  for f in "$1"/pull_request_template.m[d]; do
+    printf '%s\n' "${f##*/}"
+  done
+  shopt -u nocaseglob nullglob
 
   return 0
 }
@@ -694,6 +727,7 @@ function create-template-destination() {
   echo "# template-copilot-instructions" > "${dest}/.github/copilot-instructions.md"
   echo "template-pr-template" > "${dest}/.github/PULL_REQUEST_TEMPLATE.md"
   echo "template-adr-template" > "${dest}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+  echo "template-technology-recommendations" > "${dest}/docs/adr/Technology_Recommendations.md"
 
   git -C "${dest}" init -q
   git -C "${dest}" add -A

@@ -24,10 +24,13 @@ LEGACY_LOADOUT_MAKEFILE_BEGIN_MARKER="# >>> loadout managed makefile include - D
 LEGACY_LOADOUT_MAKEFILE_END_MARKER="# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<"
 
 # Paths that, once tracked in a destination repo's own git history, are
-# considered destination-owned: apply/import/revert will not manage them.
+# considered destination-owned: apply/import/revert will not manage them. The
+# lower-case pull request template is the name older loadout versions used.
 CONDITIONALLY_OWNED_PATHS=(
+  ".github/PULL_REQUEST_TEMPLATE.md"
   ".github/pull_request_template.md"
   "docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+  "docs/adr/Technology_Recommendations.md"
 )
 
 # Paths that apply overwrites even when the destination tracks them, as
@@ -94,8 +97,8 @@ function normalise-destination-path() {
 
 # Check whether a relative path is already tracked by git in a destination
 # repo, meaning that repo - not loadout - owns the file going forward. The match
-# ignores case, so repository-template's '.github/PULL_REQUEST_TEMPLATE.md'
-# counts as '.github/pull_request_template.md'.
+# ignores case, so '.github/PULL_REQUEST_TEMPLATE.md' and
+# '.github/pull_request_template.md' count as the same file.
 # Arguments:
 #   $1=[destination directory path]
 #   $2=[relative file path]
@@ -105,6 +108,24 @@ function is-destination-owned() {
   local rel_path="$2"
 
   git -C "${destination}" ls-files --error-unmatch ":(icase)${rel_path}" > /dev/null 2>&1
+}
+
+# Print the repository-relative path of a destination's pull request template
+# in '.github/', in the letter case it has on disk, or nothing if it has none.
+# Arguments:
+#   $1=[destination directory path]
+function find-pull-request-template() {
+
+  local -a found=()
+
+  shopt -s nocaseglob nullglob
+  found=("$1"/.github/pull_request_template.m[d])
+  shopt -u nocaseglob nullglob
+  if [[ ${#found[@]} -gt 0 ]]; then
+    printf '.github/%s\n' "${found[0]##*/}"
+  fi
+
+  return 0
 }
 
 # Check whether a Makefile includes a path outside a loadout-managed block.

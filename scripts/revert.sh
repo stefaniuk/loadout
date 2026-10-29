@@ -168,17 +168,18 @@ function revert-shared-resources() {
     rm -rf "${dest:?}/.specify"
   fi
 
-  # Remove the ADR template, unless the destination owns it in its own git
-  # history
-  local adr_template_rel="docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
-  if [[ -f "${dest}/${adr_template_rel}" ]]; then
-    if is-destination-owned "${dest}" "${adr_template_rel}"; then
-      print-info "Skipping ${dest}/${adr_template_rel} (destination-owned; tracked in destination git history)"
+  # Remove the ADR template and the technology recommendations it links, unless
+  # the destination owns them in its own git history
+  local adr_rel
+  for adr_rel in "docs/adr/ADR-nnn_Any_Decision_Record_Template.md" "docs/adr/Technology_Recommendations.md"; do
+    [[ -f "${dest}/${adr_rel}" ]] || continue
+    if is-destination-owned "${dest}" "${adr_rel}"; then
+      print-info "Skipping ${dest}/${adr_rel} (destination-owned; tracked in destination git history)"
     else
-      print-info "Removing ${dest}/${adr_template_rel}"
-      rm -f "${dest}/${adr_template_rel}"
+      print-info "Removing ${dest}/${adr_rel}"
+      rm -f "${dest:?}/${adr_rel}"
     fi
-  fi
+  done
 
   # Remove Tech Radar (always loadout-managed)
   if [[ -f "${dest}/docs/adr/Tech_Radar.md" ]]; then

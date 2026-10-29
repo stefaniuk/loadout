@@ -57,11 +57,13 @@ set -euo pipefail
 #   - scripts/loadout.ext.mk for downstream repos whose repository-template
 #     scripts/init.mk loads '*.ext.mk' files, replacing the scripts/loadout.mk
 #     and Makefile include block that older loadout versions installed
-#   - pull_request_template.md (if not already present)
+#   - PULL_REQUEST_TEMPLATE.md (if no pull request template is present in any
+#     letter case)
 #   - constitution.md
 #   - .specify/scripts/python
 #   - .specify/templates
 #   - ADR-nnn_Any_Decision_Record_Template.md
+#   - Technology_Recommendations.md
 #   - Tech_Radar.md
 #   - .copilot/analysis/.gitignore
 #   - .gitignore content (managed section with begin/end markers)
@@ -99,8 +101,9 @@ SPECIFY_MEMORY="${REPO_ROOT}/.specify/memory"
 SPECIFY_SCRIPTS_PYTHON="${REPO_ROOT}/.specify/scripts/python"
 SPECIFY_TEMPLATES="${REPO_ROOT}/.specify/templates"
 
-PULL_REQUEST_TEMPLATE="${REPO_ROOT}/.github/pull_request_template.md"
+PULL_REQUEST_TEMPLATE="${REPO_ROOT}/.github/PULL_REQUEST_TEMPLATE.md"
 ADR_TEMPLATE="${REPO_ROOT}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+ADR_TECHNOLOGY_RECOMMENDATIONS="${REPO_ROOT}/docs/adr/Technology_Recommendations.md"
 ADR_TECH_RADAR="${REPO_ROOT}/docs/adr/Tech_Radar.md"
 COPILOT_ANALYSIS_DIR="${REPO_ROOT}/.copilot/analysis"
 GITIGNORE_LOADOUT="${REPO_ROOT}/.gitignore.loadout"
@@ -765,21 +768,25 @@ function copy-hook-scripts() {
   chmod +x "${dest}"/*.sh
 }
 
-# Copy pull_request_template.md to the destination if missing.
+# Copy PULL_REQUEST_TEMPLATE.md to the destination if it has no pull request
+# template. Any letter case counts, so an older loadout's lower-case copy is
+# kept and not duplicated.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function copy-pull-request-template() {
 
   local destination="$1"
-  local dest_file="${destination}/.github/pull_request_template.md"
+  local dest_file="${destination}/.github/PULL_REQUEST_TEMPLATE.md"
+  local existing
   mkdir -p "$(dirname "${dest_file}")"
+  existing="$(find-pull-request-template "${destination}")"
 
-  if is-destination-owned "${destination}" ".github/pull_request_template.md"; then
-    print-info "Skipping pull_request_template.md (destination-owned; tracked in destination git history)"
-  elif [[ -f "${dest_file}" ]]; then
-    print-info "Skipping pull_request_template.md (already exists)"
+  if is-destination-owned "${destination}" ".github/PULL_REQUEST_TEMPLATE.md"; then
+    print-info "Skipping PULL_REQUEST_TEMPLATE.md (destination-owned; tracked in destination git history)"
+  elif [[ -n "${existing}" ]]; then
+    print-info "Skipping PULL_REQUEST_TEMPLATE.md (${existing} already exists)"
   else
-    print-info "Copying pull_request_template.md to ${dest_file}"
+    print-info "Copying PULL_REQUEST_TEMPLATE.md to ${dest_file}"
     cp "${PULL_REQUEST_TEMPLATE}" "${dest_file}"
   fi
 }
@@ -836,6 +843,14 @@ function copy-adr-template() {
   else
     print-info "Copying ADR-nnn_Any_Decision_Record_Template.md to ${dest}"
     cp "${ADR_TEMPLATE}" "${dest}/"
+  fi
+
+  # The ADR template links the technology recommendations
+  if is-destination-owned "${destination}" "docs/adr/Technology_Recommendations.md"; then
+    print-info "Skipping Technology_Recommendations.md (destination-owned; tracked in destination git history)"
+  else
+    print-info "Copying Technology_Recommendations.md to ${dest}"
+    cp "${ADR_TECHNOLOGY_RECOMMENDATIONS}" "${dest}/"
   fi
 
   print-info "Copying Tech_Radar.md to ${dest}"
@@ -1025,7 +1040,8 @@ Always copied (default/glue layer):
     Default skills: enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
     Spec-kit agents, prompts, templates and constitution
     Shell, Docker, Makefile instructions and prompts
-    .copilot/analysis/.gitignore, ADR template, Tech_Radar.md
+    .copilot/analysis/.gitignore, ADR template, Technology_Recommendations.md,
+    Tech_Radar.md
     managed .gitignore section
 
 Examples:

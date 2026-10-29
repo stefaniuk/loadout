@@ -9,9 +9,10 @@ description: Generate pull request review using architecture overview context
 - Read the [constitution](../../.specify/memory/constitution.md) and honour its
   non-negotiable rules.
 - Read the Pull Request template at
-  [pull_request_template.md](../pull_request_template.md) only to understand the
-  author's reporting structure; the review output uses its own structure defined
-  below.
+  [PULL_REQUEST_TEMPLATE.md](../PULL_REQUEST_TEMPLATE.md), or
+  `.github/pull_request_template.md` in a repository that uses the lower-case
+  name, only to understand the author's reporting structure; the review output
+  uses its own structure defined below.
 - Read the technology-specific instructions **only for languages actually
   touched on this branch** (look at the stat in the bounded report; do not
   preload every instruction file). For example
