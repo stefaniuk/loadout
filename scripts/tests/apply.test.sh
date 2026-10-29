@@ -44,6 +44,8 @@ SUBSET_PROJECT_DEST=""
 MAKE_PATCH_DEST=""
 MAKE_REAPPLY_DEST=""
 MAKE_REVERT_DEST=""
+MAKE_LEGACY_DEST=""
+MAKE_UNSUPPORTED_DEST=""
 
 function main() {
 
@@ -61,10 +63,13 @@ function main() {
     test-apply-playwright-python-copies-both-instructions \
     test-apply-playwright-without-lang-fails \
     test-apply-clean-removes-previous-tech-files \
-    test-apply-compatible-downstream-makefile-copies-loadout-module-and-patches-root-makefile \
-    test-apply-reapply-does-not-duplicate-loadout-make-include \
+    test-apply-template-destination-installs-loadout-extension \
+    test-apply-template-destination-keeps-template-owned-files \
+    test-apply-reapply-is-idempotent-on-template-destination \
+    test-apply-migrates-legacy-loadout-make-integration \
+    test-apply-skips-loadout-extension-without-ext-mk-support \
     test-revert-removes-all-managed-artefacts \
-    test-revert-removes-loadout-make-integration \
+    test-revert-restores-template-destination-to-clean-state \
     test-apply-skips-existing-singletons \
     test-apply-updates-existing-gitignore-managed-section \
     test-apply-respects-git-tracked-destination-owned-files \
@@ -121,6 +126,8 @@ function test-apply-suite-setup() {
   MAKE_PATCH_DEST="${TEMP_DIR}/_make_patch"
   MAKE_REAPPLY_DEST="${TEMP_DIR}/_make_reapply"
   MAKE_REVERT_DEST="${TEMP_DIR}/_make_revert"
+  MAKE_LEGACY_DEST="${TEMP_DIR}/_make_legacy"
+  MAKE_UNSUPPORTED_DEST="${TEMP_DIR}/_make_unsupported"
 
   # Pre-build all destinations in parallel.
   (./scripts/apply.sh "${DEFAULT_DEST}" > /dev/null 2>&1) &
@@ -174,14 +181,21 @@ function test-apply-suite-setup() {
   (subset=speckit ./scripts/apply.sh "${SUBSET_SPECKIT_DEST}" > /dev/null 2>&1) &
   (subset=docs ./scripts/apply.sh "${SUBSET_DOCS_DEST}" > /dev/null 2>&1) &
   (subset=project ./scripts/apply.sh "${SUBSET_PROJECT_DEST}" > /dev/null 2>&1) &
-  (create-template-managed-make-destination "${MAKE_PATCH_DEST}" && \
+  (create-template-destination "${MAKE_PATCH_DEST}" && \
     ./scripts/apply.sh "${MAKE_PATCH_DEST}" > /dev/null 2>&1) &
-  (create-template-managed-make-destination "${MAKE_REAPPLY_DEST}" && \
+  (create-template-destination "${MAKE_REAPPLY_DEST}" && \
     ./scripts/apply.sh "${MAKE_REAPPLY_DEST}" > /dev/null 2>&1 && \
+    cp "${MAKE_REAPPLY_DEST}/.gitignore" "${MAKE_REAPPLY_DEST}/.gitignore.first" && \
     ./scripts/apply.sh "${MAKE_REAPPLY_DEST}" > /dev/null 2>&1) &
-  (create-template-managed-make-destination "${MAKE_REVERT_DEST}" && \
+  (create-template-destination "${MAKE_REVERT_DEST}" && \
     ./scripts/apply.sh "${MAKE_REVERT_DEST}" > /dev/null 2>&1 && \
     bash ./scripts/revert.sh --dest "${MAKE_REVERT_DEST}" > /dev/null 2>&1) &
+  (create-template-destination "${MAKE_LEGACY_DEST}" && \
+    seed-legacy-loadout-make-integration "${MAKE_LEGACY_DEST}" && \
+    ./scripts/apply.sh "${MAKE_LEGACY_DEST}" > /dev/null 2>&1) &
+  (create-template-destination "${MAKE_UNSUPPORTED_DEST}" && \
+    printf '%s\n' 'help: # Print help @Others' > "${MAKE_UNSUPPORTED_DEST}/scripts/init.mk" && \
+    ./scripts/apply.sh "${MAKE_UNSUPPORTED_DEST}" > /dev/null 2>&1) &
   wait
 
   return 0
@@ -360,23 +374,60 @@ function test-apply-clean-removes-previous-tech-files() {
   return 0
 }
 
-function test-apply-compatible-downstream-makefile-copies-loadout-module-and-patches-root-makefile() {
+function test-apply-template-destination-installs-loadout-extension() {
 
   local d="${MAKE_PATCH_DEST}"
-  [[ -f "${d}/scripts/loadout.mk" ]] || return 1
-  [[ -f "${d}/Makefile" ]] || return 1
-  grep -qF "# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>" "${d}/Makefile" || return 1
-  grep -qF "include scripts/loadout.mk" "${d}/Makefile" || return 1
-  [[ "$(grep -cF "include scripts/loadout.mk" "${d}/Makefile")" -eq 1 ]] || return 1
+  grep -qxF "# loadout-managed: scripts/loadout.ext.mk" "${d}/scripts/loadout.ext.mk" || return 1
+  [[ ! -e "${d}/scripts/loadout.mk" ]] || return 1
+  # The template's init.mk loads the extension, so the Makefile stays untouched
+  git -C "${d}" diff --quiet -- Makefile scripts/init.mk || return 1
+  grep -qxF "scripts/loadout.ext.mk" "${d}/.gitignore" || return 1
+  make -C "${d}" -n workflow-status > /dev/null 2>&1 || return 1
   return 0
 }
 
-function test-apply-reapply-does-not-duplicate-loadout-make-include() {
+function test-apply-template-destination-keeps-template-owned-files() {
+
+  local d="${MAKE_PATCH_DEST}"
+  # The template's upper-case pull request template is not duplicated
+  local f
+  for f in "${d}/.github"/*; do
+    [[ "${f##*/}" != "pull_request_template.md" ]] || return 1
+  done
+  grep -qxF "template-pr-template" "${d}/.github/PULL_REQUEST_TEMPLATE.md" || return 1
+  grep -qF "# .github/pull_request_template.md" "${d}/.gitignore" || return 1
+  grep -qxF "template-adr-template" "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" || return 1
+  # The tracked copilot-instructions.md is overwritten, and not ignored
+  grep -qF "## Workflow mode" "${d}/.github/copilot-instructions.md" || return 1
+  grep -qF "# .github/copilot-instructions.md" "${d}/.gitignore" || return 1
+  ! grep -qxF ".github/copilot-instructions.md" "${d}/.gitignore" || return 1
+  return 0
+}
+
+function test-apply-reapply-is-idempotent-on-template-destination() {
 
   local d="${MAKE_REAPPLY_DEST}"
-  [[ "$(grep -cF "# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>" "${d}/Makefile")" -eq 1 ]] || return 1
-  [[ "$(grep -cF "include scripts/loadout.mk" "${d}/Makefile")" -eq 1 ]] || return 1
-  [[ "$(grep -cF "# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<" "${d}/Makefile")" -eq 1 ]] || return 1
+  git -C "${d}" diff --quiet -- Makefile scripts/init.mk || return 1
+  cmp -s "${d}/.gitignore" "${d}/.gitignore.first" || return 1
+  [[ "$(grep -cF "loadout managed content - DO NOT EDIT BELOW" "${d}/.gitignore")" -eq 1 ]] || return 1
+  return 0
+}
+
+function test-apply-migrates-legacy-loadout-make-integration() {
+
+  local d="${MAKE_LEGACY_DEST}"
+  [[ ! -e "${d}/scripts/loadout.mk" ]] || return 1
+  [[ -f "${d}/scripts/loadout.ext.mk" ]] || return 1
+  git -C "${d}" diff --quiet -- Makefile || return 1
+  make -C "${d}" -n workflow-status > /dev/null 2>&1 || return 1
+  return 0
+}
+
+function test-apply-skips-loadout-extension-without-ext-mk-support() {
+
+  local d="${MAKE_UNSUPPORTED_DEST}"
+  [[ ! -e "${d}/scripts/loadout.ext.mk" ]] || return 1
+  git -C "${d}" diff --quiet -- Makefile || return 1
   return 0
 }
 
@@ -399,13 +450,12 @@ function test-revert-removes-all-managed-artefacts() {
   return 0
 }
 
-function test-revert-removes-loadout-make-integration() {
+function test-revert-restores-template-destination-to-clean-state() {
 
   local d="${MAKE_REVERT_DEST}"
-  [[ ! -f "${d}/scripts/loadout.mk" ]] || return 1
-  [[ -f "${d}/Makefile" ]] || return 1
-  ! grep -qF "loadout managed makefile include" "${d}/Makefile" || return 1
-  ! grep -qF "include scripts/loadout.mk" "${d}/Makefile" || return 1
+  [[ ! -e "${d}/scripts/loadout.ext.mk" ]] || return 1
+  grep -qxF "# template-copilot-instructions" "${d}/.github/copilot-instructions.md" || return 1
+  [[ -z "$(git -C "${d}" status --porcelain --untracked-files=all)" ]] || return 1
   return 0
 }
 
@@ -596,7 +646,7 @@ function seed-destination-owned-files() {
 
   git -C "${dest}" init -q
   git -C "${dest}" add -A
-  git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" commit -q -m "seed destination-owned files"
+  git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" -c commit.gpgsign=false commit -q -m "seed destination-owned files"
 
   return 0
 }
@@ -613,16 +663,17 @@ function seed-legacy-hook-files() {
 
   git -C "${dest}" init -q
   git -C "${dest}" add scripts/hooks/user-prompt-record.sh
-  git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" commit -q -m "track a hook script"
+  git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" -c commit.gpgsign=false commit -q -m "track a hook script"
 
   return 0
 }
 
-function create-template-managed-make-destination() {
+# Create a git repository shaped like a repository-template destination.
+function create-template-destination() {
 
   local dest="$1"
 
-  mkdir -p "${dest}/scripts"
+  mkdir -p "${dest}/scripts" "${dest}/.github" "${dest}/docs/adr"
 
   {
     printf '%s\n' 'include scripts/init.mk'
@@ -634,7 +685,34 @@ function create-template-managed-make-destination() {
   {
     printf '%s\n' 'help: # Print help @Others'
     printf '\t%s\n' "printf 'shared help\\n'"
+    printf '\n'
+    printf '%s\n' "include \$(sort \$(shell find scripts \\( -type f -o -type l \\) -name '*.ext.mk'))"
   } > "${dest}/scripts/init.mk"
+
+  printf '%s\n' '.version' '*.code-workspace' > "${dest}/.gitignore"
+  echo "# template-copilot-instructions" > "${dest}/.github/copilot-instructions.md"
+  echo "template-pr-template" > "${dest}/.github/PULL_REQUEST_TEMPLATE.md"
+  echo "template-adr-template" > "${dest}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+
+  git -C "${dest}" init -q
+  git -C "${dest}" add -A
+  git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" -c commit.gpgsign=false commit -q -m "seed template destination"
+
+  return 0
+}
+
+# Add the untracked Makefile integration that older loadout versions installed.
+function seed-legacy-loadout-make-integration() {
+
+  local dest="$1"
+
+  printf '%s\n' '# loadout-managed: scripts/loadout.mk' 'legacy-target: ; @true' > "${dest}/scripts/loadout.mk"
+  sed -i.bak '/^include scripts\/init\.mk$/a\
+# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>\
+include scripts/loadout.mk\
+# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<
+' "${dest}/Makefile"
+  rm -f "${dest}/Makefile.bak"
 
   return 0
 }

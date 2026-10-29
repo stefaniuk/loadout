@@ -44,8 +44,9 @@ set -euo pipefail
 #   - scripts/hooks/ (workflow-mode scripts; chmod +x), removing the hook files
 #     older loadout versions installed unless the destination tracks them or
 #     git cannot tell
-#   - scripts/loadout.mk plus a managed Makefile include block for downstream repos
-#     that already use repository-template's Makefile + scripts/init.mk
+#   - scripts/loadout.ext.mk for downstream repos whose repository-template
+#     scripts/init.mk loads '*.ext.mk' files, replacing the scripts/loadout.mk
+#     and Makefile include block that older loadout versions installed
 #   - pull_request_template.md (if not already present)
 #   - constitution.md
 #   - .specify/scripts/python
@@ -82,7 +83,7 @@ COPILOT_PROMPTS_DIR="${REPO_ROOT}/.github/prompts"
 COPILOT_SKILLS_DIR="${REPO_ROOT}/.github/skills"
 COPILOT_INSTRUCTIONS_MD_FILE="${REPO_ROOT}/.github/copilot-instructions.md"
 HOOK_SCRIPTS_DIR="${REPO_ROOT}/scripts/hooks"
-LOADOUT_MAKEFILE_MODULE="${REPO_ROOT}/scripts/loadout.mk"
+LOADOUT_MAKEFILE_MODULE="${REPO_ROOT}/scripts/loadout.ext.mk"
 
 SPECIFY_MEMORY="${REPO_ROOT}/.specify/memory"
 SPECIFY_SCRIPTS_PYTHON="${REPO_ROOT}/.specify/scripts/python"
@@ -501,43 +502,44 @@ function copilot-clean-directories() {
   return 0
 }
 
-# Copy scripts/loadout.mk and patch a compatible downstream root Makefile.
+# Copy scripts/loadout.ext.mk to a destination whose scripts/init.mk loads
+# '*.ext.mk' files, as repository-template does, after removing the Makefile
+# integration that older loadout versions installed.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function copy-loadout-make-integration() {
 
   local dest="$1"
   local dest_makefile="${dest}/Makefile"
-  local dest_loadout_module="${dest}/scripts/loadout.mk"
+  local dest_loadout_module="${dest}/${LOADOUT_MAKEFILE_MODULE_PATH}"
 
-  if ! destination-has-compatible-root-makefile "${dest}"; then
-    print-info "Skipping loadout Makefile integration (destination does not have repository-template Makefile + scripts/init.mk)"
+  if ! destination-loads-make-extensions "${dest}"; then
+    print-info "Skipping ${LOADOUT_MAKEFILE_MODULE_PATH} (destination does not have repository-template Makefile + scripts/init.mk that loads '*.ext.mk' files)"
     return 0
   fi
 
-  if [[ -f "${dest_makefile}" ]] && ! grep -qF "${LOADOUT_MAKEFILE_BEGIN_MARKER}" "${dest_makefile}" && grep -qF "include scripts/loadout.mk" "${dest_makefile}"; then
-    print-info "Skipping loadout Makefile integration (destination Makefile already includes scripts/loadout.mk outside the managed block)"
+  if [[ -f "${dest_loadout_module}" ]] && ! grep -qxF "${LOADOUT_MAKEFILE_FILE_MARKER}" "${dest_loadout_module}"; then
+    print-info "Skipping ${LOADOUT_MAKEFILE_MODULE_PATH} (destination file exists and is not loadout-managed)"
     return 0
   fi
 
-  if [[ -f "${dest_loadout_module}" ]] && ! grep -qF "${LOADOUT_MAKEFILE_FILE_MARKER}" "${dest_loadout_module}"; then
-    print-info "Skipping loadout Makefile integration (destination scripts/loadout.mk exists and is not loadout-managed)"
+  remove-legacy-loadout-make-integration "${dest}"
+  if makefile-includes-unmanaged "${dest_makefile}" "${LEGACY_LOADOUT_MAKEFILE_MODULE_PATH}"; then
+    print-info "Skipping ${LOADOUT_MAKEFILE_MODULE_PATH} (${dest_makefile} includes ${LEGACY_LOADOUT_MAKEFILE_MODULE_PATH}, remove that include to update)"
     return 0
   fi
 
-  mkdir -p "${dest}/scripts"
-  print-info "Copying scripts/loadout.mk to ${dest}/scripts"
+  print-info "Copying ${LOADOUT_MAKEFILE_MODULE_PATH} to ${dest}/scripts"
   cp "${LOADOUT_MAKEFILE_MODULE}" "${dest_loadout_module}"
-
-  update-loadout-make-include "${dest_makefile}"
 
   return 0
 }
 
-# Check whether a destination repository has the repository-template root Makefile surface.
+# Check whether a destination has the repository-template root Makefile and a
+# scripts/init.mk that loads every '*.ext.mk' file under scripts/.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
-function destination-has-compatible-root-makefile() {
+function destination-loads-make-extensions() {
 
   local dest="$1"
   local dest_makefile="${dest}/Makefile"
@@ -551,49 +553,9 @@ function destination-has-compatible-root-makefile() {
     return 1
   fi
 
-  return 0
-}
-
-# Insert or refresh the managed loadout include block in a downstream Makefile.
-# Arguments (provided as function parameters):
-#   $1=[path to the destination Makefile]
-function update-loadout-make-include() {
-
-  local dest_makefile="$1"
-  local stripped_makefile
-  local updated_makefile
-
-  stripped_makefile=$(mktemp)
-  updated_makefile=$(mktemp)
-
-  if grep -qF "${LOADOUT_MAKEFILE_BEGIN_MARKER}" "${dest_makefile}"; then
-    awk -v begin="${LOADOUT_MAKEFILE_BEGIN_MARKER}" -v end="${LOADOUT_MAKEFILE_END_MARKER}" '
-      $0 == begin { skip = 1; next }
-      $0 == end { skip = 0; next }
-      !skip { print }
-    ' "${dest_makefile}" > "${stripped_makefile}"
-  else
-    cp "${dest_makefile}" "${stripped_makefile}"
+  if ! grep -Eq "^[[:space:]]*-?include[[:space:]].*\*\.ext\.mk" "${dest_init_mk}"; then
+    return 1
   fi
-
-  if ! awk -v begin="${LOADOUT_MAKEFILE_BEGIN_MARKER}" -v include_line="include scripts/loadout.mk" -v end="${LOADOUT_MAKEFILE_END_MARKER}" '
-    {
-      print
-      if (!inserted && $0 ~ /^[[:space:]]*include[[:space:]]+scripts\/init\.mk([[:space:]]*(#.*)?)?$/) {
-        print begin
-        print include_line
-        print end
-        inserted = 1
-      }
-    }
-    END { exit inserted ? 0 : 1 }
-  ' "${stripped_makefile}" > "${updated_makefile}"; then
-    rm -f "${stripped_makefile}" "${updated_makefile}"
-    print-error "Could not find 'include scripts/init.mk' in ${dest_makefile}"
-  fi
-
-  mv "${updated_makefile}" "${dest_makefile}"
-  rm -f "${stripped_makefile}"
 
   return 0
 }
@@ -908,18 +870,24 @@ function copy-copilot-analysis() {
 function render-gitignore-content() {
 
   local destination="$1"
-  local line owned_path is_owned
+  local line owned_path suffix
 
   while IFS= read -r line || [[ -n "${line}" ]]; do
-    is_owned=false
+    suffix=""
     for owned_path in "${CONDITIONALLY_OWNED_PATHS[@]}"; do
       if [[ "${line}" == "${owned_path}" ]] && is-destination-owned "${destination}" "${owned_path}"; then
-        is_owned=true
+        suffix="already tracked in this repo's git history; owned here, not managed by loadout"
         break
       fi
     done
-    if [[ "${is_owned}" == "true" ]]; then
-      echo "# ${line}  # already tracked in this repo's git history; owned here, not managed by loadout"
+    for owned_path in "${TRACKED_OVERWRITTEN_PATHS[@]}"; do
+      if [[ "${line}" == "${owned_path}" ]] && is-destination-owned "${destination}" "${owned_path}"; then
+        suffix="already tracked in this repo's git history; loadout overwrites it and revert restores it"
+        break
+      fi
+    done
+    if [[ -n "${suffix}" ]]; then
+      echo "# ${line}  # ${suffix}"
     else
       echo "${line}"
     fi
@@ -1039,8 +1007,8 @@ Always copied (default/glue layer):
     scripts/hooks/ (workflow-mode scripts; chmod +x), removing the hook files
       older loadout versions installed unless the destination tracks them or
       git cannot tell
-    scripts/loadout.mk plus a managed Makefile include block for downstream repos
-      that already use repository-template's Makefile + scripts/init.mk
+    scripts/loadout.ext.mk for downstream repos whose repository-template
+      scripts/init.mk loads '*.ext.mk' files
     Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
     Spec-kit agents, prompts, templates and constitution
     Shell, Docker, Makefile instructions and prompts

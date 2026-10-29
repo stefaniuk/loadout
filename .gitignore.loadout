@@ -20,7 +20,7 @@
 # Skills (repository-template and technology-specific)
 .github/skills/
 
-# Copilot instructions file
+# Copilot instructions file - entry is commented out per-destination if the file is already tracked in that repo's git history. Loadout still overwrites it and revert restores the tracked version.
 .github/copilot-instructions.md
 
 # Superpowers local planning and design artefacts
@@ -30,7 +30,7 @@ docs/superpowers/
 scripts/hooks/
 
 # Workflow configuration scripts
-scripts/loadout.mk
+scripts/loadout.ext.mk
 
 # ------------------------------------------------------------------------------
 # GitHub Spec Kit framework

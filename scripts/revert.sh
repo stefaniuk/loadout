@@ -136,11 +136,8 @@ function revert-copilot() {
     fi
   done
 
-  # Remove copilot-instructions.md
-  if [[ -f "${dest}/.github/copilot-instructions.md" ]]; then
-    print-info "Removing ${dest}/.github/copilot-instructions.md"
-    rm -f "${dest}/.github/copilot-instructions.md"
-  fi
+  # Remove copilot-instructions.md, or restore the version the destination tracks
+  revert-tracked-overwritten-paths "${dest}"
 
   # Remove hook files that older loadout versions installed
   remove-legacy-hook-files "${dest}"
@@ -228,31 +225,46 @@ function revert-shared-resources() {
   return 0
 }
 
-# Remove the managed loadout Makefile integration from a downstream repository.
+# Remove files that apply overwrites, restoring the committed version of any
+# file the destination tracks.
+# Arguments:
+#   $1=[destination directory path]
+function revert-tracked-overwritten-paths() {
+
+  local dest="$1"
+  local rel_path
+
+  for rel_path in "${TRACKED_OVERWRITTEN_PATHS[@]}"; do
+    if is-destination-owned "${dest}" "${rel_path}"; then
+      if git -C "${dest}" checkout HEAD -- "${rel_path}" > /dev/null 2>&1; then
+        print-info "Restoring ${dest}/${rel_path} from destination git history"
+      else
+        print-info "Keeping ${dest}/${rel_path}, which the destination tracks but git could not restore"
+      fi
+    elif [[ -f "${dest}/${rel_path}" ]]; then
+      print-info "Removing ${dest}/${rel_path}"
+      rm -f "${dest:?}/${rel_path}"
+    fi
+  done
+
+  return 0
+}
+
+# Remove the loadout Makefile integration from a downstream repository,
+# including the one that older loadout versions installed.
 # Arguments:
 #   $1=[destination directory path]
 function revert-loadout-make-integration() {
 
   local dest="$1"
-  local dest_makefile="${dest}/Makefile"
-  local dest_loadout_module="${dest}/scripts/loadout.mk"
-  local stripped_makefile
+  local dest_loadout_module="${dest}/${LOADOUT_MAKEFILE_MODULE_PATH}"
 
-  if [[ -f "${dest_makefile}" ]] && grep -qF "${LOADOUT_MAKEFILE_BEGIN_MARKER}" "${dest_makefile}"; then
-    print-info "Removing loadout managed Makefile include from ${dest_makefile}"
-    stripped_makefile=$(mktemp)
-    awk -v begin="${LOADOUT_MAKEFILE_BEGIN_MARKER}" -v end="${LOADOUT_MAKEFILE_END_MARKER}" '
-      $0 == begin { skip = 1; next }
-      $0 == end { skip = 0; next }
-      !skip { print }
-    ' "${dest_makefile}" > "${stripped_makefile}"
-    mv "${stripped_makefile}" "${dest_makefile}"
-  fi
-
-  if [[ -f "${dest_loadout_module}" ]] && grep -qF "${LOADOUT_MAKEFILE_FILE_MARKER}" "${dest_loadout_module}"; then
+  if [[ -f "${dest_loadout_module}" ]] && grep -qxF "${LOADOUT_MAKEFILE_FILE_MARKER}" "${dest_loadout_module}"; then
     print-info "Removing ${dest_loadout_module}"
     rm -f "${dest_loadout_module}"
   fi
+
+  remove-legacy-loadout-make-integration "${dest}"
 
   return 0
 }

@@ -13,15 +13,28 @@ set -euo pipefail
 # Begin/end markers for managed .gitignore content
 GITIGNORE_BEGIN_MARKER="# >>> loadout managed content - DO NOT EDIT BELOW THIS LINE >>>"
 GITIGNORE_END_MARKER="# <<< loadout managed content - DO NOT EDIT ABOVE THIS LINE <<<"
-LOADOUT_MAKEFILE_BEGIN_MARKER="# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>"
-LOADOUT_MAKEFILE_END_MARKER="# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<"
-LOADOUT_MAKEFILE_FILE_MARKER="# loadout-managed: scripts/loadout.mk"
+LOADOUT_MAKEFILE_MODULE_PATH="scripts/loadout.ext.mk"
+LOADOUT_MAKEFILE_FILE_MARKER="# loadout-managed: scripts/loadout.ext.mk"
+
+# Makefile integration that older loadout versions installed, before
+# repository-template's scripts/init.mk loaded every 'scripts/**/*.ext.mk' file.
+LEGACY_LOADOUT_MAKEFILE_MODULE_PATH="scripts/loadout.mk"
+LEGACY_LOADOUT_MAKEFILE_FILE_MARKER="# loadout-managed: scripts/loadout.mk"
+LEGACY_LOADOUT_MAKEFILE_BEGIN_MARKER="# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>"
+LEGACY_LOADOUT_MAKEFILE_END_MARKER="# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<"
 
 # Paths that, once tracked in a destination repo's own git history, are
 # considered destination-owned: apply/import/revert will not manage them.
 CONDITIONALLY_OWNED_PATHS=(
   ".github/pull_request_template.md"
   "docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
+)
+
+# Paths that apply overwrites even when the destination tracks them, as
+# repository-template does. Their .gitignore entry is commented out for such a
+# destination and revert restores the tracked version from git.
+TRACKED_OVERWRITTEN_PATHS=(
+  ".github/copilot-instructions.md"
 )
 
 # Hook files that older loadout versions installed. The Copilot hooks now live in
@@ -80,7 +93,9 @@ function normalise-destination-path() {
 }
 
 # Check whether a relative path is already tracked by git in a destination
-# repo, meaning that repo - not loadout - owns the file going forward.
+# repo, meaning that repo - not loadout - owns the file going forward. The match
+# ignores case, so repository-template's '.github/PULL_REQUEST_TEMPLATE.md'
+# counts as '.github/pull_request_template.md'.
 # Arguments:
 #   $1=[destination directory path]
 #   $2=[relative file path]
@@ -89,7 +104,61 @@ function is-destination-owned() {
   local destination="$1"
   local rel_path="$2"
 
-  git -C "${destination}" ls-files --error-unmatch "${rel_path}" > /dev/null 2>&1
+  git -C "${destination}" ls-files --error-unmatch ":(icase)${rel_path}" > /dev/null 2>&1
+}
+
+# Check whether a Makefile includes a path outside a loadout-managed block.
+# Arguments:
+#   $1=[Makefile path]
+#   $2=[included path]
+function makefile-includes-unmanaged() {
+
+  local makefile="$1"
+  local included="$2"
+
+  [[ -f "${makefile}" ]] || return 1
+  awk -v begin="${LEGACY_LOADOUT_MAKEFILE_BEGIN_MARKER}" -v end="${LEGACY_LOADOUT_MAKEFILE_END_MARKER}" -v included="${included}" '
+    $0 == begin { skip = 1; next }
+    $0 == end { skip = 0; next }
+    !skip && $1 == "include" && $2 == included { found = 1 }
+    END { exit found ? 0 : 1 }
+  ' "${makefile}"
+}
+
+# Remove the Makefile integration that older loadout versions installed: the
+# managed include block in the root Makefile and the loadout-managed
+# scripts/loadout.mk. A module the Makefile still includes by hand is kept.
+# Arguments:
+#   $1=[destination directory path]
+function remove-legacy-loadout-make-integration() {
+
+  local dest="$1"
+  local dest_makefile="${dest}/Makefile"
+  local dest_legacy_module="${dest}/${LEGACY_LOADOUT_MAKEFILE_MODULE_PATH}"
+  local stripped_makefile
+
+  if [[ -f "${dest_makefile}" ]] && grep -qF "${LEGACY_LOADOUT_MAKEFILE_BEGIN_MARKER}" "${dest_makefile}"; then
+    print-info "Removing old loadout managed Makefile include from ${dest_makefile}"
+    stripped_makefile=$(mktemp)
+    awk -v begin="${LEGACY_LOADOUT_MAKEFILE_BEGIN_MARKER}" -v end="${LEGACY_LOADOUT_MAKEFILE_END_MARKER}" '
+      $0 == begin { skip = 1; next }
+      $0 == end { skip = 0; next }
+      !skip { print }
+    ' "${dest_makefile}" > "${stripped_makefile}"
+    cat "${stripped_makefile}" > "${dest_makefile}"
+    rm -f "${stripped_makefile}"
+  fi
+
+  if [[ -f "${dest_legacy_module}" ]] && grep -qxF "${LEGACY_LOADOUT_MAKEFILE_FILE_MARKER}" "${dest_legacy_module}"; then
+    if makefile-includes-unmanaged "${dest_makefile}" "${LEGACY_LOADOUT_MAKEFILE_MODULE_PATH}"; then
+      print-info "Keeping ${dest_legacy_module}, which ${dest_makefile} includes outside a loadout-managed block"
+    else
+      print-info "Removing old loadout Makefile module ${dest_legacy_module}"
+      rm -f "${dest_legacy_module}"
+    fi
+  fi
+
+  return 0
 }
 
 # Print how far git can tell what a destination tracks: 'repository' inside a

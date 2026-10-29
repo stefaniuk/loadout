@@ -104,7 +104,7 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 - [MK-STR-002] Shared targets must live in `scripts/**/*.mk` modules where feasible.
 - [MK-STR-003] Required modules use `include`. Optional modules use `-include`.
 - [MK-STR-004] Reusable logic must live in scripts (for example `scripts/**/something.sh`) and be called from a wrapper target; do not embed large shell programs inside recipes.
-- [MK-STR-005] A module copied from another repository starts with a one-line marker naming its source, for example `# loadout-managed: scripts/loadout.mk`. Do not add "do not edit" banners.
+- [MK-STR-005] A module copied from another repository starts with a one-line marker naming its source, for example `# loadout-managed: scripts/loadout.ext.mk`. Do not add "do not edit" banners.
 - [MK-STR-008] Add capabilities as extension modules. `scripts/init.mk` includes every `*.ext.mk` file under `scripts/` in sorted order. Name only entry points `*.ext.mk`, name helpers `*.lib.mk`, and never include one `*.ext.mk` from another ([Use_Bash_and_Make.md](../../docs/guides/Use_Bash_and_Make.md)).
 - [MK-STR-009] Keep the Make settings (`.DEFAULT_GOAL`, `.ONESHELL`, `.SHELLFLAGS`, `SHELL`, `.PHONY: *`) and the `help` implementation in `scripts/init.mk` only. Never repeat them in the root `Makefile` or a module.
 

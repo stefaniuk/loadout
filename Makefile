@@ -1,5 +1,5 @@
 include scripts/init.mk
-include scripts/loadout.mk
+include scripts/loadout.ext.mk
 
 # ==============================================================================
 # Project targets

@@ -1,4 +1,4 @@
-# loadout-managed: scripts/loadout.mk
+# loadout-managed: scripts/loadout.ext.mk
 
 # ==============================================================================
 # Loadout workflow targets
