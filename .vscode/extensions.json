@@ -1,9 +1,28 @@
 {
   "recommendations": [
+    "alefragnani.bookmarks",
     "davidanson.vscode-markdownlint",
+    "dbaeumer.vscode-eslint",
+    "eamodio.gitlens",
     "editorconfig.editorconfig",
+    "esbenp.prettier-vscode",
+    "github.github-vscode-theme",
+    "github.vscode-github-actions",
+    "github.vscode-pull-request-github",
+    "johnpapa.vscode-peacock",
+    "mhutchie.git-graph",
+    "ms-vscode.hexeditor",
+    "ms-vscode.live-server",
+    "ms-vsliveshare.vsliveshare",
+    "redhat.vscode-xml",
+    "streetsidesoftware.code-spell-checker-british-english",
+    "tamasfe.even-better-toml",
+    "tomoki1207.pdf",
+    "vscode-icons-team.vscode-icons",
     "vstirbu.vscode-mermaid-preview",
-    "yzhang.markdown-all-in-one"
+    "wayou.vscode-todo-highlight",
+    "yzhang.dictionary-completion",
+    "yzhang.markdown-all-in-one",
   ],
   "unwantedRecommendations": []
 }

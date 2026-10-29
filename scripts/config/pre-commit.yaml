@@ -10,27 +10,42 @@ repos:
     hooks:
       - id: check-file-format
         name: Check file format
-        entry: make check-file-format check=all
+        entry: make lint-file-format check=all
         language: system
         pass_filenames: false
   - repo: local
     hooks:
       - id: check-markdown-format
         name: Check Markdown format
-        entry: make check-markdown-format check=all
+        entry: make lint-markdown-format check=all
         language: system
         pass_filenames: false
   - repo: local
     hooks:
       - id: check-markdown-links
         name: Check Markdown links
-        entry: make check-markdown-links check=all
+        entry: make lint-markdown-links check=all
         language: system
         pass_filenames: false
   - repo: local
     hooks:
       - id: check-shell-lint
         name: Check shell scripts
-        entry: make check-shell-lint
+        entry: make lint-shell check=all
         language: system
         pass_filenames: false
+  - repo: local
+    hooks:
+      - id: check-workflow-security
+        name: Check workflow security
+        entry: make lint-workflow-security check=all
+        language: system
+        pass_filenames: false
+  - repo: local
+    hooks:
+      - id: test
+        name: Run tests
+        entry: make test
+        language: system
+        pass_filenames: false
+        always_run: true

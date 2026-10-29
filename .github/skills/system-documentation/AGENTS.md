@@ -26,7 +26,7 @@
   factual, explanation docs stay conceptual, how-to docs stay task-oriented,
   tutorials stay learning-oriented, operations docs stay safety-oriented,
   audience indexes stay link routers, and governance/lifecycle artefacts
-  (`CHANGELOG.md`, `.github/SECURITY.md`, `.github/contributing.md`,
+  (`CHANGELOG.md`, `.github/SECURITY.md`, `.github/CONTRIBUTING.md`,
   `.github/CODE_OF_CONDUCT.md`, upgrade guides) stay policy- and
   change-oriented.
 - **Evidence first.** Prefer current code, configuration, contracts, scripts,

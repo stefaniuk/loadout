@@ -1,6 +1,6 @@
 # Step 09 - Governance and Lifecycle
 
-**Outputs:** `CHANGELOG.md`, `.github/SECURITY.md`, `.github/contributing.md`
+**Outputs:** `CHANGELOG.md`, `.github/SECURITY.md`, `.github/CONTRIBUTING.md`
 (or root `CONTRIBUTING.md` where the repository already uses that location),
 `.github/CODE_OF_CONDUCT.md`, and any upgrade-guide pages under `docs/how-to/`
 or `docs/operations/runbooks/`. **Dependencies:** step 01 (`README.md`,
@@ -17,7 +17,7 @@ documentation alongside the Diátaxis core.
 | ---------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | `CHANGELOG.md`               | Chronological record of user-visible changes | versioned entries, added/changed/deprecated/removed/fixed/security sections, upgrade hints  | design rationale, task lists, reference tables                  |
 | `.github/SECURITY.md`        | Security policy and vulnerability reporting  | supported versions, private reporting path, disclosure expectations, remediation commitment | hardening tutorials, runtime operations, ADR debate             |
-| `.github/contributing.md`    | Contribution process                         | how to propose changes, branch and review workflow, quality gates, doc contribution rules   | architecture explanation, user tutorials, exhaustive reference  |
+| `.github/CONTRIBUTING.md`    | Contribution process                         | how to propose changes, branch and review workflow, quality gates, doc contribution rules   | architecture explanation, user tutorials, exhaustive reference  |
 | `.github/CODE_OF_CONDUCT.md` | Community behaviour policy                   | scope, expected behaviour, enforcement contact and process                                  | technical guidance                                              |
 | Upgrade guides               | Safe transition between significant versions | scope, breaking changes, ordered upgrade steps, verification, rollback                      | new-feature tutorials, conceptual essays, full reference tables |
 
@@ -33,7 +33,7 @@ procedures. Link both directions from `CHANGELOG.md`.
 ## Discovery
 
 1. Confirm the current state of `CHANGELOG.md`, `.github/SECURITY.md`,
-   `.github/contributing.md`, and `.github/CODE_OF_CONDUCT.md`.
+   `.github/CONTRIBUTING.md`, and `.github/CODE_OF_CONDUCT.md`.
 2. Inspect release tags, release notes, and `.github/` workflows to derive the
    supported versions and the change-tracking style already in use.
 3. Identify any vulnerability reporting channel that the project relies on
@@ -57,7 +57,7 @@ procedures. Link both directions from `CHANGELOG.md`.
    type and reference the relevant feature spec, ADR, or PR.
 2. Update `.github/SECURITY.md` when the supported version window, the reporting
    path, or the disclosure policy changes.
-3. Update `.github/contributing.md` when the contribution workflow, quality
+3. Update `.github/CONTRIBUTING.md` when the contribution workflow, quality
    gates, or documentation rules change.
 4. Add or update upgrade guides whenever a release introduces breaking changes,
    configuration migrations, or required operator action.
@@ -68,7 +68,7 @@ procedures. Link both directions from `CHANGELOG.md`.
    entries.
 2. Flag missing or outdated supported-version statements in
    `.github/SECURITY.md`.
-3. Flag contribution-workflow drift between `.github/contributing.md`,
+3. Flag contribution-workflow drift between `.github/CONTRIBUTING.md`,
    `docs/onboarding.md`, and the actual repository automation.
 4. Detect breaking changes without an upgrade guide.
 
@@ -98,7 +98,7 @@ Prefer these sections:
 4. Remediation expectations
 5. Public acknowledgements policy
 
-### `.github/contributing.md`
+### `.github/CONTRIBUTING.md`
 
 Prefer these sections:
 

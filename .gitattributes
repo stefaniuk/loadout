@@ -1,6 +1,7 @@
-.specify/scripts/bash/** linguist-vendored
 .specify/templates/** linguist-vendored
 scripts/config/** linguist-vendored
 scripts/docker/** linguist-vendored
 scripts/quality/** linguist-vendored
 scripts/init.mk linguist-vendored
+
+* text=auto eol=lf

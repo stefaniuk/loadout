@@ -112,6 +112,7 @@ function main() {
   update-editorconfig-exclude
   update-markdownlint-ignore
   update-prettier-ignore
+  update-shelllint-ignore
   update-lychee-ignore
   emit-commit-message "$name" "$patch_only"
   return 0
@@ -156,6 +157,11 @@ function update-markdownlint-ignore() {
 # Update .prettierignore with entries for all synced skill directories.
 function update-prettier-ignore() {
   update-ignore-file "${REPO_ROOT}/scripts/config/.prettierignore"
+}
+
+# Update .shelllintignore with entries for all synced skill directories.
+function update-shelllint-ignore() {
+  update-ignore-file "${REPO_ROOT}/scripts/config/.shelllintignore"
 }
 
 # Update lychee.toml exclude_path with entries for all synced skill directories.

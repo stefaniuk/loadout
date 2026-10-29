@@ -211,8 +211,8 @@ documentation set.
 ### `## Contributing`
 
 Write this as a short invitation followed by the minimal next steps. Link to
-`.github/contributing.md`, summarise local setup, and include the exact quality
-commands the project gates contributions on. If `.github/contributing.md` does
+`.github/CONTRIBUTING.md`, summarise local setup, and include the exact quality
+commands the project gates contributions on. If `.github/CONTRIBUTING.md` does
 not exist, create a contributing file. Include links to `.github/SECURITY.md`
 and `.github/CODE_OF_CONDUCT.md` when those files exist.
 
@@ -538,7 +538,7 @@ More detail:
 If you want to contribute, start with the contributor guide and the local
 quality gates below.
 
-See [.github/contributing.md](.github/contributing.md) for the full process.
+See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for the full process.
 See also [.github/SECURITY.md](.github/SECURITY.md) and
 [.github/CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md).
 

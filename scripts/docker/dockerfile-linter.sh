@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -euo pipefail
 
@@ -9,58 +9,74 @@ set -euo pipefail
 #   $ [options] ./dockerfile-linter.sh
 #
 # Arguments (provided as environment variables):
-#   file=Dockerfile         # Path to the Dockerfile to lint, relative to the project's top-level directory, default is './Dockerfile.effective'
-#   FORCE_USE_DOCKER=true   # If set to true the command is run in a Docker container, default is 'false'
+#   file=Dockerfile         # Dockerfile to lint, relative to the repository
+#                           # root, default is './Dockerfile.effective'
+#   FORCE_USE_DOCKER=true   # Run in a Docker container, default is 'false'
 #   VERBOSE=true            # Show all the executed commands, default is 'false'
 
 # ==============================================================================
 
+# Lint the Dockerfile natively or in Docker.
 function main() {
 
   cd "$(git rev-parse --show-toplevel)"
 
   local file=${file:-./Dockerfile.effective}
+  local rc=0
   if command -v hadolint > /dev/null 2>&1 && ! is-arg-true "${FORCE_USE_DOCKER:-false}"; then
-    file="$file" run-hadolint-natively
+    file="$file" run-hadolint-natively || rc=$?
   else
-    file="$file" run-hadolint-in-docker
+    file="$file" run-hadolint-in-docker || rc=$?
   fi
+
+  return "$rc"
 }
 
 # Run hadolint natively.
 # Arguments (provided as environment variables):
-#   file=[path to the Dockerfile to lint, relative to the project's top-level directory]
+#   file=[path to the Dockerfile to lint, relative to the repository root]
 function run-hadolint-natively() {
 
+  local rc=0
   # shellcheck disable=SC2001
-  hadolint "$(echo "$file" | sed "s#$PWD#.#")"
+  hadolint \
+    --config scripts/config/hadolint.yaml \
+    "$(echo "$file" | sed "s#$PWD#.#")" || rc=$?
+
+  return "$rc"
 }
 
 # Run hadolint in a Docker container.
 # Arguments (provided as environment variables):
-#   file=[path to the Dockerfile to lint, relative to the project's top-level directory]
+#   file=[path to the Dockerfile to lint, relative to the repository root]
 function run-hadolint-in-docker() {
 
   # shellcheck disable=SC1091
   source ./scripts/docker/docker.lib.sh
 
-  # shellcheck disable=SC2155
-  local image=$(name=hadolint/hadolint docker-get-image-version-and-pull)
+  local image
+  image=$(name=hadolint/hadolint docker-get-image-version-and-pull) || return "$?"
+  local rc=0
   # shellcheck disable=SC2001
   docker run --rm --platform linux/amd64 \
-    --volume "$PWD:/workdir" \
+    --network none \
+    --volume "$PWD:/workdir:ro" \
     --workdir /workdir \
     "$image" \
       hadolint \
         --config /workdir/scripts/config/hadolint.yaml \
-        "/workdir/$(echo "$file" | sed "s#$PWD#.#")"
+        "/workdir/$(echo "$file" | sed "s#$PWD#.#")" || rc=$?
+
+  return "$rc"
 }
 
 # ==============================================================================
 
+# Check whether the supplied argument represents a true boolean value.
 function is-arg-true() {
 
-  if [[ "$1" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$ ]]; then
+  local value="$1"
+  if [[ "$value" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$ ]]; then
     return 0
   else
     return 1

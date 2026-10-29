@@ -656,7 +656,7 @@ after making **any** change to shell scripts, you must run the repository's
 
   ```bash
   make lint-shell
-  file=scripts/quality/check-file-format.sh make check-shell-lint check=file
+  make lint-shell check=staged-changes
   ```
 
 - [SH-QG-003] Use directive comments to disable specific warnings only when

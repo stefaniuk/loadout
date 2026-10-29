@@ -1,5 +1,7 @@
 name: "CI/CD pull request"
 
+# The total recommended execution time for the "CI/CD Pull Request" workflow is around 20 minutes.
+
 on:
   push:
     branches:
@@ -7,33 +9,133 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
+permissions: {}
+
 jobs:
   metadata:
     name: "Set CI/CD metadata"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: read
     timeout-minutes: 1
     outputs:
+      build_datetime_london: ${{ steps.variables.outputs.build_datetime_london }}
       build_datetime: ${{ steps.variables.outputs.build_datetime }}
+      build_epoch: ${{ steps.variables.outputs.build_epoch }}
       build_timestamp: ${{ steps.variables.outputs.build_timestamp }}
+      mise_version: ${{ steps.variables.outputs.mise_version }}
+      nodejs_version: ${{ steps.variables.outputs.nodejs_version }}
+      python_version: ${{ steps.variables.outputs.python_version }}
+      version: ${{ steps.variables.outputs.version }}
+      does_pull_request_exist: ${{ steps.pr_exists.outputs.does_pull_request_exist }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: "Set CI/CD variables"
         id: variables
         run: |
           datetime=$(date -u +'%Y-%m-%dT%H:%M:%S%z')
+          BUILD_DATETIME=$datetime make version-create-effective-file
+          echo "build_datetime_london=$(TZ=Europe/London date --date=$datetime +'%Y-%m-%dT%H:%M:%S%z')" >> $GITHUB_OUTPUT
           echo "build_datetime=$datetime" >> $GITHUB_OUTPUT
+          echo "build_epoch=$(date --date=$datetime -u +'%s')" >> $GITHUB_OUTPUT
           echo "build_timestamp=$(date --date=$datetime -u +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
-  commit-stage:
+          source scripts/docker/docker.lib.sh
+          echo "mise_version=$(_toml-table-entry "" min_version mise.toml)" >> "$GITHUB_OUTPUT"
+          echo "nodejs_version=$(_toml-table-entry tools node mise.toml)" >> "$GITHUB_OUTPUT"
+          echo "python_version=$(_toml-table-entry tools python mise.toml)" >> "$GITHUB_OUTPUT"
+          echo "version=$(head -n 1 .version 2> /dev/null || echo unknown)" >> $GITHUB_OUTPUT
+      - name: "Check if pull request exists for this branch"
+        id: pr_exists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "Current branch is '$branch_name'"
+          if gh pr list --head "$branch_name" | grep -q .; then
+            echo "Pull request exists"
+            echo "does_pull_request_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "Pull request doesn't exist"
+            echo "does_pull_request_exist=false" >> $GITHUB_OUTPUT
+          fi
+      - name: "List variables"
+        env:
+          BUILD_DATETIME_LONDON: ${{ steps.variables.outputs.build_datetime_london }}
+          BUILD_DATETIME: ${{ steps.variables.outputs.build_datetime }}
+          BUILD_EPOCH: ${{ steps.variables.outputs.build_epoch }}
+          BUILD_TIMESTAMP: ${{ steps.variables.outputs.build_timestamp }}
+          MISE_VERSION: ${{ steps.variables.outputs.mise_version }}
+          NODEJS_VERSION: ${{ steps.variables.outputs.nodejs_version }}
+          PYTHON_VERSION: ${{ steps.variables.outputs.python_version }}
+          VERSION: ${{ steps.variables.outputs.version }}
+          DOES_PULL_REQUEST_EXIST: ${{ steps.pr_exists.outputs.does_pull_request_exist }}
+        run: |
+          make list-variables
+  commit-stage: # Recommended maximum execution time is 2 minutes
     name: "Commit stage"
     permissions:
       contents: read
     needs: [metadata]
     uses: ./.github/workflows/stage-1-commit.yaml
     with:
+      build_datetime_london: "${{ needs.metadata.outputs.build_datetime_london }}"
       build_datetime: "${{ needs.metadata.outputs.build_datetime }}"
+      build_epoch: "${{ needs.metadata.outputs.build_epoch }}"
       build_timestamp: "${{ needs.metadata.outputs.build_timestamp }}"
-    secrets: inherit
+      mise_version: "${{ needs.metadata.outputs.mise_version }}"
+      nodejs_version: "${{ needs.metadata.outputs.nodejs_version }}"
+      python_version: "${{ needs.metadata.outputs.python_version }}"
+      version: "${{ needs.metadata.outputs.version }}"
+  test-stage: # Recommended maximum execution time is 5 minutes
+    name: "Test stage"
+    permissions:
+      contents: read
+    needs: [metadata, commit-stage]
+    uses: ./.github/workflows/stage-2-test.yaml
+    with:
+      build_datetime_london: "${{ needs.metadata.outputs.build_datetime_london }}"
+      build_datetime: "${{ needs.metadata.outputs.build_datetime }}"
+      build_epoch: "${{ needs.metadata.outputs.build_epoch }}"
+      build_timestamp: "${{ needs.metadata.outputs.build_timestamp }}"
+      mise_version: "${{ needs.metadata.outputs.mise_version }}"
+      nodejs_version: "${{ needs.metadata.outputs.nodejs_version }}"
+      python_version: "${{ needs.metadata.outputs.python_version }}"
+      version: "${{ needs.metadata.outputs.version }}"
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  build-stage: # Recommended maximum execution time is 3 minutes
+    name: "Build stage"
+    permissions:
+      contents: read
+    needs: [metadata, test-stage]
+    uses: ./.github/workflows/stage-3-build.yaml
+    if: needs.metadata.outputs.does_pull_request_exist == 'true' || (github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened'))
+    with:
+      build_datetime_london: "${{ needs.metadata.outputs.build_datetime_london }}"
+      build_datetime: "${{ needs.metadata.outputs.build_datetime }}"
+      build_epoch: "${{ needs.metadata.outputs.build_epoch }}"
+      build_timestamp: "${{ needs.metadata.outputs.build_timestamp }}"
+      mise_version: "${{ needs.metadata.outputs.mise_version }}"
+      nodejs_version: "${{ needs.metadata.outputs.nodejs_version }}"
+      python_version: "${{ needs.metadata.outputs.python_version }}"
+      version: "${{ needs.metadata.outputs.version }}"
+  acceptance-stage: # Recommended maximum execution time is 10 minutes
+    name: "Acceptance stage"
+    permissions:
+      contents: read
+    needs: [metadata, build-stage]
+    uses: ./.github/workflows/stage-4-acceptance.yaml
+    if: needs.metadata.outputs.does_pull_request_exist == 'true' || (github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened'))
+    with:
+      build_datetime_london: "${{ needs.metadata.outputs.build_datetime_london }}"
+      build_datetime: "${{ needs.metadata.outputs.build_datetime }}"
+      build_epoch: "${{ needs.metadata.outputs.build_epoch }}"
+      build_timestamp: "${{ needs.metadata.outputs.build_timestamp }}"
+      mise_version: "${{ needs.metadata.outputs.mise_version }}"
+      nodejs_version: "${{ needs.metadata.outputs.nodejs_version }}"
+      python_version: "${{ needs.metadata.outputs.python_version }}"
+      version: "${{ needs.metadata.outputs.version }}"

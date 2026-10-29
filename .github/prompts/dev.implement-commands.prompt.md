@@ -101,7 +101,7 @@ and categories:
 - `test` - run the fast test suite (typically unit tests).
 - `clean` - remove build artefacts and temporary files.
 - `config` - configure the development environment and install tooling (calls
-  `_install-dependencies`).
+  `_toolchain-install`).
 
 If a target is not applicable, document why and provide a no-op target that
 exits successfully with a clear message.

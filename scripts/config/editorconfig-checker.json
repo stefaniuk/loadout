@@ -1,9 +1,6 @@
 {
   "Exclude": [
-    "^\\.github/skills/speckit-[^/]+/SKILL\\.md$",
-    "^\\.github/instructions/makefile\\.instructions\\.md$",
     "^\\.specify/scripts/python/.*\\.py$",
-    "^\\.specify/templates/.*-template\\.md$",
     "^\\.github/skills/api-and-interface-design/",
     "^\\.github/skills/brainstorming/",
     "^\\.github/skills/browser-testing-with-devtools/",

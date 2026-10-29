@@ -22,7 +22,10 @@ Three paths are supported. Pick the one that matches your goal:
 ## Prerequisites
 
 - Git
-- GNU Make 3.82 or newer
+- [mise](https://mise.jdx.dev/), which installs the tools pinned in `mise.toml`
+- GNU Make 3.82 or newer, Bash 5.2 or newer and the GNU userland. On macOS, run
+  `make toolchain-install-gnu-macos`
+- Docker or Podman, optional, for the containerised quality checks
 - A text editor (VS Code recommended for Copilot integration)
 
 ## First setup
@@ -33,11 +36,12 @@ Clone the repository and configure the local environment:
 git clone https://github.com/stefaniuk/loadout.git
 cd loadout
 
-# Configure the development environment (installs git hooks, sets up scripts)
+# Install the pinned toolchain, the Git hooks and the pinned Docker images
+mise trust mise.toml
 make config
 
 # Verify quality gates work
-make lint && make test
+make lint && make validate-customisations && make test
 ```
 
 `make config` is idempotent - it can be re-run safely after pulling updates.
@@ -83,16 +87,19 @@ Use one workflow family per session or worktree:
 
 ## First run + expected output
 
-After `make config`, run both quality gates:
+After `make config`, run the quality gates:
 
 ```bash
 make lint
+make validate-customisations
 make test
 ```
 
 **Expected output:** Each command completes with exit code `0`. Linting covers
-markdown, links, scripts, and configuration; tests exercise the apply pipeline
-and helper scripts. If either command fails on a clean clone,
+file format, Markdown, links, shell scripts and workflow security. The
+customisation check covers the frontmatter and naming of instructions, prompts,
+agents and skills. Tests exercise the apply pipeline, the helper scripts and the
+repository-template quality scripts. If either command fails on a clean clone,
 [open an issue](https://github.com/stefaniuk/loadout/issues) with the failure
 output.
 
@@ -402,9 +409,13 @@ make skill-patch name=incremental-implementation
    `scripts/config/skill-patches.yaml` that also apply to imported Spec Kit
    skills.
 3. The resolved commit SHA is written back to `scripts/config/skills.yaml`.
-4. The `.markdownlintignore` managed section is updated with all synced skill
-   directories (sorted alphabetically).
-5. Synced skill directories are excluded from shellcheck automatically.
+4. The synced skill directories are written to the managed sections of
+   `.markdownlintignore`, `.prettierignore`, `.shelllintignore` and
+   `lychee.toml`, and to the `Exclude` list of `editorconfig-checker.json`, all
+   under `scripts/config/` (sorted alphabetically).
+5. Synced skill directories are therefore excluded from the file format,
+   Markdown and link checks, and from the shell comment length rule. ShellCheck
+   still lints their scripts.
 
 ### Skill sync prerequisites
 
@@ -426,21 +437,23 @@ make config
 ### Quality commands
 
 ```bash
-make lint   # File format, markdown format, markdown links
-make test   # Apply pipeline and script tests
+make lint                     # File format, Markdown, links, shell, workflows
+make validate-customisations  # Customisation frontmatter and naming
+make test                     # Every test suite under scripts/
 ```
 
 ### Quick checklist
 
 1. **Raise an issue or PR** describing the planned changes.
 2. **Keep artefacts in sync** - specs, plans, tasks, and docs must align.
-3. **Run quality gates** - `make lint && make test` must pass before opening a
-   PR.
+3. **Run quality gates** - `make lint`, `make validate-customisations` and
+   `make test` must pass before opening a PR. The Copilot Stop hook runs them
+   for agent sessions.
 4. **Follow the constitution** in `.specify/memory/constitution.md` and the
    repository-wide rules in
    [.github/copilot-instructions.md](../.github/copilot-instructions.md).
 
-See [.github/contributing.md](../.github/contributing.md) for the full
+See [.github/CONTRIBUTING.md](../.github/CONTRIBUTING.md) for the full
 contributor guide.
 
 ## Troubleshooting

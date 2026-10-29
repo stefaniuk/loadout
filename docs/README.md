@@ -35,7 +35,7 @@ only when the repository ships matching surfaces or evidence-backed content.
 
 - Contributors starting work should begin with [onboarding.md](onboarding.md),
   [conventions.md](conventions.md), and
-  [../.github/contributing.md](../.github/contributing.md).
+  [../.github/CONTRIBUTING.md](../.github/CONTRIBUTING.md).
 - Maintainers changing architecture or tooling should read
   [architecture.md](architecture.md), `docs/adr/`, and the
   [Tech Radar](adr/Tech_Radar.md).

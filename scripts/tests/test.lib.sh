@@ -1,0 +1,734 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034
+
+set -euo pipefail
+
+# Shared test harness for the repository's shell test suites. Each test runs in
+# its own subshell with 'set -e' in force, so any failing command fails the
+# test, not only the last one. A test that calls exit fails, even with status
+# 0, since it never reached its end. Each test also gets its own scratch
+# directory and a command stub directory first on PATH, and nothing a test
+# changes leaks into the next test. Each test runs in its own process group, so
+# when the suite is interrupted it stops the running tests and every command
+# they started before the teardown runs.
+#
+# Usage:
+#   $ source ./scripts/tests/test.lib.sh
+#   $ test-run-suite test-one test-two
+#
+# Arguments (provided as environment variables):
+#   VERBOSE=true         # The suite traces its commands and the harness also
+#                        # prints the output of passing tests, default is
+#                        # 'false'
+#   TEST_JOBS=n          # Number of tests to run in parallel, default is the
+#                        # number of CPUs
+#   TEST_STOP_TIMEOUT=n  # Seconds an interrupted suite waits for its running
+#                        # tests to stop before killing them, default is 5
+#   TEST_PROFILE=file    # Append the start time, end time and name of each
+#                        # test to this file, default is not to
+#
+# Optional functions a suite can define:
+#   test-suite-setup     # Runs once before the first test
+#   test-suite-teardown  # Runs once on exit, even when a test or the setup
+#                        # fails
+# Setup and teardown can use SUITE_TMP and have git isolated and LC_ALL=C like
+# the tests. TEST_TMP, STUB_DIR and the helpers that need them are not available
+# there.
+#
+# Variables available to tests:
+#   TEST_REPO_ROOT   # Absolute path of this repository
+#   TEST_BASE_TOOLS  # Tools test-isolate-path always keeps reachable
+#   SUITE_TMP        # Scratch directory shared by the suite, removed on exit
+#   TEST_TMP         # Scratch directory of the current test, removed after it
+#   STUB_DIR         # Directory of command stubs, first on PATH
+#   TEST_STDOUT, TEST_STDERR, TEST_STATUS  # Set by test-capture
+# test-capture runs the command in a subshell, so its 'cd' and variable changes
+# are discarded.
+
+TEST_REPO_ROOT="${BASH_SOURCE[0]%/*}"
+[[ "$TEST_REPO_ROOT" != "${BASH_SOURCE[0]}" ]] || TEST_REPO_ROOT=.
+TEST_REPO_ROOT="$(cd "$TEST_REPO_ROOT/../.." && pwd -P)"
+TEST_INDENT_PATTERN='s/^/    /'
+TEST_BASE_TOOLS=(awk basename bash cat chmod cmp cp cut date dirname env find git grep head ln mkdir mktemp mv rm sed sleep sort tail tee touch tr uniq wc xargs)
+
+# ==============================================================================
+# Suite runner
+
+# Run the given tests in parallel, print a PASS or FAIL line for each in the
+# given order and a summary. A new test starts as soon as any running test ends.
+# Fail without running anything when no test is given.
+# Arguments:
+#   $@=[names of the test functions to run, in order]
+function test-run-suite() {
+
+  local jobs i=0 next=0 failed=0 running=0
+  local -a tests=("$@")
+
+  if [[ $# -eq 0 ]]; then
+    echo "ERROR: no tests to run" >&2
+    return 1
+  fi
+  if ! _test-mktemp-dir _TEST_SUITE_TMP; then
+    echo "ERROR: cannot create the suite scratch directory" >&2
+    return 1
+  fi
+  SUITE_TMP="$_TEST_SUITE_TMP"
+  trap '_test-suite-exit' EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  _test-isolate-git
+  export LC_ALL=C
+  if declare -F test-suite-setup > /dev/null; then
+    test-suite-setup
+  fi
+
+  jobs="${TEST_JOBS:-$(getconf _NPROCESSORS_ONLN 2> /dev/null || echo 4)}"
+  [[ "$jobs" =~ ^[1-9][0-9]*$ ]] || jobs=4
+  # Each test writes its index to this pipe when it ends, so a slow test does
+  # not hold up the next ones
+  if ! mkfifo "$SUITE_TMP/.ended"; then
+    echo "ERROR: cannot create the pipe that reports ended tests" >&2
+    return 1
+  fi
+  exec 3<> "$SUITE_TMP/.ended"
+  _TEST_PIDS=()
+  _TEST_ENDED=()
+  for i in "${!tests[@]}"; do
+    while [[ $running -ge $jobs ]]; do
+      _test-await-end
+      running=$((running - 1))
+    done
+    # Job control gives the test its own process group, whose ID is its PID
+    # Known gap: a signal between the launch and the PID registration below
+    # leaves that one test running unsupervised until it ends on its own.
+    # Accepted for now as the window is tiny and the test is short-lived. If
+    # that starts to matter, have the INT and TERM traps only set a flag while
+    # launching and exit once registered.
+    set -m
+    # The parent also sets the group, so hide the child's setpgid warning
+    { _test-run-job "$i" "${tests[$i]}" & } 2> /dev/null
+    _TEST_PIDS[i]=$!
+    set +m
+    running=$((running + 1))
+    # Report the tests that have ended, in the given order
+    while [[ -n "${_TEST_ENDED[next]:-}" ]]; do
+      _test-report "${tests[$next]}" "$next" || failed=$((failed + 1))
+      next=$((next + 1))
+    done
+  done
+  while [[ $next -lt ${#tests[@]} ]]; do
+    if [[ -z "${_TEST_ENDED[next]:-}" ]]; then
+      _test-await-end
+      continue
+    fi
+    _test-report "${tests[$next]}" "$next" || failed=$((failed + 1))
+    next=$((next + 1))
+  done
+
+  echo "Total: $#, Passed: $(($# - failed)), Failed: $failed"
+  _TEST_SUITE_COMPLETED=true
+  [[ $failed -eq 0 ]] || return 1
+
+  return 0
+}
+
+# Wait for a test started by test-run-suite and print its PASS or FAIL line,
+# and its output when it failed or VERBOSE is on. Fail when the test failed.
+# Arguments:
+#   $1=[name of the test function]
+#   $2=[index of the test in the suite]
+function _test-report() {
+
+  local test="$1" i="$2" rc log="$SUITE_TMP/.test-$2.log"
+  set +e
+  wait "${_TEST_PIDS[$i]}"
+  rc=$?
+  set -e
+  unset '_TEST_PIDS[i]'
+  if [[ $rc -eq 0 ]]; then
+    echo "$test PASS"
+    if [[ "${VERBOSE:-false}" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$ ]]; then
+      _test-indent "$log"
+    fi
+    return 0
+  fi
+  echo "$test FAIL"
+  _test-indent "$log"
+
+  return 1
+}
+
+# Run a test as the background job started by test-run-suite, with its output in
+# its log, then write its index to the pipe on file descriptor 3, which the test
+# itself does not inherit. Exit with the test's status.
+# Arguments:
+#   $1=[index of the test in the suite]
+#   $2=[name of the test function]
+function _test-run-job() {
+
+  local i="$1" rc started=$EPOCHREALTIME
+  # A plain statement, as errexit is ignored inside a command that is part of a
+  # '||' list
+  set +e
+  ( _test-run-isolated "$2" ) > "$SUITE_TMP/.test-$i.log" 2>&1 < /dev/null 3>&-
+  rc=$?
+  [[ -z "${TEST_PROFILE:-}" ]] || echo "$started $EPOCHREALTIME $2" >> "$TEST_PROFILE"
+  echo "$i" >&3
+  exit "$rc"
+}
+
+# Wait until one more test has ended and mark it in _TEST_ENDED. A test killed
+# together with its job never writes its index, so every second without news,
+# look for a job that is gone.
+function _test-await-end() {
+
+  local i
+  while true; do
+    # In a subshell, as a signal trap that exits during 'read -t' leaves its
+    # timer to break the exit trap
+    if i="$(read -r -t 1 -u 3 i && printf '%s' "$i")"; then
+      if [[ -z "${_TEST_ENDED[i]:-}" ]]; then
+        _TEST_ENDED[i]=true
+        return 0
+      fi
+      continue
+    fi
+    for i in "${!_TEST_PIDS[@]}"; do
+      if [[ -z "${_TEST_ENDED[i]:-}" ]] && ! kill -0 "${_TEST_PIDS[$i]}" 2> /dev/null; then
+        _TEST_ENDED[i]=true
+        return 0
+      fi
+    done
+  done
+}
+
+# Run one test in an isolated subshell with errexit, nounset and pipefail on.
+# Arguments:
+#   $1=[name of the test function]
+function _test-run-one() {
+
+  local test="$1"
+  ( _test-run-isolated "$test" )
+
+  return $?
+}
+
+# Give the current test its scratch directory and stub directory, then run it.
+# Must be called inside the test's own subshell.
+# Arguments:
+#   $1=[name of the test function]
+function _test-run-isolated() {
+
+  set -euo pipefail
+  local test="$1"
+  _TEST_NAME="$test"
+  _TEST_RETURNED=""
+  _test-mktemp-dir TEST_TMP
+  trap '_test-isolated-exit' EXIT
+  STUB_DIR="$TEST_TMP/.stubs"
+  mkdir "$STUB_DIR"
+  PATH="$STUB_DIR:$PATH"
+  export TEST_TMP STUB_DIR PATH
+  "$test"
+  _TEST_RETURNED=true
+  if [[ $- != *e* ]]; then
+    echo "ERROR: test '$test' left errexit off" >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail a test whose subshell exits with status 0 before the test returned, then
+# remove the test's scratch directory and keep the exit status.
+function _test-isolated-exit() {
+
+  local rc=$?
+  if [[ $rc -eq 0 && -z "${_TEST_RETURNED:-}" ]]; then
+    echo "ERROR: test '${_TEST_NAME:-}' exited before returning" >&2
+    rc=1
+  fi
+  _test-remove-dir "${TEST_TMP:-}"
+  exit "$rc"
+}
+
+# Point git at an empty global config and a fixed identity, and drop the
+# variables that could point it at another repository, such as a git hook's
+# GIT_DIR. Turn off the automatic maintenance that each commit would otherwise
+# start as another git process.
+function _test-isolate-git() {
+
+  local vars var
+  vars="$(git rev-parse --local-env-vars)"
+  while IFS= read -r var; do
+    unset -v "$var"
+  done <<< "$vars"
+  GIT_CONFIG_GLOBAL=/dev/null
+  GIT_CONFIG_NOSYSTEM=1
+  GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=maintenance.auto GIT_CONFIG_VALUE_0=false
+  GIT_AUTHOR_NAME=Test GIT_AUTHOR_EMAIL=test@example.com
+  GIT_COMMITTER_NAME=Test GIT_COMMITTER_EMAIL=test@example.com
+  export GIT_CONFIG_GLOBAL GIT_CONFIG_NOSYSTEM GIT_CONFIG_COUNT GIT_CONFIG_KEY_0 GIT_CONFIG_VALUE_0 \
+    GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL
+
+  return 0
+}
+
+# Stop the running tests, run the suite teardown, remove the suite scratch
+# directory and keep the exit status.
+function _test-suite-exit() {
+
+  local rc=$?
+  set +e
+  if [[ -n "${_TEST_PIDS[*]:-}" ]]; then
+    # Bash 3.2 reports each terminated test on stderr
+    _test-stop-tests 2> /dev/null
+  fi
+  if declare -F test-suite-teardown > /dev/null; then
+    test-suite-teardown || { echo "ERROR: test-suite-teardown failed" >&2; rc=1; }
+  fi
+  _test-remove-dir "${_TEST_SUITE_TMP:-}"
+  if [[ -z "${_TEST_SUITE_COMPLETED:-}" ]]; then
+    echo "ERROR: the test suite aborted before running all its tests, see the output above" >&2
+    [[ $rc -ne 0 ]] || rc=1
+  fi
+  exit "$rc"
+}
+
+# Send TERM to the process group of every running test, KILL whatever is left
+# after TEST_STOP_TIMEOUT seconds, then reap the tests.
+function _test-stop-tests() {
+
+  local timeout="${TEST_STOP_TIMEOUT:-5}"
+  [[ "$timeout" =~ ^(0|[1-9][0-9]*)$ ]] || timeout=5
+  _test-signal-tests TERM
+  _test-wait-for-tests "$((timeout * 10))" || _test-signal-tests KILL
+  _test-wait-for-tests 50
+  wait "${_TEST_PIDS[@]}"
+
+  return 0
+}
+
+# Send a signal to the process group of every running test.
+# Arguments:
+#   $1=[signal name]
+function _test-signal-tests() {
+
+  local signal="$1" pid
+  for pid in "${_TEST_PIDS[@]}"; do
+    kill -"$signal" -- "-$pid" 2> /dev/null
+  done
+
+  return 0
+}
+
+# Wait until the process groups of the running tests are empty, failing when
+# that takes longer than the given time.
+# Arguments:
+#   $1=[time limit, in tenths of a second]
+function _test-wait-for-tests() {
+
+  local limit="$1" ticks=0 pid
+  for pid in "${_TEST_PIDS[@]}"; do
+    while kill -0 -- "-$pid" 2> /dev/null; do
+      [[ $ticks -lt $limit ]] || return 1
+      sleep 0.1
+      ticks=$((ticks + 1))
+    done
+  done
+
+  return 0
+}
+
+# Set a variable to the physical path of a new temporary directory, or fail and
+# leave it unset.
+# Arguments:
+#   $1=[name of the variable to set]
+function _test-mktemp-dir() {
+
+  local dir here="$PWD"
+  if ! dir="$(mktemp -d)" || [[ -z "$dir" || ! -d "$dir" ]]; then
+    return 1
+  fi
+  cd -P "$dir" && dir="$PWD" && cd "$here" || return 1
+  printf -v "$1" '%s' "$dir"
+
+  return 0
+}
+
+# Remove a scratch directory created by the harness, doing nothing for an empty
+# value or a path that is not a directory.
+# Arguments:
+#   $1=[directory to remove]
+function _test-remove-dir() {
+
+  local dir="$1"
+  if [[ -n "$dir" && -d "$dir" ]]; then
+    rm -rf "$dir"
+  fi
+
+  return 0
+}
+
+# Print a file with every line indented by four spaces and newline-terminated.
+# Arguments:
+#   $1=[file to print]
+function _test-indent() {
+
+  local file="$1"
+  awk '{ print "    " $0 }' "$file"
+
+  return 0
+}
+
+# ==============================================================================
+# Helpers
+
+# Run a command with errexit on, xtrace off, VERBOSE unset and stdin from
+# /dev/null, capturing its stdout (trailing newlines removed), stderr and exit
+# status.
+# Arguments:
+#   $@=[command and arguments, a function is allowed]
+function test-capture() {
+
+  set +e
+  TEST_STDOUT="$(
+    set -e
+    { set +x; } 2> /dev/null
+    unset VERBOSE
+    "$@" 2> "$TEST_TMP/.stderr" < /dev/null
+  )"
+  TEST_STATUS=$?
+  set -e
+  TEST_STDERR="$(< "$TEST_TMP/.stderr")"
+
+  return 0
+}
+
+# Create a command stub, first on PATH, that records each call as one line of
+# "$STUB_DIR/<name>.calls": the arguments quoted with printf %q and separated
+# by single spaces, or an empty line for a call without arguments. The stub is
+# a symlink to scripts/tests/stub.sh, which runs "$STUB_DIR/<name>.body".
+# "$STUB_DIR/<name>" links to the tracked dispatcher, so never write to it,
+# change a body with another test-stub call. Calling it again for the same name
+# replaces the body.
+# Arguments:
+#   $1=[command name]
+#   $2=[bash code the stub runs after recording, with the call's arguments in
+#     "$@", default is 'exit 0']
+function test-stub() {
+
+  local name="$1" body="${2:-exit 0}"
+  printf '%s\n' "$body" > "$STUB_DIR/$name.body"
+  ln -sf "$TEST_REPO_ROOT/scripts/tests/stub.sh" "$STUB_DIR/$name"
+
+  return 0
+}
+
+# Print the recorded calls of a stub, one per line, or nothing if it was never
+# called.
+# Arguments:
+#   $1=[command name]
+function test-stub-calls() {
+
+  local name="$1" calls=""
+  if [[ -f "$STUB_DIR/$name.calls" ]]; then
+    # Reads the whole file without starting 'cat', the calls hold no NUL
+    IFS= read -r -d '' calls < "$STUB_DIR/$name.calls" || true
+    printf '%s' "$calls"
+  fi
+
+  return 0
+}
+
+# Replace PATH with the stub directory plus symlinks to the base tools and the
+# given tools, so the command under test cannot see anything else installed on
+# the host. Call it before creating stubs. Calling it again in the same test is
+# harmless.
+# A tool found in a mise shims directory is linked to the real executable, as
+# 'mise which' resolves it from this repository, because a shim's behaviour
+# depends on the mise config of the directory it runs in.
+# Arguments:
+#   $@=[extra tools to keep reachable, in addition to TEST_BASE_TOOLS]
+# shellcheck disable=SC2120
+function test-isolate-path() {
+
+  local bin="$TEST_TMP/.bin" tool path paths i=0 seen=" " lines cached
+  local -a tools=("${TEST_BASE_TOOLS[@]}" "$@") batch=()
+  mkdir -p "$bin"
+  # One lookup and one 'ln' for all tools, as each process start is slow on
+  # macOS. Bash 3.2 may succeed when only some are found, so count the paths
+  # instead.
+  paths="$(type -P "${tools[@]}")" || true
+  lines="${paths//[!$'\n']/}"
+  if [[ -z "$paths" || $((${#lines} + 1)) -ne ${#tools[@]} ]]; then
+    for tool in "${tools[@]}"; do
+      type -P "$tool" > /dev/null || { echo "test-isolate-path: '$tool' is not on PATH" >&2; return 1; }
+    done
+  fi
+  while IFS= read -r path; do
+    tool="${tools[$i]}"
+    i=$((i + 1))
+    [[ "$seen" != *" $tool "* ]] || continue
+    seen="$seen$tool "
+    if [[ "$path" == */mise/shims/* ]]; then
+      # Each 'mise which' is slow, so the suite keeps a link to the result,
+      # named after the tool and kept apart for each shim path
+      cached="${SUITE_TMP:-}/.mise-which/${path//\//%}/$tool"
+      if [[ -n "${SUITE_TMP:-}" && -L "$cached" ]]; then
+        path="$cached"
+      else
+        path="$(cd "$TEST_REPO_ROOT" && mise which "$tool")" ||
+          { echo "test-isolate-path: cannot resolve the mise shim of '$tool'" >&2; return 1; }
+        if [[ -n "${SUITE_TMP:-}" ]]; then
+          mkdir -p "${cached%/*}" && ln -sf "$path" "$cached" || true
+        fi
+      fi
+    fi
+    # On a repeated call the tool already resolves to its link, which must not
+    # point to itself.
+    if [[ "$path" == "$bin/$tool" ]]; then
+      continue
+    elif [[ "${path##*/}" == "$tool" ]]; then
+      batch+=("$path")
+    else
+      ln -sf "$path" "$bin/$tool"
+    fi
+  done <<< "$paths"
+  if [[ ${#batch[@]} -gt 0 ]]; then
+    ln -sf "${batch[@]}" "$bin/"
+  fi
+  PATH="$STUB_DIR:$bin"
+  export PATH
+
+  return 0
+}
+
+# Create a git repository on branch 'main' containing the given files from
+# this repository, with one commit. Executable files are symlinked, not copied,
+# because macOS assesses every new executable on its first run. Linked
+# executables are the real repository files, so tests must never write to them
+# or change their mode or timestamps (chmod, touch and redirections all follow
+# links).
+# Arguments:
+#   $1=[directory to create]
+#   $@=[paths to include, relative to this repository's top-level directory]
+function test-create-repo() {
+
+  local dir="$1" path
+  shift
+  git init -q -b main "$dir"
+  for path in "$@"; do
+    test-mkdir-parent "$dir/$path"
+    if [[ -f "$TEST_REPO_ROOT/$path" && -x "$TEST_REPO_ROOT/$path" ]]; then
+      ln -s "$TEST_REPO_ROOT/$path" "$dir/$path"
+    else
+      cp -p "$TEST_REPO_ROOT/$path" "$dir/$path"
+    fi
+  done
+  git -C "$dir" add -A
+  git -C "$dir" commit -q --allow-empty -m "initial"
+
+  return 0
+}
+
+# Create the parent directory of a path when it is missing, without starting a
+# process when it exists.
+# Arguments:
+#   $1=[path of a file]
+function test-mkdir-parent() {
+
+  local path="$1"
+  [[ "$path" != */* || -d "${path%/*}" ]] || mkdir -p "${path%/*}" || return "$?"
+
+  return 0
+}
+
+# ==============================================================================
+# Assertions
+
+# Fail unless the two values are equal.
+# Arguments:
+#   $1=[expected value]
+#   $2=[actual value]
+#   $3=[description of the value, default is 'values are equal']
+function assert-equal() {
+
+  local expected="$1" actual="$2" what="${3:-values are equal}"
+  if [[ "$expected" != "$actual" ]]; then
+    {
+      echo "ASSERTION FAILED: $what"
+      echo "  expected: [$expected]"
+      echo "  actual:   [$actual]"
+    } >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail unless the haystack contains the needle as a fixed string.
+# Arguments:
+#   $1=[text to search]
+#   $2=[fixed string to find]
+#   $3=[description of the check, default is 'text contains the string']
+function assert-contains() {
+
+  local haystack="$1" needle="$2" what="${3:-text contains the string}"
+  if [[ "$haystack" != *"$needle"* ]]; then
+    {
+      echo "ASSERTION FAILED: $what"
+      echo "  expected to contain: [$needle]"
+      echo "  actual:              [$haystack]"
+    } >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail if the haystack contains the needle as a fixed string.
+# Arguments:
+#   $1=[text to search]
+#   $2=[fixed string that must not appear]
+#   $3=[description of the check, default is 'text does not contain the string']
+function assert-not-contains() {
+
+  local haystack="$1" needle="$2" what="${3:-text does not contain the string}"
+  if [[ "$haystack" == *"$needle"* ]]; then
+    {
+      echo "ASSERTION FAILED: $what"
+      echo "  expected not to contain: [$needle]"
+      echo "  actual:                  [$haystack]"
+    } >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail unless the value matches the extended regular expression.
+# Arguments:
+#   $1=[value to match]
+#   $2=[extended regular expression]
+#   $3=[description of the check, default is 'value matches the pattern']
+function assert-matches() {
+
+  local value="$1" ere="$2" what="${3:-value matches the pattern}"
+  if ! [[ "$value" =~ $ere ]]; then
+    {
+      echo "ASSERTION FAILED: $what"
+      echo "  expected to match: [$ere]"
+      echo "  actual:            [$value]"
+    } >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail unless the path exists.
+# Arguments:
+#   $1=[path to check]
+function assert-file-exists() {
+
+  local file="$1"
+  if [[ ! -e "$file" ]]; then
+    echo "ASSERTION FAILED: file exists: [$file]" >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail if the path exists.
+# Arguments:
+#   $1=[path to check]
+function assert-file-not-exists() {
+
+  local file="$1"
+  if [[ -e "$file" ]]; then
+    echo "ASSERTION FAILED: file does not exist: [$file]" >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail unless the file has a line equal to the given line.
+# Arguments:
+#   $1=[file to search]
+#   $2=[expected line]
+function assert-file-has-line() {
+
+  local file="$1" line="$2"
+  if ! grep -Fxq -- "$line" "$file"; then
+    {
+      echo "ASSERTION FAILED: [$file] has the line: [$line]"
+      echo "  actual content:"
+      sed "$TEST_INDENT_PATTERN" "$file"
+    } >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail unless the two files have byte-identical content.
+# Arguments:
+#   $1=[file with the expected content]
+#   $2=[file with the actual content]
+function assert-files-identical() {
+
+  local expected="$1" actual="$2"
+  if ! cmp -s "$expected" "$actual"; then
+    {
+      echo "ASSERTION FAILED: [$actual] is byte-identical to [$expected]"
+      echo "  expected content:"
+      sed "$TEST_INDENT_PATTERN" "$expected"
+      echo "  actual content:"
+      sed "$TEST_INDENT_PATTERN" "$actual"
+    } >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail unless a stub recorded a call whose whole arguments line equals the given
+# line.
+# Arguments:
+#   $1=[command name]
+#   $2=[expected arguments line, as recorded by test-stub]
+function assert-stub-called() {
+
+  local name="$1" line="$2"
+  if [[ ! -f "$STUB_DIR/$name.calls" ]] || ! grep -Fxq -- "$line" "$STUB_DIR/$name.calls"; then
+    {
+      echo "ASSERTION FAILED: stub '$name' called with: [$line]"
+      echo "  recorded calls:"
+      test-stub-calls "$name" | sed "$TEST_INDENT_PATTERN"
+    } >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Fail if a stub recorded any call.
+# Arguments:
+#   $1=[command name]
+function assert-stub-not-called() {
+
+  local name="$1"
+  if [[ -s "$STUB_DIR/$name.calls" ]]; then
+    {
+      echo "ASSERTION FAILED: stub '$name' not called"
+      echo "  recorded calls:"
+      sed "$TEST_INDENT_PATTERN" "$STUB_DIR/$name.calls"
+    } >&2
+    return 1
+  fi
+
+  return 0
+}

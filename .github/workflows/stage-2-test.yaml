@@ -1,0 +1,107 @@
+name: "Test stage"
+
+on:
+  workflow_call:
+    inputs:
+      build_datetime_london:
+        description: "London build datetime, set by the CI/CD pipeline workflow"
+        required: true
+        type: string
+      build_datetime:
+        description: "Build datetime, set by the CI/CD pipeline workflow"
+        required: true
+        type: string
+      build_epoch:
+        description: "Build epoch, set by the CI/CD pipeline workflow"
+        required: true
+        type: string
+      build_timestamp:
+        description: "Build timestamp, set by the CI/CD pipeline workflow"
+        required: true
+        type: string
+      mise_version:
+        description: "mise CLI version, set by the CI/CD pipeline workflow"
+        required: true
+        type: string
+      nodejs_version:
+        description: "Node.js version, set by the CI/CD pipeline workflow"
+        required: true
+        type: string
+      python_version:
+        description: "Python version, set by the CI/CD pipeline workflow"
+        required: true
+        type: string
+      version:
+        description: "Version of the software, set by the CI/CD pipeline workflow"
+        required: true
+        type: string
+    secrets:
+      SONAR_TOKEN:
+        description: "SonarQube Cloud token for static analysis"
+        required: false
+
+permissions: {}
+
+jobs:
+  test-unit:
+    name: "Unit tests"
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: "Set up mise"
+        uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
+        with:
+          version: ${{ inputs.mise_version }}
+          install: true
+          install_args: "python node jq yq editorconfig-checker npm:markdownlint-cli npm:prettier lychee shellcheck"
+          persist_github_token: false
+          cache: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Run type checks and tests"
+        run: |
+          make toolchain-verify-gnu
+          make typecheck test
+      - name: "Save the result of fast test suite"
+        run: |
+          echo "Nothing to save"
+  perform-static-analysis:
+    name: "Perform static analysis"
+    needs: [test-unit]
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    env:
+      HAS_SONAR_CONFIGURATION: ${{ secrets.SONAR_TOKEN != '' && vars.SONAR_ORGANISATION_KEY != '' && vars.SONAR_PROJECT_KEY != '' }}
+    steps:
+      - name: "Checkout code"
+        if: env.HAS_SONAR_CONFIGURATION == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # Full history is needed to improve the relevancy of reporting
+          persist-credentials: false
+      - name: "Perform static analysis"
+        if: env.HAS_SONAR_CONFIGURATION == 'true'
+        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          # Each adopting Engineering team maintains sonar.*.coverage.reportPaths
+          # and sonar.exclusions for its tests and generated files.
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANISATION_KEY }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=.
+            -Dsonar.exclusions=.mise/locks/**/package.json
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.qualitygate.wait=true
+      - name: "Skip static analysis"
+        if: env.HAS_SONAR_CONFIGURATION != 'true'
+        run: |
+          echo "Sonar is not configured (missing token or org/project variables), skipping static analysis..."

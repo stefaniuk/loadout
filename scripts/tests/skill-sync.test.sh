@@ -37,6 +37,7 @@ function main() {
     test-skill-sync-writes-editorconfig-excludes \
     test-skill-sync-editorconfig-excludes-are-idempotent \
     test-skill-sync-does-not-create-editorconfigignore \
+    test-skill-sync-writes-shelllint-ignore \
   )
   local status=0
 
@@ -576,6 +577,21 @@ function test-skill-sync-editorconfig-excludes-are-idempotent() {
 function test-skill-sync-does-not-create-editorconfigignore() {
 
   [[ ! -e "${PATCHED_FIXTURE}/scripts/config/.editorconfigignore" ]] || return 1
+
+  return 0
+}
+
+function test-skill-sync-writes-shelllint-ignore() {
+
+  local expected
+  expected=$(printf '%s\n' \
+    "# begin: synced skills" \
+    ".github/skills/additive-skill/" \
+    ".github/skills/incremental-implementation/" \
+    ".github/skills/vanilla-skill/" \
+    "# end: synced skills")
+
+  [[ "$(sed -n '/^# begin: synced skills$/,/^# end: synced skills$/p' "${PATCHED_FIXTURE}/scripts/config/.shelllintignore")" == "${expected}" ]] || return 1
 
   return 0
 }

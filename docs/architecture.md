@@ -137,7 +137,7 @@ Start at the top and walk down - the first matching branch wins. When more than
 one branch could plausibly apply, prefer the higher (leftmost in the answer
 order) branch, because hooks, instructions, and skills compose better than
 ad-hoc prompts. For per-artefact quickstarts (frontmatter, naming, validation
-steps), see [.github/contributing.md](../.github/contributing.md).
+steps), see [.github/CONTRIBUTING.md](../.github/CONTRIBUTING.md).
 
 ## Spec-kit lifecycle
 
@@ -257,12 +257,12 @@ Customisations currently marked as subagent workers:
   repository does not currently ship any custom agents under `.github/agents/`;
   the worker/coordinator split is expressed through skills instead.
 
-This repository ships no Copilot hooks. The Copilot hook implementation,
-including the quality gate that runs on `Stop`, lives in repository-template and
-is installed there, not by loadout. `make apply` and `make revert` remove the
-hook files that older loadout versions installed. They keep a file the
-destination tracks in git, every file when git cannot tell what the destination
-tracks, and a file that a link places outside the destination.
+Loadout ships no Copilot hooks. The Copilot hook implementation, including the
+quality gate that runs on `Stop`, comes from repository-template, which this
+repository is built on. `make apply` and `make revert` remove the hook files
+that older loadout versions installed. They keep a file the destination tracks
+in git, every file when git cannot tell what the destination tracks, and a file
+that a link places outside the destination.
 
 **Guardrails.** Workers are constrained to read-only tool sets or to a
 single-writer responsibility; coordinators are the only agents that orchestrate

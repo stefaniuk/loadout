@@ -66,7 +66,7 @@ This skill does not:
 ## Canonical layout
 
 Governance and lifecycle files (`CHANGELOG.md`, `.github/SECURITY.md`,
-`.github/contributing.md`, `.github/CODE_OF_CONDUCT.md`, and upgrade guides) are
+`.github/CONTRIBUTING.md`, `.github/CODE_OF_CONDUCT.md`, and upgrade guides) are
 first-class artefacts. See
 [step-09-governance-lifecycle.md](step-09-governance-lifecycle.md).
 
@@ -75,7 +75,7 @@ first-class artefacts. See
 ├── README.md
 ├── CHANGELOG.md
 ├── .github/
-│   ├── contributing.md
+│   ├── CONTRIBUTING.md
 │   ├── SECURITY.md
 │   └── CODE_OF_CONDUCT.md
 ├── specs/
@@ -121,7 +121,7 @@ Resolve the requested step from `$ARGUMENTS`.
 | 06   | tutorials        | `docs/tutorials/**`                                                                                            | Steps 03,05  |
 | 07   | operations       | `docs/operations/README.md`, `docs/operations/runbooks/**`                                                     | Steps 01,03  |
 | 08   | audience-indexes | `docs/developers/README.md`, `docs/users/README.md`                                                            | Step 01      |
-| 09   | governance       | `CHANGELOG.md`, `.github/SECURITY.md`, `.github/contributing.md`, `.github/CODE_OF_CONDUCT.md`, upgrade guides | Step 01      |
+| 09   | governance       | `CHANGELOG.md`, `.github/SECURITY.md`, `.github/CONTRIBUTING.md`, `.github/CODE_OF_CONDUCT.md`, upgrade guides | Step 01      |
 | all  | (all steps)      | All applicable outputs                                                                                         | None         |
 
 Apply the following rules in order:
@@ -351,7 +351,7 @@ artefact contracts, and a Definition of Done.
   developer and user navigation pages.
 - **Step 09 - Governance and lifecycle.** See
   [step-09-governance-lifecycle.md](step-09-governance-lifecycle.md). Maintains
-  `CHANGELOG.md`, `.github/SECURITY.md`, `.github/contributing.md`,
+  `CHANGELOG.md`, `.github/SECURITY.md`, `.github/CONTRIBUTING.md`,
   `.github/CODE_OF_CONDUCT.md`, and upgrade guides.
 
 ## Common closing steps

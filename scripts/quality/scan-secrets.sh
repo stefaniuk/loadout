@@ -1,103 +1,197 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -euo pipefail
 
-# Pre-commit git hook to scan for secrets hard-coded in the codebase. This is a
-# gitleaks command wrapper. It will run gitleaks natively if it is installed,
-# otherwise it will run it in a Docker container.
+# Scan the codebase and its Git history for hard-coded secrets. It runs
+# gitleaks natively when installed, otherwise in a Docker container.
 #
 # Usage:
-#   $ [options] ./scan-secrets.sh
+#   $ [options] ./scripts/quality/scan-secrets.sh
 #
 # Options:
-#   check={whole-history,last-commit,staged-changes}  # Type of the check to run, default is 'staged-changes'
-#   FORCE_USE_DOCKER=true                             # If set to true the command is run in a Docker container, default is 'false'
-#   VERBOSE=true                                      # Show all the executed commands, default is 'false'
+#   check={all,staged-changes,working-tree-changes,branch,whole-history,
+#          last-commit}
+#                                       # Check mode, default is 'whole-history'
+#   BRANCH_NAME=base-branch             # Local base for the branch mode,
+#                                       # chosen automatically when unset, as
+#                                       # './scripts/quality/git-base.lib.sh'
+#                                       # describes
+#   FORCE_USE_DOCKER=true               # Run in a Docker container, default is
+#                                       # 'false'
+#   VERBOSE=true                        # Show all the executed commands,
+#                                       # default is 'false'
 #
 # Exit codes:
 #   0 - No leaks present
-#   1 - Leaks or error encountered
-#   126 - Unknown flag
+#   1 - Leaks encountered
+#   126 - The check mode is not recognised
+#
+# Check modes:
+#   all                   # staged-changes, working-tree-changes and branch
+#                         # together
+#   staged-changes        # Changes staged for commit
+#   working-tree-changes  # Working tree files, including untracked ones
+#   branch                # Commits on this branch since the resolved base ref
+#   whole-history         # Every commit on every branch
+#   last-commit           # The most recent commit only
 
 # ==============================================================================
 
+# Run secret scanning in the requested check mode(s).
 function main() {
 
   cd "$(git rev-parse --show-toplevel)"
 
-  if command -v gitleaks > /dev/null 2>&1 && ! is-arg-true "${FORCE_USE_DOCKER:-false}"; then
-    dir="$PWD"
-    cmd="$(get-cmd-to-run)" run-gitleaks-natively
-  else
-    dir="/workdir"
-    cmd="$(get-cmd-to-run)" run-gitleaks-in-docker
-  fi
+  local check=${check:-whole-history}
+  case $check in
+    "all")
+      # 'all' aggregates the three local-change checks. Every sub-check runs
+      # and the overall result fails if any of them find a leak. The real
+      # exit code is preserved instead of being collapsed, so a genuine
+      # tool failure (e.g. an unrecognised mode or a Docker error) isn't
+      # mistaken for "leaks found".
+      local rc=0
+      run-check staged-changes || rc=$?
+      run-check working-tree-changes || rc=$?
+      run-check branch || rc=$?
+      return "$rc"
+      ;;
+    "staged-changes" | "working-tree-changes" | "branch" | "whole-history" | "last-commit")
+      run-check "$check"
+      ;;
+    *)
+      echo "Unrecognised check mode: '$check'. Use check=all, check=staged-changes, check=working-tree-changes, check=branch, check=whole-history, check=last-commit" >&2
+      return 126
+      ;;
+  esac
+
+  return 0
 }
 
-# Get Gitleaks command to execute and configuration.
-# Arguments (provided as environment variables):
-#   dir=[project's top-level directory]
-function get-cmd-to-run() {
+# Run a single secret-scanning check, natively or in Docker.
+# Arguments:
+#   $1=[check mode]
+function run-check() {
 
-  check=${check:-staged-changes}
+  local check="$1"
+  local -a args=()
+  if command -v gitleaks > /dev/null 2>&1 && ! is-arg-true "${FORCE_USE_DOCKER:-false}"; then
+    get-gitleaks-args args "$check" "$PWD" || return "$?"
+    run-gitleaks-natively "${args[@]}" || return "$?"
+  else
+    get-gitleaks-args args "$check" /workdir || return "$?"
+    run-gitleaks-in-docker /workdir "${args[@]}" || return "$?"
+  fi
+
+  return 0
+}
+
+# Build the Gitleaks arguments and configuration for the current check.
+# Arguments:
+#   $1=[name of the caller's result array]
+#   $2=[check mode]
+#   $3=[project's top-level directory]
+function get-gitleaks-args() {
+
+  local -n result="$1"
+  local check="$2" dir="$3"
+  result=()
   case $check in
+    "staged-changes")
+      result=(protect --source "$dir" --verbose --redact --staged)
+      ;;
+    "working-tree-changes")
+      # `protect` only diffs tracked files against the index, so untracked
+      # files are invisible to it. `detect --no-git` scans the working
+      # directory as plain files instead, which also picks up untracked
+      # files.
+      result=(detect --no-git --source "$dir" --verbose --redact)
+      ;;
+    "branch")
+      # Scan only the commits unique to this branch, i.e. those reachable from
+      # HEAD but not from the base branch. This keeps the scan scoped to the
+      # work in progress and does not fail on secrets that live only on
+      # unrelated branches another developer may have pushed.
+      # shellcheck disable=SC1091
+      source ./scripts/quality/git-base.lib.sh
+      # shellcheck disable=SC2034
+      local base_ref fork_point
+      quality-resolve-base base_ref fork_point || return "$?"
+      result=(detect --source "$dir" --verbose --redact --log-opts "${base_ref}..HEAD")
+      ;;
     "whole-history")
-      cmd="detect --source $dir --verbose --redact"
+      # Scan every commit on every branch (Gitleaks' default `git log --all`
+      # traversal). This is the most thorough mode and the default.
+      result=(detect --source "$dir" --verbose --redact)
       ;;
     "last-commit")
-      cmd="detect --source $dir --verbose --redact --log-opts -1"
+      result=(detect --source "$dir" --verbose --redact --log-opts -1)
       ;;
-    "staged-changes")
-      cmd="protect --source $dir --verbose --staged"
+    *)
+      echo "Unrecognised check mode: '$check'. Use check=staged-changes, check=working-tree-changes, check=branch, check=whole-history, check=last-commit" >&2
+      return 126
       ;;
   esac
   # Include base line file if it exists
-  if [ -f "$PWD/scripts/config/.gitleaks-baseline.json" ]; then
-    cmd="$cmd --baseline-path $dir/scripts/config/.gitleaks-baseline.json"
+  if [[ -f "$PWD/scripts/config/.gitleaks-baseline.json" ]]; then
+    result+=(--baseline-path "$dir/scripts/config/.gitleaks-baseline.json")
   fi
   # Include the config file
-  cmd="$cmd --config $dir/scripts/config/gitleaks.toml"
+  result+=(--config "$dir/scripts/config/gitleaks.toml")
   # Include ignore file if it exists
-  if [ -f "$PWD/scripts/config/.gitleaksignore" ]; then
-    cmd="$cmd --gitleaks-ignore-path $dir/scripts/config/.gitleaksignore"
+  if [[ -f "$PWD/scripts/config/.gitleaksignore" ]]; then
+    result+=(--gitleaks-ignore-path "$dir/scripts/config/.gitleaksignore")
   fi
 
-  echo "$cmd"
+  return 0
 }
 
 # Run Gitleaks natively.
-# Arguments (provided as environment variables):
-#   cmd=[command to run]
+# Arguments:
+#   $@=[Gitleaks arguments]
 function run-gitleaks-natively() {
 
-  # shellcheck disable=SC2086
-  gitleaks $cmd
+  # Isolate from the caller's global/system git config (e.g. a customised
+  # `log.date` format breaks gitleaks' git-log parsing and silently drops the
+  # commit hash from findings), so results match the Docker image's git
+  # defaults regardless of the developer machine's configuration.
+  GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null gitleaks "$@" || return "$?"
+
+  return 0
 }
 
 # Run Gitleaks in a Docker container.
-# Arguments (provided as environment variables):
-#   cmd=[command to run]
-#   dir=[directory to mount as a volume]
+# Arguments:
+#   $1=[directory to mount as a volume]
+#   $@=[Gitleaks arguments]
 function run-gitleaks-in-docker() {
 
+  local dir="$1"
+  shift
   # shellcheck disable=SC1091
   source ./scripts/docker/docker.lib.sh
 
-  # shellcheck disable=SC2155
-  local image=$(name=ghcr.io/gitleaks/gitleaks docker-get-image-version-and-pull)
-  # shellcheck disable=SC2086
+  local image
+  image=$(name=ghcr.io/gitleaks/gitleaks docker-get-image-version-and-pull) || return "$?"
   docker run --rm --platform linux/amd64 \
-    --volume "$PWD:$dir" \
-    --workdir $dir \
+    --network none \
+    --volume "$PWD:$dir:ro" \
+    --workdir "$dir" \
     "$image" \
-      $cmd
+      "$@" || return "$?"
+
+  return 0
 }
 
 # ==============================================================================
 
+# Check whether the supplied argument represents a true boolean value.
+# Arguments:
+#   $1=[value to evaluate]
 function is-arg-true() {
 
-  if [[ "$1" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$ ]]; then
+  local value="$1"
+  if [[ "$value" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$ ]]; then
     return 0
   else
     return 1

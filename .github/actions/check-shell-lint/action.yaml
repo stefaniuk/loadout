@@ -5,6 +5,7 @@ runs:
   steps:
     - name: "Check shell scripts"
       shell: bash
+      env:
+        FORCE_USE_DOCKER: "true"
       run: |
-        export BRANCH_NAME=origin/${{ github.event.repository.default_branch }}
-        FORCE_USE_DOCKER=true make check-shell-lint
+        make lint-shell check=all

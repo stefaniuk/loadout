@@ -23,7 +23,11 @@ contributor workflow.
 ### Prerequisites
 
 - Git
-- GNU Make 3.82 or newer
+- [mise](https://mise.jdx.dev/), which installs the tools pinned in `mise.toml`
+- GNU Make 3.82 or newer, Bash 5.2 or newer and the GNU userland. On macOS, run
+  `make toolchain-install-gnu-macos`, then check with
+  `make toolchain-verify-gnu`
+- Docker or Podman, optional, for the containerised quality checks
 - VS Code, if you want to use the shipped GitHub Copilot customisations locally
 
 ### Install
@@ -31,19 +35,26 @@ contributor workflow.
 ```bash
 git clone https://github.com/stefaniuk/loadout.git
 cd loadout
+mise trust mise.toml
 make config
 ```
+
+`make config` installs the pinned toolchain, the Git hooks and the pinned Docker
+images.
 
 ### First run
 
 ```bash
 make lint
+make validate-customisations
 make test
 ```
 
 Expected result
 
-- `make lint` completes without markdown, link, shell, or customisation errors.
+- `make lint` completes without file format, Markdown, link, shell, or workflow
+  security errors.
+- `make validate-customisations` prints `customisations: ok`.
 - `make test` completes with a zero exit code.
 
 For plugin installation, selective installs, and downstream apply workflows, see
@@ -63,7 +74,9 @@ every project.
   planning, implementation, review, and convergence workflows.
 - Reusable skills for documentation, code review, enforcement audits, and
   framework-specific setup.
-- Deterministic hooks and quality scripts for markdown, links, shell, and
+- Quality gates from
+  [repository-template](https://github.com/nhs-england-tools/repository-template),
+  run by Make, Git hooks, CI and a Copilot Stop hook, plus a validator for
   customisation metadata.
 
 ### Non-goals
@@ -122,6 +135,7 @@ changing it.
 ```bash
 make config
 make lint
+make validate-customisations
 make test
 ```
 
@@ -181,6 +195,8 @@ Further reading:
   and governance gates.
 - [docs/conventions.md](docs/conventions.md): naming, placement, frontmatter,
   and ADR rules.
+- [docs/guides/](docs/guides/): repository-template guides for the toolchain,
+  quality gates, Git hooks, secret scanning and dependency updates.
 
 ## Contributing
 
@@ -190,15 +206,17 @@ the documented workflow, then run the quality gates before you open a pull
 request.
 
 ```bash
+make format
 make lint
+make validate-customisations
 make test
 ```
 
-If you change prompts, agents, skills, hooks, or generated inventories, also run
-`make catalogue` before you submit the change.
+The Copilot Stop hook runs the same gates when an agent finishes a turn. See
+[docs/guides/Run_quality_gate_on_agent_stop.md](docs/guides/Run_quality_gate_on_agent_stop.md).
 
-See [.github/contributing.md](.github/contributing.md) for the full contributor
-guide and [.github/security.md](.github/security.md) for private vulnerability
+See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for the full contributor
+guide and [.github/SECURITY.md](.github/SECURITY.md) for private vulnerability
 reporting.
 
 ## Repository layout
@@ -207,13 +225,12 @@ These are the top-level paths most contributors need to recognise first.
 
 ```text
 .
-├── .github/      # Agents, instructions, prompts, skills, hooks, and repo governance files
+├── .github/      # Agents, instructions, prompts, skills, hooks, workflows, and governance files
 ├── .specify/     # Project constitution and spec-kit templates
-├── docs/         # Architecture, onboarding, and ADRs
-├── scripts/      # Apply, import, and quality helpers
-├── tests/        # Repository tests
+├── docs/         # Architecture, onboarding, ADRs, and repository-template guides
+├── scripts/      # Apply, import, skill sync, quality checks, and their tests
 ├── Makefile      # Main entrypoint for setup, validation, and apply workflows
-└── .github/      # Agents, instructions, prompts, skills, hooks, and repo governance files
+└── mise.toml     # Pinned toolchain versions
 ```
 
 ## Licence

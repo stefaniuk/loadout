@@ -1,0 +1,1717 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1091,SC2016,SC2034,SC2317,SC2329
+
+set -euo pipefail
+
+# Unit test suite for the Docker library functions. Every test that can reach
+# the docker command stubs it, so the suite needs no Docker daemon, and every
+# test writes only into its own scratch directory.
+#
+# Usage:
+#   $ ./scripts/docker/tests/docker.lib.test.sh
+#
+# Arguments (provided as environment variables):
+#   VERBOSE=true  # Show all the executed commands, default is 'false'
+
+# ==============================================================================
+
+readonly DOCKER_TABLE_HEADER='[_.docker]'
+readonly FIXTURE_BUILD_DATETIME='2023-09-04T15:46:34+0000'
+readonly EXIT_STATUS_LABEL='exit status'
+readonly STDOUT_LABEL='stdout'
+readonly STDERR_LABEL='stderr'
+readonly PULL_AND_TAG_CALLS_LABEL='pull and tag calls'
+
+function main() {
+
+  cd "$(git rev-parse --show-toplevel)"
+  source ./scripts/tests/test.lib.sh
+  source ./scripts/docker/docker.lib.sh
+
+  # The caller's options must not reach the functions under test
+  unset -v args cmd check compose_dir dir docker_dir file project name match_version MISE_TOML BUILD_DATETIME GITHUB_HEAD_REF GITHUB_REF CONTAINER_CLI CONTAINER_INFO_TIMEOUT CONFIRM
+
+  DOCKER_IMAGE=repository-template/docker-test
+  DOCKER_TITLE="Repository Template Docker Test"
+  FIXTURE_MISE_TOML="$TEST_REPO_ROOT/scripts/docker/tests/mise.toml.test"
+  DIGEST_A="sha256:$(printf 'a%.0s' {1..64})"
+  DIGEST_B="sha256:$(printf 'b%.0s' {1..64})"
+
+  test-run-suite \
+    test-pin-dockerfile-arg-versions-uses-docker-table-pin \
+    test-pin-dockerfile-arg-versions-matches-exact-image-name \
+    test-pin-dockerfile-arg-versions-handles-registry-port \
+    test-pin-dockerfile-arg-versions-pins-every-arg-for-image \
+    test-docker-toml-table-entries \
+    test-docker-toml-table-entry-extracts-one-tools-value \
+    test-docker-get-image-version \
+    test-pin-dockerfile-arg-versions-falls-back-to-tools-table \
+    test-pin-dockerfile-arg-versions-handles-platform-flag-and-stage-alias \
+    test-pin-dockerfile-arg-versions-leaves-unpinned-args-alone \
+    test-pin-dockerfile-arg-versions-substitutes-date-tokens \
+    test-pin-dockerfile-arg-versions-drops-latest-ignore-comments \
+    test-version-create-effective-file-writes-exact-lines \
+    test-version-create-effective-file-substitutes-time-tokens \
+    test-version-create-effective-file-skips-missing-version-file \
+    test-get-effective-tag-with-and-without-version-file \
+    test-get-git-branch-name-prefers-github-variables \
+    test-docker-get-image-version-and-pull-pulls-by-digest-and-tags \
+    test-docker-get-image-version-and-pull-skips-pull-when-tag-exists \
+    test-docker-get-image-version-and-pull-fails-when-pull-fails \
+    test-docker-get-image-version-and-pull-fails-when-tag-fails \
+    test-docker-get-image-version-and-pull-rejects-missing-pin-in-substitution \
+    test-docker-get-image-version-and-pull-ignores-lowercase-container-cli \
+    test-docker-get-image-version-and-pull-rejects-missing-pin \
+    test-docker-get-image-version-and-pull-rejects-invalid-pins \
+    test-docker-get-image-version-and-pull-selects-by-match-version \
+    test-docker-pull-pinned-images-pulls-every-docker-pin \
+    test-docker-pull-pinned-images-fails-when-pull-fails \
+    test-docker-pull-pinned-images-stops-at-first-failed-pull \
+    test-docker-pull-pinned-images-skips-when-runtime-hangs \
+    test-docker-pull-pinned-images-uses-podman-when-docker-is-unreachable \
+    test-docker-pull-pinned-images-skips-when-docker-is-missing \
+    test-docker-pull-pinned-images-skips-when-docker-is-unreachable \
+    test-docker-build-passes-metadata-and-tags-every-version \
+    test-docker-build-continues-without-base-labels-when-unresolved \
+    test-get-effective-base-image-normalises-python-and-node-flavours \
+    test-get-effective-base-image-expands-global-args \
+    test-get-effective-base-image-follows-stages-and-instruction-syntax \
+    test-get-effective-base-image-warns-when-unresolved \
+    test-docker-bake-dockerfile-creates-effective-files \
+    test-docker-bake-dockerfile-returns-create-effective-dockerfile-failure-in-conditional-call \
+    test-docker-make-run-without-command-preserves-image-cmd \
+    test-docker-make-run-forwards-command-and-args \
+    test-docker-make-targets-select-functions \
+    test-docker-compose-build-forwards-file-and-project \
+    test-docker-compose-build-uses-compose-lookup-by-default \
+    test-docker-compose-make-forwards-dir \
+    test-docker-compose-run-finds-the-only-compose-dir \
+    test-docker-compose-run-prefers-top-level-compose-file \
+    test-docker-compose-run-rejects-several-compose-dirs \
+    test-docker-compose-run-rejects-repository-without-compose-file \
+    test-docker-compose-run-rejects-dir-without-compose-file \
+    test-docker-compose-run-rejects-file-and-dir \
+    test-docker-compose-run-rejects-missing-file \
+    test-docker-compose-run-propagates-failure \
+    test-docker-make-build-and-lint-honour-docker-dir \
+    test-docker-make-requires-docker-fn \
+    test-docker-run-passes-args-command-and-tag \
+    test-docker-check-test-reports-pass-and-fail \
+    test-docker-push-pushes-every-version-and-latest \
+    test-docker-clean-removes-images-and-files-in-dir \
+    test-docker-lint-runs-hadolint-on-effective-dockerfile \
+    test-docker-lint-returns-hadolint-failure-in-conditional-call \
+    test-docker-run-returns-container-exit-status-in-conditional-call \
+    test-container-runtime-is-operational-returns-timeout-status-in-conditional-call \
+    test-docker-build-leaves-tag-and-version-unset-in-caller-scope
+
+  return 0
+}
+
+# ==============================================================================
+
+function test-pin-dockerfile-arg-versions-uses-docker-table-pin() {
+
+  # Arrange
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  cp "$TEST_REPO_ROOT/scripts/docker/tests/Dockerfile" "$TEST_TMP/Dockerfile.effective"
+  # Act
+  dir="$TEST_TMP" _pin-dockerfile-arg-versions
+  # Assert
+  assert-matches "$(grep '^ARG PYTHON_VERSION=' "$TEST_TMP/Dockerfile.effective")" \
+    '^ARG PYTHON_VERSION=.*-alpine.*@sha256:.*' "ARG PYTHON_VERSION is pinned"
+
+  return 0
+}
+
+function test-pin-dockerfile-arg-versions-matches-exact-image-name() {
+
+  # Arrange
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  cat > "$TEST_TMP/Dockerfile.effective" << 'EOF'
+ARG PYTHON_VERSION=3.11.0
+FROM python:${PYTHON_VERSION}
+
+ARG CIMG_PYTHON_VERSION=3.10.0
+FROM cimg/python:${CIMG_PYTHON_VERSION} AS other
+EOF
+  # Act
+  dir="$TEST_TMP" _pin-dockerfile-arg-versions
+  # Assert
+  assert-matches "$(grep '^ARG PYTHON_VERSION=' "$TEST_TMP/Dockerfile.effective")" \
+    '^ARG PYTHON_VERSION=3\.11\.4-alpine3\.18@sha256:' "python pin"
+  assert-matches "$(grep '^ARG CIMG_PYTHON_VERSION=' "$TEST_TMP/Dockerfile.effective")" \
+    '^ARG CIMG_PYTHON_VERSION=3\.12\.0@sha256:' "cimg/python pin"
+
+  return 0
+}
+
+function test-pin-dockerfile-arg-versions-handles-registry-port() {
+
+  # Arrange
+  MISE_TOML="$TEST_TMP/mise.toml"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  printf '%s\n' "$DOCKER_TABLE_HEADER" '"registry.example:5000/team/image" = "2.0.0"' > "$MISE_TOML"
+  cat > "$TEST_TMP/Dockerfile.effective" << 'EOF'
+ARG IMAGE_VERSION=1.0.0
+FROM --platform=linux/amd64 registry.example:5000/team/image:${IMAGE_VERSION} AS base
+ARG OTHER_VERSION=1.0.0
+FROM registry.example/team/image:${OTHER_VERSION} AS other
+EOF
+  cat > "$TEST_TMP/Dockerfile.expected" << 'EOF'
+ARG IMAGE_VERSION=2.0.0
+FROM --platform=linux/amd64 registry.example:5000/team/image:${IMAGE_VERSION} AS base
+ARG OTHER_VERSION=1.0.0
+FROM registry.example/team/image:${OTHER_VERSION} AS other
+EOF
+  # Act
+  dir="$TEST_TMP" _pin-dockerfile-arg-versions
+  # Assert
+  assert-files-identical "$TEST_TMP/Dockerfile.expected" "$TEST_TMP/Dockerfile.effective"
+
+  return 0
+}
+
+function test-pin-dockerfile-arg-versions-pins-every-arg-for-image() {
+
+  # Arrange
+  MISE_TOML="$TEST_TMP/mise.toml"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  printf '%s\n' "$DOCKER_TABLE_HEADER" 'alpine = "3.20.0"' > "$MISE_TOML"
+  cat > "$TEST_TMP/Dockerfile.effective" << 'EOF'
+ARG BUILD_VERSION=3.18.0
+ARG RUNTIME_VERSION=3.19.0
+FROM alpine:${BUILD_VERSION} AS build
+FROM alpine:${RUNTIME_VERSION} AS runtime
+EOF
+  cat > "$TEST_TMP/Dockerfile.expected" << 'EOF'
+ARG BUILD_VERSION=3.20.0
+ARG RUNTIME_VERSION=3.20.0
+FROM alpine:${BUILD_VERSION} AS build
+FROM alpine:${RUNTIME_VERSION} AS runtime
+EOF
+  # Act
+  dir="$TEST_TMP" _pin-dockerfile-arg-versions
+  # Assert
+  assert-files-identical "$TEST_TMP/Dockerfile.expected" "$TEST_TMP/Dockerfile.effective"
+
+  return 0
+}
+
+function test-docker-toml-table-entries() {
+
+  # Arrange
+  local expected_docker expected_tools actual_docker actual_tools
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  expected_docker="$(printf '%s\n' \
+    "python 3.11.4-alpine3.18@sha256:0135ae6442d1269379860b361760ad2cf6ab7c403d21935a8015b48d5bf78a86" \
+    "cimg/python 3.12.0@sha256:1111111111111111111111111111111111111111111111111111111111111111" \
+    "ghcr.io/org/single-quoted 1.0.0@sha256:2222222222222222222222222222222222222222222222222222222222222222")"
+  expected_tools="python 3.14.7"
+  # Act
+  actual_docker="$(_toml-table-entries "_.docker" "$MISE_TOML")"
+  actual_tools="$(_toml-table-entries "tools" "$MISE_TOML")"
+  # Assert
+  assert-equal "$expected_docker" "$actual_docker" "[_.docker] entries"
+  assert-equal "$expected_tools" "$actual_tools" "[tools] entries"
+
+  return 0
+}
+
+function test-docker-toml-table-entry-extracts-one-tools-value() {
+
+  # Arrange
+  local mise node python missing duplicate_status
+  MISE_TOML="$TEST_TMP/mise.toml"
+  cat > "$MISE_TOML" << 'EOF'
+min_version = "2026.9.14"
+
+[tools]
+"node" = "24.21.0"
+python = "3.14.7"
+
+[_.docker]
+min_version = "must-not-leak"
+node = "24.21.0-slim"
+python = "3.14.7-slim"
+EOF
+  cat > "$TEST_TMP/duplicate.mise.toml" << 'EOF'
+[tools]
+python = "3.14.7"
+python = "3.13.0"
+EOF
+  # Act
+  mise="$(_toml-table-entry "" min_version "$MISE_TOML")"
+  node="$(_toml-table-entry tools node "$MISE_TOML")"
+  python="$(_toml-table-entry tools python "$MISE_TOML")"
+  test-capture _toml-table-entry tools ruby "$MISE_TOML"
+  missing=$TEST_STATUS
+  test-capture _toml-table-entry tools python "$TEST_TMP/duplicate.mise.toml"
+  duplicate_status=$TEST_STATUS
+  # Assert
+  assert-equal "2026.9.14" "$mise" "root min_version"
+  assert-equal "24.21.0" "$node" "quoted node key in [tools]"
+  assert-equal "3.14.7" "$python" "python key in [tools]"
+  assert-equal 1 "$missing" "missing key status"
+  assert-equal 1 "$duplicate_status" "duplicate key status"
+
+  return 0
+}
+
+function test-docker-get-image-version() {
+
+  # Arrange
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  unset match_version
+  local exact suffix quoted
+  # Act
+  exact="$(name=python _get-docker-image-version)"
+  suffix="$(name=cimg/python _get-docker-image-version)"
+  quoted="$(name=ghcr.io/org/single-quoted _get-docker-image-version)"
+  # Assert
+  assert-equal "3.11.4-alpine3.18@sha256:0135ae6442d1269379860b361760ad2cf6ab7c403d21935a8015b48d5bf78a86" "$exact" "exact name"
+  assert-equal "3.12.0@sha256:1111111111111111111111111111111111111111111111111111111111111111" "$suffix" "name with a matching suffix"
+  assert-equal "1.0.0@sha256:2222222222222222222222222222222222222222222222222222222222222222" "$quoted" "single-quoted entry"
+  name=org/not-pinned test-capture _get-docker-image-version
+  assert-equal 1 "$TEST_STATUS" "missing pin status"
+  assert-equal "" "$TEST_STDOUT" "missing pin stdout"
+  assert-contains "$TEST_STDERR" "no pinned SHA-256 digest for org/not-pinned"
+  name=python match_version=".*-rt.*" test-capture _get-docker-image-version
+  assert-equal 1 "$TEST_STATUS" "filtered pin status"
+  assert-equal "" "$TEST_STDOUT" "filtered pin stdout"
+  assert-contains "$TEST_STDERR" "no pinned SHA-256 digest for python"
+
+  return 0
+}
+
+function test-pin-dockerfile-arg-versions-falls-back-to-tools-table() {
+
+  # Arrange
+  MISE_TOML="$TEST_TMP/mise.toml"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  printf '%s\n' '[tools]' 'ruby = "3.3.0"' '' "$DOCKER_TABLE_HEADER" > "$MISE_TOML"
+  cat > "$TEST_TMP/Dockerfile.effective" << 'EOF'
+ARG RUBY_VERSION=3.2.0
+FROM ruby:${RUBY_VERSION}
+EOF
+  # Act
+  dir="$TEST_TMP" _pin-dockerfile-arg-versions
+  # Assert
+  assert-file-has-line "$TEST_TMP/Dockerfile.effective" "ARG RUBY_VERSION=3.3.0"
+
+  return 0
+}
+
+function test-pin-dockerfile-arg-versions-handles-platform-flag-and-stage-alias() {
+
+  # Arrange
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  cat > "$TEST_TMP/Dockerfile.effective" << 'EOF'
+ARG PYTHON_VERSION=3.11.0
+FROM --platform=linux/amd64 python:${PYTHON_VERSION} AS base
+EOF
+  # Act
+  dir="$TEST_TMP" _pin-dockerfile-arg-versions
+  # Assert
+  assert-file-has-line "$TEST_TMP/Dockerfile.effective" \
+    "ARG PYTHON_VERSION=3.11.4-alpine3.18@sha256:0135ae6442d1269379860b361760ad2cf6ab7c403d21935a8015b48d5bf78a86"
+  # shellcheck disable=SC2016
+  assert-file-has-line "$TEST_TMP/Dockerfile.effective" \
+    'FROM --platform=linux/amd64 python:${PYTHON_VERSION} AS base'
+
+  return 0
+}
+
+function test-pin-dockerfile-arg-versions-leaves-unpinned-args-alone() {
+
+  # Arrange
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  cat > "$TEST_TMP/Dockerfile.input" << 'EOF'
+ARG NODE_IMAGE_VERSION=20.0.0
+FROM example.org/unpinned:${NODE_IMAGE_VERSION}
+EOF
+  cp "$TEST_TMP/Dockerfile.input" "$TEST_TMP/Dockerfile.effective"
+  # Act
+  dir="$TEST_TMP" _pin-dockerfile-arg-versions
+  # Assert
+  assert-files-identical "$TEST_TMP/Dockerfile.input" "$TEST_TMP/Dockerfile.effective"
+
+  return 0
+}
+
+function test-pin-dockerfile-arg-versions-substitutes-date-tokens() {
+
+  # Arrange
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  cat > "$TEST_TMP/Dockerfile.effective" << 'EOF'
+FROM example.org/unpinned:1.0.0
+LABEL built="${yyyy}-${mm}-${dd}T${HH}:${MM}:${SS}"
+EOF
+  # Act
+  dir="$TEST_TMP" _pin-dockerfile-arg-versions
+  # Assert
+  assert-file-has-line "$TEST_TMP/Dockerfile.effective" 'LABEL built="2023-09-04T15:46:34"'
+
+  return 0
+}
+
+function test-pin-dockerfile-arg-versions-drops-latest-ignore-comments() {
+
+  # Arrange
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  printf '%s\n' \
+    'ARG TOOL_VERSION=1.0.0' \
+    '# hadolint ignore=DL3007' \
+    'FROM example.org/tool:latest' \
+    'RUN echo done' \
+    > "$TEST_TMP/Dockerfile.effective"
+  printf '%s\n' \
+    'ARG TOOL_VERSION=1.0.0' \
+    'FROM example.org/tool:latest' \
+    'RUN echo done' \
+    > "$TEST_TMP/Dockerfile.expected"
+  # Act
+  dir="$TEST_TMP" _pin-dockerfile-arg-versions
+  # Assert
+  assert-files-identical "$TEST_TMP/Dockerfile.expected" "$TEST_TMP/Dockerfile.effective"
+
+  return 0
+}
+
+function test-version-create-effective-file-writes-exact-lines() {
+
+  # Arrange
+  local commit
+  commit="$(git rev-parse --short HEAD)"
+  use-empty-mise-toml
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  cp "$TEST_REPO_ROOT/scripts/docker/tests/VERSION" "$TEST_TMP/VERSION"
+  printf '%s\n' "20230904-$commit" "2023.09.04-$commit" "somme-name-yyyyeah" > "$TEST_TMP/expected.version"
+  # Act
+  dir="$TEST_TMP" version-create-effective-file
+  # Assert
+  assert-files-identical "$TEST_TMP/expected.version" "$TEST_TMP/.version"
+
+  return 0
+}
+
+function test-version-create-effective-file-substitutes-time-tokens() {
+
+  # Arrange
+  use-empty-mise-toml
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  cat > "$TEST_TMP/VERSION" << 'EOF'
+${HH}${MM}${SS}
+$HH.$MM.$SS
+EOF
+  printf '%s\n' 154634 15.46.34 > "$TEST_TMP/expected.version"
+  # Act
+  dir="$TEST_TMP" version-create-effective-file
+  # Assert
+  assert-files-identical "$TEST_TMP/expected.version" "$TEST_TMP/.version"
+
+  return 0
+}
+
+function test-version-create-effective-file-skips-missing-version-file() {
+
+  # Arrange
+  use-empty-mise-toml
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  # Act
+  dir="$TEST_TMP" test-capture version-create-effective-file
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-file-not-exists "$TEST_TMP/.version"
+
+  return 0
+}
+
+function test-get-effective-tag-with-and-without-version-file() {
+
+  # Arrange
+  local without with
+  use-empty-mise-toml
+  # Act
+  without="$(dir="$TEST_TMP" _get-effective-tag)"
+  printf '%s\n' 1.2.3 latest-ish > "$TEST_TMP/.version"
+  with="$(dir="$TEST_TMP" _get-effective-tag)"
+  # Assert
+  assert-equal "repository-template/docker-test" "$without" "tag without a .version file"
+  assert-equal "repository-template/docker-test:1.2.3" "$with" "tag with a .version file"
+
+  return 0
+}
+
+function test-get-git-branch-name-prefers-github-variables() {
+
+  # Arrange
+  local head_ref ref local_branch
+  use-empty-mise-toml
+  unset GITHUB_HEAD_REF GITHUB_REF
+  # Act
+  head_ref="$(GITHUB_HEAD_REF=feature/x GITHUB_REF=refs/heads/other _get-git-branch-name)"
+  ref="$(GITHUB_REF=refs/heads/release/1 _get-git-branch-name)"
+  local_branch="$(_get-git-branch-name)"
+  # Assert
+  assert-equal "feature/x" "$head_ref" "GITHUB_HEAD_REF wins"
+  assert-equal "release/1" "$ref" "GITHUB_REF without the refs/heads/ prefix"
+  assert-equal "$(git rev-parse --abbrev-ref HEAD)" "$local_branch" "local git branch"
+
+  return 0
+}
+
+function test-docker-get-image-version-and-pull-pulls-by-digest-and-tags() {
+
+  # Arrange
+  write-image-pin
+  unset match_version
+  test-isolate-path
+  stub-image-absent docker
+  # Act
+  name=ghcr.io/org/image test-capture docker-get-image-version-and-pull
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "ghcr.io/org/image:1.2.3@$DIGEST_A" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "pull --platform linux/amd64 ghcr.io/org/image@$DIGEST_A" \
+    "tag ghcr.io/org/image@$DIGEST_A ghcr.io/org/image:1.2.3")" \
+    "$(docker-pull-and-tag-calls)" "$PULL_AND_TAG_CALLS_LABEL"
+
+  return 0
+}
+
+function test-docker-get-image-version-and-pull-skips-pull-when-tag-exists() {
+
+  # Arrange
+  write-image-pin
+  unset match_version
+  test-isolate-path
+  # shellcheck disable=SC2016
+  test-stub docker 'if [[ "${1:-} ${2:-}" == "image inspect" && "${3:-}" == "ghcr.io/org/image:1.2.3" ]]; then exit 0; fi; exit 1'
+  # Act
+  name=ghcr.io/org/image test-capture docker-get-image-version-and-pull
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "ghcr.io/org/image:1.2.3@$DIGEST_A" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-equal "" "$(docker-pull-and-tag-calls)" "$PULL_AND_TAG_CALLS_LABEL"
+
+  return 0
+}
+
+function test-docker-get-image-version-and-pull-fails-when-pull-fails() {
+
+  # Arrange
+  write-image-pin
+  unset match_version
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-} ${2:-}" == "image inspect" ]]; then exit 1; fi; if [[ "${1:-}" == "pull" ]]; then echo "pull failed" >&2; exit 23; fi'
+  # Act
+  name=ghcr.io/org/image test-capture docker-get-image-version-and-pull
+  # Assert
+  assert-equal 23 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-contains "$TEST_STDERR" "pull failed"
+  assert-equal "pull --platform linux/amd64 ghcr.io/org/image@$DIGEST_A" \
+    "$(docker-pull-and-tag-calls)" "pull calls"
+
+  return 0
+}
+
+function test-docker-get-image-version-and-pull-fails-when-tag-fails() {
+
+  # Arrange
+  write-image-pin
+  unset match_version
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-} ${2:-}" == "image inspect" ]]; then exit 1; fi; if [[ "${1:-}" == "tag" ]]; then echo "tag failed" >&2; exit 24; fi'
+  # Act
+  name=ghcr.io/org/image test-capture docker-get-image-version-and-pull-in-substitution
+  # Assert
+  assert-equal 24 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-contains "$TEST_STDERR" "tag failed"
+
+  return 0
+}
+
+function test-docker-get-image-version-and-pull-rejects-missing-pin-in-substitution() {
+
+  # Arrange
+  write-image-pin
+  unset match_version
+  test-isolate-path
+  stub-image-absent docker
+  # Act
+  name=ghcr.io/org/unpinned test-capture docker-get-image-version-and-pull-in-substitution
+  # Assert
+  assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-contains "$TEST_STDERR" "no pinned SHA-256 digest for ghcr.io/org/unpinned"
+  assert-equal "" "$(test-stub-calls docker)" "no Docker calls"
+
+  return 0
+}
+
+function test-docker-get-image-version-and-pull-ignores-lowercase-container-cli() {
+
+  # Arrange
+  write-image-pin
+  unset match_version
+  test-isolate-path
+  stub-image-absent docker
+  test-stub podman 'exit 1'
+  # Act
+  container_cli=podman name=ghcr.io/org/image test-capture docker-get-image-version-and-pull
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "" "$(test-stub-calls podman)" "Podman calls"
+  assert-contains "$(test-stub-calls docker)" "pull --platform linux/amd64 ghcr.io/org/image@"
+
+  return 0
+}
+
+function test-docker-get-image-version-and-pull-rejects-missing-pin() {
+
+  # Arrange
+  write-image-pin
+  unset match_version
+  test-isolate-path
+  stub-image-absent docker
+  # Act
+  name=ghcr.io/org/unpinned test-capture docker-get-image-version-and-pull
+  # Assert
+  assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-contains "$TEST_STDERR" "no pinned SHA-256 digest for ghcr.io/org/unpinned"
+  assert-equal "" "$(test-stub-calls docker)" "no Docker calls"
+
+  return 0
+}
+
+function test-docker-get-image-version-and-pull-rejects-invalid-pins() {
+
+  # Arrange
+  MISE_TOML="$TEST_TMP/mise.toml"
+  unset match_version
+  test-isolate-path
+  stub-image-absent docker
+  local version
+  for version in "1.2.3" "1.2.3@sha256:abc" "latest@$DIGEST_A"; do
+    printf '%s\n' "$DOCKER_TABLE_HEADER" "\"ghcr.io/org/image\" = \"$version\"" > "$MISE_TOML"
+    # Act
+    name=ghcr.io/org/image test-capture docker-get-image-version-and-pull
+    # Assert
+    assert-equal 1 "$TEST_STATUS" "exit status for $version"
+    assert-equal "" "$TEST_STDOUT" "stdout for $version"
+    assert-contains "$TEST_STDERR" "no pinned SHA-256 digest for ghcr.io/org/image"
+    assert-equal "" "$(test-stub-calls docker)" "no Docker calls for $version"
+  done
+
+  return 0
+}
+
+function test-docker-get-image-version-and-pull-selects-by-match-version() {
+
+  # Arrange
+  local rt_stdout rt_calls
+  unset match_version
+  MISE_TOML="$TEST_TMP/mise.toml"
+  cat > "$MISE_TOML" << EOF
+[_.docker]
+"ghcr.io/org/rt" = "1.2.3-rt@$DIGEST_B"
+"ghcr.io/org/image" = "1.2.3@$DIGEST_A"
+EOF
+  test-isolate-path
+  stub-image-absent docker
+  # Act
+  name=ghcr.io/org/rt match_version='.*-rt.*' test-capture docker-get-image-version-and-pull
+  rt_stdout="$TEST_STDOUT"
+  rt_calls="$(docker-pull-and-tag-calls)"
+  : > "$STUB_DIR/docker.calls"
+  name=ghcr.io/org/image match_version='.*-rt.*' test-capture docker-get-image-version-and-pull
+  # Assert
+  assert-equal "ghcr.io/org/rt:1.2.3-rt@$DIGEST_B" "$rt_stdout" "stdout for the matching pin"
+  assert-equal "$(printf '%s\n' \
+    "pull --platform linux/amd64 ghcr.io/org/rt@$DIGEST_B" \
+    "tag ghcr.io/org/rt@$DIGEST_B ghcr.io/org/rt:1.2.3-rt")" \
+    "$rt_calls" "pull and tag calls for the matching pin"
+  assert-equal 1 "$TEST_STATUS" "filtered-out pin status"
+  assert-equal "" "$TEST_STDOUT" "stdout for the filtered-out pin"
+  assert-contains "$TEST_STDERR" "no pinned SHA-256 digest for ghcr.io/org/image"
+  assert-equal "" "$(test-stub-calls docker)" "no Docker calls for the filtered-out pin"
+
+  return 0
+}
+
+function test-docker-pull-pinned-images-pulls-every-docker-pin() {
+
+  # Arrange
+  MISE_TOML="$TEST_TMP/mise.toml"
+  cat > "$MISE_TOML" << EOF
+[tools]
+python = "3.14.7"
+
+[_.docker]
+"ghcr.io/org/image" = "1.2.3@$DIGEST_A"
+"ghcr.io/org/other" = "4.5.6@$DIGEST_B"
+EOF
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-}" == "info" ]]; then exit 0; fi; if [[ "${1:-} ${2:-}" == "image inspect" ]]; then exit 1; fi'
+  # Act
+  test-capture docker-pull-pinned-images
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "Pulling ghcr.io/org/image" \
+    "OK ghcr.io/org/image:1.2.3@$DIGEST_A" \
+    "Pulling ghcr.io/org/other" \
+    "OK ghcr.io/org/other:4.5.6@$DIGEST_B")" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "pull --platform linux/amd64 ghcr.io/org/image@$DIGEST_A" \
+    "tag ghcr.io/org/image@$DIGEST_A ghcr.io/org/image:1.2.3" \
+    "pull --platform linux/amd64 ghcr.io/org/other@$DIGEST_B" \
+    "tag ghcr.io/org/other@$DIGEST_B ghcr.io/org/other:4.5.6")" \
+    "$(docker-pull-and-tag-calls)" "$PULL_AND_TAG_CALLS_LABEL"
+
+  return 0
+}
+
+function test-docker-pull-pinned-images-fails-when-pull-fails() {
+
+  # Arrange
+  write-image-pin
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-}" == "info" ]]; then exit 0; fi; if [[ "${1:-} ${2:-}" == "image inspect" ]]; then exit 1; fi; if [[ "${1:-}" == "pull" ]]; then echo "pull failed" >&2; exit 23; fi'
+  # Act
+  test-capture docker-pull-pinned-images
+  # Assert
+  assert-equal 23 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "Pulling ghcr.io/org/image" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "Checking docker (up to 10s)" \
+    "pull failed" \
+    "ERROR Pulling ghcr.io/org/image with docker failed with exit status 23" \
+    "HINT Check the network connection and registry login, then run 'make docker-pull-pinned-images'")" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+
+  return 0
+}
+
+function test-docker-pull-pinned-images-stops-at-first-failed-pull() {
+
+  # Arrange
+  MISE_TOML="$TEST_TMP/mise.toml"
+  cat > "$MISE_TOML" << EOF
+[_.docker]
+"ghcr.io/org/first" = "1.0.0@$DIGEST_A"
+"ghcr.io/org/second" = "2.0.0@$DIGEST_B"
+"ghcr.io/org/third" = "3.0.0@$DIGEST_A"
+EOF
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-}" == "info" ]]; then exit 0; fi; if [[ "${1:-} ${2:-}" == "image inspect" ]]; then exit 1; fi; if [[ "${1:-}" == "pull" && "${4:-}" == ghcr.io/org/second@* ]]; then exit 26; fi'
+  # Act
+  test-capture docker-pull-pinned-images
+  # Assert
+  assert-equal 26 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "Pulling ghcr.io/org/first" \
+    "OK ghcr.io/org/first:1.0.0@$DIGEST_A" \
+    "Pulling ghcr.io/org/second")" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-contains "$TEST_STDERR" "ERROR Pulling ghcr.io/org/second with docker failed with exit status 26"
+  assert-equal "$(printf '%s\n' \
+    "pull --platform linux/amd64 ghcr.io/org/first@$DIGEST_A" \
+    "tag ghcr.io/org/first@$DIGEST_A ghcr.io/org/first:1.0.0" \
+    "pull --platform linux/amd64 ghcr.io/org/second@$DIGEST_B")" \
+    "$(docker-pull-and-tag-calls)" "$PULL_AND_TAG_CALLS_LABEL"
+
+  return 0
+}
+
+function test-docker-pull-pinned-images-skips-when-runtime-hangs() {
+
+  # Arrange
+  write-image-pin
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-}" == "info" ]]; then exec sleep 30; fi'
+  # Act
+  CONTAINER_INFO_TIMEOUT=3 test-capture docker-pull-pinned-images
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "Checking docker (up to 3s)" \
+    "WARN Docker/Podman image pull skipped (docker: no response after 3s; podman: not installed)" \
+    "HINT Start Docker Desktop or run 'podman machine start', then run 'make docker-pull-pinned-images'")" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+  assert-equal "info" "$(test-stub-calls docker)" "Docker calls"
+
+  return 0
+}
+
+function test-docker-pull-pinned-images-skips-when-docker-is-missing() {
+
+  # Arrange
+  write-image-pin
+  test-isolate-path
+  # Act
+  test-capture docker-pull-pinned-images
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "WARN Docker/Podman image pull skipped (docker: not installed; podman: not installed)" \
+    "HINT Install Docker or Podman, see README.md, then run 'make docker-pull-pinned-images'")" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+
+  return 0
+}
+
+function test-docker-pull-pinned-images-skips-when-docker-is-unreachable() {
+
+  # Arrange
+  write-image-pin
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-}" == "info" ]]; then echo "Cannot connect" >&2; exit 1; fi'
+  test-stub podman 'if [[ "${1:-}" == "info" ]]; then echo "Cannot connect" >&2; exit 1; fi'
+  # Act
+  test-capture docker-pull-pinned-images
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "Checking docker (up to 10s)" \
+    "Checking podman (up to 10s)" \
+    "WARN Docker/Podman image pull skipped (docker: installed, not running; podman: installed, not running)" \
+    "HINT Start Docker Desktop or run 'podman machine start', then run 'make docker-pull-pinned-images'")" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+  assert-stub-called docker info
+  assert-stub-called podman info
+
+  return 0
+}
+
+function test-docker-pull-pinned-images-uses-podman-when-docker-is-unreachable() {
+
+  # Arrange
+  write-image-pin
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-}" == "info" ]]; then echo "Cannot connect" >&2; exit 1; fi'
+  stub-image-absent podman
+  # Act
+  test-capture docker-pull-pinned-images
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "Pulling ghcr.io/org/image" \
+    "OK ghcr.io/org/image:1.2.3@$DIGEST_A")" "$TEST_STDOUT" "$STDOUT_LABEL"
+  assert-equal "info" "$(test-stub-calls docker)" "Docker calls"
+  assert-equal "$(printf '%s\n' \
+    "info" \
+    "image inspect ghcr.io/org/image:1.2.3" \
+    "pull --platform linux/amd64 ghcr.io/org/image@$DIGEST_A" \
+    "tag ghcr.io/org/image@$DIGEST_A ghcr.io/org/image:1.2.3")" \
+    "$(test-stub-calls podman)" "Podman calls"
+
+  return 0
+}
+
+function test-docker-build-passes-metadata-and-tags-every-version() {
+
+  # Arrange
+  local commit build build_count image=repository-template/docker-test
+  commit="$(git rev-parse --short HEAD)"
+  copy-image-fixtures
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  test-isolate-path
+  test-stub docker
+  # Act
+  dir="$TEST_TMP" test-capture docker-build
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  build_count="$(test-stub-calls docker | awk '/^build / { n++ } END { print n + 0 }')"
+  assert-equal 1 "$build_count" "number of build calls"
+  # Spaces around the line and each needle make every needle match whole
+  # arguments.
+  build=" $(test-stub-calls docker | grep '^build ' || true) "
+  assert-contains "$build" " --build-arg TITLE=Repository\\ Template\\ Docker\\ Test "
+  assert-contains "$build" " --build-arg BASE_IMAGE=docker.io/library/python:3.11.4-alpine3.18 "
+  assert-contains "$build" " --build-arg BASE_DIGEST=sha256:0135ae6442d1269379860b361760ad2cf6ab7c403d21935a8015b48d5bf78a86 "
+  assert-matches "$build" ' --build-arg BUILD_DATE=[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z '
+  assert-contains "$build" " --build-arg BUILD_VERSION=20230904-$commit "
+  assert-contains "$build" " --tag $image:20230904-$commit "
+  assert-contains "$build" " --file $(printf '%q' "$TEST_TMP/Dockerfile.effective") "
+  assert-equal "$(printf '%s\n' \
+    "tag $image:20230904-$commit $image:20230904-$commit" \
+    "tag $image:20230904-$commit $image:2023.09.04-$commit" \
+    "tag $image:20230904-$commit $image:somme-name-yyyyeah" \
+    "tag $image:20230904-$commit $image:latest")" \
+    "$(test-stub-calls docker | grep '^tag ' || true)" "tag calls"
+  assert-effective-dockerfile-is-pinned-with-metadata "$TEST_TMP/Dockerfile.effective"
+
+  return 0
+}
+
+function test-docker-build-continues-without-base-labels-when-unresolved() {
+
+  local build
+
+  # Arrange
+  printf '%s\n' 'ARG BASE_IMAGE' 'FROM ${BASE_IMAGE}' > "$TEST_TMP/Dockerfile"
+  use-empty-mise-toml
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  test-isolate-path
+  test-stub docker
+  # Act
+  dir="$TEST_TMP" test-capture docker-build
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "WARN Base image labels left empty (no global ARG default for BASE_IMAGE)" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+  build=" $(test-stub-calls docker | grep '^build ' || true) "
+  assert-contains "$build" " --build-arg BASE_IMAGE= "
+  assert-contains "$build" " --build-arg BASE_DIGEST= "
+
+  return 0
+}
+
+function test-get-effective-base-image-normalises-python-and-node-flavours() {
+
+  # Arrange, act and assert
+  assert-base-image docker.io/library/python:3.15.0-slim \
+    'FROM python:3.15.0-slim'
+  assert-base-image docker.io/library/python:3.15-slim-trixie \
+    'FROM python:3.15-slim-trixie'
+  assert-base-image docker.io/library/python:3.15-alpine3.22 \
+    'FROM python:3.15-alpine3.22'
+  assert-base-image "docker.io/library/python:3.15.0-slim@$DIGEST_A" \
+    "FROM python:3.15.0-slim@$DIGEST_A"
+  assert-base-image docker.io/library/node:26.12.0-slim \
+    'FROM node:26.12.0-slim'
+  assert-base-image docker.io/library/node:26-alpine3.22 \
+    'FROM node:26-alpine3.22'
+  assert-base-image docker.io/library/node:lts-bookworm-slim \
+    'FROM node:lts-bookworm-slim'
+  assert-base-image docker.io/library/node:latest 'FROM node'
+  assert-base-image "docker.io/library/node@$DIGEST_B" "FROM node@$DIGEST_B"
+  assert-base-image docker.io/library/python:3.15-slim \
+    'FROM docker.io/python:3.15-slim'
+  assert-base-image docker.io/library/node:26-slim \
+    'FROM index.docker.io/library/node:26-slim'
+  assert-base-image docker.io/cimg/python:3.15-node \
+    'FROM cimg/python:3.15-node'
+  assert-base-image cgr.dev/chainguard/python:latest-dev \
+    'FROM cgr.dev/chainguard/python:latest-dev'
+  assert-base-image public.ecr.aws/docker/library/node:26-slim \
+    'FROM public.ecr.aws/docker/library/node:26-slim'
+  assert-base-image localhost:5000/python:3.15-slim \
+    'FROM localhost:5000/python:3.15-slim'
+  assert-base-image "" 'FROM node:26-slim AS build' 'FROM scratch'
+
+  return 0
+}
+
+function test-get-effective-base-image-expands-global-args() {
+
+  # Arrange, act and assert
+  assert-base-image "docker.io/library/python:3.15.0-slim@$DIGEST_A" \
+    "ARG PYTHON_VERSION=3.15.0-slim@$DIGEST_A" \
+    'FROM python:${PYTHON_VERSION} AS builder' \
+    'FROM python:${PYTHON_VERSION} AS runtime'
+  assert-base-image docker.io/library/node:26.12.0-slim \
+    'ARG NODE_VERSION="26.12.0-slim"' 'FROM node:${NODE_VERSION}'
+  assert-base-image docker.io/library/node:26-alpine \
+    'ARG IMAGE=node TAG=26-alpine' 'FROM ${IMAGE}:$TAG'
+  assert-base-image docker.io/library/node:26-slim \
+    'ARG NODE_MAJOR=26' 'ARG NODE_TAG=${NODE_MAJOR}-slim' 'FROM node:${NODE_TAG}'
+  assert-base-image docker.io/library/python:3.15-slim \
+    'ARG PYTHON_VERSION' 'FROM python:${PYTHON_VERSION:-3.15-slim}'
+  assert-base-image docker.io/library/python:3.15-slim \
+    'ARG VARIANT=slim' 'FROM python:3.15${VARIANT:+-$VARIANT}'
+  assert-base-image docker.io/library/python:3.15 \
+    'ARG VARIANT=' 'FROM python:3.15${VARIANT:+-$VARIANT}'
+  assert-base-image docker.io/library/python:3.15-slim \
+    'FROM python:3.15-slim' 'ARG PYTHON_VERSION=3.14'
+
+  return 0
+}
+
+function test-get-effective-base-image-follows-stages-and-instruction-syntax() {
+
+  # Arrange, act and assert
+  assert-base-image docker.io/library/python:3.15-slim \
+    'FROM node:26-slim AS assets' 'FROM python:3.15-slim AS runtime'
+  assert-base-image docker.io/library/python:3.15-slim \
+    'FROM python:3.15-slim AS Base' 'FROM base AS test' 'FROM TEST'
+  assert-base-image docker.io/library/node:26-alpine \
+    'from --platform=$BUILDPLATFORM node:26-alpine as build'
+  assert-base-image docker.io/library/python:3.15-slim \
+    $'FROM \\' '  # A comment inside a continuation' $'  python:3.15-slim \\' \
+    '  AS runtime'
+  assert-base-image docker.io/library/python:3.15-slim \
+    'FROM python:3.15-slim' 'RUN <<EOF' 'from os import path' 'EOF' \
+    "RUN python - <<-'PY'" $'\tfrom sys import argv' $'\tPY' \
+    'RUN cat <<< "from here-string"'
+  assert-base-image docker.io/library/python:3.15-slim \
+    $'FROM python:3.15-slim\r' $'ARG PYTHON_VERSION=3.14\r'
+
+  return 0
+}
+
+function test-get-effective-base-image-warns-when-unresolved() {
+
+  # Arrange, act and assert
+  assert-base-image-unresolved "no global ARG default for BASE" \
+    'ARG BASE' 'FROM ${BASE}'
+  assert-base-image-unresolved "no global ARG default for UNDECLARED" \
+    'FROM python:${UNDECLARED}'
+  assert-base-image-unresolved "no global ARG default for A" \
+    'ARG B=${A}' 'FROM python:${B}'
+  assert-base-image-unresolved 'unsupported variable ${V#3}' \
+    'ARG V=3.15' 'FROM python:${V#3}'
+  assert-base-image-unresolved "invalid repository in Python" \
+    'FROM Python:3.15'
+  assert-base-image-unresolved "invalid digest in python@sha256:XYZ" \
+    'FROM python@sha256:XYZ'
+  assert-base-image-unresolved "no FROM instruction" 'RUN true'
+
+  return 0
+}
+
+function test-docker-bake-dockerfile-creates-effective-files() {
+
+  # Arrange
+  copy-image-fixtures
+  echo "*.tmp" > "$TEST_TMP/Dockerfile.dockerignore"
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  test-isolate-path
+  test-stub docker
+  # Act
+  dir="$TEST_TMP" test-capture docker-bake-dockerfile
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-file-exists "$TEST_TMP/.version"
+  assert-file-exists "$TEST_TMP/Dockerfile.effective"
+  assert-file-exists "$TEST_TMP/Dockerfile.effective.dockerignore"
+  assert-effective-dockerfile-is-pinned-with-metadata "$TEST_TMP/Dockerfile.effective"
+  assert-stub-not-called docker
+
+  return 0
+}
+
+function test-docker-bake-dockerfile-returns-create-effective-dockerfile-failure-in-conditional-call() {
+
+  # Arrange
+  local status=0
+  function _create-effective-dockerfile() { return 42; }
+  use-empty-mise-toml
+  test-isolate-path
+  # Act
+  if dir="$TEST_TMP" docker-bake-dockerfile; then
+    status=0
+  else
+    status=$?
+  fi
+  # Assert
+  assert-equal 42 "$status" "$EXIT_STATUS_LABEL"
+
+  return 0
+}
+
+function test-docker-run-passes-args-command-and-tag() {
+
+  # Arrange
+  use-empty-mise-toml
+  echo 1.2.3 > "$TEST_TMP/.version"
+  test-isolate-path
+  test-stub docker
+  # Act
+  args="--env A=1" cmd="python --version" dir="$TEST_TMP" test-capture docker-run
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "run --rm --platform linux/amd64 --env A=1 repository-template/docker-test:1.2.3 python --version" \
+    "$(test-stub-calls docker)" "docker calls"
+
+  return 0
+}
+
+function test-docker-make-run-without-command-preserves-image-cmd() {
+
+  # Arrange
+  echo 1.2.3 > "$TEST_TMP/.version"
+  test-isolate-path make
+  test-stub docker
+  # Act
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    DOCKER_IMAGE="$DOCKER_IMAGE" dir="$TEST_TMP" make docker-run
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "run --rm --platform linux/amd64 $DOCKER_IMAGE:1.2.3" \
+    "$(test-stub-calls docker)" "docker run arguments without cmd"
+
+  return 0
+}
+
+function test-docker-make-run-forwards-command-and-args() {
+
+  # Arrange
+  echo 1.2.3 > "$TEST_TMP/.version"
+  test-isolate-path make
+  test-stub docker
+  # Act
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    DOCKER_IMAGE="$DOCKER_IMAGE" dir="$TEST_TMP" \
+    cmd="python --version" args="--env A=1" make docker-run
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "run --rm --platform linux/amd64 --env A=1 $DOCKER_IMAGE:1.2.3 python --version" \
+    "$(test-stub-calls docker)" "docker run arguments with cmd and args"
+
+  return 0
+}
+
+function test-docker-make-targets-select-functions() {
+
+  local bake_status push_calls help_output
+
+  # Arrange
+  cp "$TEST_REPO_ROOT/scripts/docker/tests/Dockerfile" "$TEST_TMP/Dockerfile"
+  cp "$TEST_REPO_ROOT/scripts/docker/tests/VERSION" "$TEST_TMP/VERSION"
+  test-isolate-path make perl tput
+  test-stub docker
+  # Act
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    DOCKER_IMAGE="$DOCKER_IMAGE" dir="$TEST_TMP" MISE_TOML="$FIXTURE_MISE_TOML" \
+    BUILD_DATETIME="$FIXTURE_BUILD_DATETIME" make docker-bake-dockerfile
+  bake_status="$TEST_STATUS"
+  assert-equal 0 "$bake_status" "docker-bake-dockerfile exit status"
+  assert-file-exists "$TEST_TMP/Dockerfile.effective"
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    DOCKER_IMAGE="$DOCKER_IMAGE" dir="$TEST_TMP" make docker-push
+  push_calls="$(test-stub-calls docker)"
+  # Not 'make clean', whose common rule cleans the real checkout
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    DOCKER_IMAGE="$DOCKER_IMAGE" dir="$TEST_TMP" make _docker docker_fn=clean
+  # A wide terminal keeps each help description on one line
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    TERM=dumb COLUMNS=1000 make help
+  help_output="$TEST_STDOUT"
+  # Assert
+  assert-contains "$push_calls" "push $DOCKER_IMAGE:"
+  assert-contains "$(test-stub-calls docker)" "rmi $DOCKER_IMAGE:"
+  assert-file-not-exists "$TEST_TMP/.version"
+  assert-file-not-exists "$TEST_TMP/Dockerfile.effective"
+  assert-contains "$help_output" "[command to run in the container]"
+  assert-contains "$help_output" "[docker run options]"
+
+  return 0
+}
+
+function test-docker-compose-build-forwards-file-and-project() {
+
+  local compose_file expected
+
+  # Arrange
+  compose_file="$TEST_TMP/compose.yaml"
+  touch "$compose_file"
+  test-isolate-path make
+  test-stub docker '
+    if [[ "$1 ${2:-}" == "compose version" ]]; then exit 0; fi
+  '
+  # Act
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    file="$compose_file" project=dx-test make docker-compose-build
+  expected="$(printf '%s\n' \
+    "compose version" \
+    "compose --file $compose_file --project-name dx-test build")"
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "$expected" "$(test-stub-calls docker)" "Compose arguments"
+
+  return 0
+}
+
+function test-docker-compose-build-uses-compose-lookup-by-default() {
+
+  local expected
+
+  # Arrange
+  test-isolate-path make
+  test-stub docker '
+    if [[ "$1 ${2:-}" == "compose version" ]]; then exit 0; fi
+  '
+  # Act
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    -u file -u project -u compose_dir COMPOSE_FILE=compose.yaml:compose.dev.yaml \
+    make docker-compose-build
+  expected="$(printf '%s\n' "compose version" "compose build")"
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "$expected" "$(test-stub-calls docker)" "Compose arguments"
+
+  return 0
+}
+
+function test-docker-compose-make-forwards-dir() {
+
+  local repo
+
+  # Arrange
+  repo="$(make-compose-repo services/api/compose.yaml)"
+  test-isolate-path make
+  stub-docker-compose-recording-cwd
+  # Act
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    -u file -u project -u COMPOSE_FILE dir="$repo/services/api" \
+    make docker-compose-build
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "$(printf '%s\n' "compose version" "compose build")" \
+    "$(test-stub-calls docker)" "Compose arguments"
+  assert-equal "$(cd "$repo/services/api" && pwd -P)" \
+    "$(< "$TEST_TMP/docker.cwd")" "Compose working directory"
+
+  return 0
+}
+
+function test-docker-compose-run-finds-the-only-compose-dir() {
+
+  local repo
+
+  # Arrange
+  repo="$(make-compose-repo services/api/compose.yaml \
+    services/api/compose.override.yaml build/compose.yaml)"
+  printf '%s\n' 'build/' > "$repo/.gitignore"
+  test-isolate-path
+  stub-docker-compose-recording-cwd
+  # Act
+  test-capture compose-run-in "$repo" up --detach --wait
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "$(printf '%s\n' "compose version" "compose up --detach --wait")" \
+    "$(test-stub-calls docker)" "Compose arguments"
+  assert-equal "$(cd "$repo/services/api" && pwd -P)" \
+    "$(< "$TEST_TMP/docker.cwd")" "Compose working directory"
+
+  return 0
+}
+
+function test-docker-compose-run-prefers-top-level-compose-file() {
+
+  local repo
+
+  # Arrange
+  repo="$(make-compose-repo compose.yml services/api/compose.yaml)"
+  test-isolate-path
+  stub-docker-compose-recording-cwd
+  # Act
+  test-capture compose-run-in "$repo" ps
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "$(cd "$repo" && pwd -P)" "$(< "$TEST_TMP/docker.cwd")" \
+    "Compose working directory"
+
+  return 0
+}
+
+function test-docker-compose-run-rejects-several-compose-dirs() {
+
+  local repo
+
+  # Arrange
+  repo="$(make-compose-repo services/web/docker-compose.yml \
+    services/api/compose.yaml services/api/docker-compose.yaml)"
+  test-isolate-path
+  test-stub docker
+  # Act
+  test-capture compose-run-in "$repo" build
+  # Assert
+  assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "ERROR: Compose files were found in several directories, set 'dir' to one of: services/api services/web" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+  assert-stub-not-called docker
+
+  return 0
+}
+
+function test-docker-compose-run-rejects-repository-without-compose-file() {
+
+  local repo
+
+  # Arrange
+  repo="$(make-compose-repo services/api/compose.yaml.template)"
+  test-isolate-path
+  test-stub docker
+  # Act
+  test-capture compose-run-in "$repo" build
+  # Assert
+  assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "ERROR: No Compose file was found, set 'file' or 'dir'" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+  assert-stub-not-called docker
+
+  return 0
+}
+
+function test-docker-compose-run-rejects-dir-without-compose-file() {
+
+  local repo
+
+  # Arrange
+  repo="$(make-compose-repo compose.yaml services/api/compose.yaml)"
+  test-isolate-path
+  test-stub docker
+  # Act
+  compose_dir=services test-capture compose-run-in "$repo" build
+  # Assert
+  assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "ERROR: No Compose file was found in 'services'" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+  assert-stub-not-called docker
+
+  return 0
+}
+
+function test-docker-compose-run-rejects-file-and-dir() {
+
+  local repo
+
+  # Arrange
+  repo="$(make-compose-repo services/api/compose.yaml)"
+  test-isolate-path
+  test-stub docker
+  # Act
+  compose_dir=services/api file=services/api/compose.yaml \
+    test-capture compose-run-in "$repo" build
+  # Assert
+  assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "ERROR: Set either 'file' or 'dir', not both" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+  assert-stub-not-called docker
+
+  return 0
+}
+
+function test-docker-compose-run-rejects-missing-file() {
+
+  # Arrange
+  test-isolate-path
+  test-stub docker
+  # Act
+  file="$TEST_TMP/missing.yaml" test-capture _docker-compose-run build
+  # Assert
+  assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "ERROR: Compose file '$TEST_TMP/missing.yaml' was not found" \
+    "$TEST_STDERR" "$STDERR_LABEL"
+  assert-stub-not-called docker
+
+  return 0
+}
+
+function test-docker-compose-run-propagates-failure() {
+
+  local compose_file
+
+  # Arrange
+  compose_file="$TEST_TMP/compose.yaml"
+  touch "$compose_file"
+  test-isolate-path
+  test-stub docker '
+    if [[ "$1 ${2:-}" == "compose version" ]]; then exit 0; fi
+    exit 42
+  '
+  # Act
+  file="$compose_file" project=dx-test test-capture \
+    _docker-compose-run up --detach --wait
+  # Assert
+  assert-equal 42 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-contains "$(test-stub-calls docker)" \
+    "compose --file $compose_file --project-name dx-test up --detach --wait"
+
+  return 0
+}
+
+function test-docker-make-build-and-lint-honour-docker-dir() {
+
+  # Arrange
+  local effective
+  cp "$TEST_REPO_ROOT/scripts/docker/tests/Dockerfile" "$TEST_TMP/Dockerfile"
+  cp "$TEST_REPO_ROOT/scripts/docker/tests/VERSION" "$TEST_TMP/VERSION"
+  effective="$(printf '%q' "$TEST_TMP/Dockerfile.effective")"
+  test-isolate-path make
+  test-stub hadolint
+  test-stub docker
+  # Act
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES -u FORCE_USE_DOCKER \
+    DOCKER_IMAGE="$DOCKER_IMAGE" docker_dir="$TEST_TMP" MISE_TOML="$FIXTURE_MISE_TOML" \
+    BUILD_DATETIME="$FIXTURE_BUILD_DATETIME" make docker-lint
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "docker-lint exit status"
+  assert-equal "--config scripts/config/hadolint.yaml $effective" \
+    "$(test-stub-calls hadolint)" "hadolint calls"
+  # Build only once lint is proven, so it cannot write to the checkout
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES -u FORCE_USE_DOCKER \
+    DOCKER_IMAGE="$DOCKER_IMAGE" docker_dir="$TEST_TMP" MISE_TOML="$FIXTURE_MISE_TOML" \
+    BUILD_DATETIME="$FIXTURE_BUILD_DATETIME" make docker-build
+  assert-equal 0 "$TEST_STATUS" "docker-build exit status"
+  assert-contains " $(test-stub-calls docker | grep '^build ' || true) " " --file $effective "
+
+  return 0
+}
+
+function test-docker-make-requires-docker-fn() {
+
+  # Arrange
+  test-isolate-path make
+  # Act
+  test-capture env -u MAKEFLAGS -u MAKELEVEL -u GNUMAKEFLAGS -u MAKEFILES \
+    make _docker docker_fn=
+  # Assert
+  assert-matches "$TEST_STATUS" '^[1-9][0-9]*$' "$EXIT_STATUS_LABEL"
+  assert-contains "$TEST_STDERR" "docker_fn is required"
+  assert-contains "$TEST_STDERR" "make _docker docker_fn=run"
+
+  return 0
+}
+
+function test-docker-check-test-reports-pass-and-fail() {
+
+  # Arrange
+  local found
+  use-empty-mise-toml
+  test-isolate-path
+  # shellcheck disable=SC2016
+  test-stub docker 'if [[ "${1:-}" == run ]]; then echo "Python 3.11.4"; fi'
+  # Act
+  check=Python dir="$TEST_TMP" test-capture docker-check-test
+  found="$TEST_STDOUT"
+  check=Ruby dir="$TEST_TMP" test-capture docker-check-test
+  # Assert
+  assert-equal PASS "$found" "output when the check string is present"
+  assert-equal FAIL "$TEST_STDOUT" "output when the check string is absent"
+
+  return 0
+}
+
+function test-docker-push-pushes-every-version-and-latest() {
+
+  # Arrange
+  use-empty-mise-toml
+  printf '%s\n' 1.2.3 1.2 > "$TEST_TMP/.version"
+  test-isolate-path
+  test-stub docker
+  # Act
+  dir="$TEST_TMP" test-capture docker-push
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "$(printf '%s\n' \
+    "push repository-template/docker-test:1.2.3" \
+    "push repository-template/docker-test:1.2" \
+    "push repository-template/docker-test:latest")" \
+    "$(test-stub-calls docker)" "push calls"
+
+  return 0
+}
+
+function test-docker-clean-removes-images-and-files-in-dir() {
+
+  # Arrange
+  use-empty-mise-toml
+  mkdir "$TEST_TMP/elsewhere" "$TEST_TMP/image"
+  cd "$TEST_TMP/elsewhere"
+  echo 1.2.3 > "$TEST_TMP/image/.version"
+  touch "$TEST_TMP/image/Dockerfile.effective" "$TEST_TMP/image/Dockerfile.effective.dockerignore"
+  test-isolate-path
+  # shellcheck disable=SC2016
+  test-stub docker 'if [[ "${1:-}" == rmi ]]; then exit 1; fi'
+  # Act
+  dir="$TEST_TMP/image" test-capture docker-clean
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-stub-called docker "rmi repository-template/docker-test:1.2.3"
+  assert-stub-called docker "rmi repository-template/docker-test:latest"
+  assert-file-not-exists "$TEST_TMP/image/.version"
+  assert-file-not-exists "$TEST_TMP/image/Dockerfile.effective"
+  assert-file-not-exists "$TEST_TMP/image/Dockerfile.effective.dockerignore"
+
+  return 0
+}
+
+function test-docker-lint-runs-hadolint-on-effective-dockerfile() {
+
+  # Arrange
+  use-empty-mise-toml
+  unset FORCE_USE_DOCKER
+  test-isolate-path
+  test-stub hadolint
+  test-stub docker
+  # Act
+  dir="$TEST_TMP" test-capture docker-lint
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal "--config scripts/config/hadolint.yaml $(printf '%q' "$TEST_TMP/Dockerfile.effective")" \
+    "$(test-stub-calls hadolint)" "hadolint calls"
+  assert-stub-not-called docker
+
+  return 0
+}
+
+function test-docker-lint-returns-hadolint-failure-in-conditional-call() {
+
+  # Arrange
+  local status=0
+  use-empty-mise-toml
+  unset FORCE_USE_DOCKER
+  test-isolate-path
+  test-stub hadolint 'exit 42'
+  test-stub docker
+  # Act
+  if dir="$TEST_TMP" docker-lint; then
+    status=0
+  else
+    status=$?
+  fi
+  # Assert
+  assert-equal 42 "$status" "$EXIT_STATUS_LABEL"
+
+  return 0
+}
+
+function test-docker-run-returns-container-exit-status-in-conditional-call() {
+
+  # Arrange
+  local status=0
+  use-empty-mise-toml
+  echo 1.2.3 > "$TEST_TMP/.version"
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-}" == run ]]; then exit 42; fi'
+  # Act
+  if dir="$TEST_TMP" docker-run; then
+    status=0
+  else
+    status=$?
+  fi
+  # Assert
+  assert-equal 42 "$status" "$EXIT_STATUS_LABEL"
+
+  return 0
+}
+
+function test-container-runtime-is-operational-returns-timeout-status-in-conditional-call() {
+
+  # Arrange
+  local status=0
+  test-isolate-path
+  test-stub docker 'if [[ "${1:-}" == info ]]; then exec sleep 30; fi'
+  # Act
+  if CONTAINER_INFO_TIMEOUT=1 _container-runtime-is-operational docker; then
+    status=0
+  else
+    status=$?
+  fi
+  # Assert
+  assert-equal 124 "$status" "$EXIT_STATUS_LABEL"
+
+  return 0
+}
+
+function test-docker-build-leaves-tag-and-version-unset-in-caller-scope() {
+
+  # Arrange
+  copy-image-fixtures
+  MISE_TOML="$FIXTURE_MISE_TOML"
+  export BUILD_DATETIME="$FIXTURE_BUILD_DATETIME"
+  test-isolate-path
+  test-stub docker
+  unset -v tag version
+  # Act
+  dir="$TEST_TMP" docker-build
+  # Assert
+  assert-equal "unset" "$(declare -p tag > /dev/null 2>&1 && echo set || echo unset)" "tag is unset in the caller"
+  assert-equal "unset" "$(declare -p version > /dev/null 2>&1 && echo set || echo unset)" "version is unset in the caller"
+
+  return 0
+}
+
+# ==============================================================================
+# Helpers
+
+# Copy the test image's Dockerfile and VERSION files into "$TEST_TMP".
+function copy-image-fixtures() {
+
+  cp "$TEST_REPO_ROOT/scripts/docker/tests/Dockerfile" "$TEST_REPO_ROOT/scripts/docker/tests/VERSION" "$TEST_TMP/"
+
+  return 0
+}
+
+# Write an empty "$TEST_TMP/mise.toml" and point MISE_TOML at it.
+function use-empty-mise-toml() {
+
+  MISE_TOML="$TEST_TMP/mise.toml"
+  : > "$MISE_TOML"
+
+  return 0
+}
+
+# Write "$TEST_TMP/mise.toml" pinning 'ghcr.io/org/image' to '1.2.3@$DIGEST_A'
+# and point MISE_TOML at it.
+function write-image-pin() {
+
+  MISE_TOML="$TEST_TMP/mise.toml"
+  printf '%s\n' "$DOCKER_TABLE_HEADER" "\"ghcr.io/org/image\" = \"1.2.3@$DIGEST_A\"" > "$MISE_TOML"
+
+  return 0
+}
+
+# Call docker-get-image-version-and-pull the way the callers do, inside a
+# command substitution, which does not inherit errexit, so only its explicit
+# 'return' statements can propagate a failure.
+function docker-get-image-version-and-pull-in-substitution() {
+
+  local result
+  result=$(docker-get-image-version-and-pull) || return "$?"
+  echo "$result"
+
+  return 0
+}
+
+# Stub a container CLI whose 'image inspect' fails, so every image looks absent.
+# Arguments:
+#   $1=[command name]
+function stub-image-absent() {
+
+  local cli="$1"
+  test-stub "$cli" 'if [[ "${1:-} ${2:-}" == "image inspect" ]]; then exit 1; fi'
+
+  return 0
+}
+
+# Fail unless the effective Dockerfile made of the given lines resolves to the
+# expected base image.
+# Arguments:
+#   $1=[expected base image, empty for 'scratch']
+#   $2...=[Dockerfile lines]
+function assert-base-image() {
+
+  local expected="$1"
+  shift
+  printf '%s\n' "$@" > "$TEST_TMP/Dockerfile.effective"
+  dir="$TEST_TMP" test-capture _get-effective-base-image
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL for: $*"
+  assert-equal "$expected" "$TEST_STDOUT" "base image for: $*"
+  assert-equal "" "$TEST_STDERR" "$STDERR_LABEL for: $*"
+
+  return 0
+}
+
+# Fail unless the effective Dockerfile made of the given lines is reported as
+# unresolved with the expected reason.
+# Arguments:
+#   $1=[expected reason]
+#   $2...=[Dockerfile lines]
+function assert-base-image-unresolved() {
+
+  local reason="$1"
+  shift
+  printf '%s\n' "$@" > "$TEST_TMP/Dockerfile.effective"
+  dir="$TEST_TMP" test-capture _get-effective-base-image
+  assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL for: $*"
+  assert-equal "" "$TEST_STDOUT" "base image for: $*"
+  assert-equal "WARN Base image labels left empty ($reason)" \
+    "$TEST_STDERR" "$STDERR_LABEL for: $*"
+
+  return 0
+}
+
+# Create a Git repository with the given empty files and print its path.
+# Arguments:
+#   $@=[file paths relative to the repository]
+function make-compose-repo() {
+
+  local repo="$TEST_TMP/repo" path
+  git init --quiet "$repo"
+  for path in "$@"; do
+    mkdir -p "$repo/$(dirname "$path")"
+    touch "$repo/$path"
+  done
+  echo "$repo"
+
+  return 0
+}
+
+# Stub docker so that 'compose version' succeeds and any other call writes its
+# working directory to "$TEST_TMP/docker.cwd".
+function stub-docker-compose-recording-cwd() {
+
+  test-stub docker "
+    if [[ \"\$1 \${2:-}\" == 'compose version' ]]; then exit 0; fi
+    pwd -P > '$TEST_TMP/docker.cwd'
+  "
+
+  return 0
+}
+
+# Run _docker-compose-run from the given directory.
+# Arguments:
+#   $1=[directory]
+#   $2...=[Compose arguments]
+function compose-run-in() {
+
+  cd "$1" || return "$?"
+  shift
+  _docker-compose-run "$@" || return "$?"
+
+  return 0
+}
+
+# Print the recorded docker 'pull' and 'tag' calls, one per line.
+function docker-pull-and-tag-calls() {
+
+  test-stub-calls docker | grep -E '^(pull|tag) ' || true
+
+  return 0
+}
+
+# Fail unless the effective Dockerfile pins ARG PYTHON_VERSION from the fixture
+# and ends with the exact bytes of scripts/docker/Dockerfile.metadata.
+# Arguments:
+#   $1=[path to the effective Dockerfile]
+function assert-effective-dockerfile-is-pinned-with-metadata() {
+
+  local file="$1" metadata="$TEST_REPO_ROOT/scripts/docker/Dockerfile.metadata" size
+  assert-file-has-line "$file" \
+    "ARG PYTHON_VERSION=3.11.4-alpine3.18@sha256:0135ae6442d1269379860b361760ad2cf6ab7c403d21935a8015b48d5bf78a86"
+  size="$(wc -c < "$metadata")"
+  tail -c "$((size))" "$file" > "$TEST_TMP/effective-tail"
+  assert-files-identical "$metadata" "$TEST_TMP/effective-tail"
+
+  return 0
+}
+
+# ==============================================================================
+
+function is-arg-true() {
+
+  local value="$1"
+  if [[ "$value" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$ ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# ==============================================================================
+
+is-arg-true "${VERBOSE:-false}" && set -x
+
+main "$@"
+
+exit 0

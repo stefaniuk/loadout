@@ -1,51 +1,53 @@
 include scripts/init.mk
-include scripts/loadout.ext.mk
 
 # ==============================================================================
 # Project targets
 
-format: # Auto-format code @Quality
-	./scripts/quality/format-markdown-tables.sh
+env: # Set up project environment @Configuration
+	# TODO: Implement environment setup steps
 
-lint-file-format: # Check file formats @Quality
-	check=all ./scripts/quality/check-file-format.sh && echo "file format: ok"
+deps: # Install dependencies needed to build and test the project @Build
+	# TODO: Implement installation of your project dependencies
 
-lint-markdown-format: # Check markdown formatting @Quality
-	check=all ./scripts/quality/check-markdown-format.sh && echo "markdown format: ok"
+format: check ?= all
+format: # Auto-format code (set check=all|staged-changes|working-tree-changes|branch) @Quality
+	$(MAKE) format-markdown
 
-lint-markdown-links: # Check markdown links @Quality
-	output=$$(check=all ./scripts/quality/check-markdown-links.sh 2>&1) && echo "markdown links: ok" || { echo "$$output"; exit 1; }
-
-lint-shell: # Check shell scripts @Quality
-	$(MAKE) check-shell-lint
-
-lint-customisations: # Validate customisation artefact frontmatter and naming @Quality
-	./scripts/quality/validate-customisations.sh
-
-lint: # Run linter to check code style and errors @Quality
+lint: check ?= all
+lint: # Run linter to check code style and errors (set check=all|staged-changes|working-tree-changes|branch for the file checks) @Quality
+	if [[ "$(check)" == branch ]]; then
+		source scripts/quality/git-base.lib.sh
+		quality-export-pr-base
+	fi
 	$(MAKE) lint-file-format
 	$(MAKE) lint-markdown-format
 	$(MAKE) lint-markdown-links
-	$(MAKE) lint-shell
-	$(MAKE) lint-customisations
+	$(MAKE) lint-shell check=all
+	$(MAKE) lint-workflow-security
 
-test: # Run comprehensive test suite @Testing
-	@bash -c '\
-		d=$$(mktemp -d); trap "rm -rf $$d" EXIT; \
-		tests="apply speckit-sync import skill-sync workflow-mode revert skill-remove"; \
-		pids=""; \
-		for t in $$tests; do \
-			bash ./scripts/tests/$$t.test.sh > "$$d/$$t.log" 2>&1 & \
-			pids="$$pids $$t:$$!"; \
-		done; \
-		status=0; \
-		for entry in $$pids; do \
-			t=$${entry%%:*}; p=$${entry##*:}; \
-			if wait "$$p"; then echo "$$t: ok"; \
-			else echo "$$t: FAIL"; cat "$$d/$$t.log"; status=1; fi; \
-		done; \
-		exit $$status \
-	'
+typecheck: # Run type checker @Quality
+	# TODO: Implement type checking required for this repository
+
+test: # Run all tests @Quality
+	./scripts/tests/run-test-suites.sh
+
+check: # Run all format, lint, type and test checks @Quality
+	$(MAKE) format
+	$(MAKE) lint
+	$(MAKE) typecheck
+	$(MAKE) test
+
+build: # Build the project artefact @Build
+	# TODO: Implement the artefact build step
+
+publish: # Publish the project artefact @Release
+	# TODO: Implement the artefact publishing step
+
+deploy: # Deploy the project artefact to the target environment @Release
+	# TODO: Implement the artefact deployment step
+
+validate-customisations: # Validate customisation artefact frontmatter and naming @Quality
+	./scripts/quality/validate-customisations.sh
 
 speckit-sync: # Fetch upstream spec-kit and apply local patches; optional: patch=[true|false] @Operations
 	patch="$(or $(patch),true)" ./scripts/speckit-sync.sh
@@ -77,33 +79,27 @@ revert: # Remove all loadout-managed artifacts from a destination repository (op
 	$(if $(dest),,$(error dest is required. Usage: make revert dest=/path/to/destination))
 	./scripts/revert.sh --dest "$(dest)" $(if $(filter true,$(dry-run)),--dry-run)
 
-clean:: # Remove project-specific generated files (main) @Operations
-	find .copilot/analysis -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
-	rm -rf docs/superpowers
-	find . \( \
-		-name ".coverage" -o \
-		-name ".env" -o \
-		-name "*.log" -o \
-		-name "coverage.xml" \
-	\) -prune -exec rm -rf {} +
-
 config:: # Configure development environment (main) @Configuration
-	$(MAKE) _install-dependencies
+	# TODO: Implement project-specific configuration steps
+
+clean:: # Clean-up project resources (main) @Operations
+	# TODO: Implement project resources clean-up step
 
 # ==============================================================================
 
 ${VERBOSE}.SILENT: \
 	apply \
+	build \
+	check \
 	clean \
 	config \
+	deploy \
+	deps \
+	env \
 	format \
 	import \
 	lint \
-	lint-customisations \
-	lint-file-format \
-	lint-markdown-format \
-	lint-markdown-links \
-	lint-shell \
+	publish \
 	revert \
 	skill-add \
 	skill-patch \
@@ -111,3 +107,5 @@ ${VERBOSE}.SILENT: \
 	skill-sync \
 	speckit-sync \
 	test \
+	typecheck \
+	validate-customisations \

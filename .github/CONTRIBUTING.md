@@ -108,7 +108,8 @@ For a deeper decision matrix (when to pick a Skill over a Prompt, etc.), see
 ### Prerequisites
 
 - Git
-- Make (for running quality gates)
+- [mise](https://mise.jdx.dev/) and Make (for the pinned toolchain and the
+  quality gates)
 - A text editor (VS Code recommended for Copilot integration)
 
 ### Setup
@@ -118,8 +119,12 @@ For a deeper decision matrix (when to pick a Skill over a Prompt, etc.), see
 git clone https://github.com/stefaniuk/loadout.git
 cd loadout
 
+# Install the pinned toolchain, the Git hooks and the pinned Docker images
+mise trust mise.toml
+make config
+
 # Verify quality gates work
-make lint && make test
+make lint && make validate-customisations && make test
 ```
 
 ### Repository Structure
@@ -290,7 +295,8 @@ chars; filename `<technology>.instructions.md`; every normative rule tagged
       Reference table
 - [ ] No contradictions with other instruction files whose `applyTo` overlaps
       yours
-- [ ] `make lint && make test` pass with zero warnings
+- [ ] `make lint`, `make validate-customisations` and `make test` pass with zero
+      warnings
 - [ ] Cross-linked from `.github/instructions/README.md` if it's a new
       technology
 
@@ -357,7 +363,7 @@ chars); `agent` and `argument-hint` optional; filename
 - [ ] Frontmatter parses (try `/<prompt-name>` in VS Code Copilot Chat)
 - [ ] Prompt produces deterministic, reviewable output
 - [ ] Linked from `.github/prompts/README.md` under the right category
-- [ ] `make lint && make test` pass
+- [ ] `make lint`, `make validate-customisations` and `make test` pass
 - [ ] No secrets, tokens, or absolute user paths in the prompt body
 
 **Typical review failures.**
@@ -427,7 +433,7 @@ example `docs-review.agent.md`). Full schema:
 - [ ] `tools` list is minimal - no `[*]` or unused tools
 - [ ] All `handoffs.agent` targets exist in `.github/agents/`
 - [ ] Listed in `.github/agents/README.md`
-- [ ] `make lint && make test` pass
+- [ ] `make lint`, `make validate-customisations` and `make test` pass
 
 **Typical review failures.**
 
@@ -506,7 +512,7 @@ semver; `allowed-tools` scoped to minimum. Full schema:
 - [ ] `description` makes the **invocation trigger** obvious to an agent
 - [ ] All referenced `templates/` and `examples/` files exist
 - [ ] Listed in `.github/skills/README.md`
-- [ ] `make lint && make test` pass
+- [ ] `make lint`, `make validate-customisations` and `make test` pass
 
 **Typical review failures.**
 
@@ -518,9 +524,11 @@ semver; `allowed-tools` scoped to minimum. Full schema:
 
 ### 🪝 Hooks Quickstart
 
-**Hooks are not part of loadout.** The Copilot hook implementation and the
-quality gate that blocks the agent from finishing live in repository-template,
-in `.github/hooks/` and `scripts/quality/`. Add or change hooks there.
+**Loadout does not ship hooks.** The Copilot hook and the quality gate that
+blocks the agent from finishing come from repository-template, in
+`.github/hooks/` and `scripts/quality/`. Change them there. Add a project gate
+as a drop-in file in `scripts/config/quality-gates.d/`, as `customisations.yaml`
+does.
 
 <a id="instruction-precedence"></a>
 
@@ -595,7 +603,7 @@ Examples:
 All contributions must pass quality gates:
 
 ```bash
-make lint && make test
+make lint && make validate-customisations && make test
 ```
 
 ### Content Checklist
@@ -668,7 +676,8 @@ Include:
 
 ### 5. Review Process
 
-1. Automated checks must pass (`make lint && make test`)
+1. Automated checks must pass (`make lint`, `make validate-customisations` and
+   `make test`)
 2. At least one maintainer review required
 3. Address feedback promptly
 4. Squash commits before merge (if requested)

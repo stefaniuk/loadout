@@ -1,134 +1,119 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -euo pipefail
 
-# Pre-commit git hook to check the EditorConfig rules compliance over changed
-# files. It ensures all non-binary files across the codebase are formatted
-# according to the style defined in the `.editorconfig` file. This is a
-# editorconfig command wrapper. It will run editorconfig natively if it is
-# installed, otherwise it will run it in a Docker container.
+# Check that files follow the EditorConfig rules defined in '.editorconfig'. It
+# runs editorconfig-checker natively when installed, otherwise in a Docker
+# container.
 #
 # Usage:
-#   $ [options] ./check-file-format.sh
+#   $ [options] ./scripts/quality/check-file-format.sh
 #
 # Options:
-#   check={all,staged-changes,working-tree-changes,branch}  # Check mode, default is 'working-tree-changes'
-#   dry_run=true                                            # Do not check, run dry run only, default is 'false'
-#   BRANCH_NAME=other-branch-than-main                      # Branch to compare with, default is `origin/main`
-#   FORCE_USE_DOCKER=true                                   # If set to true the command is run in a Docker container, default is 'false'
-#   VERBOSE=true                                            # Show all the executed commands, default is `false`
+#   check={all,staged-changes,working-tree-changes,branch}
+#       Check mode, default is 'working-tree-changes'
+#   dry_run=true
+#       List the files to check without checking them, default is 'false'
+#   BRANCH_NAME=base-branch
+#       Local base for the branch mode, chosen automatically when unset, as
+#       './scripts/quality/git-base.lib.sh' describes
+#   FORCE_USE_DOCKER=true
+#       Run in a Docker container, default is 'false'
+#   VERBOSE=true
+#       Show all the executed commands, default is 'false'
 #
 # Exit codes:
-#   0 - All files are formatted correctly
-#   1 - Files are not formatted correctly
-#
-# The `check` parameter controls which files are checked, so you can
-# limit the scope of the check according to what is appropriate at the
-# point the check is being applied.
-#
-#   check=all: check all files in the repository
-#   check=staged-changes: check only files staged for commit.
-#   check=working-tree-changes: check modified, unstaged files. This is the default.
-#   check=branch: check for all changes since branching from $BRANCH_NAME
+#   0 - All selected files are formatted correctly, or no files need checking
+#   1 - Files are not formatted correctly, or the branch to compare with is not
+#       found
+#   126 - The check mode is not recognised
+#   Other - Non-zero statuses from Git, EditorConfig Checker, Docker or image
+#           pulls
 #
 # Notes:
-#   Please make sure to enable EditorConfig linting in your IDE. For the
-#   Visual Studio Code editor it is `editorconfig.editorconfig` that is already
-#   specified in the `./.vscode/extensions.json` file.
+#   1) Check modes select existing files known to Git, as described in
+#      './scripts/quality/git-files.lib.sh'. Untracked files are never checked.
+#   2) Exclusions are Go/RE2 regular expressions in
+#      './scripts/config/editorconfig-checker.json', matched against paths
+#      relative to the repository root. Escape literal dots and anchor patterns,
+#      for example '^docs/generated/'. Empty selections print 'No files to
+#      check' and skip EditorConfig Checker.
+#   3) Enable EditorConfig in your IDE. For Visual Studio Code, the
+#      'editorconfig.editorconfig' extension is listed in
+#      './.vscode/extensions.json'.
 
 # ==============================================================================
 
+# Check file format in native or Docker mode.
 function main() {
 
   cd "$(git rev-parse --show-toplevel)"
 
-  # shellcheck disable=SC2154
-  is-arg-true "${dry_run:-false}" && dry_run_opt="--dry-run"
-
-  check=${check:-working-tree-changes}
-  case $check in
-    "all")
-      filter="git ls-files --exclude-standard"
-      ;;
-    "staged-changes")
-      filter="git diff --diff-filter=ACMRT --name-only --cached"
-      ;;
-    "working-tree-changes")
-      filter="git diff --diff-filter=ACMRT --name-only"
-      ;;
-    "branch")
-      filter="git diff --diff-filter=ACMRT --name-only ${BRANCH_NAME:-origin/main}"
-      ;;
-    *)
-      echo "Unrecognised check mode: $check" >&2 && exit 1
-      ;;
-  esac
-
-  # Exclude files tracked by git but missing from the working tree
-  local files
-  files=$($filter | while IFS= read -r f; do [ -f "$f" ] && printf '%s\n' "$f"; done || true)
-  [[ -z "$files" ]] && return 0
-
-  # Exclude paths listed in .editorconfigignore
-  local ignore_file="$PWD/scripts/config/.editorconfigignore"
-  if [[ -f "$ignore_file" ]]; then
-    local patterns
-    patterns=$(grep -v '^#' "$ignore_file" | grep -v '^$' || true)
-    if [[ -n "$patterns" ]]; then
-      local grep_pattern
-      grep_pattern=$(echo "$patterns" | sed 's|/$||' | paste -sd'|' -)
-      files=$(echo "$files" | grep -Ev "^($grep_pattern)" || true)
-      [[ -z "$files" ]] && return 0
-    fi
+  # shellcheck disable=SC1091
+  source ./scripts/quality/git-files.lib.sh
+  local -a files=() dry_run_opt=()
+  quality-collect-git-files files "${check:-working-tree-changes}" || return "$?"
+  if [[ ${#files[@]} -eq 0 ]]; then
+    echo "No files to check"
+    return 0
+  fi
+  if is-arg-true "${dry_run:-false}"; then
+    dry_run_opt=(--dry-run)
   fi
 
   if command -v editorconfig-checker > /dev/null 2>&1 && ! is-arg-true "${FORCE_USE_DOCKER:-false}"; then
-    files="$files" dry_run_opt="${dry_run_opt:-}" run-editorconfig-natively
+    run-editorconfig-natively "${dry_run_opt[@]}" -- "${files[@]}" || return "$?"
   else
-    files="$files" dry_run_opt="${dry_run_opt:-}" run-editorconfig-in-docker
+    run-editorconfig-in-docker "${dry_run_opt[@]}" -- "${files[@]}" || return "$?"
   fi
+
+  return 0
 }
 
-# Run editorconfig natively.
-# Arguments (provided as environment variables):
-#   dry_run_opt=[dry run option]
-#   files=[newline-separated file list]
+# Run editorconfig-checker natively.
+# Arguments:
+#   $@=[checker options, then '--' and the paths to check]
 function run-editorconfig-natively() {
 
-  # shellcheck disable=SC2046,SC2086
   editorconfig-checker \
     -config "$PWD/scripts/config/editorconfig-checker.json" \
-    --exclude '.git/' $dry_run_opt $files
+    "$@" || return "$?"
+
+  return 0
 }
 
-# Run editorconfig in a Docker container.
-# Arguments (provided as environment variables):
-#   dry_run_opt=[dry run option]
-#   files=[newline-separated file list]
+# Run editorconfig-checker in a Docker container.
+# Arguments:
+#   $@=[checker options, then '--' and the paths to check]
 function run-editorconfig-in-docker() {
 
   # shellcheck disable=SC1091
   source ./scripts/docker/docker.lib.sh
 
-  # shellcheck disable=SC2155
-  local image=$(name=mstruebing/editorconfig-checker docker-get-image-version-and-pull)
-  # We use /dev/null here as a backstop in case there are no files in the state
-  # we choose. If the filter comes back empty, adding `/dev/null` onto it has
-  # the effect of preventing `ec` from treating "no files" as "all the files".
-  local files_inline
-  files_inline=$(echo "$files" | tr '\n' ' ')
-  # shellcheck disable=SC2086
+  local image
+  image=$(name=mstruebing/editorconfig-checker docker-get-image-version-and-pull) || return "$?"
+  # Forward the variables that select the output format and colour natively
   docker run --rm --platform linux/amd64 \
-    --volume "$PWD":/check \
+    --network none \
+    --env GITHUB_ACTIONS \
+    --env NO_COLOR \
+    --volume "$PWD":/check:ro \
+    --workdir /check \
     "$image" \
-      sh -c "cd /check && ec -config /check/scripts/config/editorconfig-checker.json --exclude '.git/' $dry_run_opt $files_inline /dev/null"
+      editorconfig-checker -config /check/scripts/config/editorconfig-checker.json "$@" || return "$?"
+
+  return 0
 }
 
 # ==============================================================================
 
+# Check whether the supplied argument represents a true boolean value.
+# Arguments:
+#   $1=[value to evaluate]
 function is-arg-true() {
 
-  if [[ "$1" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$ ]]; then
+  local value="$1"
+  if [[ "$value" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$ ]]; then
     return 0
   else
     return 1

@@ -1,58 +1,78 @@
 # This file is for you! Edit it to implement your own Docker make targets.
 
 # ==============================================================================
-# Custom implementation - implementation of a make target should not exceed 5 lines of effective code.
+# Custom implementation - implementation of a make target should not exceed 5
+# lines of effective code.
 # In most cases there should be no need to modify the existing make targets.
 
-DOCKER_IMAGE ?= $(or ${docker_image}, $(or ${IMAGE}, $(or ${image}, ghcr.io/org/repo)))
-DOCKER_TITLE ?= $(or "${docker_title}", $(or "${TITLE}", $(or "${title}", "Service Docker image")))
+DOCKER_IMAGE ?= $(or ${docker_image}, ${IMAGE}, ${image})
+DOCKER_TITLE ?= $(or ${docker_title}, ${TITLE}, ${title})
 FORCE_USE_DOCKER ?= false
 
-docker-bake-dockerfile: # Create Dockerfile.effective - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'] @Development
-	make _docker cmd="bake-dockerfile" \
+docker-compose-build: # Build Compose services - optional: compose_dir|dir=[directory with the Compose file, default is the top level, else the only one found], file=[Compose file instead of dir], project=[project name, default is the Compose default] @Build
+	$(MAKE) _docker docker_fn="compose-build" dir=. \
+		compose_dir=$(or ${compose_dir}, ${dir})
+
+docker-compose-up: # Start Compose services - optional: compose_dir|dir=[directory with the Compose file, default is the top level, else the only one found], file=[Compose file instead of dir], project=[project name, default is the Compose default] @Development
+	$(MAKE) _docker docker_fn="compose-up" dir=. \
+		compose_dir=$(or ${compose_dir}, ${dir})
+
+docker-compose-down: # Stop Compose services - optional: compose_dir|dir=[directory with the Compose file, default is the top level, else the only one found], file=[Compose file instead of dir], project=[project name, default is the Compose default] @Operations
+	$(MAKE) _docker docker_fn="compose-down" dir=. \
+		compose_dir=$(or ${compose_dir}, ${dir})
+
+docker-compose-status: # Show Compose status - optional: compose_dir|dir=[directory with the Compose file, default is the top level, else the only one found], file=[Compose file instead of dir], project=[project name, default is the Compose default] @Operations
+	$(MAKE) _docker docker_fn="compose-status" dir=. \
+		compose_dir=$(or ${compose_dir}, ${dir})
+
+docker-compose-logs: # Print recent Compose logs - optional: compose_dir|dir=[directory with the Compose file, default is the top level, else the only one found], file=[Compose file instead of dir], project=[project name, default is the Compose default] @Operations
+	$(MAKE) _docker docker_fn="compose-logs" dir=. \
+		compose_dir=$(or ${compose_dir}, ${dir})
+
+docker-compose-clean: # Remove Compose resources - optional: compose_dir|dir=[directory with the Compose file, default is the top level, else the only one found], file=[Compose file instead of dir], project=[project name, default is the Compose default] @Operations
+	$(MAKE) _docker docker_fn="compose-clean" dir=. \
+		compose_dir=$(or ${compose_dir}, ${dir})
+
+docker-bake-dockerfile: # Create Dockerfile.effective - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'] @Build
+	$(MAKE) _docker docker_fn="bake-dockerfile" \
 		dir=$(or ${docker_dir}, ${dir})
 
-docker-build: # Build Docker image - optional: docker_dir|dir=[path to the Dockerfile to use, default is '.'] @Development
-	dir=$(or ${docker_dir}, ${dir})
-	make _docker cmd="build"
 docker-build: docker-lint
+docker-build: # Build Docker image - optional: docker_dir|dir=[path to the Dockerfile to use, default is '.'] @Build
+	$(MAKE) _docker docker_fn="build" \
+		dir=$(or ${docker_dir}, ${dir})
 
-docker-lint: # Run hadolint over the Dockerfile - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'] @Development
-	dir=$(or ${docker_dir}, ${dir})
-	make _docker cmd="lint"
 docker-lint: docker-bake-dockerfile
-
-docker-push: # Push Docker image - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'] @Development
-	make _docker cmd="push" \
+docker-lint: # Run hadolint over the Dockerfile - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'] @Quality
+	$(MAKE) _docker docker_fn="lint" \
 		dir=$(or ${docker_dir}, ${dir})
 
-docker-run: # Run Docker image - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'] @Development
-	make _docker cmd="run" \
+docker-push: # Push Docker image - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'] @Release
+	$(MAKE) _docker docker_fn="push" \
 		dir=$(or ${docker_dir}, ${dir})
 
-clean:: # Remove Docker resources (docker) - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'] @Operations
-	make _docker cmd="clean" \
+docker-run: # Run Docker image - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'], cmd=[command to run in the container], args=[docker run options] @Development
+	$(MAKE) _docker docker_fn="run" \
 		dir=$(or ${docker_dir}, ${dir})
 
-_docker: # Docker command wrapper - mandatory: cmd=[command to execute]; optional: dir=[path to the image directory where the Dockerfile is located, relative to the project's top-level directory, default is '.']
-	# 'DOCKER_IMAGE' and 'DOCKER_TITLE' are passed to the functions as environment variables
+docker-pull-pinned-images: # Pull Docker images pinned in mise.toml [_.docker] @Configuration
+	source scripts/docker/docker.lib.sh
+	docker-pull-pinned-images
+
+docker-test-suite-run: # Run Docker test suite @Quality
+	dir=scripts/docker ./scripts/tests/run-test-suites.sh
+
+_docker: # Docker function wrapper - mandatory: docker_fn=[function name, for example 'run']; optional: dir=[path to the image directory where the Dockerfile is located, relative to the project's top-level directory, default is '.']
+	[[ -n "${docker_fn}" ]] || { echo "docker_fn is required, for example: make _docker docker_fn=run" >&2; exit 1; }
+	# 'DOCKER_IMAGE' and 'DOCKER_TITLE' are passed to the functions as
+	# environment variables
 	dir=$(realpath $(or ${dir}, infrastructure/images/${DOCKER_IMAGE}))
 	source scripts/docker/docker.lib.sh
-	docker-${cmd} # 'dir' is accessible by the function as environment variable
+	docker-${docker_fn} # 'dir' is accessible by the function as environment variable
 
-# ==============================================================================
-# Quality checks - please DO NOT edit this section!
-
-docker-shellscript-lint: # Lint all Docker module shell scripts @Quality
-	for file in $$(find scripts/docker -type f -name "*.sh"); do
-		file=$${file} scripts/quality/check-shell-lint.sh
-	done
-
-# ==============================================================================
-# Module tests and examples - please DO NOT edit this section!
-
-docker-test-suite-run: # Run Docker test suite @ExamplesAndTests
-	scripts/docker/tests/docker.test.sh
+clean:: # Remove Docker resources (docker) - optional: docker_dir|dir=[path to the image directory where the Dockerfile is located, default is '.'] @Operations
+	$(MAKE) _docker docker_fn="clean" \
+		dir=$(or ${docker_dir}, ${dir})
 
 # ==============================================================================
 
@@ -61,8 +81,14 @@ ${VERBOSE}.SILENT: \
 	clean \
 	docker-bake-dockerfile \
 	docker-build \
+	docker-compose-build \
+	docker-compose-clean \
+	docker-compose-down \
+	docker-compose-logs \
+	docker-compose-status \
+	docker-compose-up \
 	docker-lint \
+	docker-pull-pinned-images \
 	docker-push \
 	docker-run \
-	docker-shellscript-lint \
 	docker-test-suite-run \

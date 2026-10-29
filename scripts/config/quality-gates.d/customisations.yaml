@@ -1,0 +1,15 @@
+# Loadout's own gate, added to the template gates in
+# scripts/config/quality-gates.yaml. The template's 'make lint' runs a fixed
+# set of checks, so customisation metadata is validated here and in CI.
+version: 1
+gates:
+  - name: customisations
+    target: validate-customisations
+    paths:
+      - ".github/agents/*"
+      - ".github/instructions/*"
+      - ".github/prompts/*"
+      - ".github/skills/*"
+      - "scripts/quality/schemas/*"
+      - "scripts/quality/validate-customisations.*"
+    description: Customisation artefact frontmatter and naming

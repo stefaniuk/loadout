@@ -1,0 +1,48 @@
+# Minimum mise CLI version for developers; CI/CD pins the exact same version, SEE: .github/workflows/cicd-1-pull-request.yaml
+min_version = "2026.10.9"
+
+[settings]
+lockfile = true
+lockfile_platforms = ["linux-arm64", "linux-x64", "macos-arm64", "macos-x64"]
+minimum_release_age = "7d"
+locked_verify_provenance = true
+
+[tool_config]
+locked = true
+
+[tools]
+editorconfig-checker = "4.0.2"
+gitleaks = "8.30.1"
+hadolint = "2.15.1"
+jq = "1.8.2"
+lychee = "0.24.2"
+node = "26.12.0"
+"npm:markdownlint-cli" = "0.49.1"
+"npm:prettier" = "3.9.10"
+pre-commit = "4.7.0"
+python = "3.15.0"
+shellcheck = "0.11.0"
+uv = "0.13.5"
+yq = "4.54.1"
+
+# ==============================================================================
+# The table below is reserved for Docker image versions and is never parsed by
+# mise, SEE: https://mise.jdx.dev/configuration.html
+
+[_.docker]
+# gitleaks, SEE: https://github.com/gitleaks/gitleaks/pkgs/container/gitleaks keep in sync with the gitleaks version above
+"ghcr.io/gitleaks/gitleaks" = "v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f"
+# markdownlint-cli, SEE: https://github.com/igorshubovych/markdownlint-cli/pkgs/container/markdownlint-cli keep in sync with the markdownlint-cli version above
+"ghcr.io/igorshubovych/markdownlint-cli" = "v0.49.1@sha256:905baf9f6bd11da2ede8c394882c616509385f24b8b8d54fff6e111be88f39de"
+# hadolint, SEE: https://hub.docker.com/r/hadolint/hadolint/tags keep in sync with the hadolint version above
+"hadolint/hadolint" = "v2.15.1-alpine@sha256:a1d49ae1a4e83c1dbad26b8c1ad7588c8bd1e04f4866b34ad3cac50335198552"
+# shellcheck, SEE: https://hub.docker.com/r/koalaman/shellcheck/tags keep in sync with the shellcheck version above
+"koalaman/shellcheck" = "v0.11.0@sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d"
+# lychee, SEE: https://hub.docker.com/r/lycheeverse/lychee keep in sync with the lychee version above
+"lycheeverse/lychee" = "0.24.2@sha256:e2d19e57cf6ab037026f20b8e449a1f30d9d7f81eef4194763aab2eab20bd28d"
+# editorconfig-checker, SEE: https://hub.docker.com/r/mstruebing/editorconfig-checker/tags keep in sync with the editorconfig-checker version above
+"mstruebing/editorconfig-checker" = "4.0.2@sha256:2ba6232bfa0058f72f5f7d7816711590aa764afab1542af30b3ecb4553587918"
+# node, SEE: https://hub.docker.com/_/node/tags keep in sync with the node version above
+"node" = "26.12.0-slim@sha256:e556a144463cc8dc53afe8de6d2fa0db5c132fd39ffa232c17641bd40df2bf11"
+# python, SEE: https://hub.docker.com/_/python/tags keep in sync with the python version above
+"python" = "3.15.0-slim@sha256:f5b92f2a669a4c347044f29367f31983280b648250ca94dea66f98c53bc87e58"
