@@ -124,8 +124,9 @@ self-documenting.
   - `Usage:` with the invocation from the repository root,
     `$ [options] ./scripts/<area>/<name>.sh`, or
     `$ source ./scripts/<area>/<name>.lib.sh` for a library
-  - `Options:` for an executable script, one environment variable per line as
-    `name=value  # Description, default is 'value'`. A library uses
+  - `Options:` for an executable script, one environment variable per entry as
+    `name=value` on one line, then the description indented by four more spaces
+    on the next, ending with `default is 'value'`. A library uses
     `Arguments (provided as environment variables):` instead
   - `Exit codes:` with every status the script can return, including statuses
     passed through from the wrapped tool ([SH-ERR-009])
@@ -151,15 +152,22 @@ set -euo pipefail
 #   $ [options] ./scripts/quality/check-markdown-links.sh
 #
 # Options:
-#   check={all,staged-changes,working-tree-changes,branch}  # Check mode, default is 'working-tree-changes'
-#   BRANCH_NAME=other-branch-than-main                      # Branch to compare with, default is 'origin/main'
-#   FORCE_USE_DOCKER=true                                   # If set to true the command is run in a Docker container, default is 'false'
-#   VERBOSE=true                                            # Show all the executed commands, default is 'false'
+#   check={all,staged-changes,working-tree-changes,branch}
+#       Check mode, default is 'working-tree-changes'
+#   BRANCH_NAME=base-branch
+#       Local base for the branch mode, chosen automatically when unset, as
+#       './scripts/quality/git-base.lib.sh' describes
+#   FORCE_USE_DOCKER=true
+#       Run in a Docker container, default is 'false'
+#   VERBOSE=true
+#       Show all the executed commands, default is 'false'
 #
 # Exit codes:
 #   0 - All links are valid
-#   1 - The check mode is not recognised, or lychee failed to run
+#   1 - Lychee failed to run, or the branch to compare with is not found
 #   2 - Broken links found
+#   126 - The check mode is not recognised
+#   Other - Non-zero statuses from Git, lychee, Docker or image pulls
 #
 # Notes:
 #   1) Check modes select existing Markdown files known to Git, as described in
