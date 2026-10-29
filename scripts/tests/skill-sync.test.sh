@@ -34,6 +34,9 @@ function main() {
     test-skill-sync-applies-per-skill-replacement-patch \
     test-skill-sync-skips-patches-when-patch-false \
     test-skill-sync-applies-frontmatter-overrides \
+    test-skill-sync-writes-editorconfig-excludes \
+    test-skill-sync-editorconfig-excludes-are-idempotent \
+    test-skill-sync-does-not-create-editorconfigignore \
   )
   local status=0
 
@@ -93,6 +96,7 @@ function create-skill-sync-fixture-repo() {
   create-skill-sync-config "${fixture_dir}" "${UPSTREAM_DIR}"
   create-skill-sync-manifest "${fixture_dir}"
   create-skill-sync-patches "${fixture_dir}"
+  create-editorconfig-checker-config "${fixture_dir}"
   create-yq-stub "${fixture_dir}/bin/yq"
 
   chmod +x "${fixture_dir}/scripts/skill-sync.sh" "${fixture_dir}/bin/yq"
@@ -177,6 +181,28 @@ Patched overview for Spec Kit compatibility.
 ## Verification
 
 - Verify against the existing task list.
+EOF
+
+  return 0
+}
+
+# Create an editorconfig-checker config with a static entry, an entry for a
+# skill that is no longer synced and one that keeps a path below a skill.
+# Arguments:
+#   $1=[fixture directory]
+function create-editorconfig-checker-config() {
+
+  local fixture_dir="$1"
+
+  cat <<'EOF' > "${fixture_dir}/scripts/config/editorconfig-checker.json"
+{
+  "Exclude": [
+    "^\\.specify/templates/.*-template\\.md$",
+    "^\\.github/skills/speckit-[^/]+/SKILL\\.md$",
+    "^\\.github/skills/vanilla-skill/assets/",
+    "^\\.github/skills/removed-skill/"
+  ]
+}
 EOF
 
   return 0
@@ -516,6 +542,40 @@ EOF
   grep -qF "invocable: false" "${skill_dir}/SKILL.md" || return 1
   ! grep -qF "description:" "${skill_dir}/SKILL.md" || return 1
   grep -qF "Body content." "${skill_dir}/SKILL.md" || return 1
+
+  return 0
+}
+
+function test-skill-sync-writes-editorconfig-excludes() {
+
+  local config_file="${PATCHED_FIXTURE}/scripts/config/editorconfig-checker.json"
+  local expected
+  expected='["^\\.specify/templates/.*-template\\.md$","^\\.github/skills/speckit-[^/]+/SKILL\\.md$","^\\.github/skills/vanilla-skill/assets/","^\\.github/skills/additive-skill/","^\\.github/skills/incremental-implementation/","^\\.github/skills/vanilla-skill/"]'
+
+  [[ "$(jq -c '.Exclude' "${config_file}")" == "${expected}" ]] || return 1
+
+  return 0
+}
+
+function test-skill-sync-editorconfig-excludes-are-idempotent() {
+
+  local fixture_dir="${TEMP_DIR}/editorconfig-idempotent"
+  cp -R "${PATCHED_FIXTURE}" "${fixture_dir}"
+  local config_file="${fixture_dir}/scripts/config/editorconfig-checker.json"
+  cp "${config_file}" "${fixture_dir}/first-pass.json"
+
+  PATH="${fixture_dir}/bin:${PATH}" \
+    patch_only=true \
+    "${fixture_dir}/scripts/skill-sync.sh" > "${fixture_dir}/patch-only.log" 2>&1 || return 1
+
+  cmp -s "${fixture_dir}/first-pass.json" "${config_file}" || return 1
+
+  return 0
+}
+
+function test-skill-sync-does-not-create-editorconfigignore() {
+
+  [[ ! -e "${PATCHED_FIXTURE}/scripts/config/.editorconfigignore" ]] || return 1
 
   return 0
 }

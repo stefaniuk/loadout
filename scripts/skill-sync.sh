@@ -58,6 +58,11 @@ function main() {
     return 1
   fi
 
+  if ! command -v jq > /dev/null 2>&1; then
+    echo "error: jq is required but not installed. Install via: brew install jq" >&2
+    return 1
+  fi
+
   mkdir -p "$DEST_DIR"
 
   local skill_count
@@ -102,7 +107,7 @@ function main() {
   else
     echo "==> Synced ${synced} skill(s)"
   fi
-  update-editorconfig-ignore
+  update-editorconfig-exclude
   update-markdownlint-ignore
   update-prettier-ignore
   update-lychee-ignore
@@ -112,9 +117,33 @@ function main() {
 
 # ==============================================================================
 
-# Update .editorconfigignore with entries for all synced skill directories.
-function update-editorconfig-ignore() {
-  update-ignore-file "${REPO_ROOT}/scripts/config/.editorconfigignore"
+# Rewrite the synced skill entries of the editorconfig-checker Exclude list.
+# Skill sync owns every entry of the form '^\.github/skills/<name>/' and
+# regenerates them from the config, so exclude a loadout-owned skill with a
+# narrower pattern. Every other entry is kept in place.
+function update-editorconfig-exclude() {
+  local config_file="${REPO_ROOT}/scripts/config/editorconfig-checker.json"
+
+  # Only update an existing config, never fabricate a partial one
+  if [[ ! -f "$config_file" ]]; then
+    return 0
+  fi
+
+  local names tmp
+  names=$(yq -r '.skills[].name' "$CONFIG_FILE" | sort)
+  tmp=$(mktemp)
+  if ! jq --arg names "$names" '
+    def synced: startswith("^\\.github/skills/") and endswith("/")
+      and (ltrimstr("^\\.github/skills/") | rtrimstr("/") | contains("/") | not);
+    .Exclude = ([(.Exclude // [])[] | select(synced | not)]
+      + [$names | split("\n")[] | select(length > 0)
+        | "^\\.github/skills/\(.)/"])
+  ' "$config_file" > "$tmp"; then
+    rm -f "$tmp"
+    return 1
+  fi
+  cat "$tmp" > "$config_file"
+  rm -f "$tmp"
 }
 
 # Update .markdownlintignore with entries for all synced skill directories.
