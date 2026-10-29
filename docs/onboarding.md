@@ -131,6 +131,15 @@ repository's own git history, as in a repository-template repository,
 loadout, owns that file - and the matching `.gitignore` entry is commented out
 for that repository.
 
+The pull request template links `.github/CONTRIBUTING.md`. Add that file to a
+target that does not have one. Apply also removes the retired
+`.github/skills/repository-template` skill that older loadout versions
+installed, unless the target tracks it.
+
+In a repository-template target, loadout's files are git-ignored, so the
+template's `make clean CONFIRM=true` deletes them, together with any ignored
+plans under `docs/superpowers/`. Run `make apply` again afterwards.
+
 After the copy completes, review `git status` in the target repository, commit
 the changes, and run `make lint && make test` to confirm everything wires up
 correctly.
@@ -236,9 +245,11 @@ make revert dest=/absolute/path/to/target
 ```
 
 Add `dry-run=true` to preview what would be removed without changing anything.
-This is the only supported way to revert a previous apply - `scripts/apply.sh`
-has no revert option. For full argument details see `scripts/revert.sh --help`
-and the `revert` target in the [Makefile](../Makefile).
+Revert keeps the pull request template, which the target may have edited since
+apply copied it. This is the only supported way to revert a previous apply -
+`scripts/apply.sh` has no revert option. For full argument details see
+`scripts/revert.sh --help` and the `revert` target in the
+[Makefile](../Makefile).
 
 ## Import workflow from downstream repos
 

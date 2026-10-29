@@ -496,6 +496,9 @@ function test-apply-respects-git-tracked-destination-owned-files() {
   grep -qF "# docs/adr/ADR-nnn_Any_Decision_Record_Template.md" "${d}/.gitignore" || return 1
   grep -qx "custom-owned-technology-recommendations" "${d}/docs/adr/Technology_Recommendations.md" || return 1
   grep -qF "# docs/adr/Technology_Recommendations.md" "${d}/.gitignore" || return 1
+  # A skill directory the destination tracks is its own, even under a
+  # retired loadout skill name
+  grep -qx "team-owned-skill" "${d}/.github/skills/repository-template/SKILL.md" || return 1
   # An owned lower-case template is not duplicated
   [[ "$(list-pr-templates "${d}/.github")" == "pull_request_template.md" ]] || return 1
   # Tech_Radar.md is not in the conditionally-owned set, so it stays managed.
@@ -526,6 +529,9 @@ function test-apply-removes-legacy-hook-files() {
   grep -q "team-owned-prompt-hook" "${d}/scripts/hooks/user-prompt-record.sh" || return 1
   [[ -f "${d}/.github/hooks/team.json" ]] || return 1
   [[ -x "${d}/scripts/hooks/workflow-mode.sh" ]] || return 1
+  # The untracked, retired repository-template skill is removed
+  [[ ! -e "${d}/.github/skills/repository-template" ]] || return 1
+  [[ -f "${d}/.github/skills/code-review/SKILL.md" ]] || return 1
   return 0
 }
 
@@ -661,6 +667,8 @@ function seed-destination-owned-files() {
   echo "custom-owned-pr-template" > "${dest}/.github/pull_request_template.md"
   echo "custom-owned-adr-template" > "${dest}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
   echo "custom-owned-technology-recommendations" > "${dest}/docs/adr/Technology_Recommendations.md"
+  mkdir -p "${dest}/.github/skills/repository-template"
+  echo "team-owned-skill" > "${dest}/.github/skills/repository-template/SKILL.md"
 
   git -C "${dest}" init -q
   git -C "${dest}" add -A
@@ -678,6 +686,9 @@ function seed-legacy-hook-files() {
   echo '{"hooks":{}}' > "${dest}/.github/hooks/team.json"
   echo "# old loadout stop gate" > "${dest}/scripts/hooks/stop-gate.sh"
   echo "# team-owned-prompt-hook" > "${dest}/scripts/hooks/user-prompt-record.sh"
+  mkdir -p "${dest}/.github/skills/repository-template/assets"
+  echo "# Retired skill" > "${dest}/.github/skills/repository-template/SKILL.md"
+  echo "generated" > "${dest}/.github/skills/repository-template/assets/x.txt"
 
   git -C "${dest}" init -q
   git -C "${dest}" add scripts/hooks/user-prompt-record.sh

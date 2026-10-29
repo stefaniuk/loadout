@@ -392,6 +392,7 @@ function copilot-apply() {
     subset-skip "prompts"
   fi
   if [[ "${SUBSET_SKILLS}" == "true" ]]; then
+    remove-legacy-skill-dirs "${destination}"
     copilot-copy-skills "${destination}"
   else
     subset-skip "skills"

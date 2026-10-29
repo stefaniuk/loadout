@@ -52,6 +52,12 @@ LEGACY_HOOK_FILES=(
   "scripts/hooks/user-prompt-record.sh"
 )
 
+# Skill directories that older loadout versions installed and loadout no longer
+# ships.
+LEGACY_SKILL_DIRS=(
+  ".github/skills/repository-template"
+)
+
 # ==============================================================================
 
 # Print an informational message.
@@ -212,38 +218,77 @@ function destination-git-state() {
   return 0
 }
 
-# Remove the hook files that older loadout versions installed in a destination.
-# A file the destination tracks in git is its own, so it is kept with a notice,
-# as is every file when git cannot tell what is tracked, or a file that a link
-# places outside the destination.
+# Remove the hook files that older loadout versions installed in a destination,
+# as 'is-removable-legacy-path' allows.
 # Arguments:
 #   $1=[destination directory path]
 function remove-legacy-hook-files() {
 
   local destination="$1"
-  local rel_path git_state real_destination parent
+  local rel_path git_state real_destination
 
   real_destination="$(cd "${destination}" 2> /dev/null && pwd -P)" || return 0
   git_state="$(destination-git-state "${destination}")"
   for rel_path in "${LEGACY_HOOK_FILES[@]}"; do
     [[ -e "${destination}/${rel_path}" || -L "${destination}/${rel_path}" ]] || continue
-    parent="$(cd "$(dirname "${destination}/${rel_path}")" && pwd -P)" || continue
-    if [[ "${parent}" != "${real_destination}/"* ]]; then
-      print-info "Keeping ${destination}/${rel_path}, which a link places outside the destination"
-      continue
-    fi
-    if [[ "${git_state}" == "unknown" ]]; then
-      print-info "Keeping ${destination}/${rel_path}, as git cannot tell whether the destination tracks it. Remove it if it is the old loadout hook"
-      continue
-    fi
-    if [[ "${git_state}" == "repository" ]] && is-destination-owned "${destination}" "${rel_path}"; then
-      print-info "Keeping ${destination}/${rel_path}, which the destination tracks. Remove it if it is the old loadout hook"
-      continue
-    fi
+    is-removable-legacy-path "${destination}" "${real_destination}" "${git_state}" "${rel_path}" hook || continue
     print-info "Removing old loadout hook file ${destination}/${rel_path}"
     rm -f "${destination:?}/${rel_path}"
   done
   rmdir "${destination}/.github/hooks" 2> /dev/null || true
+
+  return 0
+}
+
+# Remove the skill directories that older loadout versions installed and loadout
+# no longer ships, as 'is-removable-legacy-path' allows.
+# Arguments:
+#   $1=[destination directory path]
+function remove-legacy-skill-dirs() {
+
+  local destination="$1"
+  local rel_path git_state real_destination
+
+  real_destination="$(cd "${destination}" 2> /dev/null && pwd -P)" || return 0
+  git_state="$(destination-git-state "${destination}")"
+  for rel_path in "${LEGACY_SKILL_DIRS[@]}"; do
+    [[ -e "${destination}/${rel_path}" || -L "${destination}/${rel_path}" ]] || continue
+    is-removable-legacy-path "${destination}" "${real_destination}" "${git_state}" "${rel_path}" skill || continue
+    print-info "Removing retired loadout skill ${destination}/${rel_path}"
+    rm -rf "${destination:?}/${rel_path:?}"
+  done
+
+  return 0
+}
+
+# Check whether a path that older loadout versions installed may be removed. A
+# path the destination tracks in git is its own, so it is kept with a notice,
+# as is every path when git cannot tell what is tracked, or a path that a link
+# places outside the destination.
+# Arguments:
+#   $1=[destination directory path]
+#   $2=[destination directory path with links resolved]
+#   $3=[git state, as 'destination-git-state' prints it]
+#   $4=[relative path]
+#   $5=[kind of artefact, used in notices, for example 'hook']
+function is-removable-legacy-path() {
+
+  local destination="$1" real_destination="$2" git_state="$3" rel_path="$4" kind="$5"
+  local parent
+
+  parent="$(cd "$(dirname "${destination}/${rel_path}")" && pwd -P)" || return 1
+  if [[ "${parent}" != "${real_destination}/"* ]]; then
+    print-info "Keeping ${destination}/${rel_path}, which a link places outside the destination"
+    return 1
+  fi
+  if [[ "${git_state}" == "unknown" ]]; then
+    print-info "Keeping ${destination}/${rel_path}, as git cannot tell whether the destination tracks it. Remove it if it is the old loadout ${kind}"
+    return 1
+  fi
+  if [[ "${git_state}" == "repository" ]] && is-destination-owned "${destination}" "${rel_path}"; then
+    print-info "Keeping ${destination}/${rel_path}, which the destination tracks. Remove it if it is the old loadout ${kind}"
+    return 1
+  fi
 
   return 0
 }
