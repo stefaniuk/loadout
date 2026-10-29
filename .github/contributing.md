@@ -1,6 +1,8 @@
 # Contributing to Prompt Files
 
-Thank you for your interest in contributing to this prompt library! This guide will help you understand how to add, improve, or extend prompts, instructions, agents, and skills.
+Thank you for your interest in contributing to this prompt library! This guide
+will help you understand how to add, improve, or extend prompts, instructions,
+agents, and skills.
 
 ---
 
@@ -82,7 +84,8 @@ Thank you for your interest in contributing to this prompt library! This guide w
 
 ## 🧭 Quickstart Chooser
 
-Not sure which artefact to create? Use this **"I want to do X → use Y"** table to jump straight to the right quickstart block.
+Not sure which artefact to create? Use this **"I want to do X → use Y"** table
+to jump straight to the right quickstart block.
 
 | 🎯 I want to…                                                  | 📦 Use this artefact | 🚀 Jump to                                          |
 | -------------------------------------------------------------- | -------------------- | --------------------------------------------------- |
@@ -93,7 +96,8 @@ Not sure which artefact to create? Use this **"I want to do X → use Y"** table
 | Automate per-edit feedback (lint after edit, block on stop)    | **Hook**             | [Hooks Quickstart](#quickstart-hooks)               |
 | Document an architectural or technology decision               | **ADR**              | See [docs/adr/](../docs/adr/)                       |
 
-For a deeper decision matrix (when to pick a Skill over a Prompt, etc.), see [docs/architecture.md](../docs/architecture.md).
+For a deeper decision matrix (when to pick a Skill over a Prompt, etc.), see
+[docs/architecture.md](../docs/architecture.md).
 
 ---
 
@@ -154,9 +158,12 @@ Single-purpose prompt files that guide Copilot through specific tasks.
 - Task requiring specific structure or format
 - Process with defined steps or checklist
 
-**File naming:** `<prefix>.<category-or-action>.prompt.md` (prefix + category + verb)
+**File naming:** `<prefix>.<category-or-action>.prompt.md` (prefix + category +
+verb)
 
-Examples: `architecture.01-repository-map.prompt.md`, `review.speckit-code.prompt.md`, `util.gh-pr.prompt.md`, `enforce.python.prompt.md`
+Examples: `architecture.01-repository-map.prompt.md`,
+`review.speckit-code.prompt.md`, `util.gh-pr.prompt.md`,
+`enforce.python.prompt.md`
 
 ### Instructions (`.github/instructions/*.instructions.md`)
 
@@ -219,17 +226,27 @@ Bundled capabilities with supporting assets (templates, examples, data).
 
 ## 🚀 Quickstart Templates
 
-Copy-paste starters for each artefact type. Each block follows the same shape: **when to choose · minimal template · required fields · pre-PR checklist · typical review failures**.
+Copy-paste starters for each artefact type. Each block follows the same shape:
+**when to choose · minimal template · required fields · pre-PR checklist ·
+typical review failures**.
 
-> **Frontmatter authority:** the canonical frontmatter schema for every artefact type lives in [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type). The templates below are the smallest valid shape; consult conventions for the full field reference.
+> **Frontmatter authority:** the canonical frontmatter schema for every artefact
+> type lives in
+> [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
+> The templates below are the smallest valid shape; consult conventions for the
+> full field reference.
 
 <a id="quickstart-instructions"></a>
 
 ### 📋 Instructions Quickstart
 
-**When to choose this artefact.** You need language/framework/tool rules that VS Code auto-applies to matching files (e.g. all `**/*.py`). Rules must be order-independent and additive. See the [artefact decision matrix](../docs/architecture.md) for borderline cases.
+**When to choose this artefact.** You need language/framework/tool rules that VS
+Code auto-applies to matching files (e.g. all `**/*.py`). Rules must be
+order-independent and additive. See the
+[artefact decision matrix](../docs/architecture.md) for borderline cases.
 
-**Minimal starter template** - save as `.github/instructions/<technology>.instructions.md`:
+**Minimal starter template** - save as
+`.github/instructions/<technology>.instructions.md`:
 
 ````markdown
 ---
@@ -261,29 +278,41 @@ These instructions define the default engineering approach for <scope>. They are
 ```
 ````
 
-**Required fields and naming constraints.** `applyTo` glob; `description` ≤ 120 chars; filename `<technology>.instructions.md`; every normative rule tagged `[XX-YYY-NNN]`. Full schema: [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
+**Required fields and naming constraints.** `applyTo` glob; `description` ≤ 120
+chars; filename `<technology>.instructions.md`; every normative rule tagged
+`[XX-YYY-NNN]`. Full schema:
+[docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
 
 **Pre-PR validation checklist.**
 
 - [ ] `applyTo` glob is **as tight as possible** (no `**/*` unless truly global)
-- [ ] Every rule has a unique `[XX-YYY-NNN]` identifier and appears in the Quick Reference table
-- [ ] No contradictions with other instruction files whose `applyTo` overlaps yours
+- [ ] Every rule has a unique `[XX-YYY-NNN]` identifier and appears in the Quick
+      Reference table
+- [ ] No contradictions with other instruction files whose `applyTo` overlaps
+      yours
 - [ ] `make lint && make test` pass with zero warnings
-- [ ] Cross-linked from `.github/instructions/README.md` if it's a new technology
+- [ ] Cross-linked from `.github/instructions/README.md` if it's a new
+      technology
 
 **Typical review failures.**
 
 - Overly broad `applyTo` causing rules to bleed into unrelated files
-- Imperative "do X before Y" phrasing that breaks when rules load in a different order
-- Duplicate or missing identifiers, or identifiers not surfaced in the Quick Reference
+- Imperative "do X before Y" phrasing that breaks when rules load in a different
+  order
+- Duplicate or missing identifiers, or identifiers not surfaced in the Quick
+  Reference
 
 <a id="quickstart-prompts"></a>
 
 ### ✨ Prompts Quickstart
 
-**When to choose this artefact.** You have a **single repeatable task** (review, generate, refactor, audit) invoked on demand via `/<prompt-name>`. If it needs templates, multi-file assets, or branching logic, prefer a Skill instead. See [docs/architecture.md](../docs/architecture.md).
+**When to choose this artefact.** You have a **single repeatable task** (review,
+generate, refactor, audit) invoked on demand via `/<prompt-name>`. If it needs
+templates, multi-file assets, or branching logic, prefer a Skill instead. See
+[docs/architecture.md](../docs/architecture.md).
 
-**Minimal starter template** - save as `.github/prompts/<prefix>.<action>.prompt.md`:
+**Minimal starter template** - save as
+`.github/prompts/<prefix>.<action>.prompt.md`:
 
 ````markdown
 ---
@@ -317,7 +346,11 @@ $ARGUMENTS
 ```
 ````
 
-**Required fields and naming constraints.** `description` (required, ≤ 120 chars); `agent` and `argument-hint` optional; filename `<prefix>.<category-or-action>.prompt.md` (e.g. `enforce.python.prompt.md`, `review.speckit-code.prompt.md`). Full schema: [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
+**Required fields and naming constraints.** `description` (required, ≤ 120
+chars); `agent` and `argument-hint` optional; filename
+`<prefix>.<category-or-action>.prompt.md` (e.g. `enforce.python.prompt.md`,
+`review.speckit-code.prompt.md`). Full schema:
+[docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
 
 **Pre-PR validation checklist.**
 
@@ -329,7 +362,8 @@ $ARGUMENTS
 
 **Typical review failures.**
 
-- Prompt drifts into instruction-territory (rules that should live in `.github/instructions/`)
+- Prompt drifts into instruction-territory (rules that should live in
+  `.github/instructions/`)
 - Vague "improve this code" steps without success criteria
 - Missing `description` - prompt is then invisible in the Copilot picker
 
@@ -337,9 +371,13 @@ $ARGUMENTS
 
 ### 🤖 Agents Quickstart
 
-**When to choose this artefact.** You're building a **multi-step workflow with handoffs** between custom agents. For Spec Kit lifecycle stages, prefer the `speckit-*` skills. For one-shot work, a Prompt is enough. See [docs/architecture.md](../docs/architecture.md).
+**When to choose this artefact.** You're building a **multi-step workflow with
+handoffs** between custom agents. For Spec Kit lifecycle stages, prefer the
+`speckit-*` skills. For one-shot work, a Prompt is enough. See
+[docs/architecture.md](../docs/architecture.md).
 
-**Minimal starter template** - save as `.github/agents/<namespace>.<action>.agent.md`:
+**Minimal starter template** - save as
+`.github/agents/<namespace>.<action>.agent.md`:
 
 ````markdown
 ---
@@ -377,7 +415,11 @@ handoffs:
 ```
 ````
 
-**Required fields and naming constraints.** `description` (required); `tools` array scoped to the **minimum** needed; `handoffs` if the agent participates in a chain; filename `<slug>.agent.md` or `<namespace>.<action>.agent.md` (for example `docs-review.agent.md`). Full schema: [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
+**Required fields and naming constraints.** `description` (required); `tools`
+array scoped to the **minimum** needed; `handoffs` if the agent participates in
+a chain; filename `<slug>.agent.md` or `<namespace>.<action>.agent.md` (for
+example `docs-review.agent.md`). Full schema:
+[docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
 
 **Pre-PR validation checklist.**
 
@@ -389,7 +431,8 @@ handoffs:
 
 **Typical review failures.**
 
-- Overlapping responsibility with an existing agent (should extend, not duplicate)
+- Overlapping responsibility with an existing agent (should extend, not
+  duplicate)
 - Broad `tools` grant that violates least-privilege
 - Handoffs that point to non-existent agents (causes silent dead-ends)
 
@@ -397,7 +440,10 @@ handoffs:
 
 ### 🧠 Skills Quickstart
 
-**When to choose this artefact.** You're packaging a **capability + supporting assets** (templates, examples, datasets, scripts) that an agent or prompt can invoke. If you only need text guidance, a Prompt is lighter. See [docs/architecture.md](../docs/architecture.md).
+**When to choose this artefact.** You're packaging a **capability + supporting
+assets** (templates, examples, datasets, scripts) that an agent or prompt can
+invoke. If you only need text guidance, a Prompt is lighter. See
+[docs/architecture.md](../docs/architecture.md).
 
 **Minimal starter structure** - create `.github/skills/<skill-name>/`:
 
@@ -449,7 +495,10 @@ allowed-tools: []
 ```
 ````
 
-**Required fields and naming constraints.** `name` must match the directory name; `description` (required, must explain _when_ to invoke); `version` follows semver; `allowed-tools` scoped to minimum. Full schema: [docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
+**Required fields and naming constraints.** `name` must match the directory
+name; `description` (required, must explain _when_ to invoke); `version` follows
+semver; `allowed-tools` scoped to minimum. Full schema:
+[docs/conventions.md](../docs/conventions.md#frontmatter-schema-by-artefact-type).
 
 **Pre-PR validation checklist.**
 
@@ -469,19 +518,31 @@ allowed-tools: []
 
 ### 🪝 Hooks Quickstart
 
-**Hooks are not part of loadout.** The Copilot hook implementation and the quality gate that blocks the agent from finishing live in repository-template, in `.github/hooks/` and `scripts/quality/`. Add or change hooks there.
+**Hooks are not part of loadout.** The Copilot hook implementation and the
+quality gate that blocks the agent from finishing live in repository-template,
+in `.github/hooks/` and `scripts/quality/`. Add or change hooks there.
 
 <a id="instruction-precedence"></a>
 
 ## ⚖️ Instruction Precedence Quick Reference
 
-VS Code Copilot merges every instruction file whose `applyTo` glob matches the current file. The full precedence rules live in [docs/conventions.md](../docs/conventions.md#instruction-precedence-and-merge-semantics). Practical rules of thumb:
+VS Code Copilot merges every instruction file whose `applyTo` glob matches the
+current file. The full precedence rules live in
+[docs/conventions.md](../docs/conventions.md#instruction-precedence-and-merge-semantics).
+Practical rules of thumb:
 
-- **Write order-independent rules.** Never assume file A loads before file B - both apply simultaneously.
-- **Scope `applyTo` tightly.** A narrow glob (`src/api/**/*.py`) wins fewer conflicts than `**/*.py`.
-- **Avoid contradictions across files.** If two files target the same path, their rules must be additive. Resolve conflicts by merging or splitting `applyTo`.
-- **Verify the loaded set in VS Code.** Open a target file → run _Developer: Show Language Server Output_ or check the Copilot diagnostics panel to confirm which instruction files were actually applied.
-- **Global rules go in `.github/copilot-instructions.md`.** Per-language rules go in `.github/instructions/*.instructions.md`.
+- **Write order-independent rules.** Never assume file A loads before file B -
+  both apply simultaneously.
+- **Scope `applyTo` tightly.** A narrow glob (`src/api/**/*.py`) wins fewer
+  conflicts than `**/*.py`.
+- **Avoid contradictions across files.** If two files target the same path,
+  their rules must be additive. Resolve conflicts by merging or splitting
+  `applyTo`.
+- **Verify the loaded set in VS Code.** Open a target file → run _Developer:
+  Show Language Server Output_ or check the Copilot diagnostics panel to confirm
+  which instruction files were actually applied.
+- **Global rules go in `.github/copilot-instructions.md`.** Per-language rules
+  go in `.github/instructions/*.instructions.md`.
 
 ---
 
@@ -539,7 +600,8 @@ make lint && make test
 
 ### Content Checklist
 
-- [ ] **British English** - colour, behaviour, organisation (not color, behavior, organization)
+- [ ] **British English** - colour, behaviour, organisation (not color,
+      behavior, organization)
 - [ ] **Simple language** - avoid jargon where possible
 - [ ] **Consistent formatting** - follow existing patterns
 - [ ] **No sensitive data** - no credentials, tokens, or personal information

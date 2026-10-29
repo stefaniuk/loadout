@@ -1,6 +1,7 @@
 # Step 06 - Consolidated Checklists
 
 **Output:** `specs/product/checklists/` (optional)
+
 **Dependencies:** steps 01–05 plus source feature checklists.
 
 Merge review checklists from every `specs/NNN-*/checklists/`, deduplicating
@@ -11,19 +12,19 @@ This step is conditional. In Spec Kit, checklists are optional outputs of
 
 ## Discovery
 
-1. Enumerate every file under every `specs/NNN-*/checklists/`.
-   If none exist, stop and report that step 06 is skipped.
-2. Classify by checklist purpose: spec review, code review, test review,
-   release readiness, security, accessibility, performance, etc.
-3. Map each item to the consolidated requirement (`REQ-PRD-NNN`),
-   entity (`ENT-PRD-NNN`), or contract it validates.
+1. Enumerate every file under every `specs/NNN-*/checklists/`. If none exist,
+   stop and report that step 06 is skipped.
+2. Classify by checklist purpose: spec review, code review, test review, release
+   readiness, security, accessibility, performance, etc.
+3. Map each item to the consolidated requirement (`REQ-PRD-NNN`), entity
+   (`ENT-PRD-NNN`), or contract it validates.
 
 ## Authoring
 
 1. One checklist file per purpose: `spec-review.md`, `code-review.md`,
    `test-review.md`, `release-readiness.md`, …
-2. Deduplicate items. Where two items overlap partially, keep the more
-   specific wording.
+2. Deduplicate items. Where two items overlap partially, keep the more specific
+   wording.
 3. Treat consolidated checklists as review instruments, not historical status
    snapshots. Do not mechanically copy `[x]` state from source feature
    checklists; leave items unchecked unless the current consolidation run

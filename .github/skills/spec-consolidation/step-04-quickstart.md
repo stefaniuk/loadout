@@ -1,12 +1,13 @@
 # Step 04 - Consolidated Quickstart
 
 **Output:** `specs/product/quickstart.md`
+
 **Dependencies:** steps 01–02.
 
-Produce a single operator on-ramp covering every shipped CLI and library
-entry point, derived from every `specs/NNN-*/quickstart.md` and confirmed
-against the repository's current entry-point declarations and selected
-baseline implementation.
+Produce a single operator on-ramp covering every shipped CLI and library entry
+point, derived from every `specs/NNN-*/quickstart.md` and confirmed against the
+repository's current entry-point declarations and selected baseline
+implementation.
 
 Default to the current working tree at `HEAD` for command validation. Only use
 the default branch when the user explicitly asks for a shipped-only baseline.
@@ -17,8 +18,8 @@ the default branch when the user explicitly asks for a shipped-only baseline.
 2. Read the current repository bootstrap and operator guidance surface:
    onboarding docs, automation guidance, entry-point declarations, runtime or
    packaging metadata, and equivalent sources of install and invocation truth.
-3. Read the repository's entry-point declarations to enumerate the actual
-   CLI, service, or library entry points.
+3. Read the repository's entry-point declarations to enumerate the actual CLI,
+   service, or library entry points.
 4. For each entry point, confirm the implementing component in the selected
    baseline.
 5. Walk relevant validation artefacts to confirm example invocations still
@@ -26,8 +27,8 @@ the default branch when the user explicitly asks for a shipped-only baseline.
 
 ## Authoring
 
-1. Single page with a `Prerequisites` section, then one section per entry
-   point (`<entry-point-a>`, `<entry-point-b>`, …).
+1. Single page with a `Prerequisites` section, then one section per entry point
+   (`<entry-point-a>`, `<entry-point-b>`, …).
 2. Prefer the current repository bootstrap and operator guidance surface when
    source quickstarts disagree with current onboarding, automation, or
    entry-point declarations. Record the stale source quickstart details in
@@ -40,8 +41,7 @@ the default branch when the user explicitly asks for a shipped-only baseline.
 5. Examples MUST be copy-pasteable and use realistic but small inputs.
 6. Cite the implementing component for each entry point.
 7. Drop any commands or options that no longer exist in the selected baseline;
-   log them under
-   research.md drift if they appeared in source quickstarts.
+   log them under research.md drift if they appeared in source quickstarts.
 
 ## Template (skeleton)
 
@@ -76,7 +76,7 @@ the default branch when the user explicitly asks for a shipped-only baseline.
 ## Definition of Done
 
 - Exactly one `quickstart.md` exists under `specs/product/`.
-- Every documented entry point, command, option, or flag exists in the
-  selected baseline.
+- Every documented entry point, command, option, or flag exists in the selected
+  baseline.
 - Every example runs against the selected baseline.
 - No content references obsolete or planned-but-unshipped commands.

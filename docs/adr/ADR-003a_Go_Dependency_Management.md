@@ -29,7 +29,11 @@
 
 ## Context 🧭
 
-The user asked for a Go tech stack entry in the Tech Radar. Each category must have an ADR comparing at least five alternatives and selecting the best option. The Go toolchain has a standard dependency workflow and the decision should align with Go 1.25.7 (latest stable on 2026-02-08) and with low-maintenance, reproducible builds.
+The user asked for a Go tech stack entry in the Tech Radar. Each category must
+have an ADR comparing at least five alternatives and selecting the best option.
+The Go toolchain has a standard dependency workflow and the decision should
+align with Go 1.25.7 (latest stable on 2026-02-08) and with low-maintenance,
+reproducible builds.
 
 ## Decision ✅
 
@@ -51,7 +55,8 @@ The user asked for a Go tech stack entry in the Tech Radar. Each category must h
 
 #### Option A: Go modules (go mod) (Selected) ✅
 
-Use [`go mod`](https://github.com/golang/go) with `go.mod` and `go.sum`, optionally with `go mod vendor` for offline builds.
+Use [`go mod`](https://github.com/golang/go) with `go.mod` and `go.sum`,
+optionally with `go mod vendor` for offline builds.
 
 | Criteria                | Score/Notes                                              |
 | ----------------------- | -------------------------------------------------------- |
@@ -63,7 +68,8 @@ Use [`go mod`](https://github.com/golang/go) with `go.mod` and `go.sum`, optiona
 
 #### Option B: dep (deprecated)
 
-Use [`dep`](https://github.com/golang/dep) (deprecated), a legacy dependency manager no longer maintained.
+Use [`dep`](https://github.com/golang/dep) (deprecated), a legacy dependency
+manager no longer maintained.
 
 | Criteria                | Score/Notes                           |
 | ----------------------- | ------------------------------------- |
@@ -77,7 +83,8 @@ Use [`dep`](https://github.com/golang/dep) (deprecated), a legacy dependency man
 
 #### Option C: Glide (deprecated)
 
-Use [`Glide`](https://github.com/Masterminds/glide) (deprecated), a legacy vendoring tool for pre-modules workflows.
+Use [`Glide`](https://github.com/Masterminds/glide) (deprecated), a legacy
+vendoring tool for pre-modules workflows.
 
 | Criteria                | Score/Notes                         |
 | ----------------------- | ----------------------------------- |
@@ -87,11 +94,13 @@ Use [`Glide`](https://github.com/Masterminds/glide) (deprecated), a legacy vendo
 | Operational complexity  | ⭐⭐ Requires manual upkeep         |
 | Effort                  | M                                   |
 
-**Why not chosen**: Deprecated and incompatible with modern module-aware tooling.
+**Why not chosen**: Deprecated and incompatible with modern module-aware
+tooling.
 
 #### Option D: govendor
 
-Use [`govendor`](https://github.com/kardianos/govendor), a vendoring tool with a manifest file.
+Use [`govendor`](https://github.com/kardianos/govendor), a vendoring tool with a
+manifest file.
 
 | Criteria                | Score/Notes                               |
 | ----------------------- | ----------------------------------------- |
@@ -105,7 +114,9 @@ Use [`govendor`](https://github.com/kardianos/govendor), a vendoring tool with a
 
 #### Option E: Bazel with rules_go
 
-Use [`Bazel`](https://github.com/bazelbuild/bazel) with [`rules_go`](https://github.com/bazelbuild/rules_go) for dependency and build management.
+Use [`Bazel`](https://github.com/bazelbuild/bazel) with
+[`rules_go`](https://github.com/bazelbuild/rules_go) for dependency and build
+management.
 
 | Criteria                | Score/Notes                                            |
 | ----------------------- | ------------------------------------------------------ |
@@ -115,15 +126,22 @@ Use [`Bazel`](https://github.com/bazelbuild/bazel) with [`rules_go`](https://git
 | Operational complexity  | ⭐ Low, higher build system complexity                 |
 | Effort                  | L to XL                                                |
 
-**Why not chosen**: Too heavy for the baseline tech stack and increases maintenance cost.
+**Why not chosen**: Too heavy for the baseline tech stack and increases
+maintenance cost.
 
 ### Outcome 🏁
 
-Adopt Go modules (`go mod`) as the default dependency management approach. Vendoring via `go mod vendor` is allowed only when offline or regulated build environments require it. This decision is reversible, but only if Go changes the default workflow or a build system requirement emerges.
+Adopt Go modules (`go mod`) as the default dependency management approach.
+Vendoring via `go mod vendor` is allowed only when offline or regulated build
+environments require it. This decision is reversible, but only if Go changes the
+default workflow or a build system requirement emerges.
 
 ### Rationale 🧠
 
-Go modules are the official and most widely supported approach. They deliver strong reproducibility via `go.sum`, work with standard tooling, and keep the workflow simple. The alternatives are either deprecated, too niche, or impose unnecessary operational burden.
+Go modules are the official and most widely supported approach. They deliver
+strong reproducibility via `go.sum`, work with standard tooling, and keep the
+workflow simple. The alternatives are either deprecated, too niche, or impose
+unnecessary operational burden.
 
 ## Consequences ⚖️
 

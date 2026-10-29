@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-Rust tools need a CLI parsing library that supports subcommands, clear help output, and a stable API.
+Rust tools need a CLI parsing library that supports subcommands, clear help
+output, and a stable API.
 
 ## Decision ✅
 
@@ -94,7 +95,8 @@ Use [`argh`](https://github.com/google/argh) for lightweight parsing.
 
 #### Option D: docopt
 
-Use [`docopt`](https://github.com/docopt/docopt.rs) for docstring-driven parsing.
+Use [`docopt`](https://github.com/docopt/docopt.rs) for docstring-driven
+parsing.
 
 | Criteria     | Score/Notes                        |
 | ------------ | ---------------------------------- |
@@ -124,11 +126,13 @@ Use [`pico-args`](https://github.com/RazrFalcon/pico-args) for minimal parsing.
 
 ### Outcome 🏁
 
-Adopt `clap` as the default CLI argument parsing library. This decision is reversible if a better standard emerges.
+Adopt `clap` as the default CLI argument parsing library. This decision is
+reversible if a better standard emerges.
 
 ### Rationale 🧠
 
-Clap provides strong derive-based ergonomics, robust help output, and wide adoption, making it the safest default.
+Clap provides strong derive-based ergonomics, robust help output, and wide
+adoption, making it the safest default.
 
 ## Consequences ⚖️
 

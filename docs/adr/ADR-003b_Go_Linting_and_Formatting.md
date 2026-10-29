@@ -29,7 +29,9 @@
 
 ## Context 🧭
 
-The Go tech stack needs a standard approach for linting and formatting that is consistent, low friction, and easy to run in CI. The choice should align with Go 1.25.7 and avoid deprecated tooling.
+The Go tech stack needs a standard approach for linting and formatting that is
+consistent, low friction, and easy to run in CI. The choice should align with Go
+1.25.7 and avoid deprecated tooling.
 
 ## Decision ✅
 
@@ -51,7 +53,9 @@ The Go tech stack needs a standard approach for linting and formatting that is c
 
 #### Option A: gofmt + golangci-lint (Selected) ✅
 
-Use [`gofmt`](https://github.com/golang/go) for formatting and [`golangci-lint`](https://github.com/golangci/golangci-lint) as the lint runner with a curated rule set.
+Use [`gofmt`](https://github.com/golang/go) for formatting and
+[`golangci-lint`](https://github.com/golangci/golangci-lint) as the lint runner
+with a curated rule set.
 
 | Criteria               | Score/Notes                                |
 | ---------------------- | ------------------------------------------ |
@@ -63,7 +67,9 @@ Use [`gofmt`](https://github.com/golang/go) for formatting and [`golangci-lint`]
 
 #### Option B: gofmt + staticcheck + revive
 
-Run [`gofmt`](https://github.com/golang/go), [`staticcheck`](https://github.com/dominikh/go-tools), and [`revive`](https://github.com/mgechev/revive) separately.
+Run [`gofmt`](https://github.com/golang/go),
+[`staticcheck`](https://github.com/dominikh/go-tools), and
+[`revive`](https://github.com/mgechev/revive) separately.
 
 | Criteria               | Score/Notes                        |
 | ---------------------- | ---------------------------------- |
@@ -73,11 +79,13 @@ Run [`gofmt`](https://github.com/golang/go), [`staticcheck`](https://github.com/
 | Maintenance            | ⭐⭐ More moving parts             |
 | Effort                 | M                                  |
 
-**Why not chosen**: Extra configuration and tool management without clear benefits over the aggregate runner.
+**Why not chosen**: Extra configuration and tool management without clear
+benefits over the aggregate runner.
 
 #### Option C: gofumpt + golangci-lint
 
-Use stricter formatting with [`gofumpt`](https://github.com/mvdan/gofumpt) and linting via [`golangci-lint`](https://github.com/golangci/golangci-lint).
+Use stricter formatting with [`gofumpt`](https://github.com/mvdan/gofumpt) and
+linting via [`golangci-lint`](https://github.com/golangci/golangci-lint).
 
 | Criteria               | Score/Notes                              |
 | ---------------------- | ---------------------------------------- |
@@ -87,11 +95,14 @@ Use stricter formatting with [`gofumpt`](https://github.com/mvdan/gofumpt) and l
 | Maintenance            | ⭐⭐ Active, but more formatting debates |
 | Effort                 | M                                        |
 
-**Why not chosen**: Adds extra style rules that are not broadly standard, increasing review friction.
+**Why not chosen**: Adds extra style rules that are not broadly standard,
+increasing review friction.
 
 #### Option D: gofmt + go vet + golint
 
-Use [`gofmt`](https://github.com/golang/go) with [`go vet`](https://github.com/golang/go) and the deprecated [`golint`](https://github.com/golang/lint).
+Use [`gofmt`](https://github.com/golang/go) with
+[`go vet`](https://github.com/golang/go) and the deprecated
+[`golint`](https://github.com/golang/lint).
 
 | Criteria               | Score/Notes                    |
 | ---------------------- | ------------------------------ |
@@ -119,11 +130,15 @@ Rely on [`gofmt`](https://github.com/golang/go) formatting without linting.
 
 ### Outcome 🏁
 
-Adopt `gofmt` for formatting and `golangci-lint` for linting with a curated rule set. This is reversible if the Go community standard shifts or the lint runner becomes unmaintained.
+Adopt `gofmt` for formatting and `golangci-lint` for linting with a curated rule
+set. This is reversible if the Go community standard shifts or the lint runner
+becomes unmaintained.
 
 ### Rationale 🧠
 
-`gofmt` is the canonical formatter, and `golangci-lint` provides strong lint coverage with manageable performance and configuration. This combination balances standard practice with practical quality controls.
+`gofmt` is the canonical formatter, and `golangci-lint` provides strong lint
+coverage with manageable performance and configuration. This combination
+balances standard practice with practical quality controls.
 
 ## Consequences ⚖️
 

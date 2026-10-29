@@ -8,11 +8,15 @@ version: 1.0.0
 
 # Enforcement Audit Skill
 
-This skill runs a structured compliance audit for a specific technology against its instruction file. It replaces the individual `enforce.*` prompts with a single parameterised workflow.
+This skill runs a structured compliance audit for a specific technology against
+its instruction file. It replaces the individual `enforce.*` prompts with a
+single parameterised workflow.
 
 ## Technology Resolution
 
-Resolve the technology from the user's input (`$ARGUMENTS`). Match against the table below to determine the instruction file, file patterns, rule prefix, and output paths.
+Resolve the technology from the user's input (`$ARGUMENTS`). Match against the
+table below to determine the instruction file, file patterns, rule prefix, and
+output paths.
 
 | Technology            | Instruction file                        | File patterns                                                  | Rule prefix | Inventory path                                         | Plan path                                                                |
 | --------------------- | --------------------------------------- | -------------------------------------------------------------- | ----------- | ------------------------------------------------------ | ------------------------------------------------------------------------ |
@@ -29,84 +33,122 @@ Resolve the technology from the user's input (`$ARGUMENTS`). Match against the t
 | playwright-python     | `playwright-python.instructions.md`     | `*.py`                                                         | PPW         | `.copilot/analysis/playwright-python-inventory.md`     | `.copilot/analysis/playwright-python-instructions-alignment-plan.md`     |
 | playwright-typescript | `playwright-typescript.instructions.md` | `*.ts`, `*.tsx`                                                | PTW         | `.copilot/analysis/playwright-typescript-inventory.md` | `.copilot/analysis/playwright-typescript-instructions-alignment-plan.md` |
 
-If the technology is not in this table, inform the user and list the supported technologies.
+If the technology is not in this table, inform the user and list the supported
+technologies.
 
 ## Mandatory Preparation
 
 Before starting the audit:
 
-1. Read the [constitution](../../../.specify/memory/constitution.md) for non-negotiable rules, if you have not done already.
-2. Read the instruction file for the resolved technology (from the table above, located in `.github/instructions/`).
-3. Note the reference identifiers (e.g. `[PY-QR-001]`) - you must assess compliance against each of them.
-4. Read the [architecture overview instructions](../../instructions/includes/architecture-baseline.include.md) and adopt the approach for gathering supporting evidence.
+1. Read the [constitution](../../../.specify/memory/constitution.md) for
+   non-negotiable rules, if you have not done already.
+2. Read the instruction file for the resolved technology (from the table above,
+   located in `.github/instructions/`).
+3. Note the reference identifiers (e.g. `[PY-QR-001]`) - you must assess
+   compliance against each of them.
+4. Read the
+   [architecture overview instructions](../../instructions/includes/architecture-baseline.include.md)
+   and adopt the approach for gathering supporting evidence.
 
 ## Goal
 
-Enumerate every artefact of the resolved technology in the repository, detect any discrepancies against the instruction file, plan the refactor/rework workstream, implement the required changes, and confirm compliance.
+Enumerate every artefact of the resolved technology in the repository, detect
+any discrepancies against the instruction file, plan the refactor/rework
+workstream, implement the required changes, and confirm compliance.
 
 ## Discovery (run before writing)
 
 ### A. Enumerate scope
 
-1. Run `git ls-files` with the file patterns from the table above (and include glue files such as `Makefile`, CI configs) to capture the full footprint.
-2. Categorise each file by role (entrypoints, libraries, tests, configuration, tooling, etc.).
-3. Record locations that declare tooling to ensure instructions apply consistently.
+1. Run `git ls-files` with the file patterns from the table above (and include
+   glue files such as `Makefile`, CI configs) to capture the full footprint.
+2. Categorise each file by role (entrypoints, libraries, tests, configuration,
+   tooling, etc.).
+3. Record locations that declare tooling to ensure instructions apply
+   consistently.
 
 ### B. Load enforcement context
 
-1. Re-read the relevant sections of the instruction file for the features present.
-2. Note any repository ADRs or docs that explicitly override defaults; if none exist, assume the instructions are fully binding.
-3. Summarise any uncertainties as **Unknown from code - verify {topic} with maintainers** before proceeding.
+1. Re-read the relevant sections of the instruction file for the features
+   present.
+2. Note any repository ADRs or docs that explicitly override defaults; if none
+   exist, assume the instructions are fully binding.
+3. Summarise any uncertainties as **Unknown from code - verify {topic} with
+   maintainers** before proceeding.
 
 ## Steps
 
-> **Note:** On subsequent runs, check whether the artefacts produced by earlier executions (inventory and alignment plan) already exist and parse them so progress is cumulative rather than duplicated.
+> **Note:** On subsequent runs, check whether the artefacts produced by earlier
+> executions (inventory and alignment plan) already exist and parse them so
+> progress is cumulative rather than duplicated.
 
 ### 1) Build the artefact matrix
 
-1. Produce a table in the inventory path (from the table above) listing each file/folder, its role, and key instruction tags that apply.
+1. Produce a table in the inventory path (from the table above) listing each
+   file/folder, its role, and key instruction tags that apply.
 2. Highlight high-risk areas where divergence is most likely.
 
 ### 2) Detect discrepancies against instructions
 
 1. For each artefact and file, scan for violations of the instruction tags.
-2. Assess each artefact and file against compliance of each reference identifier from the instruction file.
-3. Capture findings with precise evidence links, formatted as `- Evidence: [path/to/file](path/to/file#L10-L40) - violates [{PREFIX}-XXX-NNN] because ...` (using the rule prefix from the table).
+2. Assess each artefact and file against compliance of each reference identifier
+   from the instruction file.
+3. Capture findings with precise evidence links, formatted as follows (using the
+   rule prefix from the table):
+
+   ```markdown
+   - Evidence: [path/to/file](path/to/file#L10-L40) - violates [{PREFIX}-XXX-NNN] because ...
+   ```
+
 4. Record unknowns explicitly using **Unknown from code - {action}**.
 
 ### 3) Plan refactoring and rework
 
 1. Group findings into actionable workstreams.
-2. For each workstream, provide: objective, files to touch, specific instruction tags satisfied, order of execution (prioritise safety-critical fixes first).
+2. For each workstream, provide: objective, files to touch, specific instruction
+   tags satisfied, order of execution (prioritise safety-critical fixes first).
 3. Store the plan in the plan path from the table above for traceability.
 
 ### 4) Implement the changes (iterative, safe batches)
 
-1. Execute the plan in small batches, keeping commits narrowly scoped and referencing instruction tags.
-2. Prefer refactors that move logic into shared modules, add missing tooling config, or adjust CLIs/APIs to match the contract.
-3. Update docs, Makefiles, CI, and configuration to keep guidance, automation, and behaviour in sync.
+1. Execute the plan in small batches, keeping commits narrowly scoped and
+   referencing instruction tags.
+2. Prefer refactors that move logic into shared modules, add missing tooling
+   config, or adjust CLIs/APIs to match the contract.
+3. Update docs, Makefiles, CI, and configuration to keep guidance, automation,
+   and behaviour in sync.
 
 ### 5) Validate quality gates and behavioural parity
 
-1. After each batch, run `make lint` and `make test`; iterate until all pass with zero errors or warnings.
-2. If additional technology-specific checks exist, run them when the touched areas require it.
-3. Document any failures and fixes in the plan file; unresolved issues must be tracked as blockers.
+1. After each batch, run `make lint` and `make test`; iterate until all pass
+   with zero errors or warnings.
+2. If additional technology-specific checks exist, run them when the touched
+   areas require it.
+3. Document any failures and fixes in the plan file; unresolved issues must be
+   tracked as blockers.
 
 ### 6) Summarise outcomes and next steps
 
-1. Produce a final enforcement report (append to the plan file) covering: resolved discrepancies, remaining gaps, follow-up actions.
-2. Confirm there are no lingering **Unknown from code** items; if any remain, turn them into explicit follow-ups.
+1. Produce a final enforcement report (append to the plan file) covering:
+   resolved discrepancies, remaining gaps, follow-up actions.
+2. Confirm there are no lingering **Unknown from code** items; if any remain,
+   turn them into explicit follow-ups.
 3. Share the plan/report with maintainers (e.g. via PR description).
 
 ## Output Requirements
 
 - Use concrete evidence links for every finding or change request.
 - Reference instruction identifiers when explaining discrepancies or fixes.
-- Keep activities broken into the steps above; do not skip steps even if the code appears compliant.
+- Keep activities broken into the steps above; do not skip steps even if the
+  code appears compliant.
 - Prefer automation (scripts, linters) over manual spot checks where feasible.
-- Maintain ASCII-only text unless the repository already contains Unicode in the touched files.
-- When information is missing, record **Unknown from code - {suggested action}** instead of guessing.
+- Maintain ASCII-only text unless the repository already contains Unicode in the
+  touched files.
+- When information is missing, record **Unknown from code - {suggested action}**
+  instead of guessing.
 
 ## Examples
 
-- [example-01-happy-path.md](./examples/example-01-happy-path.md) - a full `python` audit producing the inventory and alignment plan, implementing fixes across five workstreams, and validating with `make lint` and `make test`.
+- [example-01-happy-path.md](./examples/example-01-happy-path.md) - a full
+  `python` audit producing the inventory and alignment plan, implementing fixes
+  across five workstreams, and validating with `make lint` and `make test`.

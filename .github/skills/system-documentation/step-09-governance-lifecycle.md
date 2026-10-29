@@ -1,11 +1,10 @@
 # Step 09 - Governance and Lifecycle
 
-**Outputs:** `CHANGELOG.md`, `.github/SECURITY.md`,
-`.github/contributing.md` (or root `CONTRIBUTING.md` where the repository
-already uses that location), `.github/CODE_OF_CONDUCT.md`, and any
-upgrade-guide pages under `docs/how-to/` or `docs/operations/runbooks/`.
-**Dependencies:** step 01 (`README.md`, `docs/README.md`,
-`docs/conventions.md`, `docs/onboarding.md`).
+**Outputs:** `CHANGELOG.md`, `.github/SECURITY.md`, `.github/contributing.md`
+(or root `CONTRIBUTING.md` where the repository already uses that location),
+`.github/CODE_OF_CONDUCT.md`, and any upgrade-guide pages under `docs/how-to/`
+or `docs/operations/runbooks/`. **Dependencies:** step 01 (`README.md`,
+`docs/README.md`, `docs/conventions.md`, `docs/onboarding.md`).
 
 This step maintains the cross-cutting governance, security, contribution, and
 change-history artefacts that mature open-source repositories (for example
@@ -22,22 +21,21 @@ documentation alongside the Diátaxis core.
 | `.github/CODE_OF_CONDUCT.md` | Community behaviour policy                   | scope, expected behaviour, enforcement contact and process                                  | technical guidance                                              |
 | Upgrade guides               | Safe transition between significant versions | scope, breaking changes, ordered upgrade steps, verification, rollback                      | new-feature tutorials, conceptual essays, full reference tables |
 
-If the repository tracks releases through Git tags only, prefer
-`CHANGELOG.md` at the repository root with `Keep a Changelog`-style sections.
-If the repository publishes long-form release notes, store the templated
-notes under `docs/operations/` and reference them from `CHANGELOG.md`.
+If the repository tracks releases through Git tags only, prefer `CHANGELOG.md`
+at the repository root with `Keep a Changelog`-style sections. If the repository
+publishes long-form release notes, store the templated notes under
+`docs/operations/` and reference them from `CHANGELOG.md`.
 
-Upgrade guides live under `docs/how-to/` when they are version-agnostic
-recipes, and under `docs/operations/runbooks/` when they are
-safety-sensitive operator procedures. Link both directions from
-`CHANGELOG.md`.
+Upgrade guides live under `docs/how-to/` when they are version-agnostic recipes,
+and under `docs/operations/runbooks/` when they are safety-sensitive operator
+procedures. Link both directions from `CHANGELOG.md`.
 
 ## Discovery
 
 1. Confirm the current state of `CHANGELOG.md`, `.github/SECURITY.md`,
    `.github/contributing.md`, and `.github/CODE_OF_CONDUCT.md`.
-2. Inspect release tags, release notes, and `.github/` workflows to derive
-   the supported versions and the change-tracking style already in use.
+2. Inspect release tags, release notes, and `.github/` workflows to derive the
+   supported versions and the change-tracking style already in use.
 3. Identify any vulnerability reporting channel that the project relies on
    (private advisory, dedicated email, security team handle).
 4. Inventory breaking changes since the last documented release.
@@ -46,8 +44,8 @@ safety-sensitive operator procedures. Link both directions from
 
 ### `establish`
 
-1. Create the four governance files if they are missing, using minimal,
-   honest content backed by current repository practice.
+1. Create the four governance files if they are missing, using minimal, honest
+   content backed by current repository practice.
 2. Seed `CHANGELOG.md` with the present unreleased section and any
    already-shipped versions reconstructable from tags and release notes.
 3. Do not invent supported-version windows or disclosure SLAs that the
@@ -55,14 +53,14 @@ safety-sensitive operator procedures. Link both directions from
 
 ### `sync`
 
-1. Update `CHANGELOG.md` whenever a user-visible change ships; group entries
-   by type and reference the relevant feature spec, ADR, or PR.
-2. Update `.github/SECURITY.md` when the supported version window, the
-   reporting path, or the disclosure policy changes.
+1. Update `CHANGELOG.md` whenever a user-visible change ships; group entries by
+   type and reference the relevant feature spec, ADR, or PR.
+2. Update `.github/SECURITY.md` when the supported version window, the reporting
+   path, or the disclosure policy changes.
 3. Update `.github/contributing.md` when the contribution workflow, quality
    gates, or documentation rules change.
-4. Add or update upgrade guides whenever a release introduces breaking
-   changes, configuration migrations, or required operator action.
+4. Add or update upgrade guides whenever a release introduces breaking changes,
+   configuration migrations, or required operator action.
 
 ### `audit` and `pre-pr-review`
 

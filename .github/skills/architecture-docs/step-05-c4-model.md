@@ -6,7 +6,8 @@ Author the C4 model in LikeC4 (Context, Container, Component) - evidence-first.
 
 Create (or update) the C4 model in `.copilot/analysis/likec4/` using LikeC4 DSL.
 
-Also ensure the model is linked from the architecture overview at `.copilot/analysis/README.md`.
+Also ensure the model is linked from the architecture overview at
+`.copilot/analysis/README.md`.
 
 ## Discovery (run before writing)
 
@@ -27,11 +28,13 @@ Also ensure the model is linked from the architecture overview at `.copilot/anal
 ### B. Decide model scope (explicit)
 
 1. Decide:
-   - One **system** in scope (most repositories) **or** a small set of cooperating systems if the repo really contains them
+   - One **system** in scope (most repositories) **or** a small set of
+     cooperating systems if the repo really contains them
 2. Decide whether to model:
    - **Context** (always)
    - **Container** (always)
-   - **Component** (for the most architecturally significant containers - not all)
+   - **Component** (for the most architecturally significant containers - not
+     all)
 
 ## Steps
 
@@ -53,14 +56,17 @@ Create or update the following structure under `.copilot/analysis/likec4/`:
 Naming rules:
 
 - File names use kebab-case
-- Identifiers in DSL use camelCase or snake_case consistently (pick one and stick to it)
-- Reuse the **same names** as in `component-*.md` and `domain-*.md` (consistency rule)
+- Identifiers in DSL use camelCase or snake_case consistently (pick one and
+  stick to it)
+- Reuse the **same names** as in `component-*.md` and `domain-*.md` (consistency
+  rule)
 
 ### 2) Model - Context level
 
 In `model.c4`:
 
-1. Define **actors** (people, external automated systems) that interact with the system.
+1. Define **actors** (people, external automated systems) that interact with the
+   system.
 2. Define the **system** in scope.
 3. Define **external systems** (other systems the system in scope depends on).
 4. Define **relationships** between actors/systems and the system in scope:
@@ -68,25 +74,31 @@ In `model.c4`:
    - Purpose (one short phrase)
    - Protocol/technology (if evidenced - HTTPS, gRPC, AMQP, etc.)
 
-Each relationship must be **evidenced** by code/config in the architecture docs (link to evidence in DSL comments).
+Each relationship must be **evidenced** by code/config in the architecture docs
+(link to evidence in DSL comments).
 
 ### 3) Model - Container level
 
 In `containers.c4`:
 
 1. Inside the system in scope, define **containers**:
-   - One per deployable unit (service, web app, API, worker, scheduled job, CLI, mobile app, etc.)
-   - Optionally one per major persistent store (databases, caches, queues) - model them as containers within the system if owned, or as external systems if managed externally
+   - One per deployable unit (service, web app, API, worker, scheduled job, CLI,
+     mobile app, etc.)
+   - Optionally one per major persistent store (databases, caches, queues) -
+     model them as containers within the system if owned, or as external systems
+     if managed externally
 2. For each container, capture:
    - Technology (e.g. "Python FastAPI", "TypeScript Next.js", "PostgreSQL 15")
    - Short description (one line)
-3. Define **relationships** between containers, and between containers and external systems/actors:
+3. Define **relationships** between containers, and between containers and
+   external systems/actors:
    - Direction, purpose, protocol/technology
    - Evidence-based
 
 ### 4) Model - Component level (for selected containers only)
 
-For each architecturally significant container, create `components/container-[XXX]-[name].c4`:
+For each architecturally significant container, create
+`components/container-[XXX]-[name].c4`:
 
 1. Inside that container, define **components**:
    - One per significant component identified in `component-*.md`
@@ -94,11 +106,13 @@ For each architecturally significant container, create `components/container-[XX
 2. For each component, capture:
    - Technology (if different from container default)
    - Short description (one line)
-3. Define **relationships** between components, and from components to other containers/external systems/actors:
+3. Define **relationships** between components, and from components to other
+   containers/external systems/actors:
    - Direction, purpose, protocol/technology
    - Evidence-based
 
-Do **not** model every internal class/function - keep to architectural components.
+Do **not** model every internal class/function - keep to architectural
+components.
 
 ### 5) Views
 
@@ -107,7 +121,8 @@ In `views.c4`:
 1. Define one **Context view** of the system in scope.
 2. Define one **Container view** of the system in scope.
 3. Define one **Component view** per modelled container.
-4. Optionally define **Dynamic views** for 1–3 of the most important runtime flows (those already in `runtime-flow-*.md`).
+4. Optionally define **Dynamic views** for 1–3 of the most important runtime
+   flows (those already in `runtime-flow-*.md`).
 
 For each view:
 
@@ -141,16 +156,24 @@ In `.copilot/analysis/likec4/README.md`:
 
 ### 8) Update the architecture index
 
-Update `.copilot/analysis/README.md` with a **C4 Model (LikeC4)** section linking to the LikeC4 README and the main views.
+Update `.copilot/analysis/README.md` with a **C4 Model (LikeC4)** section
+linking to the LikeC4 README and the main views.
 
 ## Operating principles (must follow)
 
-- **Evidence first** - every model element and relationship must trace back to code/config. Add evidence as comments inside the DSL (`// evidence: /path#L10-L40`).
-- **Names match other docs** - use the same component names as `component-*.md` and the same domain names as `domain-*.md`.
-- **Scope discipline** - Context = systems, Container = deployable units, Component = significant internal building blocks. Do **not** mix levels.
-- **External vs internal** - only model as "external system" what is genuinely outside your team's ownership/repository.
-- **Minimal but complete** - prefer fewer, meaningful elements over an exhaustive (and unreadable) diagram.
-- **Unknowns visible** - if something is implied but not evidenced, add a DSL comment: `// unknown from code - {action to confirm}`.
+- **Evidence first** - every model element and relationship must trace back to
+  code/config. Add evidence as comments inside the DSL
+  (`// evidence: /path#L10-L40`).
+- **Names match other docs** - use the same component names as `component-*.md`
+  and the same domain names as `domain-*.md`.
+- **Scope discipline** - Context = systems, Container = deployable units,
+  Component = significant internal building blocks. Do **not** mix levels.
+- **External vs internal** - only model as "external system" what is genuinely
+  outside your team's ownership/repository.
+- **Minimal but complete** - prefer fewer, meaningful elements over an
+  exhaustive (and unreadable) diagram.
+- **Unknowns visible** - if something is implied but not evidenced, add a DSL
+  comment: `// unknown from code - {action to confirm}`.
 
 ## Common pitfalls (avoid)
 

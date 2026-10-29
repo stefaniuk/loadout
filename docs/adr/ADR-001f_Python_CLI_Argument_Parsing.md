@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-Python tools need a standard CLI framework that supports subcommands, clear help output, and type-safe argument handling.
+Python tools need a standard CLI framework that supports subcommands, clear help
+output, and type-safe argument handling.
 
 ## Decision ✅
 
@@ -75,7 +76,8 @@ Use [`Click`](https://github.com/pallets/click) for decorator-based CLI parsing.
 | Dependencies     | ⭐⭐ External dependency         |
 | Effort           | M                                |
 
-**Why not chosen**: Typer provides better type-driven ergonomics with less boilerplate.
+**Why not chosen**: Typer provides better type-driven ergonomics with less
+boilerplate.
 
 #### Option C: argparse (standard library)
 
@@ -105,11 +107,13 @@ Use [`docopt`](https://github.com/docopt/docopt) for docstring-driven parsing.
 | Dependencies     | ⭐⭐ External dependency            |
 | Effort           | M                                   |
 
-**Why not chosen**: Less structured than Typer and harder to maintain as CLIs grow.
+**Why not chosen**: Less structured than Typer and harder to maintain as CLIs
+grow.
 
 #### Option E: Fire
 
-Use [`Fire`](https://github.com/google/python-fire) for automatic CLI generation.
+Use [`Fire`](https://github.com/google/python-fire) for automatic CLI
+generation.
 
 | Criteria         | Score/Notes                        |
 | ---------------- | ---------------------------------- |
@@ -124,11 +128,13 @@ Use [`Fire`](https://github.com/google/python-fire) for automatic CLI generation
 
 ### Outcome 🏁
 
-Adopt `Typer` as the default CLI argument parsing library. This decision is reversible if CLI needs change or a stronger standard emerges.
+Adopt `Typer` as the default CLI argument parsing library. This decision is
+reversible if CLI needs change or a stronger standard emerges.
 
 ### Rationale 🧠
 
-Typer offers a modern, type-hint-friendly API with clear help output and strong subcommand support, while keeping developer effort low.
+Typer offers a modern, type-hint-friendly API with clear help output and strong
+subcommand support, while keeping developer effort low.
 
 ## Consequences ⚖️
 

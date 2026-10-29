@@ -5,8 +5,8 @@
 - This topic is mostly about internal behaviour change, incentives, and flow.
 - Stakeholder voices are usually more useful than public named figures for this
   kind of transformation.
-- `guided` mode is better because teams often start with an incomplete brief
-  and need sharper framing before the debate.
+- `guided` mode is better because teams often start with an incomplete brief and
+  need sharper framing before the debate.
 
 ## Step-by-step
 

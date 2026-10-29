@@ -1,16 +1,23 @@
 # Onboarding 🚀
 
-> Linked from the [README](../README.md) under **Quick start** and **How to use**. See also [docs/architecture.md](architecture.md) for the customisation model and lifecycle.
+> Linked from the [README](../README.md) under **Quick start** and **How to
+> use**. See also [docs/architecture.md](architecture.md) for the customisation
+> model and lifecycle.
 
-This guide walks new users and contributors through every supported installation path, the first-run experience, the apply workflow for downstream repositories, and the quality gates expected before opening a pull request.
+This guide walks new users and contributors through every supported installation
+path, the first-run experience, the apply workflow for downstream repositories,
+and the quality gates expected before opening a pull request.
 
 ## Choose your installation path
 
 Three paths are supported. Pick the one that matches your goal:
 
-- **Full clone** - contribute to the library or experiment with every artefact locally. Start at [First setup](#first-setup).
-- **Plugin install** - get skills and agents in VS Code without managing files in your repo. See [Plugin installation path](#plugin-installation-path).
-- **Selective copy** - pull only a subset of prompts, instructions, or templates into a target repository. See [Selective install](#selective-install).
+- **Full clone** - contribute to the library or experiment with every artefact
+  locally. Start at [First setup](#first-setup).
+- **Plugin install** - get skills and agents in VS Code without managing files
+  in your repo. See [Plugin installation path](#plugin-installation-path).
+- **Selective copy** - pull only a subset of prompts, instructions, or templates
+  into a target repository. See [Selective install](#selective-install).
 
 ## Prerequisites
 
@@ -37,7 +44,8 @@ make lint && make test
 
 ## Select the active workflow
 
-This repository can host both lifecycle families at once, but only one should be active in a given session or worktree.
+This repository can host both lifecycle families at once, but only one should be
+active in a given session or worktree.
 
 Check the current mode:
 
@@ -57,14 +65,21 @@ Switch to Superpowers:
 make workflow-use mode=superpowers
 ```
 
-The selection is stored locally in `.copilot/workflow-mode.json` and is ignored by git. After switching, start a fresh chat session so the chat picks up the active workflow family.
+The selection is stored locally in `.copilot/workflow-mode.json` and is ignored
+by git. After switching, start a fresh chat session so the chat picks up the
+active workflow family.
 
-Copilot also uses `.copilot/analysis/` as a tracked local scaffold for ephemeral analysis output. The nested `.gitignore` in that directory ignores generated files while keeping the scaffold itself in git history.
+Copilot also uses `.copilot/analysis/` as a tracked local scaffold for ephemeral
+analysis output. The nested `.gitignore` in that directory ignores generated
+files while keeping the scaffold itself in git history.
 
 Use one workflow family per session or worktree:
 
 - `speckit` mode: use `speckit-*` skills and review prompts.
-- `superpowers` mode: use the imported Superpowers workflow skills such as `/brainstorming`, `/writing-plans`, `/executing-plans`, `/subagent-driven-development`, `/requesting-code-review`, and `/receiving-code-review`.
+- `superpowers` mode: use the imported Superpowers workflow skills such as
+  `/brainstorming`, `/writing-plans`, `/executing-plans`,
+  `/subagent-driven-development`, `/requesting-code-review`, and
+  `/receiving-code-review`.
 
 ## First run + expected output
 
@@ -75,7 +90,11 @@ make lint
 make test
 ```
 
-**Expected output:** Each command completes with exit code `0`. Linting covers markdown, links, scripts, and configuration; tests exercise the apply pipeline and helper scripts. If either command fails on a clean clone, [open an issue](https://github.com/stefaniuk/loadout/issues) with the failure output.
+**Expected output:** Each command completes with exit code `0`. Linting covers
+markdown, links, scripts, and configuration; tests exercise the apply pipeline
+and helper scripts. If either command fails on a clean clone,
+[open an issue](https://github.com/stefaniuk/loadout/issues) with the failure
+output.
 
 ## Apply workflow to downstream repos
 
@@ -96,38 +115,56 @@ What gets copied:
 - `docs/adr/ADR-nnn_Any_Decision_Record_Template.md`
 - `.copilot/analysis/.gitignore`
 
-If `.github/pull_request_template.md` or `docs/adr/ADR-nnn_Any_Decision_Record_Template.md` is already tracked in the target repository's own git history, `apply`/`import`/`revert` leave it alone entirely - the target repo, not loadout, owns that file - and the matching `.gitignore` entry is commented out for that repository.
+If `.github/pull_request_template.md` or
+`docs/adr/ADR-nnn_Any_Decision_Record_Template.md` is already tracked in the
+target repository's own git history, `apply`/`import`/`revert` leave it alone
+entirely - the target repo, not loadout, owns that file - and the matching
+`.gitignore` entry is commented out for that repository.
 
-After the copy completes, review `git status` in the target repository, commit the changes, and run `make lint && make test` to confirm everything wires up correctly.
+After the copy completes, review `git status` in the target repository, commit
+the changes, and run `make lint && make test` to confirm everything wires up
+correctly.
 
 ## Plugin installation path
 
-The repository can be installed directly as a VS Code agent plugin, providing skills and any repo-scoped custom agents without invoking `make apply`:
+The repository can be installed directly as a VS Code agent plugin, providing
+skills and any repo-scoped custom agents without invoking `make apply`:
 
 1. Open VS Code with Copilot agent mode enabled.
 2. Run `Cmd+Shift+P` → **Chat: Install Plugin From Source**.
 3. Enter the repository URL: `https://github.com/stefaniuk/loadout`.
 
-After installation, skills like `/enforcement-audit` and `/architecture-docs` appear as slash commands, and speckit skills (`/speckit-specify`, `/speckit-plan`, etc.) become available.
+After installation, skills like `/enforcement-audit` and `/architecture-docs`
+appear as slash commands, and speckit skills (`/speckit-specify`,
+`/speckit-plan`, etc.) become available.
 
-If you also install the Superpowers workflow skills, set the active lane locally with `make workflow-use ...` before you start work. The plugin install does not remove the need to choose one workflow family per session.
+If you also install the Superpowers workflow skills, set the active lane locally
+with `make workflow-use ...` before you start work. The plugin install does not
+remove the need to choose one workflow family per session.
 
-> **Note:** Plugin installation provides skills and agents only. For project-specific instructions, templates, and include baselines, use `make apply`.
+> **Note:** Plugin installation provides skills and agents only. For
+> project-specific instructions, templates, and include baselines, use
+> `make apply`.
 
 ## Selective install
 
-`make apply` accepts per-technology flags so you can scope what gets copied. Pass any of the following as `name=true`:
+`make apply` accepts per-technology flags so you can scope what gets copied.
+Pass any of the following as `name=true`:
 
-`all`, `python`, `typescript`, `go`, `reactjs`, `rust`, `terraform`, `tauri`, `playwright`
+`all`, `python`, `typescript`, `go`, `reactjs`, `rust`, `terraform`, `tauri`,
+`playwright`
 
-These per-tech flags correspond to the language packs documented in [docs/conventions.md](conventions.md#language-packs).
+These per-tech flags correspond to the language packs documented in
+[docs/conventions.md](conventions.md#language-packs).
 
 Additional flags:
 
 - `clean=true` - remove previously applied artefacts before copying.
 - `subset=<csv>` - restrict the copy to named categories (see below).
 
-To undo a previous apply in the target repo, use `make revert dest=/path/to/target` instead (see [Revert](#revert)) - `make apply` has no revert option.
+To undo a previous apply in the target repo, use
+`make revert dest=/path/to/target` instead (see [Revert](#revert)) -
+`make apply` has no revert option.
 
 Example - apply only the Python and Terraform packs to a target:
 
@@ -137,7 +174,10 @@ make apply dest=/path/to/target python=true terraform=true
 
 ### Subset selection
 
-Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `subset` (or setting `subset=all`) preserves the default full-copy behaviour. Tokens are comma-separated, case-insensitive, and validated against a closed set.
+Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting
+`subset` (or setting `subset=all`) preserves the default full-copy behaviour.
+Tokens are comma-separated, case-insensitive, and validated against a closed
+set.
 
 | Token          | Categories included                                                                                                                                                                 |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -162,7 +202,10 @@ make apply dest=/path/to/target subset=instructions python=true
 
 #### Recommended profiles
 
-The repository is split into a default **core** plugin pack and an optional **speckit** sub-pack - see [conventions.md#plugin-packs](conventions.md#plugin-packs). Three common install profiles:
+The repository is split into a default **core** plugin pack and an optional
+**speckit** sub-pack - see
+[conventions.md#plugin-packs](conventions.md#plugin-packs). Three common install
+profiles:
 
 | Profile                | Command                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------- |
@@ -170,27 +213,35 @@ The repository is split into a default **core** plugin pack and an optional **sp
 | Spec-kit only          | `make apply dest=/path/to/target subset=speckit`                                               |
 | Non-spec-kit core      | `make apply dest=/path/to/target subset=agents,hooks,instructions,prompts,skills,docs,project` |
 
-For full argument details see `scripts/apply.sh --help` and the `apply` target in the [Makefile](../Makefile).
+For full argument details see `scripts/apply.sh --help` and the `apply` target
+in the [Makefile](../Makefile).
 
 ## Revert
 
-The opposite of apply: remove all loadout-managed artefacts from a previously-applied target repository.
+The opposite of apply: remove all loadout-managed artefacts from a
+previously-applied target repository.
 
 ```bash
 make revert dest=/absolute/path/to/target
 ```
 
-Add `dry-run=true` to preview what would be removed without changing anything. This is the only supported way to revert a previous apply - `scripts/apply.sh` has no revert option. For full argument details see `scripts/revert.sh --help` and the `revert` target in the [Makefile](../Makefile).
+Add `dry-run=true` to preview what would be removed without changing anything.
+This is the only supported way to revert a previous apply - `scripts/apply.sh`
+has no revert option. For full argument details see `scripts/revert.sh --help`
+and the `revert` target in the [Makefile](../Makefile).
 
 ## Import workflow from downstream repos
 
-The inverse of apply: pull improvements made in a project repository back into this source library.
+The inverse of apply: pull improvements made in a project repository back into
+this source library.
 
 ```bash
 make import dest=/absolute/path/to/project
 ```
 
-The script compares prompt files in the project against the source library and reports which files have changed. By default it prompts before copying each changed file.
+The script compares prompt files in the project against the source library and
+reports which files have changed. By default it prompts before copying each
+changed file.
 
 ### Options
 
@@ -214,7 +265,11 @@ new=true force=true make import dest=/path/to/project
 
 ## Syncing upstream Spec Kit
 
-The repository uses Spec Kit agents, prompts, and templates from the upstream [github/spec-kit](https://github.com/github/spec-kit) project. Local patches for both imported Spec Kit skills and synced third-party skills are maintained in `scripts/config/skill-patches/` and applied on top of the fetched upstream files.
+The repository uses Spec Kit agents, prompts, and templates from the upstream
+[github/spec-kit](https://github.com/github/spec-kit) project. Local patches for
+both imported Spec Kit skills and synced third-party skills are maintained in
+`scripts/config/skill-patches/` and applied on top of the fetched upstream
+files.
 
 ### Running sync
 
@@ -222,7 +277,8 @@ The repository uses Spec Kit agents, prompts, and templates from the upstream [g
 make speckit-sync
 ```
 
-This fetches the latest Spec Kit files, applies local patches declared in `scripts/config/skill-patches.yaml`, and writes the patched output to:
+This fetches the latest Spec Kit files, applies local patches declared in
+`scripts/config/skill-patches.yaml`, and writes the patched output to:
 
 - `.github/skills/speckit-*/` (speckit skill definitions)
 - `.specify/templates/` (plan, spec, tasks templates)
@@ -248,15 +304,22 @@ Run `make speckit-sync` after:
 
 ### Speckit-sync prerequisites
 
-The `specify` CLI must be installed. See [github/spec-kit](https://github.com/github/spec-kit) for installation instructions. `yq` is also required for YAML parsing.
+The `specify` CLI must be installed. See
+[github/spec-kit](https://github.com/github/spec-kit) for installation
+instructions. `yq` is also required for YAML parsing.
 
 ## Managing external skills
 
-Third-party agent skills can be cloned into `.github/skills/` from upstream repositories. A YAML manifest at `scripts/config/skills.yaml` declares which skills to fetch, and three make targets manage the lifecycle. The same patch engine and manifest used by `make speckit-sync` patch every upstream skill through the shared `scripts/config/skill-patches/` directory.
+Third-party agent skills can be cloned into `.github/skills/` from upstream
+repositories. A YAML manifest at `scripts/config/skills.yaml` declares which
+skills to fetch, and three make targets manage the lifecycle. The same patch
+engine and manifest used by `make speckit-sync` patch every upstream skill
+through the shared `scripts/config/skill-patches/` directory.
 
 ### Configuration
 
-Each entry in `scripts/config/skills.yaml` requires `name`, `repo`, and `path`. The `ref` defaults to `main` and `sha` is populated automatically on first sync:
+Each entry in `scripts/config/skills.yaml` requires `name`, `repo`, and `path`.
+The `ref` defaults to `main` and `sha` is populated automatically on first sync:
 
 ```yaml
 skills:
@@ -281,7 +344,9 @@ make skill-sync
 make skill-add name=writing-plans repo=https://github.com/obra/superpowers.git path=skills/writing-plans
 ```
 
-Both append the skill to `.github/skills/<name>/`, apply any local `SKILL.md` patch from `scripts/config/skill-patches/`, pin the resolved commit SHA in the manifest, and update lint exclusions.
+Both append the skill to `.github/skills/<name>/`, apply any local `SKILL.md`
+patch from `scripts/config/skill-patches/`, pin the resolved commit SHA in the
+manifest, and update lint exclusions.
 
 ### Removing a skill
 
@@ -289,7 +354,12 @@ Both append the skill to `.github/skills/<name>/`, apply any local `SKILL.md` pa
 make skill-remove name=writing-plans
 ```
 
-This removes the matching entry from `scripts/config/skills.yaml` and deletes the synced `.github/skills/<name>/` directory, if present. It does not touch `scripts/config/skill-patches.yaml`. If a patch file exists at `scripts/config/skill-patches/<name>.patch.md`, review and remove it, along with its matching entry under `overrides:` in `scripts/config/skill-patches.yaml`, manually.
+This removes the matching entry from `scripts/config/skills.yaml` and deletes
+the synced `.github/skills/<name>/` directory, if present. It does not touch
+`scripts/config/skill-patches.yaml`. If a patch file exists at
+`scripts/config/skill-patches/<name>.patch.md`, review and remove it, along with
+its matching entry under `overrides:` in `scripts/config/skill-patches.yaml`,
+manually.
 
 ### Updating skills
 
@@ -325,10 +395,15 @@ make skill-patch name=incremental-implementation
 
 ### What happens during sync
 
-1. Each skill is shallow-cloned using git sparse checkout (only the declared path).
-2. If `scripts/config/skill-patches/<name>.patch.md` exists, it is injected into the synced `SKILL.md` using the shared rules from `scripts/config/skill-patches.yaml` that also apply to imported Spec Kit skills.
+1. Each skill is shallow-cloned using git sparse checkout (only the declared
+   path).
+2. If `scripts/config/skill-patches/<name>.patch.md` exists, it is injected into
+   the synced `SKILL.md` using the shared rules from
+   `scripts/config/skill-patches.yaml` that also apply to imported Spec Kit
+   skills.
 3. The resolved commit SHA is written back to `scripts/config/skills.yaml`.
-4. The `.markdownlintignore` managed section is updated with all synced skill directories (sorted alphabetically).
+4. The `.markdownlintignore` managed section is updated with all synced skill
+   directories (sorted alphabetically).
 5. Synced skill directories are excluded from shellcheck automatically.
 
 ### Skill sync prerequisites
@@ -337,7 +412,8 @@ make skill-patch name=incremental-implementation
 
 ## Contributor setup and quality gates
 
-Contributors follow the same `make config` flow as users, then layer the quality commands and review checklist on top.
+Contributors follow the same `make config` flow as users, then layer the quality
+commands and review checklist on top.
 
 ### Development setup
 
@@ -358,16 +434,25 @@ make test   # Apply pipeline and script tests
 
 1. **Raise an issue or PR** describing the planned changes.
 2. **Keep artefacts in sync** - specs, plans, tasks, and docs must align.
-3. **Run quality gates** - `make lint && make test` must pass before opening a PR.
-4. **Follow the constitution** in `.specify/memory/constitution.md` and the repository-wide rules in [.github/copilot-instructions.md](../.github/copilot-instructions.md).
+3. **Run quality gates** - `make lint && make test` must pass before opening a
+   PR.
+4. **Follow the constitution** in `.specify/memory/constitution.md` and the
+   repository-wide rules in
+   [.github/copilot-instructions.md](../.github/copilot-instructions.md).
 
-See [.github/contributing.md](../.github/contributing.md) for the full contributor guide.
+See [.github/contributing.md](../.github/contributing.md) for the full
+contributor guide.
 
 ## Troubleshooting
 
-<!-- TODO: Populate with evidence-backed recurring issues as they emerge from real usage. -->
+<!--
+TODO: Populate with evidence-backed recurring issues as they emerge from real
+usage.
+-->
 
-No recurring issues have been documented yet. If you hit a reproducible problem, [open an issue](https://github.com/stefaniuk/loadout/issues) so it can be triaged and added here.
+No recurring issues have been documented yet. If you hit a reproducible problem,
+[open an issue](https://github.com/stefaniuk/loadout/issues) so it can be
+triaged and added here.
 
 ---
 

@@ -1,6 +1,7 @@
 # Step 04 - Explanation
 
 **Outputs:** `docs/explanation/**`
+
 **Dependencies:** step 02 (`docs/architecture.md`, `docs/adr/*.md`) and step 03
 (`docs/reference/**`).
 
@@ -29,21 +30,20 @@ trade-offs, boundaries, and why the repository works the way it does.
 
 1. Create `docs/explanation/README.md` when the repository is formalising the
    explanation layer.
-2. Create concept pages only for stable, repeated concepts already evidenced
-   in the repo.
+2. Create concept pages only for stable, repeated concepts already evidenced in
+   the repo.
 
 ### `sync`
 
-1. Update explanation pages when terminology, architecture rationale,
-   component boundaries, or trade-offs changed.
+1. Update explanation pages when terminology, architecture rationale, component
+   boundaries, or trade-offs changed.
 2. Link to reference and ADRs instead of restating their full content.
 
 ### `audit` and `pre-pr-review`
 
 1. Flag concepts with no explanation page when that absence makes other docs
    hard to understand.
-2. Flag explanation pages that have turned into procedures or reference
-   tables.
+2. Flag explanation pages that have turned into procedures or reference tables.
 
 ## Standardised expectations
 

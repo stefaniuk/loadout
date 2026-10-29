@@ -1,16 +1,24 @@
 # loadout
 
-A specification-first GitHub Copilot customisation toolkit for teams that want reusable prompts, instructions, agents, skills, and hooks to behave consistently across repositories.
+A specification-first GitHub Copilot customisation toolkit for teams that want
+reusable prompts, instructions, agents, skills, and hooks to behave consistently
+across repositories.
 
 ## Why this project exists
 
-AI customisation tends to drift once each repository invents its own prompts, review flow, and guardrails. That makes it harder to trust outputs, onboard contributors, and keep documentation, specs, and validation rules aligned.
+AI customisation tends to drift once each repository invents its own prompts,
+review flow, and guardrails. That makes it harder to trust outputs, onboard
+contributors, and keep documentation, specs, and validation rules aligned.
 
-loadout packages those pieces into one reusable toolkit. It gives teams a clear starting point for governance, authoring rules, reusable workflows, and quality checks, then makes that toolkit easy to copy into another repository with the same structure and expectations.
+loadout packages those pieces into one reusable toolkit. It gives teams a clear
+starting point for governance, authoring rules, reusable workflows, and quality
+checks, then makes that toolkit easy to copy into another repository with the
+same structure and expectations.
 
 ## Quick start
 
-This path proves the repository is healthy locally and shows the main contributor workflow.
+This path proves the repository is healthy locally and shows the main
+contributor workflow.
 
 ### Prerequisites
 
@@ -38,58 +46,78 @@ Expected result
 - `make lint` completes without markdown, link, shell, or customisation errors.
 - `make test` completes with a zero exit code.
 
-For plugin installation, selective installs, and downstream apply workflows, see [docs/onboarding.md](docs/onboarding.md).
+For plugin installation, selective installs, and downstream apply workflows, see
+[docs/onboarding.md](docs/onboarding.md).
 
 ## What it does
 
-The repository collects the files and helper scripts needed to run a specification-first Copilot workflow without rebuilding the same structure in every project.
+The repository collects the files and helper scripts needed to run a
+specification-first Copilot workflow without rebuilding the same structure in
+every project.
 
 ### Key features
 
-- Instruction packs for languages and tools such as Python, TypeScript, Go, Rust, Docker, Terraform, and Make.
-- Prompts and workflow skills for specification-first and Superpowers-based planning, implementation, review, and convergence workflows.
-- Reusable skills for documentation, code review, enforcement audits, and framework-specific setup.
-- Deterministic hooks and quality scripts for markdown, links, shell, and customisation metadata.
+- Instruction packs for languages and tools such as Python, TypeScript, Go,
+  Rust, Docker, Terraform, and Make.
+- Prompts and workflow skills for specification-first and Superpowers-based
+  planning, implementation, review, and convergence workflows.
+- Reusable skills for documentation, code review, enforcement audits, and
+  framework-specific setup.
+- Deterministic hooks and quality scripts for markdown, links, shell, and
+  customisation metadata.
 
 ### Non-goals
 
 - It is not a runtime replacement for GitHub Copilot or VS Code.
-- It does not replace the language-specific build, lint, or test tooling inside a downstream repository.
+- It does not replace the language-specific build, lint, or test tooling inside
+  a downstream repository.
 
 ## How it solves the problem
 
-The toolkit is organised so teams can adopt shared rules first, then layer reusable workflows on top. Governance lives in the constitution and ADRs. File-scoped instructions shape day-to-day authoring. Prompts, agents, and skills package repeatable tasks. Hooks and quality scripts catch drift before it spreads.
+The toolkit is organised so teams can adopt shared rules first, then layer
+reusable workflows on top. Governance lives in the constitution and ADRs.
+File-scoped instructions shape day-to-day authoring. Prompts, agents, and skills
+package repeatable tasks. Hooks and quality scripts catch drift before it
+spreads.
 
 In practice, the flow is simple:
 
 1. Start from the shared governance and authoring rules.
 2. Choose the prompts, agents, skills, and hooks that match your workflow.
 3. Copy them into a target repository with `make apply`.
-4. Use the built-in docs and quality gates to keep the setup understandable and consistent.
+4. Use the built-in docs and quality gates to keep the setup understandable and
+   consistent.
 
 Key concepts
 
 - `Instructions`: always-on rules matched to file types.
 - `Prompts`: one-off task entrypoints.
-- `Agents`: optional custom agents when a repository needs tool-restricted roles or handoff chains.
+- `Agents`: optional custom agents when a repository needs tool-restricted roles
+  or handoff chains.
 - `Skills`: multi-step capabilities bundled with supporting assets.
 - `Hooks`: deterministic checks that run outside the model.
 
-See [docs/architecture.md](docs/architecture.md) for the full customisation model and the spec-kit lifecycle.
+See [docs/architecture.md](docs/architecture.md) for the full customisation
+model and the spec-kit lifecycle.
 
 ## How to use
 
-The README covers the workflows most people need first. Use the docs for the full catalogue, installation variants, and architecture detail.
+The README covers the workflows most people need first. Use the docs for the
+full catalogue, installation variants, and architecture detail.
 
 ### Configuration
 
-Run `make config` when you want a local working copy ready for validation and contribution. When you apply the toolkit to another repository, pass the destination through `dest=/path/to/repo`. Use `subset=` and the language flags, such as `python=true`, when you only want part of the toolkit.
+Run `make config` when you want a local working copy ready for validation and
+contribution. When you apply the toolkit to another repository, pass the
+destination through `dest=/path/to/repo`. Use `subset=` and the language flags,
+such as `python=true`, when you only want part of the toolkit.
 
 ### Common workflows
 
 #### Validate the toolkit locally
 
-Use this when you want to confirm the repository is in a good state before changing it.
+Use this when you want to confirm the repository is in a good state before
+changing it.
 
 ```bash
 make config
@@ -103,11 +131,13 @@ Expected result
 - Linting passes.
 - Tests pass.
 
-Further reading: [docs/onboarding.md#contributor-setup-and-quality-gates](docs/onboarding.md#contributor-setup-and-quality-gates)
+Further reading:
+[docs/onboarding.md#contributor-setup-and-quality-gates](docs/onboarding.md#contributor-setup-and-quality-gates)
 
 #### Apply the full toolkit to another repository
 
-Use this when you want to copy the standard prompt, instruction, agent, skill, and hook set into a target repository.
+Use this when you want to copy the standard prompt, instruction, agent, skill,
+and hook set into a target repository.
 
 ```bash
 make apply dest=/absolute/path/to/target
@@ -117,11 +147,13 @@ Expected result
 
 - The target repository receives the standard toolkit files.
 
-Further reading: [docs/onboarding.md#apply-workflow-to-downstream-repos](docs/onboarding.md#apply-workflow-to-downstream-repos)
+Further reading:
+[docs/onboarding.md#apply-workflow-to-downstream-repos](docs/onboarding.md#apply-workflow-to-downstream-repos)
 
 #### Install only selected packs
 
-Use this when you only need a narrower set of artefacts, such as selected languages or categories.
+Use this when you only need a narrower set of artefacts, such as selected
+languages or categories.
 
 ```bash
 make apply dest=/absolute/path/to/target subset=instructions,prompts python=true terraform=true
@@ -131,31 +163,43 @@ Expected result
 
 - Only the requested categories and language packs are copied.
 
-Further reading: [docs/onboarding.md#selective-install](docs/onboarding.md#selective-install)
+Further reading:
+[docs/onboarding.md#selective-install](docs/onboarding.md#selective-install)
 
 ### Examples
 
-- Read the naming and placement rules in [docs/conventions.md](docs/conventions.md).
+- Read the naming and placement rules in
+  [docs/conventions.md](docs/conventions.md).
 
 ## Documentation
 
-- [docs/README.md](docs/README.md): documentation landing page for the supporting docs set.
-- [docs/onboarding.md](docs/onboarding.md): setup paths, first run, selective install, and contributor flow.
-- [docs/architecture.md](docs/architecture.md): customisation layers, lifecycle, and governance gates.
-- [docs/conventions.md](docs/conventions.md): naming, placement, frontmatter, and ADR rules.
+- [docs/README.md](docs/README.md): documentation landing page for the
+  supporting docs set.
+- [docs/onboarding.md](docs/onboarding.md): setup paths, first run, selective
+  install, and contributor flow.
+- [docs/architecture.md](docs/architecture.md): customisation layers, lifecycle,
+  and governance gates.
+- [docs/conventions.md](docs/conventions.md): naming, placement, frontmatter,
+  and ADR rules.
 
 ## Contributing
 
-Contributions should keep the repository's specs, docs, prompts, and helper scripts aligned. Start with `make config`, make the smallest change that fits the documented workflow, then run the quality gates before you open a pull request.
+Contributions should keep the repository's specs, docs, prompts, and helper
+scripts aligned. Start with `make config`, make the smallest change that fits
+the documented workflow, then run the quality gates before you open a pull
+request.
 
 ```bash
 make lint
 make test
 ```
 
-If you change prompts, agents, skills, hooks, or generated inventories, also run `make catalogue` before you submit the change.
+If you change prompts, agents, skills, hooks, or generated inventories, also run
+`make catalogue` before you submit the change.
 
-See [.github/contributing.md](.github/contributing.md) for the full contributor guide and [.github/security.md](.github/security.md) for private vulnerability reporting.
+See [.github/contributing.md](.github/contributing.md) for the full contributor
+guide and [.github/security.md](.github/security.md) for private vulnerability
+reporting.
 
 ## Repository layout
 
@@ -174,4 +218,5 @@ These are the top-level paths most contributors need to recognise first.
 
 ## Licence
 
-This project is licensed under the MIT Licence. See [LICENCE.md](LICENCE.md) for the full text.
+This project is licensed under the MIT Licence. See [LICENCE.md](LICENCE.md) for
+the full text.

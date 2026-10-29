@@ -1,12 +1,15 @@
 # Step 02 - Component Catalogue
 
-Create component-level summaries (responsibilities, interfaces, data, and extension points).
+Create component-level summaries (responsibilities, interfaces, data, and
+extension points).
 
 ## Goal
 
-Create (or update) the component catalogue at `.copilot/analysis/component-*.md`.
+Create (or update) the component catalogue at
+`.copilot/analysis/component-*.md`.
 
-Also ensure they are linked from the architecture overview at `.copilot/analysis/README.md`.
+Also ensure they are linked from the architecture overview at
+`.copilot/analysis/README.md`.
 
 ## Discovery (run before writing)
 
@@ -15,14 +18,16 @@ Also ensure they are linked from the architecture overview at `.copilot/analysis
 1. Re-read: `.copilot/analysis/repository-map.md`.
 2. Extract (briefly) into working notes:
    - Deployable units and entry points
-   - Repo-level architecture statement and tech stack summary (do not repeat in every component)
+   - Repo-level architecture statement and tech stack summary (do not repeat in
+     every component)
    - Domains / bounded areas already mentioned
    - Datastores and external services already identified
    - Key configuration locations (values files, env var lists, config structs)
 
 ### B. Find explicit component boundaries (structure-driven)
 
-1. Identify package/module boundaries from repository structure and manifests, for example:
+1. Identify package/module boundaries from repository structure and manifests,
+   for example:
    - Monorepo boundaries: `apps/`, `services/`, `packages/`, `libs/`, `api/`
    - Language-specific roots: `src/`, `cmd/`, `internal/`, `pkg/`, `cli/`
    - Package manifests and workspace configuration (per ecosystem)
@@ -53,13 +58,16 @@ Also ensure they are linked from the architecture overview at `.copilot/analysis
    - Primary user/system flows
    - Data ownership (who writes/reads what)
    - Integration surfaces (APIs/events/queues)
-4. If selection is ambiguous, record the criteria in the component catalogue (e.g. "picked by deployability + domain ownership + highest call volume surfaces", evidence-based where possible).
+4. If selection is ambiguous, record the criteria in the component catalogue
+   (e.g. "picked by deployability + domain ownership + highest call volume
+   surfaces", evidence-based where possible).
 
 ### 2) Create one document per component (consistent scope)
 
 For each component, create `.copilot/analysis/component-[XXX]-[name].md`, where:
 
-- `[XXX]` is a stable numeric order (e.g. `001`, `002`, `003`, ...) so links don't churn
+- `[XXX]` is a stable numeric order (e.g. `001`, `002`, `003`, ...) so links
+  don't churn
 - `[name]` is short and meaningful (kebab-case)
 
 For each component document, capture:
@@ -70,7 +78,8 @@ For each component document, capture:
 - Component type (service/app/worker/CLI/library/module)
 - Where it lives in the repo (folder roots)
 - What it owns vs what it depends on (one short "Boundaries" paragraph)
-- Architecture role (one line): e.g. edge/API, orchestration, domain core, integration adapter, persistence, shared platform
+- Architecture role (one line): e.g. edge/API, orchestration, domain core,
+  integration adapter, persistence, shared platform
 
 #### 2B. Purpose and responsibilities
 
@@ -81,9 +90,11 @@ For each component document, capture:
 #### 2C. Internal structure and key abstractions
 
 - Key modules/packages
-- Key symbols (classes/functions) that represent the "public surface" of the component
+- Key symbols (classes/functions) that represent the "public surface" of the
+  component
 - Composition root / startup wiring location (where applicable)
-- Design patterns utilised (e.g. repository, mediator, ports/adapters) **only if evidenced**
+- Design patterns utilised (e.g. repository, mediator, ports/adapters) **only if
+  evidenced**
 
 #### 2D. Interfaces (split and explicit)
 
@@ -99,15 +110,22 @@ For each component document, capture:
 
 #### 2E. Data flows and lineage (only if evidenced)
 
-Include a brief, evidence-based view of how data moves through (or is produced/consumed by) this component.
+Include a brief, evidence-based view of how data moves through (or is
+produced/consumed by) this component.
 
-- **Owned data (source of truth):** entities/tables/collections/schemas this component owns and writes
-- **Derived/replicated data:** materialised views, projections, caches, read models
-- **Consumed data (read-only):** entities/events this component reads but does not own
+- **Owned data (source of truth):** entities/tables/collections/schemas this
+  component owns and writes
+- **Derived/replicated data:** materialised views, projections, caches, read
+  models
+- **Consumed data (read-only):** entities/events this component reads but does
+  not own
 - **Published data:** events/messages produced, schema locations, topics/queues
-- **Consumed data streams:** events/messages consumed, schema locations, topics/queues
-- **Transformations:** where data is validated/transformed/enriched; key modules/symbols
-- **Lineage notes:** origin → transformations → destinations (keep to 1–3 bullets)
+- **Consumed data streams:** events/messages consumed, schema locations,
+  topics/queues
+- **Transformations:** where data is validated/transformed/enriched; key
+  modules/symbols
+- **Lineage notes:** origin → transformations → destinations (keep to 1–3
+  bullets)
 
 If any item cannot be supported by code/config, record:
 
@@ -122,7 +140,9 @@ Add evidence bullets for each of the above categories, for example:
 
 #### 2F. Cross-cutting concerns (component-specific, no duplication)
 
-Document component-specific implementation details only. If a concern is identical across many components, capture it once (in the most "central" component or a shared doc) and link to it rather than repeating.
+Document component-specific implementation details only. If a concern is
+identical across many components, capture it once (in the most "central"
+component or a shared doc) and link to it rather than repeating.
 
 - Authentication/authorisation integration points (middleware/guards/clients)
 - Error handling strategy (exceptions, error mapping, retry wrappers)
@@ -149,7 +169,8 @@ Document component-specific implementation details only. If a concern is identic
 - Variation points (interfaces, plugins, strategy objects, hook systems)
 - How to add a new handler/route/integration safely (where to register)
 - Configuration-driven behaviour (what can be changed without code)
-- Backwards-compatibility constraints (API versions, event schema evolution), if present
+- Backwards-compatibility constraints (API versions, event schema evolution), if
+  present
 
 #### 2J. Evidence (mandatory)
 
@@ -164,7 +185,8 @@ Document component-specific implementation details only. If a concern is identic
 1. If the component is referenced in docs but not found in code, record:
    - **Unknown from code - verify existence / locate entry point**
 2. If a dependency is implied but not evidenced, record:
-   - **Unknown from code - locate client initialisation / env var / IaC resource**
+   - **Unknown from code - locate client initialisation / env var / IaC
+     resource**
 
 ### 4) Write concisely, then iterate
 
@@ -172,11 +194,13 @@ Document component-specific implementation details only. If a concern is identic
 2. Then do a second pass:
    - Improve evidence links
    - Replace vague terms with precise names (symbols/routes/topics/config keys)
-   - Reduce duplication across components (move shared info into a shared section or link)
+   - Reduce duplication across components (move shared info into a shared
+     section or link)
 
 ### 5) Update the index
 
-Update `.copilot/analysis/README.md` with a **Component Catalogue** section linking to every component document (in `[XXX]` order).
+Update `.copilot/analysis/README.md` with a **Component Catalogue** section
+linking to every component document (in `[XXX]` order).
 
 ## Template snippet per component
 

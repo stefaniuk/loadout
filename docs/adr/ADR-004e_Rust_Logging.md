@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-The Rust tech stack needs a default logging approach that supports structured logs, multi-sink output, and good local console readability.
+The Rust tech stack needs a default logging approach that supports structured
+logs, multi-sink output, and good local console readability.
 
 ## Decision ✅
 
@@ -49,7 +50,8 @@ The Rust tech stack needs a default logging approach that supports structured lo
 - Low dependency footprint
 - Ecosystem support and longevity
 
-Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1), ⭐⭐ (2), ⭐⭐⭐ (3). Weighted totals exclude Effort and have a maximum of 69.
+Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1),
+⭐⭐ (2), ⭐⭐⭐ (3). Weighted totals exclude Effort and have a maximum of 69.
 
 | Criteria                 | Weight | Rationale                                          |
 | ------------------------ | ------ | -------------------------------------------------- |
@@ -65,7 +67,9 @@ Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1)
 
 #### Option A: tracing (Selected) ✅
 
-Use [`tracing`](https://github.com/tokio-rs/tracing) with [`tracing-subscriber`](https://github.com/tokio-rs/tracing) for JSON and console output.
+Use [`tracing`](https://github.com/tokio-rs/tracing) with
+[`tracing-subscriber`](https://github.com/tokio-rs/tracing) for JSON and console
+output.
 
 | Criteria                 | Score/Notes                              |
 | ------------------------ | ---------------------------------------- |
@@ -81,7 +85,8 @@ Use [`tracing`](https://github.com/tokio-rs/tracing) with [`tracing-subscriber`]
 
 #### Option B: log + env_logger
 
-Use [`log`](https://github.com/rust-lang/log) with [`env_logger`](https://github.com/env-logger-rs/env_logger).
+Use [`log`](https://github.com/rust-lang/log) with
+[`env_logger`](https://github.com/env-logger-rs/env_logger).
 
 | Criteria                 | Score/Notes                        |
 | ------------------------ | ---------------------------------- |
@@ -117,7 +122,8 @@ Use [`slog`](https://github.com/slog-rs/slog) for structured logging.
 
 #### Option D: log4rs
 
-Use [`log4rs`](https://github.com/estk/log4rs) for structured logging with configuration files.
+Use [`log4rs`](https://github.com/estk/log4rs) for structured logging with
+configuration files.
 
 | Criteria                 | Score/Notes                          |
 | ------------------------ | ------------------------------------ |
@@ -153,11 +159,13 @@ Use [`fern`](https://github.com/daboross/fern) for logging setup.
 
 ### Outcome 🏁
 
-Adopt `tracing` as the default logging library for Rust. This decision is reversible if ecosystem support shifts.
+Adopt `tracing` as the default logging library for Rust. This decision is
+reversible if ecosystem support shifts.
 
 ### Rationale 🧠
 
-Using the weighted criteria, `tracing` scores highest because it provides structured logging with good fan-out support and modern ecosystem adoption.
+Using the weighted criteria, `tracing` scores highest because it provides
+structured logging with good fan-out support and modern ecosystem adoption.
 
 ## Consequences ⚖️
 

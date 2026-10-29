@@ -29,7 +29,9 @@
 
 ## Context 🧭
 
-The Python tech stack needs a default dependency manager that is fast, deterministic, and aligned with the toolchain. The decision must support a lock file and standard Python packaging workflows.
+The Python tech stack needs a default dependency manager that is fast,
+deterministic, and aligned with the toolchain. The decision must support a lock
+file and standard Python packaging workflows.
 
 ## Decision ✅
 
@@ -51,7 +53,8 @@ The Python tech stack needs a default dependency manager that is fast, determini
 
 #### Option A: uv (Selected) ✅
 
-Use [`uv`](https://github.com/astral-sh/uv) with `pyproject.toml` and a lock file.
+Use [`uv`](https://github.com/astral-sh/uv) with `pyproject.toml` and a lock
+file.
 
 | Criteria            | Score/Notes                              |
 | ------------------- | ---------------------------------------- |
@@ -64,7 +67,8 @@ Use [`uv`](https://github.com/astral-sh/uv) with `pyproject.toml` and a lock fil
 
 #### Option B: Poetry
 
-Use [`Poetry`](https://github.com/python-poetry/poetry) with its lock file and environment management.
+Use [`Poetry`](https://github.com/python-poetry/poetry) with its lock file and
+environment management.
 
 | Criteria            | Score/Notes                |
 | ------------------- | -------------------------- |
@@ -75,11 +79,13 @@ Use [`Poetry`](https://github.com/python-poetry/poetry) with its lock file and e
 | Ecosystem support   | ⭐⭐⭐ Widely used         |
 | Effort              | M                          |
 
-**Why not chosen**: Strong feature set but slower and heavier for the baseline workflow.
+**Why not chosen**: Strong feature set but slower and heavier for the baseline
+workflow.
 
 #### Option C: pip-tools
 
-Use [`pip-tools`](https://github.com/jazzband/pip-tools) for `requirements.txt` locking.
+Use [`pip-tools`](https://github.com/jazzband/pip-tools) for `requirements.txt`
+locking.
 
 | Criteria            | Score/Notes                        |
 | ------------------- | ---------------------------------- |
@@ -90,11 +96,13 @@ Use [`pip-tools`](https://github.com/jazzband/pip-tools) for `requirements.txt` 
 | Ecosystem support   | ⭐⭐⭐ Stable and familiar         |
 | Effort              | M                                  |
 
-**Why not chosen**: Does not centre `pyproject.toml` and adds extra workflow steps.
+**Why not chosen**: Does not centre `pyproject.toml` and adds extra workflow
+steps.
 
 #### Option D: Pipenv
 
-Use [`Pipenv`](https://github.com/pypa/pipenv) for dependency and virtualenv management.
+Use [`Pipenv`](https://github.com/pypa/pipenv) for dependency and virtualenv
+management.
 
 | Criteria            | Score/Notes                         |
 | ------------------- | ----------------------------------- |
@@ -124,11 +132,13 @@ Use [`PDM`](https://github.com/pdm-project/pdm) for PEP 582-style workflows.
 
 ### Outcome 🏁
 
-Adopt `uv` as the default dependency manager for Python. This decision is reversible if the toolchain changes or if `uv` loses ecosystem support.
+Adopt `uv` as the default dependency manager for Python. This decision is
+reversible if the toolchain changes or if `uv` loses ecosystem support.
 
 ### Rationale 🧠
 
-`uv` delivers fast, deterministic installs with a simple workflow aligned to modern Python packaging. It supports lock files and keeps the toolchain lean.
+`uv` delivers fast, deterministic installs with a simple workflow aligned to
+modern Python packaging. It supports lock files and keeps the toolchain lean.
 
 ## Consequences ⚖️
 

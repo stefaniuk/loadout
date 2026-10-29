@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-TypeScript tools need a CLI parsing library that supports subcommands, clear help output, and a predictable API.
+TypeScript tools need a CLI parsing library that supports subcommands, clear
+help output, and a predictable API.
 
 ## Decision ✅
 
@@ -124,11 +125,13 @@ Use [`cac`](https://github.com/cacjs/cac) for lightweight CLI parsing.
 
 ### Outcome 🏁
 
-Adopt `commander` as the default CLI argument parsing library. This decision is reversible if a better standard emerges.
+Adopt `commander` as the default CLI argument parsing library. This decision is
+reversible if a better standard emerges.
 
 ### Rationale 🧠
 
-`commander` balances features, stability, and ease of use, making it a reliable default for CLI tooling.
+`commander` balances features, stability, and ease of use, making it a reliable
+default for CLI tooling.
 
 ## Consequences ⚖️
 

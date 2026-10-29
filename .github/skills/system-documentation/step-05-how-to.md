@@ -1,8 +1,9 @@
 # Step 05 - How-to
 
 **Outputs:** `docs/how-to/**`
-**Dependencies:** step 01 (`README.md`, `docs/README.md`,
-`docs/conventions.md`, `docs/onboarding.md`) and step 03 (`docs/reference/**`).
+
+**Dependencies:** step 01 (`README.md`, `docs/README.md`, `docs/conventions.md`,
+`docs/onboarding.md`) and step 03 (`docs/reference/**`).
 
 This step maintains task-oriented guidance for contributors or operators who
 already know what they want to do.

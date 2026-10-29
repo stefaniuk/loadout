@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-Rust includes static type checking in the compiler. The tech stack still needs a standard approach for CI-friendly type checking and fast developer feedback.
+Rust includes static type checking in the compiler. The tech stack still needs a
+standard approach for CI-friendly type checking and fast developer feedback.
 
 ## Decision ✅
 
@@ -64,7 +65,8 @@ Use `cargo check` (Rust compiler) for type checking without producing binaries.
 
 #### Option B: rust-analyzer diagnostics
 
-Use [`rust-analyzer`](https://github.com/rust-lang/rust-analyzer) diagnostics for editor checks.
+Use [`rust-analyzer`](https://github.com/rust-lang/rust-analyzer) diagnostics
+for editor checks.
 
 | Criteria         | Score/Notes                      |
 | ---------------- | -------------------------------- |
@@ -105,7 +107,8 @@ Use [`Miri`](https://github.com/rust-lang/miri) for undefined behaviour checks.
 | Maintenance      | ⭐⭐⭐ Active                          |
 | Effort           | M                                      |
 
-**Why not chosen**: Great for UB checks but too slow and specialised for default type checking.
+**Why not chosen**: Great for UB checks but too slow and specialised for default
+type checking.
 
 #### Option E: Kani
 
@@ -120,15 +123,18 @@ Use [`Kani`](https://github.com/model-checking/kani) for formal verification.
 | Maintenance      | ⭐⭐ Active but niche                    |
 | Effort           | L                                        |
 
-**Why not chosen**: Valuable for verification but too heavy for default type checks.
+**Why not chosen**: Valuable for verification but too heavy for default type
+checks.
 
 ### Outcome 🏁
 
-Adopt `cargo check` as the default type-checking command. This decision is reversible if tooling changes.
+Adopt `cargo check` as the default type-checking command. This decision is
+reversible if tooling changes.
 
 ### Rationale 🧠
 
-`cargo check` uses the compiler directly, giving accurate diagnostics with fast feedback and minimal overhead.
+`cargo check` uses the compiler directly, giving accurate diagnostics with fast
+feedback and minimal overhead.
 
 ## Consequences ⚖️
 

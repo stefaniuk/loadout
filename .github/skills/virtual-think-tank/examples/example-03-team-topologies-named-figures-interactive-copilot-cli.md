@@ -121,7 +121,6 @@
             quarters.
         - Confirm whether platform-team interfaces became clearer.
 
-> [!NOTE]
-> In the CLI, you can keep the session interactive for the follow-up decision,
-> or use the programmatic `-p` mode later if you want to script the same brief
-> for repeatable comparisons.
+> [!NOTE] In the CLI, you can keep the session interactive for the follow-up
+> decision, or use the programmatic `-p` mode later if you want to script the
+> same brief for repeatable comparisons.

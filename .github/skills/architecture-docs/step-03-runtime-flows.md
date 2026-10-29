@@ -1,12 +1,14 @@
 # Step 03 - Runtime Flows
 
-Document key runtime flows with diagrams (trigger → orchestration → data lineage), evidence-first.
+Document key runtime flows with diagrams (trigger → orchestration → data
+lineage), evidence-first.
 
 ## Goal
 
 Create (or update) runtime flows at `.copilot/analysis/runtime-flow-*.md`.
 
-Also ensure they are linked from the architecture overview at `.copilot/analysis/README.md`.
+Also ensure they are linked from the architecture overview at
+`.copilot/analysis/README.md`.
 
 ## Discovery (run before writing)
 
@@ -20,17 +22,20 @@ Also ensure they are linked from the architecture overview at `.copilot/analysis
    - Known external integrations
    - Known datastores and queues/topics
    - Any existing "critical paths" mentioned (even if non-authoritative)
-   - Repo-level architecture pattern statement (use once in README, not per flow)
+   - Repo-level architecture pattern statement (use once in README, not per
+     flow)
 
 ### B. Locate orchestration and routing points (code-driven)
 
 Search for and open the files that define or register:
 
 1. HTTP routing / controllers / endpoints (router registration points)
-2. Message consumers / subscription registration (topics/queues, consumer groups)
+2. Message consumers / subscription registration (topics/queues, consumer
+   groups)
 3. Job schedulers / cron definitions (where schedule → handler is wired)
 4. Workflow/pipeline coordinators (if present)
-5. Cross-cutting middleware that affects flows (auth, validation, transactions, retries, idempotency, timeouts, logging correlation)
+5. Cross-cutting middleware that affects flows (auth, validation, transactions,
+   retries, idempotency, timeouts, logging correlation)
 
 ### C. Identify workflow semantics (if any)
 
@@ -44,10 +49,12 @@ Search for and open the files that define or register:
 
 ### 1) Select critical flows (explicit criteria)
 
-1. Select up to **16** flows that best represent how the system behaves in production.
+1. Select up to **16** flows that best represent how the system behaves in
+   production.
 2. Prefer flows that are:
    - Frequently used (core user journeys)
-   - Business-critical (creates/updates key entities, payments, fulfilment, etc.)
+   - Business-critical (creates/updates key entities, payments, fulfilment,
+     etc.)
    - Operationally important (background processing, ingestion, reconciliation)
    - Risk-heavy (auth, permissions, data integrity, external dependencies)
 3. Ensure coverage across:
@@ -62,7 +69,8 @@ Search for and open the files that define or register:
 
 For each flow, create `.copilot/analysis/runtime-flow-[XXX]-[name].md`, where:
 
-- `[XXX]` is a stable numeric order (e.g. `001`, `002`, `003`, ...) so links don't churn
+- `[XXX]` is a stable numeric order (e.g. `001`, `002`, `003`, ...) so links
+  don't churn
 - `[name]` is short and meaningful (kebab-case)
 - Use the same component names as in `component-*.md` (consistency rule)
 
@@ -74,7 +82,8 @@ Each flow document must capture:
 - Trigger type:
   - HTTP request / message consumed / schedule / CLI / internal timer
 - Trigger location:
-  - Route + handler, consumer registration, schedule definition, or command entry point
+  - Route + handler, consumer registration, schedule definition, or command
+    entry point
 
 #### 2B. Narrative (focused and concrete)
 
@@ -84,18 +93,22 @@ Write a short narrative that includes:
 - Main steps (7–15 bullets, each a single action)
 - Outcome (what is created/updated/emitted)
 - Key side effects (events published, notifications sent, files written)
-- Any explicit sync vs async boundary (e.g. request returns before background work completes)
+- Any explicit sync vs async boundary (e.g. request returns before background
+  work completes)
 
 #### 2C. Sequence diagram (Mermaid, component-level)
 
-- Use a Mermaid sequence diagram, authored in a fenced `mermaid` block, showing collaborating components and external services.
-- Keep participants at the **component** level (not individual functions), unless the repo is very small.
+- Use a Mermaid sequence diagram, authored in a fenced `mermaid` block, showing
+  collaborating components and external services.
+- Keep participants at the **component** level (not individual functions),
+  unless the repo is very small.
 - Show:
   - The trigger
   - Main calls/messages
   - Datastore interactions
   - Published events / queued work
-  - Authentication/authorisation checks and middleware **only if they materially affect the flow**
+  - Authentication/authorisation checks and middleware **only if they materially
+    affect the flow**
 
 #### 2D. Data flow and lineage (only if evidenced)
 
@@ -103,13 +116,15 @@ Capture a brief, evidence-based view of how data moves through the flow.
 
 ##### Data flow diagram (Mermaid flowchart)
 
-- Use a Mermaid `flowchart LR` (left-to-right) diagram, authored in a fenced `mermaid` block, showing data movement.
+- Use a Mermaid `flowchart LR` (left-to-right) diagram, authored in a fenced
+  `mermaid` block, showing data movement.
 - Show:
   - Input data sources (files, requests, messages)
   - Processing/transformation steps
   - Data stores (reads and writes)
   - Output destinations (responses, events, files)
-- Use subgraphs to group related elements (e.g., `subgraph Input`, `subgraph Transform`, `subgraph Output`).
+- Use subgraphs to group related elements (e.g., `subgraph Input`,
+  `subgraph Transform`, `subgraph Output`).
 - Use different node shapes:
   - `[text]` for processes/transforms
   - `[(text)]` for databases/stores
@@ -147,7 +162,8 @@ If any item cannot be supported by code/config, record:
 
 - Evidence bullets with:
   - File paths (URLs must be prefixed with `/` so links resolve correctly)
-  - Symbols and/or config keys (routes, handlers, consumer names, schedule strings, env vars)
+  - Symbols and/or config keys (routes, handlers, consumer names, schedule
+    strings, env vars)
 - If anything is unclear or not supported, record:
   - **Unknown from code - {action to confirm}**
 
@@ -169,13 +185,16 @@ If any item cannot be supported by code/config, record:
 
 ### 5) Update the index
 
-Update `.copilot/analysis/README.md` with a **Runtime Flows** section linking to every flow document (in `[XXX]` order).
+Update `.copilot/analysis/README.md` with a **Runtime Flows** section linking to
+every flow document (in `[XXX]` order).
 
 Also add (or update) a brief flow index table in the README (evidence-based):
 
-- Flow | Trigger | Primary components | Primary datastore | Async? | Evidence link
+- Flow | Trigger | Primary components | Primary datastore | Async? | Evidence
+  link
 
-Where relevant, include cross-cutting notes in the README (link once, then reference):
+Where relevant, include cross-cutting notes in the README (link once, then
+reference):
 
 - Authentication/authorisation path (middleware/filters)
 - Transaction boundaries (where commits happen)

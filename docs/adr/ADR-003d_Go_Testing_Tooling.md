@@ -30,7 +30,9 @@
 
 ## Context 🧭
 
-The Go tech stack needs a default testing approach that is stable, fast, and widely understood. The user asked for an ADR that compares at least five options and selects the best for the Tech Radar.
+The Go tech stack needs a default testing approach that is stable, fast, and
+widely understood. The user asked for an ADR that compares at least five options
+and selects the best for the Tech Radar.
 
 ## Decision ✅
 
@@ -52,7 +54,8 @@ The Go tech stack needs a default testing approach that is stable, fast, and wid
 
 #### Option A: go test (testing package) (Selected) ✅
 
-Use the standard [`testing`](https://github.com/golang/go) package and [`go test`](https://github.com/golang/go) runner.
+Use the standard [`testing`](https://github.com/golang/go) package and
+[`go test`](https://github.com/golang/go) runner.
 
 | Criteria          | Score/Notes                            |
 | ----------------- | -------------------------------------- |
@@ -64,7 +67,8 @@ Use the standard [`testing`](https://github.com/golang/go) package and [`go test
 
 #### Option B: testify
 
-Use [`testify`](https://github.com/stretchr/testify) for richer assertions and suites.
+Use [`testify`](https://github.com/stretchr/testify) for richer assertions and
+suites.
 
 | Criteria          | Score/Notes               |
 | ----------------- | ------------------------- |
@@ -74,11 +78,13 @@ Use [`testify`](https://github.com/stretchr/testify) for richer assertions and s
 | Dependencies      | ⭐⭐ Adds a library       |
 | Effort            | S                         |
 
-**Why not chosen**: Helpful for assertions but not necessary as the default baseline.
+**Why not chosen**: Helpful for assertions but not necessary as the default
+baseline.
 
 #### Option C: ginkgo + gomega
 
-Use BDD style testing with [`ginkgo`](https://github.com/onsi/ginkgo) and [`gomega`](https://github.com/onsi/gomega).
+Use BDD style testing with [`ginkgo`](https://github.com/onsi/ginkgo) and
+[`gomega`](https://github.com/onsi/gomega).
 
 | Criteria          | Score/Notes                |
 | ----------------- | -------------------------- |
@@ -92,7 +98,8 @@ Use BDD style testing with [`ginkgo`](https://github.com/onsi/ginkgo) and [`gome
 
 #### Option D: go-convey
 
-Use [`go-convey`](https://github.com/smartystreets/goconvey) for a web-based test runner and BDD style assertions.
+Use [`go-convey`](https://github.com/smartystreets/goconvey) for a web-based
+test runner and BDD style assertions.
 
 | Criteria          | Score/Notes             |
 | ----------------- | ----------------------- |
@@ -106,7 +113,8 @@ Use [`go-convey`](https://github.com/smartystreets/goconvey) for a web-based tes
 
 #### Option E: gocheck
 
-Use [`gocheck`](https://github.com/go-check/check) for the gocheck testing framework.
+Use [`gocheck`](https://github.com/go-check/check) for the gocheck testing
+framework.
 
 | Criteria          | Score/Notes                |
 | ----------------- | -------------------------- |
@@ -116,19 +124,25 @@ Use [`gocheck`](https://github.com/go-check/check) for the gocheck testing frame
 | Dependencies      | ⭐ Low, extra framework    |
 | Effort            | M                          |
 
-**Why not chosen**: Older framework with lower adoption and extra dependency cost.
+**Why not chosen**: Older framework with lower adoption and extra dependency
+cost.
 
 ### Outcome 🏁
 
-Adopt `go test` and the standard `testing` package as the default testing approach. Optional assertion libraries can be added if a module demonstrates clear need. This decision is reversible if a stronger Go standard emerges.
+Adopt `go test` and the standard `testing` package as the default testing
+approach. Optional assertion libraries can be added if a module demonstrates
+clear need. This decision is reversible if a stronger Go standard emerges.
 
 ### Rationale 🧠
 
-The standard testing toolchain is fast, stable, and universally understood. It keeps dependencies minimal and works with coverage and CI tooling out of the box.
+The standard testing toolchain is fast, stable, and universally understood. It
+keeps dependencies minimal and works with coverage and CI tooling out of the
+box.
 
 ### Property-based testing tooling 🔬
 
-For Go in 2026, we should prefer a modern PBT library that complements native fuzzing rather than replacing it.
+For Go in 2026, we should prefer a modern PBT library that complements native
+fuzzing rather than replacing it.
 
 | Tool                                              | Score/Notes                                                                                                     |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -138,7 +152,8 @@ For Go in 2026, we should prefer a modern PBT library that complements native fu
 | [go-check](https://github.com/steffnova/go-check) | ⭐ Clear property model, but lower adoption and weaker ecosystem signal.                                        |
 | [gofuzz](https://github.com/google/gofuzz)        | ⭐ Useful random-data generator, but not a full PBT framework and now archived.                                 |
 
-**Recommended choice**: `rapid` as the default PBT companion to `go test`, with native Go fuzzing kept alongside it for coverage-guided exploration.
+**Recommended choice**: `rapid` as the default PBT companion to `go test`, with
+native Go fuzzing kept alongside it for coverage-guided exploration.
 
 ## Consequences ⚖️
 

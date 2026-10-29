@@ -29,7 +29,10 @@
 
 ## Context 🧭
 
-The Go tech stack needs a CLI argument parsing library for tools and scripts. The choice should support subcommands, help text, and shell completion, with minimal friction for developers. The user asked for at least five alternatives to be compared.
+The Go tech stack needs a CLI argument parsing library for tools and scripts.
+The choice should support subcommands, help text, and shell completion, with
+minimal friction for developers. The user asked for at least five alternatives
+to be compared.
 
 ## Decision ✅
 
@@ -51,7 +54,8 @@ The Go tech stack needs a CLI argument parsing library for tools and scripts. Th
 
 #### Option A: cobra (Selected) ✅
 
-Use [`cobra`](https://github.com/spf13/cobra) for feature-rich CLI parsing and command structure.
+Use [`cobra`](https://github.com/spf13/cobra) for feature-rich CLI parsing and
+command structure.
 
 | Criteria     | Score/Notes                               |
 | ------------ | ----------------------------------------- |
@@ -63,7 +67,8 @@ Use [`cobra`](https://github.com/spf13/cobra) for feature-rich CLI parsing and c
 
 #### Option B: urfave/cli
 
-Use [`urfave/cli`](https://github.com/urfave/cli) for straightforward command structures.
+Use [`urfave/cli`](https://github.com/urfave/cli) for straightforward command
+structures.
 
 | Criteria     | Score/Notes                    |
 | ------------ | ------------------------------ |
@@ -73,11 +78,13 @@ Use [`urfave/cli`](https://github.com/urfave/cli) for straightforward command st
 | Dependencies | ⭐⭐ Moderate                  |
 | Effort       | M                              |
 
-**Why not chosen**: Fewer built-in features for completion and larger CLI ecosystems.
+**Why not chosen**: Fewer built-in features for completion and larger CLI
+ecosystems.
 
 #### Option C: kong
 
-Use [`kong`](https://github.com/alecthomas/kong) for struct-tag driven CLI parsing.
+Use [`kong`](https://github.com/alecthomas/kong) for struct-tag driven CLI
+parsing.
 
 | Criteria     | Score/Notes                                    |
 | ------------ | ---------------------------------------------- |
@@ -91,7 +98,8 @@ Use [`kong`](https://github.com/alecthomas/kong) for struct-tag driven CLI parsi
 
 #### Option D: kingpin
 
-Use [`kingpin`](https://github.com/alecthomas/kingpin) for flag parsing and subcommands.
+Use [`kingpin`](https://github.com/alecthomas/kingpin) for flag parsing and
+subcommands.
 
 | Criteria     | Score/Notes                       |
 | ------------ | --------------------------------- |
@@ -119,16 +127,21 @@ Use the standard [`flag`](https://github.com/golang/go) package.
 
 ### Outcome 🏁
 
-Adopt `cobra` as the default CLI argument parsing library for Go tools. This decision is reversible if a simpler approach becomes more appropriate or if maintenance changes.
+Adopt `cobra` as the default CLI argument parsing library for Go tools. This
+decision is reversible if a simpler approach becomes more appropriate or if
+maintenance changes.
 
 ### Rationale 🧠
 
-`cobra` is the most widely used Go CLI framework, with strong support for subcommands, help output, and shell completion. It is well documented and supported, making it a practical default.
+`cobra` is the most widely used Go CLI framework, with strong support for
+subcommands, help output, and shell completion. It is well documented and
+supported, making it a practical default.
 
 ## Consequences ⚖️
 
 - Go CLIs should be structured around `cobra` commands by default.
-- Smaller scripts may still use `flag` when appropriate, but it should be justified.
+- Smaller scripts may still use `flag` when appropriate, but it should be
+  justified.
 
 ## Compliance 📏
 

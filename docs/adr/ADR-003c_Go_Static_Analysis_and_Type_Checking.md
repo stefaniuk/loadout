@@ -29,7 +29,9 @@
 
 ## Context 🧭
 
-Go has compile-time type checking, but the tech stack still needs a default static analysis tool to catch deeper issues. The user asked for an ADR comparing at least five alternatives and selecting the best option for this category.
+Go has compile-time type checking, but the tech stack still needs a default
+static analysis tool to catch deeper issues. The user asked for an ADR comparing
+at least five alternatives and selecting the best option for this category.
 
 ## Decision ✅
 
@@ -51,7 +53,8 @@ Go has compile-time type checking, but the tech stack still needs a default stat
 
 #### Option A: staticcheck (Selected) ✅
 
-Use [`staticcheck`](https://github.com/dominikh/go-tools) for deep static analysis and extra type correctness checks.
+Use [`staticcheck`](https://github.com/dominikh/go-tools) for deep static
+analysis and extra type correctness checks.
 
 | Criteria        | Score/Notes                     |
 | --------------- | ------------------------------- |
@@ -73,11 +76,14 @@ Use the Go standard library [`go vet`](https://github.com/golang/go) tool.
 | Maintenance     | ⭐⭐⭐ Standard Go tool        |
 | Effort          | S                              |
 
-**Why not chosen**: Useful but narrower than `staticcheck` and often overlapped by other linting.
+**Why not chosen**: Useful but narrower than `staticcheck` and often overlapped
+by other linting.
 
 #### Option C: golangci-lint (type checks only)
 
-Use the type-related linters inside [`golangci-lint`](https://github.com/golangci/golangci-lint) without the full suite.
+Use the type-related linters inside
+[`golangci-lint`](https://github.com/golangci/golangci-lint) without the full
+suite.
 
 | Criteria        | Score/Notes                      |
 | --------------- | -------------------------------- |
@@ -87,11 +93,13 @@ Use the type-related linters inside [`golangci-lint`](https://github.com/golangc
 | Maintenance     | ⭐⭐ Active, but more config     |
 | Effort          | M                                |
 
-**Why not chosen**: Adds config complexity and overlaps with the linting decision.
+**Why not chosen**: Adds config complexity and overlaps with the linting
+decision.
 
 #### Option D: errcheck
 
-Use [`errcheck`](https://github.com/kisielk/errcheck) to find unchecked error returns.
+Use [`errcheck`](https://github.com/kisielk/errcheck) to find unchecked error
+returns.
 
 | Criteria        | Score/Notes                       |
 | --------------- | --------------------------------- |
@@ -105,7 +113,8 @@ Use [`errcheck`](https://github.com/kisielk/errcheck) to find unchecked error re
 
 #### Option E: nilaway
 
-Use [`nilaway`](https://github.com/uber-go/nilaway) to detect potential nil dereferences.
+Use [`nilaway`](https://github.com/uber-go/nilaway) to detect potential nil
+dereferences.
 
 | Criteria        | Score/Notes                         |
 | --------------- | ----------------------------------- |
@@ -119,11 +128,16 @@ Use [`nilaway`](https://github.com/uber-go/nilaway) to detect potential nil dere
 
 ### Outcome 🏁
 
-Adopt `staticcheck` as the default static analysis tool for the Go tech stack. The compiler remains the primary type checker, and `staticcheck` adds higher-value analysis. This decision is reversible if it becomes unmaintained or loses ecosystem trust.
+Adopt `staticcheck` as the default static analysis tool for the Go tech stack.
+The compiler remains the primary type checker, and `staticcheck` adds
+higher-value analysis. This decision is reversible if it becomes unmaintained or
+loses ecosystem trust.
 
 ### Rationale 🧠
 
-`staticcheck` provides broad and high-signal checks that go beyond the compiler. It is widely adopted, stable, and complements the linting decision without replacing it.
+`staticcheck` provides broad and high-signal checks that go beyond the compiler.
+It is widely adopted, stable, and complements the linting decision without
+replacing it.
 
 ## Consequences ⚖️
 

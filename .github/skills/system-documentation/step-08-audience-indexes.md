@@ -1,8 +1,8 @@
 # Step 08 - Audience Indexes
 
 **Outputs:** `docs/developers/README.md` and `docs/users/README.md`
-**Dependencies:** step 01 (`README.md`, `docs/README.md`,
-`docs/conventions.md`, `docs/onboarding.md`).
+**Dependencies:** step 01 (`README.md`, `docs/README.md`, `docs/conventions.md`,
+`docs/onboarding.md`).
 
 This step creates and maintains audience-specific navigation pages that route
 readers to canonical documentation without duplicating it.

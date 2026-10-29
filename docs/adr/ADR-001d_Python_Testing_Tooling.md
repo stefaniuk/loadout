@@ -30,7 +30,8 @@
 
 ## Context 🧭
 
-The Python tech stack needs a default test framework that is fast, expressive, and widely adopted, with good plugin support for CI.
+The Python tech stack needs a default test framework that is fast, expressive,
+and widely adopted, with good plugin support for CI.
 
 ## Decision ✅
 
@@ -52,7 +53,8 @@ The Python tech stack needs a default test framework that is fast, expressive, a
 
 #### Option A: pytest (Selected) ✅
 
-Use [`pytest`](https://github.com/pytest-dev/pytest) as the primary test framework.
+Use [`pytest`](https://github.com/pytest-dev/pytest) as the primary test
+framework.
 
 | Criteria           | Score/Notes                         |
 | ------------------ | ----------------------------------- |
@@ -76,7 +78,8 @@ Use the standard [`unittest`](https://github.com/python/cpython) framework.
 | Maintenance        | ⭐⭐⭐ Standard library             |
 | Effort             | S                                   |
 
-**Why not chosen**: More boilerplate and less flexibility for fixtures and plugins.
+**Why not chosen**: More boilerplate and less flexibility for fixtures and
+plugins.
 
 #### Option C: nose2
 
@@ -110,7 +113,8 @@ Use [`behave`](https://github.com/behave/behave) for BDD-style tests.
 
 #### Option E: Robot Framework
 
-Use [`Robot Framework`](https://github.com/robotframework/robotframework) for keyword-driven testing.
+Use [`Robot Framework`](https://github.com/robotframework/robotframework) for
+keyword-driven testing.
 
 | Criteria           | Score/Notes                        |
 | ------------------ | ---------------------------------- |
@@ -125,15 +129,18 @@ Use [`Robot Framework`](https://github.com/robotframework/robotframework) for ke
 
 ### Outcome 🏁
 
-Adopt `pytest` as the default testing framework. This decision is reversible if a stronger standard emerges.
+Adopt `pytest` as the default testing framework. This decision is reversible if
+a stronger standard emerges.
 
 ### Rationale 🧠
 
-`pytest` offers the best mix of expressiveness, plugin support, and performance. It is the most widely adopted option for modern Python projects.
+`pytest` offers the best mix of expressiveness, plugin support, and performance.
+It is the most widely adopted option for modern Python projects.
 
 ### Property-based testing tooling 🔬
 
-For Python projects that already use `pytest`, we compared practical property-based testing options for day-to-day engineering use.
+For Python projects that already use `pytest`, we compared practical
+property-based testing options for day-to-day engineering use.
 
 | Tool                                                                                | Score/Notes                                                                                                                 |
 | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -143,7 +150,8 @@ For Python projects that already use `pytest`, we compared practical property-ba
 | [hypothesis-jsonschema](https://github.com/python-jsonschema/hypothesis-jsonschema) | ⭐⭐ Helpful schema-to-strategy bridge when JSON Schema is central; narrower in scope than a full PBT framework.            |
 | [pytest-quickcheck](https://github.com/Stranger6667/pytest-quickcheck)              | ⭐ Simpler random testing pattern, but limited compared with modern Hypothesis workflows.                                   |
 
-**Recommended choice**: `Hypothesis` as the default property-based testing companion to `pytest`.
+**Recommended choice**: `Hypothesis` as the default property-based testing
+companion to `pytest`.
 
 ## Consequences ⚖️
 

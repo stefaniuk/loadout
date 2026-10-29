@@ -30,7 +30,8 @@
 
 ## Context 🧭
 
-The Rust tech stack needs a default testing approach that is fast, stable, and aligned with the standard toolchain.
+The Rust tech stack needs a default testing approach that is fast, stable, and
+aligned with the standard toolchain.
 
 ## Decision ✅
 
@@ -64,7 +65,8 @@ Use the built-in test harness via `cargo test`.
 
 #### Option B: nextest
 
-Use [`nextest`](https://github.com/nextest-rs/nextest) as an alternative test runner.
+Use [`nextest`](https://github.com/nextest-rs/nextest) as an alternative test
+runner.
 
 | Criteria         | Score/Notes                    |
 | ---------------- | ------------------------------ |
@@ -74,7 +76,8 @@ Use [`nextest`](https://github.com/nextest-rs/nextest) as an alternative test ru
 | Ecosystem        | ⭐⭐ Growing adoption          |
 | Effort           | M                              |
 
-**Why not chosen**: Great performance but adds a separate runner for the baseline.
+**Why not chosen**: Great performance but adds a separate runner for the
+baseline.
 
 #### Option C: rstest
 
@@ -92,7 +95,8 @@ Use [`rstest`](https://github.com/la10736/rstest) for fixture-driven tests.
 
 #### Option D: proptest
 
-Use [`proptest`](https://github.com/proptest-rs/proptest) for property-based testing.
+Use [`proptest`](https://github.com/proptest-rs/proptest) for property-based
+testing.
 
 | Criteria         | Score/Notes                        |
 | ---------------- | ---------------------------------- |
@@ -102,7 +106,8 @@ Use [`proptest`](https://github.com/proptest-rs/proptest) for property-based tes
 | Ecosystem        | ⭐⭐ Common for property testing   |
 | Effort           | M                                  |
 
-**Why not chosen**: Excellent for specific cases but not the default test runner.
+**Why not chosen**: Excellent for specific cases but not the default test
+runner.
 
 #### Option E: criterion
 
@@ -120,15 +125,18 @@ Use [`criterion`](https://github.com/bheisler/criterion.rs) for benchmarking.
 
 ### Outcome 🏁
 
-Adopt `cargo test` as the default testing approach. This decision is reversible if a new standard emerges.
+Adopt `cargo test` as the default testing approach. This decision is reversible
+if a new standard emerges.
 
 ### Rationale 🧠
 
-The built-in test harness is fast, stable, and universally supported across the Rust ecosystem.
+The built-in test harness is fast, stable, and universally supported across the
+Rust ecosystem.
 
 ### Property-based testing tooling 🔬
 
-For Rust in 2026, keep `cargo test` as the runner and choose one default property-based testing companion for most invariant-driven tests.
+For Rust in 2026, keep `cargo test` as the runner and choose one default
+property-based testing companion for most invariant-driven tests.
 
 | Tool                                                        | Score/Notes                                                                                                         |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |

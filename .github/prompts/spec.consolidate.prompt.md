@@ -7,17 +7,17 @@ description: Consolidate per-feature Spec Kit artefacts under specs/ into a prod
 This prompt delegates to the **spec-consolidation** skill.
 
 Run the `spec-consolidation` skill. If the user input below names a step
-(`spec`, `data-model`, `research`, `quickstart`, `contracts`, `checklists`),
-run only that step. Otherwise run **all steps defined in the
-`spec-consolidation` skill** in order.
+(`spec`, `data-model`, `research`, `quickstart`, `contracts`, `checklists`), run
+only that step. Otherwise run **all steps defined in the `spec-consolidation`
+skill** in order.
 
 Use the current working tree at `HEAD` as the baseline unless the user
 explicitly asks for the default branch or another historical view.
 
-If the user input is invalid or incomplete (for example, an unknown step
-name or a baseline reference that cannot be resolved), respond with an
-error message that names the offending value and lists the accepted
-options, and do not start the consolidation run.
+If the user input is invalid or incomplete (for example, an unknown step name or
+a baseline reference that cannot be resolved), respond with an error message
+that names the offending value and lists the accepted options, and do not start
+the consolidation run.
 
 ```text
 $ARGUMENTS
@@ -53,9 +53,8 @@ Mandatory behavioural constraints (see
   baseline implementation and validation artefacts wins; record divergence in
   `specs/product/research.md`.
 - For `quickstart.md`, prefer the current repository bootstrap and operator
-  guidance surface, entry-point declarations, runtime or packaging metadata,
-  and executable validation artefacts when the source feature quickstarts are
-  stale.
+  guidance surface, entry-point declarations, runtime or packaging metadata, and
+  executable validation artefacts when the source feature quickstarts are stale.
 - In consolidated checklists, leave items unchecked unless the current
   consolidation run actually validated them.
 - Every consolidated requirement, entity, contract, and checklist item must
@@ -73,7 +72,7 @@ Mandatory behavioural constraints (see
 - After completion, include a concise before/after analysis in the final
   assistant message: fragmentation before, improvements after, remaining risks,
   and confidence that the product set matches the selected baseline.
-- After completion, list (in the final assistant message) any duplicate
-  derived artefacts that now have a product-facing counterpart and could be
-  archived after review. Do not recommend deleting the `specs/NNN-*` feature
-  histories themselves.
+- After completion, list (in the final assistant message) any duplicate derived
+  artefacts that now have a product-facing counterpart and could be archived
+  after review. Do not recommend deleting the `specs/NNN-*` feature histories
+  themselves.

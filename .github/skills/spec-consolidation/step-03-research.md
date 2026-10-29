@@ -1,6 +1,7 @@
 # Step 03 - Consolidated Research and Reconciliation
 
 **Output:** `specs/product/research.md`
+
 **Dependencies:** step 01 (`specs/product/spec.md`).
 
 Consolidate decisions, alternatives, and trade-offs from every
@@ -19,18 +20,17 @@ capturing every divergence found while consolidating the spec and data model.
 
 ## Authoring
 
-1. One decision per subsection. Title format:
-   `Decision: <what was decided>`.
+1. One decision per subsection. Title format: `Decision: <what was decided>`.
 2. For every decision, capture: context, options considered, decision,
    rationale, consequences, and a link to the ratifying ADR if one exists.
-3. Deduplicate: if the same decision appears in two feature research files,
-   keep one entry and list both sources.
+3. Deduplicate: if the same decision appears in two feature research files, keep
+   one entry and list both sources.
 4. Where a decision was research-only and never elevated to an ADR but is now
    load-bearing, recommend promotion under a `Recommended ADRs` section.
-5. Reconciliation Notes section: list every spec/code divergence found.
-   For each, record: intent statement, observed code behaviour, evidence
-   links from the selected baseline, recommended resolution (update spec,
-   update code, or open ADR).
+5. Reconciliation Notes section: list every spec/code divergence found. For
+   each, record: intent statement, observed code behaviour, evidence links from
+   the selected baseline, recommended resolution (update spec, update code, or
+   open ADR).
 
 ## Template (skeleton)
 
@@ -59,7 +59,6 @@ capturing every divergence found while consolidating the spec and data model.
 ## Definition of Done
 
 - Exactly one `research.md` exists under `specs/product/`.
-- Every decision is either linked to an ADR or listed under
-  `Recommended ADRs`.
+- Every decision is either linked to an ADR or listed under `Recommended ADRs`.
 - The Reconciliation Notes section is complete and actionable.
 - No duplicate decisions remain.

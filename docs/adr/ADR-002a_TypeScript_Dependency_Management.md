@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-The TypeScript tech stack needs a default package manager that is deterministic, fast, and supports workspaces for multi-package repos.
+The TypeScript tech stack needs a default package manager that is deterministic,
+fast, and supports workspaces for multi-package repos.
 
 ## Decision ✅
 
@@ -51,7 +52,8 @@ The TypeScript tech stack needs a default package manager that is deterministic,
 
 #### Option A: pnpm (Selected) ✅
 
-Use [`pnpm`](https://github.com/pnpm/pnpm) with a lock file and workspace support.
+Use [`pnpm`](https://github.com/pnpm/pnpm) with a lock file and workspace
+support.
 
 | Criteria           | Score/Notes                       |
 | ------------------ | --------------------------------- |
@@ -75,7 +77,8 @@ Use [`npm`](https://github.com/npm/cli) with `package-lock.json`.
 | Ecosystem adoption | ⭐⭐⭐ Default for many teams         |
 | Effort             | S                                     |
 
-**Why not chosen**: Works well but slower and less space-efficient for large repos.
+**Why not chosen**: Works well but slower and less space-efficient for large
+repos.
 
 #### Option C: Yarn Berry
 
@@ -124,11 +127,13 @@ Use [`Bun`](https://github.com/oven-sh/bun) as the package manager.
 
 ### Outcome 🏁
 
-Adopt `pnpm` as the default package manager for TypeScript projects. This decision is reversible if ecosystem support shifts.
+Adopt `pnpm` as the default package manager for TypeScript projects. This
+decision is reversible if ecosystem support shifts.
 
 ### Rationale 🧠
 
-`pnpm` provides fast, deterministic installs with strong workspace support and good ecosystem adoption, making it the best default for this repo.
+`pnpm` provides fast, deterministic installs with strong workspace support and
+good ecosystem adoption, making it the best default for this repo.
 
 ## Consequences ⚖️
 

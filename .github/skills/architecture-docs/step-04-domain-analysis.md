@@ -1,12 +1,14 @@
 # Step 04 - Domain Analysis
 
-Document domains, bounded contexts, and integration patterns (DDD-style, evidence-first).
+Document domains, bounded contexts, and integration patterns (DDD-style,
+evidence-first).
 
 ## Goal
 
 Create (or update) domain analysis documents at `.copilot/analysis/domain-*.md`.
 
-Also ensure they are linked from the architecture overview at `.copilot/analysis/README.md`.
+Also ensure they are linked from the architecture overview at
+`.copilot/analysis/README.md`.
 
 ## Discovery (run before writing)
 
@@ -26,14 +28,20 @@ Also ensure they are linked from the architecture overview at `.copilot/analysis
 
 Look for evidence of bounded contexts in the codebase:
 
-1. **Module/package boundaries** that suggest domain ownership (e.g. `accounts/`, `billing/`, `orders/`, `shipping/`).
+1. **Module/package boundaries** that suggest domain ownership (e.g.
+   `accounts/`, `billing/`, `orders/`, `shipping/`).
 2. **Aggregate roots and entities** with their own persistence and lifecycle.
-3. **Ubiquitous language** in code (consistent terminology across a set of modules).
-4. **Anti-corruption layers** (adapters/mappers between domain models and external schemas).
-5. **Schema ownership** in datastores (which tables/collections belong to which module).
-6. **Event names and topics** that indicate domain events (`OrderPlaced`, `PaymentCaptured`, etc.).
+3. **Ubiquitous language** in code (consistent terminology across a set of
+   modules).
+4. **Anti-corruption layers** (adapters/mappers between domain models and
+   external schemas).
+5. **Schema ownership** in datastores (which tables/collections belong to which
+   module).
+6. **Event names and topics** that indicate domain events (`OrderPlaced`,
+   `PaymentCaptured`, etc.).
 
-If domain boundaries are not explicit, record them as **Unknown from code - propose tentative boundaries based on {evidence}**.
+If domain boundaries are not explicit, record them as **Unknown from code -
+propose tentative boundaries based on {evidence}**.
 
 ## Steps
 
@@ -97,7 +105,8 @@ For each major aggregate:
 
 #### 2F. Integration patterns with other domains
 
-Document how this domain integrates with others. Use DDD context-mapping vocabulary where evidenced:
+Document how this domain integrates with others. Use DDD context-mapping
+vocabulary where evidenced:
 
 - **Shared kernel:** shared types/contracts between this domain and another
 - **Customer/supplier:** upstream/downstream relationship
@@ -136,7 +145,9 @@ For each integration, capture:
 
 ### 3) Build a context map
 
-In `.copilot/analysis/README.md`, add (or update) a **Domain Context Map** section with a single diagram showing all domains and the integration patterns between them.
+In `.copilot/analysis/README.md`, add (or update) a **Domain Context Map**
+section with a single diagram showing all domains and the integration patterns
+between them.
 
 Use a Mermaid flowchart:
 
@@ -151,7 +162,8 @@ Annotate each edge with the integration pattern.
 
 ### 4) Update the index
 
-Update `.copilot/analysis/README.md` with a **Domain Analysis** section linking to every domain document (in `[XXX]` order), plus the context map.
+Update `.copilot/analysis/README.md` with a **Domain Analysis** section linking
+to every domain document (in `[XXX]` order), plus the context map.
 
 ### 5) Keep unknowns visible (no guessing)
 

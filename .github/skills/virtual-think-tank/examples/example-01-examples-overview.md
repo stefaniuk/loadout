@@ -8,13 +8,13 @@
 - **Use**: Adapt these examples to your own decision briefs in VS Code Copilot
   Chat or GitHub Copilot CLI.
 
-> [!IMPORTANT]
-> These examples use the skill directly. They do not rely on prompt files.
+> [!IMPORTANT] These examples use the skill directly. They do not rely on prompt
+> files.
 
 ## Usage notes
 
-- In VS Code Copilot Chat, invoke the skill by typing `/virtual-think-tank`
-  and then pasting the brief.
+- In VS Code Copilot Chat, invoke the skill by typing `/virtual-think-tank` and
+  then pasting the brief.
 - In GitHub Copilot CLI, start an interactive session with
   `copilot --experimental` and invoke the skill by naming it with a leading
   slash in the prompt.
@@ -26,18 +26,17 @@
 ## Decision topics
 
 1. **Microservices decision**: Under what conditions should a growing,
-   business-critical platform evolve from a modular monolith into
-   microservices, and what trade-offs must be true for that move to pay off?
-2. **Team Topologies decision**: For a large enterprise, when does adopting
-   Team Topologies improve ownership, flow, and cognitive load, and what
+   business-critical platform evolve from a modular monolith into microservices,
+   and what trade-offs must be true for that move to pay off?
+2. **Team Topologies decision**: For a large enterprise, when does adopting Team
+   Topologies improve ownership, flow, and cognitive load, and what
    organisational conditions make the model succeed or fail?
 3. **Product mindset transition**: How do organisations move from project
    delivery habits to product thinking centred on outcomes, customer value, and
    flow, and where do these transformations most often stall?
 
-> [!TIP]
-> Use `panel_style: named` only when you want recognisable public voices and
-> are willing to check the skill's confidence and verification notes. Use
+> [!TIP] Use `panel_style: named` only when you want recognisable public voices
+> and are willing to check the skill's confidence and verification notes. Use
 > `panel_style: stakeholder` when the decision is more about internal change
 > than external thought leadership. If you provide any `named_*` field, the
 > skill should honour that explicit request even on an organisational topic.

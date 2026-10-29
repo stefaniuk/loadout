@@ -29,7 +29,9 @@
 
 ## Context 🧭
 
-The Python tech stack needs a default logging approach that supports structured output, multi-sink logging (JSON file plus readable console), log levels, and a good developer experience.
+The Python tech stack needs a default logging approach that supports structured
+output, multi-sink logging (JSON file plus readable console), log levels, and a
+good developer experience.
 
 ## Decision ✅
 
@@ -49,7 +51,8 @@ The Python tech stack needs a default logging approach that supports structured 
 - Low dependency footprint
 - Ecosystem support and longevity
 
-Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1), ⭐⭐ (2), ⭐⭐⭐ (3). Weighted totals exclude Effort and have a maximum of 69.
+Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1),
+⭐⭐ (2), ⭐⭐⭐ (3). Weighted totals exclude Effort and have a maximum of 69.
 
 | Criteria                 | Weight | Rationale                                          |
 | ------------------------ | ------ | -------------------------------------------------- |
@@ -65,7 +68,8 @@ Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1)
 
 #### Option A: structlog (Selected) ✅
 
-Use [`structlog`](https://github.com/hynek/structlog) with standard logging handlers for JSON files and console output.
+Use [`structlog`](https://github.com/hynek/structlog) with standard logging
+handlers for JSON files and console output.
 
 | Criteria                 | Score/Notes                               |
 | ------------------------ | ----------------------------------------- |
@@ -81,7 +85,8 @@ Use [`structlog`](https://github.com/hynek/structlog) with standard logging hand
 
 #### Option B: logging (standard library)
 
-Use the standard [`logging`](https://github.com/python/cpython) module with custom formatters.
+Use the standard [`logging`](https://github.com/python/cpython) module with
+custom formatters.
 
 | Criteria                 | Score/Notes                        |
 | ------------------------ | ---------------------------------- |
@@ -113,11 +118,13 @@ Use [`loguru`](https://github.com/Delgan/loguru) for ergonomic logging.
 | Effort                   | M                                    |
 | Weighted score (max 69)  | 58                                   |
 
-**Why not chosen**: Strong developer experience, but structured logging is less central than in structlog.
+**Why not chosen**: Strong developer experience, but structured logging is less
+central than in structlog.
 
 #### Option D: python-json-logger
 
-Use [`python-json-logger`](https://github.com/madzak/python-json-logger) to add JSON formatting to the standard logging module.
+Use [`python-json-logger`](https://github.com/madzak/python-json-logger) to add
+JSON formatting to the standard logging module.
 
 | Criteria                 | Score/Notes                            |
 | ------------------------ | -------------------------------------- |
@@ -131,11 +138,14 @@ Use [`python-json-logger`](https://github.com/madzak/python-json-logger) to add 
 | Effort                   | M                                      |
 | Weighted score (max 69)  | 46                                     |
 
-**Why not chosen**: Adds JSON output but does not address console experience well.
+**Why not chosen**: Adds JSON output but does not address console experience
+well.
 
 #### Option E: AWS Powertools Logger
 
-Use [`Powertools Logger`](https://github.com/aws-powertools/powertools-lambda-python) for AWS Lambda workloads.
+Use
+[`Powertools Logger`](https://github.com/aws-powertools/powertools-lambda-python)
+for AWS Lambda workloads.
 
 | Criteria                 | Score/Notes                   |
 | ------------------------ | ----------------------------- |
@@ -149,20 +159,25 @@ Use [`Powertools Logger`](https://github.com/aws-powertools/powertools-lambda-py
 | Effort                   | M                             |
 | Weighted score (max 69)  | 51                            |
 
-**Why not chosen**: Best for Lambda-only workloads rather than a general baseline.
+**Why not chosen**: Best for Lambda-only workloads rather than a general
+baseline.
 
 ### Outcome 🏁
 
-Adopt `structlog` as the default logging library for Python. This decision is reversible if structured logging expectations or ecosystem support change.
+Adopt `structlog` as the default logging library for Python. This decision is
+reversible if structured logging expectations or ecosystem support change.
 
 ### Rationale 🧠
 
-Using the weighted criteria, `structlog` scores highest because it is purpose-built for structured logs, integrates well with standard handlers, and supports multi-sink patterns with minimal friction.
+Using the weighted criteria, `structlog` scores highest because it is
+purpose-built for structured logs, integrates well with standard handlers, and
+supports multi-sink patterns with minimal friction.
 
 ## Consequences ⚖️
 
 - Python services should use `structlog` for structured logs.
-- AWS Lambda services may use Powertools Logger when AWS-specific features are required.
+- AWS Lambda services may use Powertools Logger when AWS-specific features are
+  required.
 
 ## Compliance 📏
 

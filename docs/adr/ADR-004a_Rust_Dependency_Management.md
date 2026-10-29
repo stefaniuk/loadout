@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-The Rust tech stack needs a default dependency manager and build workflow that aligns with the Rust toolchain and supports reproducible builds.
+The Rust tech stack needs a default dependency manager and build workflow that
+aligns with the Rust toolchain and supports reproducible builds.
 
 ## Decision ✅
 
@@ -51,7 +52,8 @@ The Rust tech stack needs a default dependency manager and build workflow that a
 
 #### Option A: Cargo (Selected) ✅
 
-Use [`Cargo`](https://github.com/rust-lang/cargo) with `Cargo.toml` and `Cargo.lock`.
+Use [`Cargo`](https://github.com/rust-lang/cargo) with `Cargo.toml` and
+`Cargo.lock`.
 
 | Criteria                | Score/Notes                          |
 | ----------------------- | ------------------------------------ |
@@ -63,7 +65,8 @@ Use [`Cargo`](https://github.com/rust-lang/cargo) with `Cargo.toml` and `Cargo.l
 
 #### Option B: Bazel + rules_rust
 
-Use [`Bazel`](https://github.com/bazelbuild/bazel) with [`rules_rust`](https://github.com/bazelbuild/rules_rust).
+Use [`Bazel`](https://github.com/bazelbuild/bazel) with
+[`rules_rust`](https://github.com/bazelbuild/rules_rust).
 
 | Criteria                | Score/Notes                            |
 | ----------------------- | -------------------------------------- |
@@ -77,7 +80,8 @@ Use [`Bazel`](https://github.com/bazelbuild/bazel) with [`rules_rust`](https://g
 
 #### Option C: Buck2
 
-Use [`Buck2`](https://github.com/facebook/buck2) for builds and dependency management.
+Use [`Buck2`](https://github.com/facebook/buck2) for builds and dependency
+management.
 
 | Criteria                | Score/Notes                                    |
 | ----------------------- | ---------------------------------------------- |
@@ -105,7 +109,8 @@ Use [`Pants`](https://github.com/pantsbuild/pants) for multi-language builds.
 
 #### Option E: Nix
 
-Use [`Nix`](https://github.com/NixOS/nix) for reproducible builds and dependency management.
+Use [`Nix`](https://github.com/NixOS/nix) for reproducible builds and dependency
+management.
 
 | Criteria                | Score/Notes                            |
 | ----------------------- | -------------------------------------- |
@@ -119,11 +124,13 @@ Use [`Nix`](https://github.com/NixOS/nix) for reproducible builds and dependency
 
 ### Outcome 🏁
 
-Adopt Cargo as the default Rust dependency manager. This decision is reversible if a different build system becomes a hard requirement.
+Adopt Cargo as the default Rust dependency manager. This decision is reversible
+if a different build system becomes a hard requirement.
 
 ### Rationale 🧠
 
-Cargo is the canonical tool for Rust and integrates with the full ecosystem, providing the most predictable and lowest-friction workflow.
+Cargo is the canonical tool for Rust and integrates with the full ecosystem,
+providing the most predictable and lowest-friction workflow.
 
 ## Consequences ⚖️
 

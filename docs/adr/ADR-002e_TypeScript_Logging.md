@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-The TypeScript tech stack needs a default logging library that supports structured logs, multi-sink output, and good local console readability.
+The TypeScript tech stack needs a default logging library that supports
+structured logs, multi-sink output, and good local console readability.
 
 ## Decision ✅
 
@@ -49,7 +50,8 @@ The TypeScript tech stack needs a default logging library that supports structur
 - Low dependency footprint
 - Ecosystem support and longevity
 
-Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1), ⭐⭐ (2), ⭐⭐⭐ (3). Weighted totals exclude Effort and have a maximum of 69.
+Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1),
+⭐⭐ (2), ⭐⭐⭐ (3). Weighted totals exclude Effort and have a maximum of 69.
 
 | Criteria                 | Weight | Rationale                                          |
 | ------------------------ | ------ | -------------------------------------------------- |
@@ -65,7 +67,8 @@ Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1)
 
 #### Option A: winston (Selected) ✅
 
-Use [`winston`](https://github.com/winstonjs/winston) with JSON file transport and console transport for local output.
+Use [`winston`](https://github.com/winstonjs/winston) with JSON file transport
+and console transport for local output.
 
 | Criteria                 | Score/Notes                       |
 | ------------------------ | --------------------------------- |
@@ -81,7 +84,8 @@ Use [`winston`](https://github.com/winstonjs/winston) with JSON file transport a
 
 #### Option B: pino
 
-Use [`pino`](https://github.com/pinojs/pino) with transports and `pino-pretty` for console output.
+Use [`pino`](https://github.com/pinojs/pino) with transports and `pino-pretty`
+for console output.
 
 | Criteria                 | Score/Notes                    |
 | ------------------------ | ------------------------------ |
@@ -95,11 +99,13 @@ Use [`pino`](https://github.com/pinojs/pino) with transports and `pino-pretty` f
 | Effort                   | M                              |
 | Weighted score (max 69)  | 59                             |
 
-**Why not chosen**: Excellent performance, but needs extra setup for multi-sink and pretty output.
+**Why not chosen**: Excellent performance, but needs extra setup for multi-sink
+and pretty output.
 
 #### Option C: log4js
 
-Use [`log4js`](https://github.com/log4js-node/log4js-node) with appenders for file and console.
+Use [`log4js`](https://github.com/log4js-node/log4js-node) with appenders for
+file and console.
 
 | Criteria                 | Score/Notes                    |
 | ------------------------ | ------------------------------ |
@@ -135,7 +141,9 @@ Use [`bunyan`](https://github.com/trentm/node-bunyan) for JSON logging.
 
 #### Option E: AWS Powertools Logger
 
-Use [`Powertools Logger`](https://github.com/aws-powertools/powertools-lambda-typescript) for AWS Lambda workloads.
+Use
+[`Powertools Logger`](https://github.com/aws-powertools/powertools-lambda-typescript)
+for AWS Lambda workloads.
 
 | Criteria                 | Score/Notes                   |
 | ------------------------ | ----------------------------- |
@@ -149,20 +157,25 @@ Use [`Powertools Logger`](https://github.com/aws-powertools/powertools-lambda-ty
 | Effort                   | M                             |
 | Weighted score (max 69)  | 51                            |
 
-**Why not chosen**: Best for Lambda-specific workloads rather than the general baseline.
+**Why not chosen**: Best for Lambda-specific workloads rather than the general
+baseline.
 
 ### Outcome 🏁
 
-Adopt `winston` as the default logging library for TypeScript. This decision is reversible if the ecosystem changes.
+Adopt `winston` as the default logging library for TypeScript. This decision is
+reversible if the ecosystem changes.
 
 ### Rationale 🧠
 
-Using the weighted criteria, `winston` scores highest because it balances structured logging, multi-sink output, and widespread adoption.
+Using the weighted criteria, `winston` scores highest because it balances
+structured logging, multi-sink output, and widespread adoption.
 
 ## Consequences ⚖️
 
-- TypeScript services should use winston with JSON file output and console transport.
-- AWS Lambda services may use Powertools Logger when AWS-specific features are required.
+- TypeScript services should use winston with JSON file output and console
+  transport.
+- AWS Lambda services may use Powertools Logger when AWS-specific features are
+  required.
 
 ## Compliance 📏
 

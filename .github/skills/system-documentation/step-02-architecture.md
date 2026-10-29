@@ -1,8 +1,9 @@
 # Step 02 - Architecture
 
 **Outputs:** `docs/architecture.md` and `docs/adr/*.md`
-**Dependencies:** step 01 (`README.md`, `docs/README.md`,
-`docs/conventions.md`, `docs/onboarding.md`).
+
+**Dependencies:** step 01 (`README.md`, `docs/README.md`, `docs/conventions.md`,
+`docs/onboarding.md`).
 
 This step maintains the current-state architecture view and the ADR trail for
 lasting technical decisions.
@@ -17,8 +18,8 @@ lasting technical decisions.
 ## Discovery
 
 1. Read the current `docs/architecture.md` and relevant ADRs.
-2. Inspect the code, contracts, scripts, and tests that define system
-   boundaries or major flows.
+2. Inspect the code, contracts, scripts, and tests that define system boundaries
+   or major flows.
 3. Determine whether the change is architectural, policy-level, or merely a
    local implementation detail.
 4. If an ADR is required, use the repository ADR template when creating or

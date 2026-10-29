@@ -1,6 +1,7 @@
 # Step 06 - Tutorials
 
 **Outputs:** `docs/tutorials/**`
+
 **Dependencies:** step 03 (`docs/reference/**`) and step 05 (`docs/how-to/**`).
 
 This step maintains guided learning journeys for readers who are new to a
@@ -24,8 +25,7 @@ workflow and need a safe, happy-path introduction.
 
 ### `establish`
 
-1. Create `docs/tutorials/README.md` when the repository needs a teaching
-   layer.
+1. Create `docs/tutorials/README.md` when the repository needs a teaching layer.
 2. Create tutorials only for supported journeys that a newcomer can complete
    end-to-end.
 

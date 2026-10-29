@@ -1,6 +1,10 @@
 # GitHub Copilot Instructions 🤖
 
-This file is the authoritative instruction source for routine GitHub Copilot work in this repository. Use it as the operational default. Consult the [constitution](../.specify/memory/constitution.md) directly when a task affects specifications, behaviour, architecture, ADRs, or governance, or when guidance conflicts.
+This file is the authoritative instruction source for routine GitHub Copilot
+work in this repository. Use it as the operational default. Consult the
+[constitution](../.specify/memory/constitution.md) directly when a task affects
+specifications, behaviour, architecture, ADRs, or governance, or when guidance
+conflicts.
 
 ## Implementation discipline 🛠️
 
@@ -20,17 +24,24 @@ This file is the authoritative instruction source for routine GitHub Copilot wor
 
 ## Skill invocation gates
 
-- Use the `test-driven-development` skill only when the task requires a new failing test that should drive a code or behaviour change.
-- On unexpected test, build, or runtime failures, load the `systematic-debugging` skill.
+- Use the `test-driven-development` skill only when the task requires a new
+  failing test that should drive a code or behaviour change.
+- On unexpected test, build, or runtime failures, load the
+  `systematic-debugging` skill.
 - Before completion, load the `verification-before-completion` skill.
 
 ## Workflow mode
 
-- Resolve the active workflow mode with `make workflow-status` before invoking lifecycle skills.
-- If the mode is `speckit`, use only the `speckit-*` lifecycle skills for that session or worktree.
-- If the mode is `superpowers`, use only the imported Superpowers workflow skills for that session or worktree.
-- Do not mix the Speckit and Superpowers lifecycle commands in the same session or worktree.
-- Switch explicitly with `make workflow-use mode=speckit` or `make workflow-use mode=superpowers`, then start a fresh chat session.
+- Resolve the active workflow mode with `make workflow-status` before invoking
+  lifecycle skills.
+- If the mode is `speckit`, use only the `speckit-*` lifecycle skills for that
+  session or worktree.
+- If the mode is `superpowers`, use only the imported Superpowers workflow
+  skills for that session or worktree.
+- Do not mix the Speckit and Superpowers lifecycle commands in the same session
+  or worktree.
+- Switch explicitly with `make workflow-use mode=speckit` or
+  `make workflow-use mode=superpowers`, then start a fresh chat session.
 
 ## Repository verification policy 🔍
 

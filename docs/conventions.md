@@ -1,12 +1,20 @@
 # Repository Conventions
 
-This document is the cross-cutting taxonomy and naming reference for contributors. It defines the **language-pack** convention that groups related artefacts under a single tech slug, and points to the canonical locations for naming, frontmatter, and ADR rules rather than duplicating them.
+This document is the cross-cutting taxonomy and naming reference for
+contributors. It defines the **language-pack** convention that groups related
+artefacts under a single tech slug, and points to the canonical locations for
+naming, frontmatter, and ADR rules rather than duplicating them.
 
 ## Language packs
 
-A **language pack** is a named, composable unit of Copilot customisation keyed by a tech slug (for example `python`, `terraform`, `reactjs`). Packs are a metadata concept: artefacts continue to live in their normal folders, but the pack vocabulary lets the catalogue, onboarding flow, and selective-install tooling reason about them together.
+A **language pack** is a named, composable unit of Copilot customisation keyed
+by a tech slug (for example `python`, `terraform`, `reactjs`). Packs are a
+metadata concept: artefacts continue to live in their normal folders, but the
+pack vocabulary lets the catalogue, onboarding flow, and selective-install
+tooling reason about them together.
 
-**Pack ID format.** `language-pack.<tech>`, kebab-case, where `<tech>` matches the instruction basename exactly (the part before `.instructions.md`).
+**Pack ID format.** `language-pack.<tech>`, kebab-case, where `<tech>` matches
+the instruction basename exactly (the part before `.instructions.md`).
 
 **A language pack MUST contain:**
 
@@ -16,20 +24,28 @@ A **language pack** is a named, composable unit of Copilot customisation keyed b
 **A language pack MAY contain:**
 
 - one or more related skills under `.github/skills/<name>/SKILL.md`;
-- an ADR cluster under `docs/adr/ADR-NNN[a-g]_<Tech>_*.md` covering tooling choices for the language;
+- an ADR cluster under `docs/adr/ADR-NNN[a-g]_<Tech>_*.md` covering tooling
+  choices for the language;
 - optional templates under `.github/instructions/templates/`.
 
 ### Pack classes
 
 Every language pack belongs to one of three classes:
 
-- **language** - general-purpose programming languages: `python`, `typescript`, `go`, `rust`.
-- **tool** - non-language tooling with its own grammar and idioms: `docker`, `makefile`, `shell`, `terraform`.
-- **framework** - composite or framework-specific packs that sit on top of a language: `reactjs`, `tauri`, `playwright-python`, `playwright-typescript`.
+- **language** - general-purpose programming languages: `python`, `typescript`,
+  `go`, `rust`.
+- **tool** - non-language tooling with its own grammar and idioms: `docker`,
+  `makefile`, `shell`, `terraform`.
+- **framework** - composite or framework-specific packs that sit on top of a
+  language: `reactjs`, `tauri`, `playwright-python`, `playwright-typescript`.
 
 ### Foundation packs (orphan policy)
 
-An instruction file that has **no** matching enforce prompt is a **foundation pack**, not a language pack. Foundation packs provide cross-cutting authoring guidance and are exempt from the enforce-prompt pairing rule. They are listed separately in the catalogue and are not surfaced through the per-tech apply flags.
+An instruction file that has **no** matching enforce prompt is a **foundation
+pack**, not a language pack. Foundation packs provide cross-cutting authoring
+guidance and are exempt from the enforce-prompt pairing rule. They are listed
+separately in the catalogue and are not surfaced through the per-tech apply
+flags.
 
 Foundation packs today: `likec4`, `readme`.
 
@@ -54,42 +70,65 @@ The table below is descriptive.
 
 ## Naming and frontmatter
 
-Conventions for filenames, identifier schemes, and frontmatter live in the per-folder READMEs and are not duplicated here:
+Conventions for filenames, identifier schemes, and frontmatter live in the
+per-folder READMEs and are not duplicated here:
 
 - Slugs and pack IDs are kebab-case.
-- Instruction packs use the `[PREFIX-NNN]` identifier scheme for normative rules.
+- Instruction packs use the `[PREFIX-NNN]` identifier scheme for normative
+  rules.
 - Frontmatter required fields differ by artefact type.
-- README authoring rules live in [.github/instructions/readme.instructions.md](../.github/instructions/readme.instructions.md).
+- README authoring rules live in
+  [.github/instructions/readme.instructions.md](../.github/instructions/readme.instructions.md).
 
 ## ADR triggers
 
-Architecture Decision Records capture significant technical choices. The complete trigger list and ADR workflow are defined in [.github/copilot-instructions.md](../.github/copilot-instructions.md). In short, raise an ADR when a change affects:
+Architecture Decision Records capture significant technical choices. The
+complete trigger list and ADR workflow are defined in
+[.github/copilot-instructions.md](../.github/copilot-instructions.md). In short,
+raise an ADR when a change affects:
 
 - architectural style or pattern;
 - language, framework, or tooling selection within a language pack;
 - any other decision that shapes the system beyond a single file.
 
-Language-pack ADR clusters are numbered by language (ADR-001 python, ADR-002 typescript, ADR-003 go, ADR-004 rust) with letter suffixes for sub-topics (dependency management, linting, testing, etc.). Consult the [Tech Radar](adr/Tech_Radar.md) before introducing a new tool.
+Language-pack ADR clusters are numbered by language (ADR-001 python, ADR-002
+typescript, ADR-003 go, ADR-004 rust) with letter suffixes for sub-topics
+(dependency management, linting, testing, etc.). Consult the
+[Tech Radar](adr/Tech_Radar.md) before introducing a new tool.
 
 ## Discovery
 
-Selective-install flags accepted by `make apply` (for example `python=true`, `terraform=true`) correspond one-to-one with the language packs above.
+Selective-install flags accepted by `make apply` (for example `python=true`,
+`terraform=true`) correspond one-to-one with the language packs above.
 
 ## Naming and slug rules
 
-All artefacts use **kebab-case** slugs (lowercase ASCII letters, digits, and hyphens; no underscores, no dots inside the slug, no leading or trailing hyphens). The slug is the portion of the filename before any artefact suffix such as `.instructions.md`, `.prompt.md`, `.agent.md`, or before the `/SKILL.md` segment for skills.
+All artefacts use **kebab-case** slugs (lowercase ASCII letters, digits, and
+hyphens; no underscores, no dots inside the slug, no leading or trailing
+hyphens). The slug is the portion of the filename before any artefact suffix
+such as `.instructions.md`, `.prompt.md`, `.agent.md`, or before the `/SKILL.md`
+segment for skills.
 
 Per-artefact slug constraints:
 
-- Instruction pack: tech slug; must match the language-pack `<tech>` exactly when the file is part of a pack. Example: `python`, `playwright-typescript`.
-- Prompt: mandatory **prefix.** (see table below) followed by a descriptive kebab-case slug. Example: `enforce.python`, `dev.implement-logging`.
-- Agent: kebab-case or namespaced slug matching the file name under `.github/agents/`. Examples: `docs-review`, `workflow.release-check`.
-- Skill: folder name only; kebab-case noun-phrase describing the capability. Example: `code-review`, `enforcement-audit`.
-- Include fragment: `<topic>` kebab-case noun-phrase with suffix `.include.md` and no leading underscore. Example: `quality-gates-baseline.include.md`.
-- Pack ID: `language-pack.<tech>` where `<tech>` matches the instruction slug. Example: `language-pack.reactjs`.
-- ADR: `ADR-NNN[a-z]?_<Pascal_Snake>_<Title>.md`; cluster letters (`a`–`g`) are reserved for language-pack ADR sub-topics. Example: `ADR-001a_Python_Dependency_Management.md`.
+- Instruction pack: tech slug; must match the language-pack `<tech>` exactly
+  when the file is part of a pack. Example: `python`, `playwright-typescript`.
+- Prompt: mandatory **prefix.** (see table below) followed by a descriptive
+  kebab-case slug. Example: `enforce.python`, `dev.implement-logging`.
+- Agent: kebab-case or namespaced slug matching the file name under
+  `.github/agents/`. Examples: `docs-review`, `workflow.release-check`.
+- Skill: folder name only; kebab-case noun-phrase describing the capability.
+  Example: `code-review`, `enforcement-audit`.
+- Include fragment: `<topic>` kebab-case noun-phrase with suffix `.include.md`
+  and no leading underscore. Example: `quality-gates-baseline.include.md`.
+- Pack ID: `language-pack.<tech>` where `<tech>` matches the instruction slug.
+  Example: `language-pack.reactjs`.
+- ADR: `ADR-NNN[a-z]?_<Pascal_Snake>_<Title>.md`; cluster letters (`a`–`g`) are
+  reserved for language-pack ADR sub-topics. Example:
+  `ADR-001a_Python_Dependency_Management.md`.
 
-**Prompt prefixes.** Prompts must begin with one of the following registered prefixes; the prefix is part of the filename and is followed by a literal dot:
+**Prompt prefixes.** Prompts must begin with one of the following registered
+prefixes; the prefix is part of the filename and is followed by a literal dot:
 
 | Prefix          | Purpose                                                        |
 | --------------- | -------------------------------------------------------------- |
@@ -119,7 +158,9 @@ Adding a new prefix requires an ADR.
 
 ## Frontmatter schema by artefact type
 
-Frontmatter is YAML, delimited by `---` lines, and **must** be the first content in the file. Required fields below are normative; field lists are derived from the per-folder READMEs and the live artefacts.
+Frontmatter is YAML, delimited by `---` lines, and **must** be the first content
+in the file. Required fields below are normative; field lists are derived from
+the per-folder READMEs and the live artefacts.
 
 ### Instructions (`.instructions.md`)
 
@@ -129,7 +170,8 @@ Frontmatter is YAML, delimited by `---` lines, and **must** be the first content
 | `applyTo`     | yes¹     | Glob (relative to workspace root) controlling automatic application; `**` for repo-wide |
 | `name`        | no       | Display name override; defaults to the filename                                         |
 
-¹ Required in this repository for predictable auto-application; VS Code itself treats `applyTo` as optional.
+¹ Required in this repository for predictable auto-application; VS Code itself
+treats `applyTo` as optional.
 
 ```yaml
 ---
@@ -201,63 +243,128 @@ allowed-tools: []
 
 ## Include-file contract
 
-Includes are reusable Markdown fragments referenced from instruction packs (and, in future, prompts). They keep cross-cutting baselines DRY without violating the "one identifier per rule" discipline.
+Includes are reusable Markdown fragments referenced from instruction packs (and,
+in future, prompts). They keep cross-cutting baselines DRY without violating the
+"one identifier per rule" discipline.
 
-- **Allowed locations.** `.github/instructions/includes/` for instruction fragments and `.github/prompts/includes/` for prompt fragments. No other directory may host an include.
-- **Filename.** `<topic>.include.md`, kebab-case, no leading underscore, single `.include.md` suffix. Match the topic to the dominant noun-phrase (for example `quality-gates-baseline.include.md`).
-- **Reference style.** Use **plain Markdown relative links**, for example `[quality gates baseline](./includes/quality-gates-baseline.include.md)`. Do **not** use the `#file:` reference syntax; the repository standard is plain links so that `lychee` can validate them.
-- **Identifier scheme.** Every normative rule in an include carries a unique tag of the form `[<DOMAIN>-BASE-<PREFIX>-NNN]` (for example `[QG-BASE-RUN-001]`). Including packs reference these identifiers; they never restate the rule body.
-- **Size.** Keep each include under roughly 60 lines; split by topic if it grows.
-- **No circular includes.** An include must not reference another include, and an instruction pack must not be referenced from within an include. The dependency graph is one-deep: pack → include.
-- **No silent extraction.** Extract a fragment only when it is substantive **and** duplicated verbatim across 4+ artefacts; otherwise inline it. See [.github/prompts/includes/README.md](../.github/prompts/includes/README.md) for the prompt-side rationale.
+- **Allowed locations.** `.github/instructions/includes/` for instruction
+  fragments and `.github/prompts/includes/` for prompt fragments. No other
+  directory may host an include.
+- **Filename.** `<topic>.include.md`, kebab-case, no leading underscore, single
+  `.include.md` suffix. Match the topic to the dominant noun-phrase (for example
+  `quality-gates-baseline.include.md`).
+- **Reference style.** Use **plain Markdown relative links**, for example
+  `[quality gates baseline](./includes/quality-gates-baseline.include.md)`. Do
+  **not** use the `#file:` reference syntax; the repository standard is plain
+  links so that `lychee` can validate them.
+- **Identifier scheme.** Every normative rule in an include carries a unique tag
+  of the form `[<DOMAIN>-BASE-<PREFIX>-NNN]` (for example `[QG-BASE-RUN-001]`).
+  Including packs reference these identifiers; they never restate the rule body.
+- **Size.** Keep each include under roughly 60 lines; split by topic if it
+  grows.
+- **No circular includes.** An include must not reference another include, and
+  an instruction pack must not be referenced from within an include. The
+  dependency graph is one-deep: pack → include.
+- **No silent extraction.** Extract a fragment only when it is substantive
+  **and** duplicated verbatim across 4+ artefacts; otherwise inline it. See
+  [.github/prompts/includes/README.md](../.github/prompts/includes/README.md)
+  for the prompt-side rationale.
 
 ## ADR trigger checklist
 
-Raise an ADR if any answer below is **yes**. Full prose, workflow, and template requirements live in [.github/copilot-instructions.md](../.github/copilot-instructions.md); do not duplicate them here.
+Raise an ADR if any answer below is **yes**. Full prose, workflow, and template
+requirements live in
+[.github/copilot-instructions.md](../.github/copilot-instructions.md); do not
+duplicate them here.
 
-- [ ] Does the change adopt or replace an **architectural style** (event-driven, layered, microservices, monolith, …)?
-- [ ] Does it adopt or replace an **architectural pattern** (event sourcing, repository pattern, composition over inheritance, …)?
+- [ ] Does the change adopt or replace an **architectural style** (event-driven,
+      layered, microservices, monolith, …)?
+- [ ] Does it adopt or replace an **architectural pattern** (event sourcing,
+      repository pattern, composition over inheritance, …)?
 - [ ] Does it select or change a **language, runtime, or framework**?
-- [ ] Does it select or change a **tool within a language pack** (linter, formatter, type checker, test runner, logger, CLI parser, TUI framework, …)?
-- [ ] Does it introduce a new **prompt prefix**, **artefact category**, or **pack class**?
+- [ ] Does it select or change a **tool within a language pack** (linter,
+      formatter, type checker, test runner, logger, CLI parser, TUI framework,
+      …)?
+- [ ] Does it introduce a new **prompt prefix**, **artefact category**, or
+      **pack class**?
 - [ ] Does it materially alter **governance, quality gates, or TDD policy**?
 
-For tooling choices inside a language pack, consult the [Tech Radar](adr/Tech_Radar.md) first and use the per-language ADR cluster numbering (ADR-001 python, ADR-002 typescript, ADR-003 go, ADR-004 rust).
+For tooling choices inside a language pack, consult the
+[Tech Radar](adr/Tech_Radar.md) first and use the per-language ADR cluster
+numbering (ADR-001 python, ADR-002 typescript, ADR-003 go, ADR-004 rust).
 
 ## Instruction precedence and merge semantics
 
-VS Code combines every applicable instruction file into the chat context. When the rules conflict, the **higher-priority source wins**:
+VS Code combines every applicable instruction file into the chat context. When
+the rules conflict, the **higher-priority source wins**:
 
-1. **Personal instructions** - user-profile `.instructions.md` files and other user-level instruction files. Highest priority.
-2. **Repository instructions** - `.github/copilot-instructions.md` and every `.github/instructions/*.instructions.md` whose `applyTo` glob matches the current file.
-3. **Organisation instructions** - GitHub-org-level instructions discovered via `github.copilot.chat.organizationInstructions.enabled`. Lowest priority.
+1. **Personal instructions** - user-profile `.instructions.md` files and other
+   user-level instruction files. Highest priority.
+2. **Repository instructions** - `.github/copilot-instructions.md` and every
+   `.github/instructions/*.instructions.md` whose `applyTo` glob matches the
+   current file.
+3. **Organisation instructions** - GitHub-org-level instructions discovered via
+   `github.copilot.chat.organizationInstructions.enabled`. Lowest priority.
 
-Within a single tier, **no merge order is guaranteed**. VS Code states explicitly that "if you have multiple instruction files in your project, VS Code combines and adds them to the chat context, no specific order is guaranteed" ([custom-instructions docs](https://code.visualstudio.com/docs/copilot/customization/custom-instructions#_types-of-instruction-files)). Treat every set of co-applying instruction files as an **unordered bag of rules**.
+Within a single tier, **no merge order is guaranteed**. VS Code states
+explicitly that "if you have multiple instruction files in your project, VS Code
+combines and adds them to the chat context, no specific order is guaranteed"
+([custom-instructions docs](https://code.visualstudio.com/docs/copilot/customization/custom-instructions#_types-of-instruction-files)).
+Treat every set of co-applying instruction files as an **unordered bag of
+rules**.
 
 Practical consequences in this repository:
 
-- `.github/copilot-instructions.md` is the repository-wide baseline. Workspace `.instructions.md` files must not contradict it.
-- Two instruction packs whose `applyTo` globs overlap (for example `playwright-typescript.instructions.md` and `typescript.instructions.md` both match `**/*.ts`) are both loaded. Their rules **must be compatible** - if a tension exists, narrow one pack's `applyTo` or move the disputed rule into an include shared by both.
-- Foundation packs (`likec4`, `readme`) are loaded purely by `applyTo` matching and have no enforce prompt to resolve conflicts; keep them strictly additive.
+- `.github/copilot-instructions.md` is the repository-wide baseline. Workspace
+  `.instructions.md` files must not contradict it.
+- Two instruction packs whose `applyTo` globs overlap (for example
+  `playwright-typescript.instructions.md` and `typescript.instructions.md` both
+  match `**/*.ts`) are both loaded. Their rules **must be compatible** - if a
+  tension exists, narrow one pack's `applyTo` or move the disputed rule into an
+  include shared by both.
+- Foundation packs (`likec4`, `readme`) are loaded purely by `applyTo` matching
+  and have no enforce prompt to resolve conflicts; keep them strictly additive.
 
 ### Writing conflict-safe instructions
 
-- **Be order-independent.** A rule that depends on another rule being read first is fragile. State preconditions explicitly inside the rule itself.
-- **Scope tightly with `applyTo`.** Use the narrowest glob that captures the intended files. Repo-wide rules belong in `.github/copilot-instructions.md`, not in a `.instructions.md` with `applyTo: "**"`.
-- **Avoid contradictions across packs.** Before adding a rule to a pack whose `applyTo` overlaps another, search the overlapping pack for the same topic and reconcile, or extract the shared rule into an include.
-- **Single source of truth per rule.** Each normative rule carries a unique identifier (for example `[PY-LOG-003]`) and is stated in exactly one location; cross-cutting baselines live in `includes/`.
-- **Use diagnostics to verify load order is irrelevant.** Run **Chat: Diagnostics** to enumerate which instruction files were applied; if a rule's behaviour changes when an unrelated pack is added, the rule is order-dependent and must be rewritten.
+- **Be order-independent.** A rule that depends on another rule being read first
+  is fragile. State preconditions explicitly inside the rule itself.
+- **Scope tightly with `applyTo`.** Use the narrowest glob that captures the
+  intended files. Repo-wide rules belong in `.github/copilot-instructions.md`,
+  not in a `.instructions.md` with `applyTo: "**"`.
+- **Avoid contradictions across packs.** Before adding a rule to a pack whose
+  `applyTo` overlaps another, search the overlapping pack for the same topic and
+  reconcile, or extract the shared rule into an include.
+- **Single source of truth per rule.** Each normative rule carries a unique
+  identifier (for example `[PY-LOG-003]`) and is stated in exactly one location;
+  cross-cutting baselines live in `includes/`.
+- **Use diagnostics to verify load order is irrelevant.** Run **Chat:
+  Diagnostics** to enumerate which instruction files were applied; if a rule's
+  behaviour changes when an unrelated pack is added, the rule is order-dependent
+  and must be rewritten.
 
 ## Plugin packs
 
-Independently of the per-tech _language packs_, the repository's artefacts are also split into two **plugin packs**, which describe the spec-kit boundary for selective install:
+Independently of the per-tech _language packs_, the repository's artefacts are
+also split into two **plugin packs**, which describe the spec-kit boundary for
+selective install:
 
-- **Core pack** - all language packs, foundation packs, any custom agents, util/dev/architecture prompts, hooks, and skills (with the caveat noted below).
-- **Speckit pack** (optional sub-pack) - every `speckit-*` skill, the `review.speckit-*` review prompts, and the entire `.specify/` tree (constitution, templates, scripts).
+- **Core pack** - all language packs, foundation packs, any custom agents,
+  util/dev/architecture prompts, hooks, and skills (with the caveat noted
+  below).
+- **Speckit pack** (optional sub-pack) - every `speckit-*` skill, the
+  `review.speckit-*` review prompts, and the entire `.specify/` tree
+  (constitution, templates, scripts).
 
-To install only one pack, use the `make apply subset=…` flag (see [onboarding.md#subset-selection](onboarding.md#subset-selection)).
+To install only one pack, use the `make apply subset=…` flag (see
+[onboarding.md#subset-selection](onboarding.md#subset-selection)).
 
-**Code-review skill dependency.** The [code-review skill](../.github/skills/code-review/SKILL.md) is part of the **core** pack, but its prose assumes spec-kit-style artefacts (`spec.md`, `plan.md`, `tasks.md`). A consumer who installs the core pack without speckit can still use the skill, but the workflow language will reference files they do not have.
+**Code-review skill dependency.** The
+[code-review skill](../.github/skills/code-review/SKILL.md) is part of the
+**core** pack, but its prose assumes spec-kit-style artefacts (`spec.md`,
+`plan.md`, `tasks.md`). A consumer who installs the core pack without speckit
+can still use the skill, but the workflow language will reference files they do
+not have.
 
 ### Pack boundary
 
@@ -280,4 +387,9 @@ To install only one pack, use the `make apply subset=…` flag (see [onboarding.
 | Spec-kit only             | `make apply dest=… subset=speckit`                                               |
 | Non-spec-kit core (today) | `make apply dest=… subset=agents,hooks,instructions,prompts,skills,docs,project` |
 
-The "non-spec-kit core" profile uses chained category tokens to omit `speckit` and `specify`. A single `core` shorthand is not implemented today because it would require an inverse exclusion filter inside `copilot-copy-skills`/`copilot-copy-prompts` (the broader category tokens currently include speckit artefacts). Until that lands, use the chained-subset form above.
+The "non-spec-kit core" profile uses chained category tokens to omit `speckit`
+and `specify`. A single `core` shorthand is not implemented today because it
+would require an inverse exclusion filter inside
+`copilot-copy-skills`/`copilot-copy-prompts` (the broader category tokens
+currently include speckit artefacts). Until that lands, use the chained-subset
+form above.

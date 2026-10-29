@@ -29,7 +29,11 @@
 
 ## Context 🧭
 
-The Go tech stack needs a default logging library that supports structured logging, is easy to adopt, and has long-term stability. The decision must also account for multi-sink management (structured JSON to file plus a readable, coloured console output), log levels, and pretty printing for developer use. The user requested an ADR comparing at least five alternatives.
+The Go tech stack needs a default logging library that supports structured
+logging, is easy to adopt, and has long-term stability. The decision must also
+account for multi-sink management (structured JSON to file plus a readable,
+coloured console output), log levels, and pretty printing for developer use. The
+user requested an ADR comparing at least five alternatives.
 
 ## Decision ✅
 
@@ -50,7 +54,8 @@ The Go tech stack needs a default logging library that supports structured loggi
 - Standardisation and ease of onboarding
 - Long-term maintenance and stability
 
-Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1), ⭐⭐ (2), ⭐⭐⭐ (3). Weighted totals exclude Effort and have a maximum of 69.
+Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1),
+⭐⭐ (2), ⭐⭐⭐ (3). Weighted totals exclude Effort and have a maximum of 69.
 
 | Criteria                 | Weight | Rationale                                          |
 | ------------------------ | ------ | -------------------------------------------------- |
@@ -66,7 +71,9 @@ Weighted criteria use a 1-5 scale (higher is more important). Scores use ⭐ (1)
 
 #### Option A: log/slog
 
-Use the standard library [`log/slog`](https://github.com/golang/go) with JSON output for files and text output for console, adding a small fan-out handler or adapter when multi-sink formatting is needed.
+Use the standard library [`log/slog`](https://github.com/golang/go) with JSON
+output for files and text output for console, adding a small fan-out handler or
+adapter when multi-sink formatting is needed.
 
 | Criteria                 | Score/Notes                                      |
 | ------------------------ | ------------------------------------------------ |
@@ -80,11 +87,14 @@ Use the standard library [`log/slog`](https://github.com/golang/go) with JSON ou
 | Effort                   | M                                                |
 | Weighted score (max 69)  | 55                                               |
 
-**Why not chosen**: The weighted criteria prioritise multi-sink and coloured console output. `slog` needs extra adapters for those requirements and still lacks native colour support.
+**Why not chosen**: The weighted criteria prioritise multi-sink and coloured
+console output. `slog` needs extra adapters for those requirements and still
+lacks native colour support.
 
 #### Option B: zap (Selected) ✅
 
-Use Uber's [`zap`](https://github.com/uber-go/zap) for high-performance structured logging.
+Use Uber's [`zap`](https://github.com/uber-go/zap) for high-performance
+structured logging.
 
 | Criteria                 | Score/Notes                                       |
 | ------------------------ | ------------------------------------------------- |
@@ -114,7 +124,8 @@ Use [`zerolog`](https://github.com/rs/zerolog) for zero allocation logging.
 | Effort                   | M                                                   |
 | Weighted score (max 69)  | 65                                                  |
 
-**Why not chosen**: Strong feature set, but slightly lower ecosystem maturity than `zap` in this weighted comparison.
+**Why not chosen**: Strong feature set, but slightly lower ecosystem maturity
+than `zap` in this weighted comparison.
 
 #### Option D: logrus
 
@@ -136,7 +147,8 @@ Use [`logrus`](https://github.com/sirupsen/logrus) for structured logging.
 
 #### Option E: go-kit log
 
-Use [`go-kit/log`](https://github.com/go-kit/log) for minimal structured logging.
+Use [`go-kit/log`](https://github.com/go-kit/log) for minimal structured
+logging.
 
 | Criteria                 | Score/Notes                        |
 | ------------------------ | ---------------------------------- |
@@ -154,15 +166,21 @@ Use [`go-kit/log`](https://github.com/go-kit/log) for minimal structured logging
 
 ### Outcome 🏁
 
-Adopt `zap` as the default logging library for Go. This decision is reversible if the standard library adds native multi-sink and coloured console support, or if dependency footprint becomes the primary driver.
+Adopt `zap` as the default logging library for Go. This decision is reversible
+if the standard library adds native multi-sink and coloured console support, or
+if dependency footprint becomes the primary driver.
 
 ### Rationale 🧠
 
-Using the weighted criteria, `zap` scores highest because it delivers strong structured logging with built-in multi-sink support, coloured console output, and robust level control. The additional dependency is an acceptable trade-off given the priority on developer experience and operational flexibility.
+Using the weighted criteria, `zap` scores highest because it delivers strong
+structured logging with built-in multi-sink support, coloured console output,
+and robust level control. The additional dependency is an acceptable trade-off
+given the priority on developer experience and operational flexibility.
 
 ## Consequences ⚖️
 
-- Go services should default to `zap` with JSON output to file and a coloured console encoder for local use.
+- Go services should default to `zap` with JSON output to file and a coloured
+  console encoder for local use.
 - Multi-sink configuration should be standardised across services.
 - Additional logging frameworks require explicit justification.
 

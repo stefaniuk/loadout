@@ -30,7 +30,8 @@
 
 ## Context 🧭
 
-The TypeScript tech stack needs a fast, modern test runner with good TypeScript support and CI integration.
+The TypeScript tech stack needs a fast, modern test runner with good TypeScript
+support and CI integration.
 
 ## Decision ✅
 
@@ -52,7 +53,8 @@ The TypeScript tech stack needs a fast, modern test runner with good TypeScript 
 
 #### Option A: Vitest (Selected) ✅
 
-Use [`Vitest`](https://github.com/vitest-dev/vitest) for TypeScript-first testing.
+Use [`Vitest`](https://github.com/vitest-dev/vitest) for TypeScript-first
+testing.
 
 | Criteria           | Score/Notes                        |
 | ------------------ | ---------------------------------- |
@@ -80,7 +82,8 @@ Use [`Jest`](https://github.com/jestjs/jest) for testing.
 
 #### Option C: Mocha + Chai
 
-Use [`Mocha`](https://github.com/mochajs/mocha) with [`Chai`](https://github.com/chaijs/chai).
+Use [`Mocha`](https://github.com/mochajs/mocha) with
+[`Chai`](https://github.com/chaijs/chai).
 
 | Criteria           | Score/Notes                        |
 | ------------------ | ---------------------------------- |
@@ -106,7 +109,8 @@ Use [`AVA`](https://github.com/avajs/ava) for concurrent tests.
 | Ease of use        | ⭐⭐ Different API         |
 | Effort             | M                          |
 
-**Why not chosen**: Smaller ecosystem and different patterns than most teams expect.
+**Why not chosen**: Smaller ecosystem and different patterns than most teams
+expect.
 
 #### Option E: node test
 
@@ -125,15 +129,18 @@ Use the built-in [`node:test`](https://github.com/nodejs/node) runner.
 
 ### Outcome 🏁
 
-Adopt `Vitest` as the default testing framework. This decision is reversible if a better standard emerges.
+Adopt `Vitest` as the default testing framework. This decision is reversible if
+a better standard emerges.
 
 ### Rationale 🧠
 
-Vitest is fast, TypeScript-friendly, and integrates well with modern build tooling, giving the best developer experience for this repo.
+Vitest is fast, TypeScript-friendly, and integrates well with modern build
+tooling, giving the best developer experience for this repo.
 
 ### Property-based testing tooling 🔬
 
-Property-based testing should complement Vitest with good TypeScript ergonomics, reliable shrinking, and active maintenance.
+Property-based testing should complement Vitest with good TypeScript ergonomics,
+reliable shrinking, and active maintenance.
 
 | Tool                                                                   | Score/Notes                                                                                                             |
 | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -143,7 +150,8 @@ Property-based testing should complement Vitest with good TypeScript ergonomics,
 | [testcheck](https://github.com/leebyron/testcheck-js)                  | ⭐⭐ Useful ideas, but legacy maintenance profile and older release cadence.                                            |
 | [jscheck](https://github.com/douglascrockford/JSCheck)                 | ⭐ Historical option; low practical fit for modern TypeScript + Vitest workflows.                                       |
 
-**Recommended choice**: `fast-check` (with `@fast-check/vitest` as the default Vitest companion).
+**Recommended choice**: `fast-check` (with `@fast-check/vitest` as the default
+Vitest companion).
 
 ## Consequences ⚖️
 

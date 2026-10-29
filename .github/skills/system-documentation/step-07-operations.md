@@ -1,8 +1,8 @@
 # Step 07 - Operations
 
 **Outputs:** `docs/operations/README.md` and `docs/operations/runbooks/**`
-**Dependencies:** step 01 (`README.md`, `docs/README.md`,
-`docs/conventions.md`, `docs/onboarding.md`) and step 03 (`docs/reference/**`).
+**Dependencies:** step 01 (`README.md`, `docs/README.md`, `docs/conventions.md`,
+`docs/onboarding.md`) and step 03 (`docs/reference/**`).
 
 This step maintains operational guidance for support, release, incident, or
 maintenance procedures where correctness and safety matter.
@@ -16,8 +16,8 @@ maintenance procedures where correctness and safety matter.
 
 ## Discovery
 
-1. Inventory operational automation, maintenance flows, release steps,
-   recovery procedures, and safety-sensitive tasks.
+1. Inventory operational automation, maintenance flows, release steps, recovery
+   procedures, and safety-sensitive tasks.
 2. Confirm triggers, guardrails, verification, and rollback paths from code,
    automation, or current operator practice.
 3. Distinguish operator runbooks from ordinary contributor how-to guides.
@@ -32,8 +32,8 @@ maintenance procedures where correctness and safety matter.
 
 ### `sync`
 
-1. Update runbooks when operational automation, release flow, rollback steps,
-   or support procedures changed.
+1. Update runbooks when operational automation, release flow, rollback steps, or
+   support procedures changed.
 2. Prefer exact commands, checks, and escalation paths over prose summaries.
 
 ### `audit` and `pre-pr-review`
@@ -57,8 +57,8 @@ Every runbook should, when practical, include:
 ### Relationship to upgrade guides
 
 Safety-sensitive upgrade procedures (breaking releases, data migrations,
-required operator action) belong under `docs/operations/runbooks/` and must
-be linked from `CHANGELOG.md`. Version-agnostic upgrade recipes for end users
+required operator action) belong under `docs/operations/runbooks/` and must be
+linked from `CHANGELOG.md`. Version-agnostic upgrade recipes for end users
 belong under `docs/how-to/`. The governance step coordinates both - see
 [step-09-governance-lifecycle.md](step-09-governance-lifecycle.md).
 

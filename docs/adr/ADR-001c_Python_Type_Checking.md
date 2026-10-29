@@ -30,7 +30,8 @@
 
 ## Context 🧭
 
-The Python tech stack needs a static type checker that is accurate, widely adopted, and easy to integrate in CI and local workflows.
+The Python tech stack needs a static type checker that is accurate, widely
+adopted, and easy to integrate in CI and local workflows.
 
 ## Decision ✅
 
@@ -76,7 +77,8 @@ Use [`pyright`](https://github.com/microsoft/pyright) for fast type checking.
 | Maintenance       | ⭐⭐⭐ Active and widely used     |
 | Effort            | M                                 |
 
-**Why not chosen**: Excellent tool, but adds a Node dependency where a pure Python tool is preferred.
+**Why not chosen**: Excellent tool, but adds a Node dependency where a pure
+Python tool is preferred.
 
 #### Option C: Pyre
 
@@ -106,7 +108,8 @@ Use [`pytype`](https://github.com/google/pytype) for type inference.
 | Maintenance       | ⭐⭐ Active but narrower adoption |
 | Effort            | M                                 |
 
-**Why not chosen**: Less common and not as strict as mypy for annotated codebases.
+**Why not chosen**: Less common and not as strict as mypy for annotated
+codebases.
 
 #### Option E: pyanalyze
 
@@ -136,15 +139,18 @@ Use [`ty`](https://github.com/astral-sh/ty) for fast type checking.
 | Maintenance       | ⭐⭐ Active but new                 |
 | Effort            | M                                   |
 
-**Why not chosen**: Too early-stage for a default, with limited ecosystem coverage.
+**Why not chosen**: Too early-stage for a default, with limited ecosystem
+coverage.
 
 ### Outcome 🏁
 
-Adopt `mypy` as the default type checker. This decision is reversible if ecosystem support shifts or a better standard emerges.
+Adopt `mypy` as the default type checker. This decision is reversible if
+ecosystem support shifts or a better standard emerges.
 
 ### Rationale 🧠
 
-`mypy` has the broadest adoption and strongest ecosystem support in Python. It provides reliable diagnostics and fits a pure-Python toolchain.
+`mypy` has the broadest adoption and strongest ecosystem support in Python. It
+provides reliable diagnostics and fits a pure-Python toolchain.
 
 ## Consequences ⚖️
 

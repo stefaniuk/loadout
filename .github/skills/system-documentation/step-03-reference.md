@@ -1,8 +1,9 @@
 # Step 03 - Reference
 
 **Outputs:** `docs/reference/**`
-**Dependencies:** step 01 (`README.md`, `docs/README.md`,
-`docs/conventions.md`, `docs/onboarding.md`).
+
+**Dependencies:** step 01 (`README.md`, `docs/README.md`, `docs/conventions.md`,
+`docs/onboarding.md`).
 
 This step creates or updates code-backed reference documentation for public
 surfaces such as commands, scripts, configuration, prompts, skills, agents,
@@ -37,8 +38,8 @@ hooks, contracts, and schemas.
 
 1. Update reference docs first when public surfaces changed.
 2. Keep tables, flags, defaults, schemas, and examples code-true.
-3. When a reference page is missing for a changed surface, create it instead
-   of widening `README.md` or a how-to guide.
+3. When a reference page is missing for a changed surface, create it instead of
+   widening `README.md` or a how-to guide.
 
 ### `audit` and `pre-pr-review`
 

@@ -1,12 +1,19 @@
 # Architecture 🏛️
 
-> Linked from the [README](../README.md) under **How it works** and **Spec-kit lifecycle**. See also [docs/onboarding.md](onboarding.md) for the contributor walkthrough.
+> Linked from the [README](../README.md) under **How it works** and **Spec-kit
+> lifecycle**. See also [docs/onboarding.md](onboarding.md) for the contributor
+> walkthrough.
 
-This document holds the deep architectural reference for the prompt library: the six-layer customisation model, the artefact type decision matrix, the workflow-mode switch, the spec-kit lifecycle, governance gates, and commit conventions per lifecycle stage.
+This document holds the deep architectural reference for the prompt library: the
+six-layer customisation model, the artefact type decision matrix, the
+workflow-mode switch, the spec-kit lifecycle, governance gates, and commit
+conventions per lifecycle stage.
 
 ## Six-layer customisation model
 
-The prompt library is organised into six customisation layers. Each layer builds on the one below, from governance foundations through to deterministic automation hooks.
+The prompt library is organised into six customisation layers. Each layer builds
+on the one below, from governance foundations through to deterministic
+automation hooks.
 
 ```text
 ┌─────────────────────────────────────────────┐
@@ -35,37 +42,66 @@ The prompt library is organised into six customisation layers. Each layer builds
 
 Each layer in detail:
 
-- **Layer 0 - Governance.** The project constitution, ADRs, and [.github/copilot-instructions.md](../.github/copilot-instructions.md) set non-negotiable rules. Every other layer must honour them. Changes here are infrequent and reviewed deliberately.
-- **Layer 1 - Instructions.** Coding standards scoped by file glob (for example `**/*.py`, `**/Dockerfile`). Copilot loads them automatically when relevant files are open, so they shape every suggestion. Shared baselines live in `.github/instructions/includes/`.
-- **Layer 2 - Prompts.** One-off, copy-runnable tasks (documentation reviews, enforcement passes, utility commands). They reference instructions and skills but are invoked explicitly.
-- **Layer 3 - Agents.** Optional custom agents with tool restrictions and handoff chains. This repository currently ships only [`.github/agents/README.md`](../.github/agents/README.md) and keeps its active workflow lanes skill-based.
-- **Layer 4 - Skills.** Reusable multi-step capabilities bundled with helper scripts and resources. This layer includes the Spec Kit ceremonies (`speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement`) and the imported Superpowers workflow skills (`brainstorming`, `writing-plans`, `dispatching-parallel-agents`, `executing-plans`, `subagent-driven-development`, review skills, `finishing-a-development-branch`), alongside capabilities such as `architecture-docs`, `enforcement-audit`, and `code-review`.
-- **Layer 5 - Hooks.** Deterministic automation that runs without an LLM in the loop: lint, format, link checks, and quality gates wired into the agent environment.
+- **Layer 0 - Governance.** The project constitution, ADRs, and
+  [.github/copilot-instructions.md](../.github/copilot-instructions.md) set
+  non-negotiable rules. Every other layer must honour them. Changes here are
+  infrequent and reviewed deliberately.
+- **Layer 1 - Instructions.** Coding standards scoped by file glob (for example
+  `**/*.py`, `**/Dockerfile`). Copilot loads them automatically when relevant
+  files are open, so they shape every suggestion. Shared baselines live in
+  `.github/instructions/includes/`.
+- **Layer 2 - Prompts.** One-off, copy-runnable tasks (documentation reviews,
+  enforcement passes, utility commands). They reference instructions and skills
+  but are invoked explicitly.
+- **Layer 3 - Agents.** Optional custom agents with tool restrictions and
+  handoff chains. This repository currently ships only
+  [`.github/agents/README.md`](../.github/agents/README.md) and keeps its active
+  workflow lanes skill-based.
+- **Layer 4 - Skills.** Reusable multi-step capabilities bundled with helper
+  scripts and resources. This layer includes the Spec Kit ceremonies
+  (`speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement`) and
+  the imported Superpowers workflow skills (`brainstorming`, `writing-plans`,
+  `dispatching-parallel-agents`, `executing-plans`,
+  `subagent-driven-development`, review skills,
+  `finishing-a-development-branch`), alongside capabilities such as
+  `architecture-docs`, `enforcement-audit`, and `code-review`.
+- **Layer 5 - Hooks.** Deterministic automation that runs without an LLM in the
+  loop: lint, format, link checks, and quality gates wired into the agent
+  environment.
 
 ## Workflow mode switch
 
-The repository supports two mutually exclusive lifecycle families in the same codebase:
+The repository supports two mutually exclusive lifecycle families in the same
+codebase:
 
-- **Spec Kit** for specification-first work via `speckit-*` skills and review prompts.
-- **Superpowers** for standalone design, planning, execution, and review via the imported workflow skills.
+- **Spec Kit** for specification-first work via `speckit-*` skills and review
+  prompts.
+- **Superpowers** for standalone design, planning, execution, and review via the
+  imported workflow skills.
 
-Only one family should be active in a given session or worktree. The active mode is stored locally in `.copilot/workflow-mode.json`, changed with `make workflow-use mode=speckit` or `make workflow-use mode=superpowers`, and managed by `scripts/hooks/workflow-mode.sh`.
+Only one family should be active in a given session or worktree. The active mode
+is stored locally in `.copilot/workflow-mode.json`, changed with
+`make workflow-use mode=speckit` or `make workflow-use mode=superpowers`, and
+managed by `scripts/hooks/workflow-mode.sh`.
 
 The `.copilot/` directory now has two distinct roles:
 
 - `.copilot/workflow-mode.json` is ignored local workflow state.
-- `.copilot/analysis/` is a tracked scaffold for ignored local analysis output such as bounded diffs, review notes, and architecture evidence.
+- `.copilot/analysis/` is a tracked scaffold for ignored local analysis output
+  such as bounded diffs, review notes, and architecture evidence.
 
 Why an explicit switch is used instead of branch-name inference:
 
 - It is visible and reversible.
 - It works without renaming branches or worktrees.
-- It lets both skill families stay installed while still keeping the agent on one lane.
+- It lets both skill families stay installed while still keeping the agent on
+  one lane.
 
 Enforcement is layered:
 
 - `.github/copilot-instructions.md` declares the one-lane-per-session rule.
-- Patched workflow skills contain mode guards so the inactive family refuses to proceed and points back to `make workflow-use ...`.
+- Patched workflow skills contain mode guards so the inactive family refuses to
+  proceed and points back to `make workflow-use ...`.
 
 ## Artefact type decision matrix
 
@@ -97,11 +133,18 @@ flowchart TD
   class hook,instr,skill,agent,prompt terminal;
 ```
 
-Start at the top and walk down - the first matching branch wins. When more than one branch could plausibly apply, prefer the higher (leftmost in the answer order) branch, because hooks, instructions, and skills compose better than ad-hoc prompts. For per-artefact quickstarts (frontmatter, naming, validation steps), see [.github/contributing.md](../.github/contributing.md).
+Start at the top and walk down - the first matching branch wins. When more than
+one branch could plausibly apply, prefer the higher (leftmost in the answer
+order) branch, because hooks, instructions, and skills compose better than
+ad-hoc prompts. For per-artefact quickstarts (frontmatter, naming, validation
+steps), see [.github/contributing.md](../.github/contributing.md).
 
 ## Spec-kit lifecycle
 
-The spec-kit lifecycle follows a structured flow that progresses through specification, planning, task generation, implementation, and three review gates. Clarification, checklist, and analysis loops feed back into earlier stages until the artefacts are coherent.
+The spec-kit lifecycle follows a structured flow that progresses through
+specification, planning, task generation, implementation, and three review
+gates. Clarification, checklist, and analysis loops feed back into earlier
+stages until the artefacts are coherent.
 
 1. **Discover** the right prompt from the library.
 2. **Ground** it in a specification using agents like `/speckit-specify`.
@@ -109,8 +152,10 @@ The spec-kit lifecycle follows a structured flow that progresses through specifi
 4. **Generate tasks** with `/speckit-tasks`.
 5. **Review documentation** with `/review.speckit-documentation`.
 6. **Implement** with `/speckit-implement`.
-7. **Converge** with `/speckit-converge` to verify completeness and gap remaining work.
-8. **Review** with governance gates (`/review.speckit-code`, `/review.speckit-test`).
+7. **Converge** with `/speckit-converge` to verify completeness and gap
+   remaining work.
+8. **Review** with governance gates (`/review.speckit-code`,
+   `/review.speckit-test`).
 9. **Automate** every validation step with `make lint` and `make test`.
 
 ```mermaid
@@ -158,11 +203,19 @@ flowchart TD
   class specifyNote,checklistNote,planNote,planNote2,tasksNote,implementNote,reviewDocsNote note;
 ```
 
-> **Optional pack.** The spec-kit lifecycle is packaged as an optional **speckit** plugin pack. Teams that do not use spec-kit can install just the core pack via `make apply dest=… subset=agents,hooks,instructions,prompts,skills,docs,project` (omitting `speckit` and `specify`). See [conventions.md#plugin-packs](conventions.md#plugin-packs) for the full boundary.
+> **Optional pack.** The spec-kit lifecycle is packaged as an optional
+> **speckit** plugin pack. Teams that do not use spec-kit can install just the
+> core pack via
+> `make apply dest=… subset=agents,hooks,instructions,prompts,skills,docs,project`
+> (omitting `speckit` and `specify`). See
+> [conventions.md#plugin-packs](conventions.md#plugin-packs) for the full
+> boundary.
 
 ## Governance gates
 
-Governance gates are explicit checkpoints between lifecycle stages. Each gate blocks the next phase until reviewers (human or agent) explicitly resolve findings.
+Governance gates are explicit checkpoints between lifecycle stages. Each gate
+blocks the next phase until reviewers (human or agent) explicitly resolve
+findings.
 
 | Gate                   | Command                         | Purpose                                       |
 | ---------------------- | ------------------------------- | --------------------------------------------- |
@@ -173,7 +226,8 @@ Governance gates are explicit checkpoints between lifecycle stages. Each gate bl
 
 Why the gates matter:
 
-- **Deterministic flow** - each gate blocks the next phase until findings are resolved.
+- **Deterministic flow** - each gate blocks the next phase until findings are
+  resolved.
 - **Auditability** - checklist evidence supports compliance reviews.
 - **Scalability** - repeatable tasks scale across dozens of teams.
 - **Fewer regressions** - integration issues surface early.
@@ -183,24 +237,48 @@ Why the gates matter:
 
 The customisation catalogue distinguishes two roles:
 
-- **Coordinators** drive a lifecycle stage end-to-end, write artefacts, and are user-invocable through their slash command. Examples: `/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement`, `/speckit-converge`, `/brainstorming`, `/writing-plans`, `/executing-plans`, and `/subagent-driven-development`.
-- **Workers** are read-only or single-writer skills or agents that a coordinator delegates to for a bounded analysis. They are marked with `subagent: true` in their frontmatter; some additionally set `user-invocable: false` so they only run when explicitly handed off to.
+- **Coordinators** drive a lifecycle stage end-to-end, write artefacts, and are
+  user-invocable through their slash command. Examples: `/speckit-specify`,
+  `/speckit-plan`, `/speckit-tasks`, `/speckit-implement`, `/speckit-converge`,
+  `/brainstorming`, `/writing-plans`, `/executing-plans`, and
+  `/subagent-driven-development`.
+- **Workers** are read-only or single-writer skills or agents that a coordinator
+  delegates to for a bounded analysis. They are marked with `subagent: true` in
+  their frontmatter; some additionally set `user-invocable: false` so they only
+  run when explicitly handed off to.
 
 Customisations currently marked as subagent workers:
 
-- [`speckit-analyze`](../.github/skills/speckit-analyze/SKILL.md) - Non-destructive cross-artefact consistency check; should only be reached through the spec-kit pipeline.
-- [`speckit-checklist`](../.github/skills/speckit-checklist/SKILL.md) - Appends checklist files (single-writer). Useful directly as well as via handoff.
-  The repository does not currently ship any custom agents under `.github/agents/`; the worker/coordinator split is expressed through skills instead.
+- [`speckit-analyze`](../.github/skills/speckit-analyze/SKILL.md) -
+  Non-destructive cross-artefact consistency check; should only be reached
+  through the spec-kit pipeline.
+- [`speckit-checklist`](../.github/skills/speckit-checklist/SKILL.md) - Appends
+  checklist files (single-writer). Useful directly as well as via handoff. The
+  repository does not currently ship any custom agents under `.github/agents/`;
+  the worker/coordinator split is expressed through skills instead.
 
-This repository ships no Copilot hooks. The Copilot hook implementation, including the quality gate that runs on `Stop`, lives in repository-template and is installed there, not by loadout. `make apply` and `make revert` remove the hook files that older loadout versions installed. They keep a file the destination tracks in git, every file when git cannot tell what the destination tracks, and a file that a link places outside the destination.
+This repository ships no Copilot hooks. The Copilot hook implementation,
+including the quality gate that runs on `Stop`, lives in repository-template and
+is installed there, not by loadout. `make apply` and `make revert` remove the
+hook files that older loadout versions installed. They keep a file the
+destination tracks in git, every file when git cannot tell what the destination
+tracks, and a file that a link places outside the destination.
 
-**Guardrails.** Workers are constrained to read-only tool sets or to a single-writer responsibility; coordinators are the only agents that orchestrate handoffs and trigger the quality gate. This keeps the blast radius of a subagent invocation small and auditable.
+**Guardrails.** Workers are constrained to read-only tool sets or to a
+single-writer responsibility; coordinators are the only agents that orchestrate
+handoffs and trigger the quality gate. This keeps the blast radius of a subagent
+invocation small and auditable.
 
-**Discovery caveat.** If this repository later adds custom agents, prefer placing them directly under `.github/agents/` unless a downstream runtime is known to support nested discovery. The `subagent` marker is informational metadata that the repository's own tooling reads; it does not change how VS Code resolves the file at runtime.
+**Discovery caveat.** If this repository later adds custom agents, prefer
+placing them directly under `.github/agents/` unless a downstream runtime is
+known to support nested discovery. The `subagent` marker is informational
+metadata that the repository's own tooling reads; it does not change how VS Code
+resolves the file at runtime.
 
 ## Commit conventions per lifecycle stage
 
-Each spec-kit stage produces artefacts worth committing. The table maps every commit point in the flow diagram above to a conventional commit message.
+Each spec-kit stage produces artefacts worth committing. The table maps every
+commit point in the flow diagram above to a conventional commit message.
 
 | Stage | Trigger                                                                                  | Conventional commit                                    |
 | ----- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -219,10 +297,20 @@ Each spec-kit stage produces artefacts worth committing. The table maps every co
 
 Commit conventions explained:
 
-- **Loops produce incremental commits.** Each pass through a clarify, checklist, analyse, or converge loop can warrant its own commit when it changes artefacts materially. The table shows the "exit" commit - the one that locks in the stable artefact.
-- **Multi-phase implementation.** Replace `phase N` with a descriptive label and `feature` with the feature name, for example `feat(checkout): implement phase 1 - data model`, `feat(checkout): implement phase 2 - API layer`.
-- **Clean review gates.** If a review gate passes without triggering changes, fold it into the preceding commit. If it triggers fixes, use `refactor(review):` for code or `test(review):` for tests.
-- **Scoping convention.** Every commit carries a scope: governance artefacts use `constitution`, `spec`, `plan`, `tasks`, or `review`; implementation commits use the feature name as the scope.
+- **Loops produce incremental commits.** Each pass through a clarify, checklist,
+  analyse, or converge loop can warrant its own commit when it changes artefacts
+  materially. The table shows the "exit" commit - the one that locks in the
+  stable artefact.
+- **Multi-phase implementation.** Replace `phase N` with a descriptive label and
+  `feature` with the feature name, for example
+  `feat(checkout): implement phase 1 - data model`,
+  `feat(checkout): implement phase 2 - API layer`.
+- **Clean review gates.** If a review gate passes without triggering changes,
+  fold it into the preceding commit. If it triggers fixes, use
+  `refactor(review):` for code or `test(review):` for tests.
+- **Scoping convention.** Every commit carries a scope: governance artefacts use
+  `constitution`, `spec`, `plan`, `tasks`, or `review`; implementation commits
+  use the feature name as the scope.
 
 ---
 

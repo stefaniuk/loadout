@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-The Rust tech stack needs a standard linting and formatting workflow that is consistent, fast, and aligned with community conventions.
+The Rust tech stack needs a standard linting and formatting workflow that is
+consistent, fast, and aligned with community conventions.
 
 ## Decision ✅
 
@@ -51,7 +52,8 @@ The Rust tech stack needs a standard linting and formatting workflow that is con
 
 #### Option A: rustfmt + clippy (Selected) ✅
 
-Use [`rustfmt`](https://github.com/rust-lang/rustfmt) for formatting and [`clippy`](https://github.com/rust-lang/rust-clippy) for linting.
+Use [`rustfmt`](https://github.com/rust-lang/rustfmt) for formatting and
+[`clippy`](https://github.com/rust-lang/rust-clippy) for linting.
 
 | Criteria               | Score/Notes                        |
 | ---------------------- | ---------------------------------- |
@@ -94,7 +96,8 @@ Use [`clippy`](https://github.com/rust-lang/rust-clippy) without formatting.
 
 #### Option D: rustfmt + clippy (pedantic by default)
 
-Use [`rustfmt`](https://github.com/rust-lang/rustfmt) with Clippy configured for `clippy::pedantic` by default.
+Use [`rustfmt`](https://github.com/rust-lang/rustfmt) with Clippy configured for
+`clippy::pedantic` by default.
 
 | Criteria               | Score/Notes                |
 | ---------------------- | -------------------------- |
@@ -109,7 +112,8 @@ Use [`rustfmt`](https://github.com/rust-lang/rustfmt) with Clippy configured for
 
 #### Option E: dprint + clippy
 
-Use [`dprint`](https://github.com/dprint/dprint) for formatting with Clippy for linting.
+Use [`dprint`](https://github.com/dprint/dprint) for formatting with Clippy for
+linting.
 
 | Criteria               | Score/Notes                        |
 | ---------------------- | ---------------------------------- |
@@ -124,11 +128,13 @@ Use [`dprint`](https://github.com/dprint/dprint) for formatting with Clippy for 
 
 ### Outcome 🏁
 
-Adopt rustfmt for formatting and Clippy for linting. This decision is reversible if community standards change.
+Adopt rustfmt for formatting and Clippy for linting. This decision is reversible
+if community standards change.
 
 ### Rationale 🧠
 
-Rustfmt and Clippy are official tools, widely supported, and give a strong balance of consistency and correctness with minimal overhead.
+Rustfmt and Clippy are official tools, widely supported, and give a strong
+balance of consistency and correctness with minimal overhead.
 
 ## Consequences ⚖️
 

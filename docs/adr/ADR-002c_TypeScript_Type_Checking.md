@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-The TypeScript tech stack needs a reliable, CI-friendly type checker that matches the TypeScript compiler semantics.
+The TypeScript tech stack needs a reliable, CI-friendly type checker that
+matches the TypeScript compiler semantics.
 
 ## Decision ✅
 
@@ -51,7 +52,8 @@ The TypeScript tech stack needs a reliable, CI-friendly type checker that matche
 
 #### Option A: tsc (Selected) ✅
 
-Use [`tsc`](https://github.com/microsoft/TypeScript) with `--noEmit` for type checking.
+Use [`tsc`](https://github.com/microsoft/TypeScript) with `--noEmit` for type
+checking.
 
 | Criteria       | Score/Notes                        |
 | -------------- | ---------------------------------- |
@@ -64,7 +66,8 @@ Use [`tsc`](https://github.com/microsoft/TypeScript) with `--noEmit` for type ch
 
 #### Option B: tsserver
 
-Use the TypeScript language service [`tsserver`](https://github.com/microsoft/TypeScript).
+Use the TypeScript language service
+[`tsserver`](https://github.com/microsoft/TypeScript).
 
 | Criteria       | Score/Notes                 |
 | -------------- | --------------------------- |
@@ -75,11 +78,14 @@ Use the TypeScript language service [`tsserver`](https://github.com/microsoft/Ty
 | Maintenance    | ⭐⭐⭐ Canonical tool       |
 | Effort         | M                           |
 
-**Why not chosen**: Great for editor feedback but not designed for CI type checking.
+**Why not chosen**: Great for editor feedback but not designed for CI type
+checking.
 
 #### Option C: typescript-eslint (type-aware linting)
 
-Use [`typescript-eslint`](https://github.com/typescript-eslint/typescript-eslint) for type-aware linting.
+Use
+[`typescript-eslint`](https://github.com/typescript-eslint/typescript-eslint)
+for type-aware linting.
 
 | Criteria       | Score/Notes                                 |
 | -------------- | ------------------------------------------- |
@@ -90,7 +96,8 @@ Use [`typescript-eslint`](https://github.com/typescript-eslint/typescript-eslint
 | Maintenance    | ⭐⭐⭐ Active and widely used               |
 | Effort         | M                                           |
 
-**Why not chosen**: Helpful for linting, but not a replacement for full type checking.
+**Why not chosen**: Helpful for linting, but not a replacement for full type
+checking.
 
 #### Option D: swc (transpile only)
 
@@ -124,11 +131,13 @@ Use [`Babel`](https://github.com/babel/babel) with TypeScript presets.
 
 ### Outcome 🏁
 
-Adopt `tsc` as the default type checker. This decision is reversible if a better, compiler-parity checker becomes available.
+Adopt `tsc` as the default type checker. This decision is reversible if a
+better, compiler-parity checker becomes available.
 
 ### Rationale 🧠
 
-`tsc` is the canonical TypeScript type checker with full compiler parity, making it the safest default for CI.
+`tsc` is the canonical TypeScript type checker with full compiler parity, making
+it the safest default for CI.
 
 ## Consequences ⚖️
 

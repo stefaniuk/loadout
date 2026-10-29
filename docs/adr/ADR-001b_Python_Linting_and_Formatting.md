@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-The Python tech stack needs a single, fast, consistent approach for linting and formatting that can run in CI and locally without heavy configuration.
+The Python tech stack needs a single, fast, consistent approach for linting and
+formatting that can run in CI and locally without heavy configuration.
 
 ## Decision ✅
 
@@ -64,7 +65,9 @@ Use [`ruff`](https://github.com/astral-sh/ruff) for both linting and formatting.
 
 #### Option B: Black + isort + Flake8
 
-Use [`Black`](https://github.com/psf/black), [`isort`](https://github.com/PyCQA/isort), and [`Flake8`](https://github.com/PyCQA/flake8) together.
+Use [`Black`](https://github.com/psf/black),
+[`isort`](https://github.com/PyCQA/isort), and
+[`Flake8`](https://github.com/PyCQA/flake8) together.
 
 | Criteria               | Score/Notes                       |
 | ---------------------- | --------------------------------- |
@@ -79,7 +82,8 @@ Use [`Black`](https://github.com/psf/black), [`isort`](https://github.com/PyCQA/
 
 #### Option C: Pylint + Black
 
-Use [`Pylint`](https://github.com/pylint-dev/pylint) for linting and Black for formatting.
+Use [`Pylint`](https://github.com/pylint-dev/pylint) for linting and Black for
+formatting.
 
 | Criteria               | Score/Notes                         |
 | ---------------------- | ----------------------------------- |
@@ -94,7 +98,8 @@ Use [`Pylint`](https://github.com/pylint-dev/pylint) for linting and Black for f
 
 #### Option D: autopep8 + pycodestyle
 
-Use [`autopep8`](https://github.com/hhatto/autopep8) and [`pycodestyle`](https://github.com/PyCQA/pycodestyle).
+Use [`autopep8`](https://github.com/hhatto/autopep8) and
+[`pycodestyle`](https://github.com/PyCQA/pycodestyle).
 
 | Criteria               | Score/Notes                           |
 | ---------------------- | ------------------------------------- |
@@ -124,11 +129,13 @@ Use [`YAPF`](https://github.com/google/yapf) with Flake8.
 
 ### Outcome 🏁
 
-Adopt `ruff` for both linting and formatting. This decision is reversible if tooling changes or if ruff ceases to meet coverage needs.
+Adopt `ruff` for both linting and formatting. This decision is reversible if
+tooling changes or if ruff ceases to meet coverage needs.
 
 ### Rationale 🧠
 
-Ruff provides a fast, single-tool workflow with strong lint coverage and a built-in formatter. It keeps the toolchain simple and consistent.
+Ruff provides a fast, single-tool workflow with strong lint coverage and a
+built-in formatter. It keeps the toolchain simple and consistent.
 
 ## Consequences ⚖️
 

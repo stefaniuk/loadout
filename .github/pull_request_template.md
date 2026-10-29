@@ -10,8 +10,9 @@ Please include:
   1. A short summary (1-3 sentences): what this PR does and the value it delivers.
   2. A file-by-file bulleted list of the substantive changes, each linking the
      file with a repository-relative path. For example:
-       - [scripts/quality/check-file-format.sh](scripts/quality/check-file-format.sh): what changed and why
-  3. Any notable implementation details, follow-ups, or explicitly out-of-scope items.
+       - [scripts/apply.sh](scripts/apply.sh): what changed and why
+  3. Any notable implementation details, follow-ups, or explicitly out-of-scope
+     items.
 -->
 
 ## Context
@@ -45,7 +46,10 @@ Recommended structure:
 
 ## Type of changes
 
-<!-- What types of changes does your code introduce? Put an `x` in all the boxes that apply. -->
+<!--
+What types of changes does your code introduce? Put an `x` in all the boxes
+that apply.
+-->
 
 - [ ] Refactoring (non-breaking change)
 - [ ] New feature (non-breaking change which adds functionality)
@@ -54,7 +58,9 @@ Recommended structure:
 
 ## Checklist
 
-<!-- Go over all the following points, and put an `x` in all the boxes that apply. -->
+<!--
+Go over all the following points, and put an `x` in all the boxes that apply.
+-->
 
 - [ ] I am familiar with the contributing guidelines
 - [ ] I have followed the code style of the project
@@ -68,6 +74,12 @@ Recommended structure:
 
 ## Sensitive Information Declaration
 
-To ensure the utmost confidentiality and protect your and others privacy, we kindly ask you to NOT including [PII (Personal Identifiable Information) / PID (Personal Identifiable Data)](https://digital.nhs.uk/data-and-information/keeping-data-safe-and-benefitting-the-public) or any other sensitive data in this PR (Pull Request) and the codebase changes. We will remove any PR that do contain any sensitive information. We really appreciate your cooperation in this matter.
+To ensure the utmost confidentiality and protect your and others privacy, we
+kindly ask you to NOT including
+[PII (Personal Identifiable Information) / PID (Personal Identifiable Data)](https://digital.nhs.uk/data-and-information/keeping-data-safe-and-benefitting-the-public)
+or any other sensitive data in this PR (Pull Request) and the codebase changes.
+We will remove any PR that do contain any sensitive information. We really
+appreciate your cooperation in this matter.
 
-- [ ] I confirm that neither PII/PID nor sensitive data are included in this PR and the codebase changes.
+- [ ] I confirm that neither PII/PID nor sensitive data are included in this PR
+      and the codebase changes.

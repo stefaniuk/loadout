@@ -29,7 +29,8 @@
 
 ## Context 🧭
 
-The TypeScript tech stack needs a fast, consistent linting and formatting setup with minimal configuration overhead and good editor support.
+The TypeScript tech stack needs a fast, consistent linting and formatting setup
+with minimal configuration overhead and good editor support.
 
 ## Decision ✅
 
@@ -64,7 +65,9 @@ Use [`Biome`](https://github.com/biomejs/biome) for linting and formatting.
 
 #### Option B: ESLint + Prettier + typescript-eslint
 
-Use [`ESLint`](https://github.com/eslint/eslint), [`Prettier`](https://github.com/prettier/prettier), and [`typescript-eslint`](https://github.com/typescript-eslint/typescript-eslint).
+Use [`ESLint`](https://github.com/eslint/eslint),
+[`Prettier`](https://github.com/prettier/prettier), and
+[`typescript-eslint`](https://github.com/typescript-eslint/typescript-eslint).
 
 | Criteria               | Score/Notes                      |
 | ---------------------- | -------------------------------- |
@@ -75,11 +78,14 @@ Use [`ESLint`](https://github.com/eslint/eslint), [`Prettier`](https://github.co
 | Ecosystem support      | ⭐⭐⭐ Very strong               |
 | Effort                 | M                                |
 
-**Why not chosen**: Strong but slower and more complex than a single-tool workflow.
+**Why not chosen**: Strong but slower and more complex than a single-tool
+workflow.
 
 #### Option C: ESLint + Prettier + XO
 
-Use [`ESLint`](https://github.com/eslint/eslint), [`Prettier`](https://github.com/prettier/prettier), and [`XO`](https://github.com/xojs/xo).
+Use [`ESLint`](https://github.com/eslint/eslint),
+[`Prettier`](https://github.com/prettier/prettier), and
+[`XO`](https://github.com/xojs/xo).
 
 | Criteria               | Score/Notes                              |
 | ---------------------- | ---------------------------------------- |
@@ -94,7 +100,8 @@ Use [`ESLint`](https://github.com/eslint/eslint), [`Prettier`](https://github.co
 
 #### Option D: StandardJS
 
-Use [`StandardJS`](https://github.com/standard/standard) for linting and formatting.
+Use [`StandardJS`](https://github.com/standard/standard) for linting and
+formatting.
 
 | Criteria               | Score/Notes                      |
 | ---------------------- | -------------------------------- |
@@ -105,7 +112,8 @@ Use [`StandardJS`](https://github.com/standard/standard) for linting and formatt
 | Ecosystem support      | ⭐⭐ Moderate                    |
 | Effort                 | M                                |
 
-**Why not chosen**: Less flexible and not as strong for TypeScript-specific rules.
+**Why not chosen**: Less flexible and not as strong for TypeScript-specific
+rules.
 
 #### Option E: Rome (deprecated)
 
@@ -124,11 +132,13 @@ Use [`Rome`](https://github.com/rome/tools) for linting and formatting.
 
 ### Outcome 🏁
 
-Adopt `Biome` for linting and formatting. This decision is reversible if a more suitable toolchain becomes the standard.
+Adopt `Biome` for linting and formatting. This decision is reversible if a more
+suitable toolchain becomes the standard.
 
 ### Rationale 🧠
 
-Biome delivers fast linting and formatting with a single configuration, keeping the workflow simple and consistent.
+Biome delivers fast linting and formatting with a single configuration, keeping
+the workflow simple and consistent.
 
 ## Consequences ⚖️
 
