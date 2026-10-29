@@ -48,7 +48,7 @@ The repository collects the files and helper scripts needed to run a specificati
 
 - Instruction packs for languages and tools such as Python, TypeScript, Go, Rust, Docker, Terraform, and Make.
 - Prompts and workflow skills for specification-first and Superpowers-based planning, implementation, review, and convergence workflows.
-- Reusable skills for documentation, code review, enforcement audits, repository templating, and framework-specific setup.
+- Reusable skills for documentation, code review, enforcement audits, and framework-specific setup.
 - Deterministic hooks and quality scripts for markdown, links, shell, and customisation metadata.
 
 ### Non-goals

@@ -9,13 +9,13 @@ description: Evaluate and enforce specific development commands discipline acros
 Audit and enforce **development command discipline** across the repository. Make is the canonical interface for local development and CI, and every command must be discoverable, stable, and well documented. Ensure a top-level Makefile exists and that required targets and quality checks are present, help text is consistent, and complex logic is delegated to scripts. Align all changes to:
 
 - [.github/instructions/makefile.instructions.md](../instructions/makefile.instructions.md)
-- [repository-template skill](../skills/repository-template/SKILL.md)
+- [repository-template](https://github.com/nhs-england-tools/repository-template) Make system: `scripts/init.mk` and its `*.ext.mk` extensions
 
 ## Steps 👣
 
 ### Step 1: Discover command surfaces
 
-1. Read the [repository-template skill](../skills/repository-template/SKILL.md) and identify the **Core Make System** capability and any linked capabilities that apply.
+1. Run `make help` and read `scripts/init.mk` to identify the repository-template **Core Make System** targets already provided, and any linked capabilities that apply.
 2. Read and apply the rules in [.github/instructions/makefile.instructions.md](../instructions/makefile.instructions.md).
 3. Locate all command surfaces:
    - Top-level `Makefile` and any included `*.mk` modules
@@ -30,7 +30,7 @@ For each Makefile and related script, assess compliance with all categories in *
 
 ### Step 3: Remediate
 
-Apply fixes immediately using sensible defaults and the repository-template skill:
+Apply fixes immediately using sensible defaults and the repository-template Make system:
 
 - Keep the root Makefile thin and include shared modules.
 - Add missing required targets and wire them to scripts.

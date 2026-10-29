@@ -65,12 +65,6 @@ skill-remove: # Remove an external skill from config and delete its synced direc
 	$(if $(name),,$(error Usage: make skill-remove name=my-skill))
 	name="$(name)" ./scripts/skill-remove.sh
 
-rt-clone: # Clone the repository template into .github/skills/repository-template @Operations
-	.github/skills/repository-template/scripts/git-clone-repository-template.sh
-
-rt-remove: # Remove the cloned repository template assets from .github/skills/repository-template @Operations
-	rm -rf .github/skills/repository-template/assets
-
 apply: # Copy prompt files assets to a destination repository; mandatory: dest=[path]; optional: clean=[true|false], subset=[csv], all|python|typescript|go|reactjs|rust|terraform|tauri|playwright=[true] @Operations
 	$(if $(dest),,$(error dest is required. Usage: make apply dest=/path/to/destination))
 	./scripts/apply.sh "$(dest)"
@@ -86,7 +80,6 @@ revert: # Remove all loadout-managed artifacts from a destination repository (op
 clean:: # Remove project-specific generated files (main) @Operations
 	find .copilot/analysis -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
 	rm -rf docs/superpowers
-	rm -rf .github/skills/repository-template/assets
 	find . \( \
 		-name ".coverage" -o \
 		-name ".env" -o \
@@ -96,7 +89,6 @@ clean:: # Remove project-specific generated files (main) @Operations
 
 config:: # Configure development environment (main) @Configuration
 	$(MAKE) _install-dependencies
-	$(MAKE) rt-clone
 
 # ==============================================================================
 
@@ -113,8 +105,6 @@ ${VERBOSE}.SILENT: \
 	lint-markdown-links \
 	lint-shell \
 	revert \
-	rt-clone \
-	rt-remove \
 	skill-add \
 	skill-patch \
 	skill-remove \

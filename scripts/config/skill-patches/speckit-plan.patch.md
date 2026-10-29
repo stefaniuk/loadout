@@ -51,7 +51,7 @@ Before marking `plan.md` as complete, verify:
 - [ ] Plan addresses all requirements from `spec.md`
 - [ ] All architectural decisions have corresponding ADRs
 - [ ] Toolchain versions are specified, verified online during planning, and confirmed as the latest stable releases
-- [ ] If the feature introduces Make targets, CLI commands, containers, CI workflows, or managed tools, relevant repository-template capabilities are planned using the skill at [.github/skills/repository-template/SKILL.md](/.github/skills/repository-template/SKILL.md)
+- [ ] If the feature introduces Make targets, CLI commands, containers, CI workflows, or managed tools, relevant repository-template capabilities are planned using the repository's existing Make targets (`make help`) and the guides in `docs/guides/`
 - [ ] If no repository-template capabilities apply, `plan.md` states `Not required for this scope`
 - [ ] Each phase and user story includes a `Show & Tell` subsection
 - [ ] Show & Tell subsections are placed at the end of each phase or user story

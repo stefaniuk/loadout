@@ -1009,7 +1009,7 @@ Always copied (default/glue layer):
       git cannot tell
     scripts/loadout.ext.mk for downstream repos whose repository-template
       scripts/init.mk loads '*.ext.mk' files
-    Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
+    Default skills: enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation
     Spec-kit agents, prompts, templates and constitution
     Shell, Docker, Makefile instructions and prompts
     .copilot/analysis/.gitignore, ADR template, Tech_Radar.md

@@ -55,7 +55,7 @@ function main() {
     test-import-force-does-not-copy-unchanged-file \
     test-import-new-true-imports-new-files \
     test-import-new-false-does-not-import-new-files \
-    test-import-ignores-generated-skill-assets \
+    test-import-ignores-retired-repository-template-skill \
     test-import-skips-destination-owned-adr-template \
     test-import-detects-and-round-trips-workflow-scripts \
   )
@@ -211,21 +211,23 @@ function test-import-new-true-imports-new-files() {
   return 0
 }
 
-function test-import-ignores-generated-skill-assets() {
+function test-import-ignores-retired-repository-template-skill() {
 
   local dest repo
-  dest=$(make-dest "ignore-generated-assets")
-  repo=$(make-repo "ignore-generated-assets")
-  local generated_file=".github/skills/repository-template/assets/generated.txt"
+  dest=$(make-dest "ignore-retired-skill")
+  repo=$(make-repo "ignore-retired-skill")
+  local skill_file=".github/skills/repository-template/SKILL.md"
+  local asset_file=".github/skills/repository-template/assets/generated.txt"
   mkdir -p "${dest}/.github/skills/repository-template/assets"
-  echo "generated" > "${dest}/${generated_file}"
+  echo "# Retired skill" > "${dest}/${skill_file}"
+  echo "generated" > "${dest}/${asset_file}"
 
   local output
   output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
   LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true new=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
 
-  ! echo "${output}" | grep -q "${generated_file}" || return 1
-  [[ ! -f "${repo}/${generated_file}" ]] || return 1
+  ! echo "${output}" | grep -q "repository-template/" || return 1
+  [[ ! -e "${repo}/.github/skills/repository-template" ]] || return 1
 
   return 0
 }
@@ -307,7 +309,7 @@ function test-import-dry-run-detects-modifications-across-tracked-types() {
   dest=$(make-dest "detect-modifications")
   repo=$(make-repo "detect-modifications")
   echo "# Modified instruction" >> "${dest}/.github/instructions/shell.instructions.md"
-  echo "# Modified skill" >> "${dest}/.github/skills/repository-template/SKILL.md"
+  echo "# Modified skill" >> "${dest}/.github/skills/code-review/SKILL.md"
   echo "# Modified prompt" >> "${dest}/.github/prompts/enforce.shell.prompt.md"
   echo "# Modified setup script" >> "${dest}/.specify/scripts/python/setup_plan.py"
   echo "# Modified constitution" >> "${dest}/.specify/memory/constitution.md"
@@ -316,7 +318,7 @@ function test-import-dry-run-detects-modifications-across-tracked-types() {
   output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
 
   echo "${output}" | grep -q "shell.instructions.md" || return 1
-  echo "${output}" | grep -q "repository-template/SKILL.md" || return 1
+  echo "${output}" | grep -q "code-review/SKILL.md" || return 1
   echo "${output}" | grep -q "enforce.shell.prompt.md" || return 1
   echo "${output}" | grep -q ".specify/scripts/python/setup_plan.py" || return 1
   echo "${output}" | grep -q "constitution.md" || return 1

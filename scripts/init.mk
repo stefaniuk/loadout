@@ -20,7 +20,6 @@ check-markdown-links: # Check markdown links (set check=all|staged-changes|worki
 
 check-shell-lint: # Lint all shell scripts in this project @Quality
 	files=$$(find . -type f -name "*.sh" \
-		! -path "./.github/skills/repository-template/*" \
 		! -path "./.specify/*" \
 		$$(yq -r '.skills[].name' scripts/config/skills.yaml 2>/dev/null | sed 's|.*|! -path "./.github/skills/&/*"|'))
 	if command -v shellcheck > /dev/null 2>&1 && [[ ! "$${FORCE_USE_DOCKER:-false}" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]]; then

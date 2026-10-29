@@ -171,7 +171,8 @@ function is-ignored-import-path() {
   local owned_path
 
   case "${path}" in
-    .github/skills/repository-template/assets/*) return 0 ;;
+    # Retired skill, still present in destinations applied by older versions
+    .github/skills/repository-template/*) return 0 ;;
   esac
 
   for owned_path in "${CONDITIONALLY_OWNED_PATHS[@]}"; do

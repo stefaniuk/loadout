@@ -17,7 +17,7 @@
 # Prompts (architecture, enforce, review, speckit, util)
 .github/prompts/
 
-# Skills (repository-template and technology-specific)
+# Skills (workflow and technology-specific)
 .github/skills/
 
 # Copilot instructions file - entry is commented out per-destination if the file is already tracked in that repo's git history. Loadout still overwrites it and revert restores the tracked version.

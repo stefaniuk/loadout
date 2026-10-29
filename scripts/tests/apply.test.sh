@@ -257,7 +257,7 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/.github/prompts/enforce.makefile.prompt.md" ]] || return 1
   [[ -f "${d}/.github/prompts/spec.consolidate.prompt.md" ]] || return 1
   # Skills (all skills copied)
-  [[ -f "${d}/.github/skills/repository-template/SKILL.md" ]] || return 1
+  [[ ! -e "${d}/.github/skills/repository-template" ]] || return 1
   [[ -f "${d}/.github/skills/enforcement-audit/SKILL.md" ]] || return 1
   [[ -f "${d}/.github/skills/architecture-docs/SKILL.md" ]] || return 1
   [[ -f "${d}/.github/skills/code-review/SKILL.md" ]] || return 1
@@ -329,7 +329,7 @@ function test-apply-all-copies-all-tech-files() {
   [[ -f "${d}/.github/prompts/enforce.playwright-python.prompt.md" ]] || return 1
   [[ -f "${d}/.github/prompts/enforce.playwright-typescript.prompt.md" ]] || return 1
   [[ -f "${d}/.github/instructions/templates/pyproject.toml" ]] || return 1
-  [[ -d "${d}/.github/skills/repository-template" ]] || return 1
+  [[ ! -e "${d}/.github/skills/repository-template" ]] || return 1
   return 0
 }
 
