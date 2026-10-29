@@ -28,7 +28,7 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
 - [RD-QR-005] Quick start content must document prerequisites, setup, first run, and expected success indicators using repository-supported commands ([RD-SEC-007]–[RD-SEC-012]).
 - [RD-QR-006] Always provide a Contributing path with links, dev setup, and quality commands ([RD-SEC-025]–[RD-SEC-028]).
 - [RD-QR-007] Use relative links for all in-repo references and include the standard docs/security links when they exist ([RD-LNK-001]–[RD-LNK-002]).
-- [RD-QR-008] Run the validation checklist in [RD-VAL-001]–[RD-VAL-006] before finalising any README change.
+- [RD-QR-008] Run the validation checklist in [RD-VAL-001]–[RD-VAL-008] before finalising any README change.
 
 ---
 
@@ -53,6 +53,7 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
 - [RD-TON-003] Avoid marketing fluff. Stay explicit, practical, and evidence-led.
 - [RD-TON-004] Use "must/should" only when you describe real constraints or agreed standards.
 - [RD-TON-005] Keep the tone direct and instructive, guiding readers to action rather than selling the project.
+- [RD-TON-006] Follow the communication style in [copilot-instructions.md](../copilot-instructions.md#communication-style-), including no em dashes or semicolons in prose.
 
 ## 4. Governance and evidence rules 🧾
 
@@ -118,16 +119,17 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
 
 - [RD-SEC-019] Break the section into clearly labelled subsections such as `Configuration`, `Common workflows`, `Examples`, and optional `Troubleshooting`.
 - [RD-SEC-020] Under `Configuration`, document environment variables, config files, flags, and secret handling exactly as implemented.
-- [RD-SEC-021] Under `Common workflows`, describe three to five typical usage patterns with short, copyable examples. Move additional workflows to `docs/how-to/`.
+- [RD-SEC-021] Under `Common workflows`, describe three to five typical usage patterns with short, copyable examples. Move additional workflows to the repository's how-to guides, `docs/guides/` in this template.
 - [RD-SEC-022] Under `Examples`, link to `examples/`, `docs/`, or other evidence rather than duplicating long content.
 - [RD-SEC-023] Include a `Troubleshooting` subsection only for recurring issues backed by evidence. Omit if unknown.
 - [RD-SEC-024] If usage instructions are lengthy, link to a dedicated doc (for example `docs/usage.md`) and summarise why the reader should follow it.
 
 ### 6.7 Contributing
 
-- [RD-SEC-025] Link to `.github/contributing.md`. If it does not exist, create a contributing file.
+- [RD-SEC-025] Link to `.github/CONTRIBUTING.md`. If it does not exist, create a contributing file.
 - [RD-SEC-026] Summarise development setup steps (dependencies, local run commands) at a high level.
 - [RD-SEC-027] List the quality commands (linting, testing, formatting) that contributors must run.
+- [RD-SEC-029] Name only `make` targets that exist. Check each one against `make help` before you finish.
 - [RD-SEC-028] Explain how to propose changes (issues, pull requests, review expectations) without duplicating the full contributing guide.
 
 ### 6.8 Repository layout
@@ -143,7 +145,7 @@ They are **non-negotiable** unless an explicit ADR grants a scoped, time-bound e
 
 ## 7. Standard links 🔗
 
-- [RD-LNK-001] Include relative links to `LICENCE.md`, `./github/contributing.md`, `./github/SECURITY.md`, `./github/CODE_OF_CONDUCT.md`, and key canonical docs entry points (for example `docs/README.md`, `docs/architecture.md`, or `docs/onboarding.md`) whenever those files exist.
+- [RD-LNK-001] Include relative links to `LICENCE.md`, `.github/CONTRIBUTING.md`, `.github/SECURITY.md`, `.github/CODE_OF_CONDUCT.md`, and key canonical docs entry points (for example `docs/README.md`, `docs/architecture.md`, or `docs/onboarding.md`) whenever those files exist. Match the file name case exactly, because links are case-sensitive on GitHub and Linux.
 - [RD-LNK-002] Use relative links for every in-repo reference, ensuring they work on forks and mirrors without modification.
 
 ## 8. Badges (optional) 🎖️
@@ -166,7 +168,9 @@ Before finalising the README, confirm:
 
 - [RD-VAL-001] The opening section answers purpose, benefit, problem, and high-level approach.
 - [RD-VAL-002] Quick start instructions are runnable or clearly marked with `TODO:` placeholders for unknown steps.
-- [RD-VAL-003] The Contributing section links to `.github/contributing.md` (or documents the missing file as a TODO).
+- [RD-VAL-003] The Contributing section links to `.github/CONTRIBUTING.md` (or documents the missing file as a TODO).
 - [RD-VAL-004] The Licence section links to `LICENCE.md` (or records the need to add one).
 - [RD-VAL-005] Every statement is evidence-backed; there are no invented facts or unsupported claims.
 - [RD-VAL-006] The document consistently uses British English spelling and punctuation.
+- [RD-VAL-007] The README passes `make lint-markdown-format` and `make lint-markdown-links`. Run `make format-markdown` first to wrap prose at 80 characters and align tables.
+- [RD-VAL-008] Every `Expected result` block matches what the command really prints, for example one `ok` line per check for `make lint`.

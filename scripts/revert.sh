@@ -128,7 +128,7 @@ function revert-copilot() {
   local dest="$1"
 
   # Remove .github directories
-  local github_dirs=("agents" "hooks" "instructions" "prompts" "skills")
+  local github_dirs=("agents" "instructions" "prompts" "skills")
   for dir in "${github_dirs[@]}"; do
     if [[ -d "${dest}/.github/${dir}" ]]; then
       print-info "Removing ${dest}/.github/${dir}"
@@ -141,6 +141,9 @@ function revert-copilot() {
     print-info "Removing ${dest}/.github/copilot-instructions.md"
     rm -f "${dest}/.github/copilot-instructions.md"
   fi
+
+  # Remove hook files that older loadout versions installed
+  remove-legacy-hook-files "${dest}"
 
   # Remove hook scripts (scripts/hooks/ is fully managed by loadout;
   # any user-authored files placed there will be removed on revert)

@@ -41,8 +41,9 @@ set -euo pipefail
 #   - Default templates (Makefile, Dockerfile, compose.yaml, shell-script)
 #   - All skills under .github/skills/
 #   - copilot-instructions.md
-#   - .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
-#   - scripts/hooks/ (hook executables, e.g. session-start-cheatsheet.sh, stop-gate.sh; chmod +x)
+#   - scripts/hooks/ (workflow-mode scripts; chmod +x), removing the hook files
+#     older loadout versions installed unless the destination tracks them or
+#     git cannot tell
 #   - scripts/loadout.mk plus a managed Makefile include block for downstream repos
 #     that already use repository-template's Makefile + scripts/init.mk
 #   - pull_request_template.md (if not already present)
@@ -76,7 +77,6 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 source "${SCRIPT_DIR}/common.lib.sh"
 
 COPILOT_AGENTS_DIR="${REPO_ROOT}/.github/agents"
-COPILOT_HOOKS_DIR="${REPO_ROOT}/.github/hooks"
 COPILOT_INSTRUCTIONS_DIR="${REPO_ROOT}/.github/instructions"
 COPILOT_PROMPTS_DIR="${REPO_ROOT}/.github/prompts"
 COPILOT_SKILLS_DIR="${REPO_ROOT}/.github/skills"
@@ -366,11 +366,6 @@ function copilot-apply() {
   else
     subset-skip "agents"
   fi
-  if [[ "${SUBSET_HOOKS}" == "true" ]]; then
-    copilot-copy-hooks "${destination}"
-  else
-    subset-skip "hooks"
-  fi
   if [[ "${SUBSET_INSTRUCTIONS}" == "true" ]]; then
     copilot-copy-instructions "${destination}"
   else
@@ -427,6 +422,7 @@ function copy-shared-resources() {
     subset-skip "project-files"
   fi
   if [[ "${SUBSET_HOOKS}" == "true" || "${SUBSET_PROJECT}" == "true" ]]; then
+    remove-legacy-hook-files "${destination}"
     copy-hook-scripts "${destination}"
   else
     subset-skip "hook-scripts"
@@ -493,7 +489,7 @@ function is-tech-enabled() {
 function copilot-clean-directories() {
 
   local dest="$1/.github"
-  local dirs=("agents" "hooks" "instructions" "prompts" "skills")
+  local dirs=("agents" "instructions" "prompts" "skills")
 
   for dir in "${dirs[@]}"; do
     if [[ -d "${dest}/${dir}" ]]; then
@@ -774,28 +770,6 @@ function copilot-copy-instructions-md() {
   cp "${COPILOT_INSTRUCTIONS_MD_FILE}" "${dest}/"
 }
 
-# Copy .github/hooks/ to the destination.
-# Arguments (provided as function parameters):
-#   $1=[destination directory path]
-function copilot-copy-hooks() {
-
-  local dest="$1/.github/hooks"
-  mkdir -p "${dest}"
-
-  print-info "Copying hooks to ${dest}"
-  local hooks=()
-  shopt -s nullglob
-  hooks=("${COPILOT_HOOKS_DIR}"/*.json)
-  shopt -u nullglob
-  if (( ${#hooks[@]} == 0 )); then
-    print-info "No hook configuration files to copy"
-    return 0
-  fi
-  cp "${hooks[@]}" "${dest}/"
-
-  return 0
-}
-
 # Copy scripts/hooks/ to the destination.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
@@ -1062,8 +1036,9 @@ Other options:
 
 Always copied (default/glue layer):
     .github/copilot-instructions.md
-    .github/hooks/ (Copilot agent hooks, e.g. quality-gates.json)
-    scripts/hooks/ (hook executables, e.g. session-start-cheatsheet.sh, stop-gate.sh; chmod +x)
+    scripts/hooks/ (workflow-mode scripts; chmod +x), removing the hook files
+      older loadout versions installed unless the destination tracks them or
+      git cannot tell
     scripts/loadout.mk plus a managed Makefile include block for downstream repos
       that already use repository-template's Makefile + scripts/init.mk
     Default skills: repository-template, enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation

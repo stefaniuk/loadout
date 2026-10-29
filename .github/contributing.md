@@ -469,52 +469,7 @@ allowed-tools: []
 
 ### 🪝 Hooks Quickstart
 
-**When to choose this artefact.** You need to **automate the inner feedback loop** - run a script on `SessionStart`, after every edit (`PostToolUse`), or block the agent from finishing (`Stop`). See [docs/architecture.md](../docs/architecture.md) and the existing [`.github/hooks/quality-gates.json`](../.github/hooks/quality-gates.json).
-
-**Minimal starter template** - add to [`.github/hooks/quality-gates.json`](../.github/hooks/quality-gates.json):
-
-```jsonc
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "type": "command",
-        "command": "./scripts/hooks/<your-script>.sh",
-        "timeout": 10,
-      },
-    ],
-  },
-}
-```
-
-And the script - save as `scripts/hooks/<your-script>.sh`, `chmod +x`:
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Receives hook payload on stdin (JSON). Exit 0 = pass; non-zero = fail/block.
-# Keep fast: PostToolUse runs after EVERY edit.
-make lint
-```
-
-**Required fields and naming constraints.** Supported events: `SessionStart`, `UserPromptSubmit`, `PostToolUse`, `Stop`. Each entry needs `type: "command"`, a `command` path, and a `timeout` (seconds). Scripts must be POSIX-portable and idempotent.
-
-**Pre-PR validation checklist.**
-
-- [ ] Script is executable (`chmod +x`) and shellcheck-clean
-- [ ] Timeout is realistic (PostToolUse < 60 s; Stop < 30 s)
-- [ ] Script is **idempotent** and safe to run on every edit
-- [ ] No network calls or long-running work in `PostToolUse`
-- [ ] `make lint && make test` pass
-
-**Typical review failures.**
-
-- Slow `PostToolUse` hook that throttles the whole agent session
-- Non-idempotent side effects (e.g. appending to a file every edit)
-- Hard-coded absolute paths instead of repo-relative ones
-
----
+**Hooks are not part of loadout.** The Copilot hook implementation and the quality gate that blocks the agent from finishing live in repository-template, in `.github/hooks/` and `scripts/quality/`. Add or change hooks there.
 
 <a id="instruction-precedence"></a>
 

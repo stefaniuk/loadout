@@ -32,7 +32,7 @@ lint: # Run linter to check code style and errors @Quality
 test: # Run comprehensive test suite @Testing
 	@bash -c '\
 		d=$$(mktemp -d); trap "rm -rf $$d" EXIT; \
-		tests="apply speckit-sync import skill-sync session-start-hook subagent-hooks workflow-mode revert skill-remove"; \
+		tests="apply speckit-sync import skill-sync workflow-mode revert skill-remove"; \
 		pids=""; \
 		for t in $$tests; do \
 			bash ./scripts/tests/$$t.test.sh > "$$d/$$t.log" 2>&1 & \

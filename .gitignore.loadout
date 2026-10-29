@@ -11,9 +11,6 @@
 # Agents (custom agent definitions or README placeholder)
 .github/agents/
 
-# Hooks (Copilot agent hooks, e.g. quality-gates.json)
-.github/hooks/
-
 # Instructions (shell, docker, makefile, readme, and technology-specific)
 .github/instructions/
 
@@ -29,7 +26,7 @@
 # Superpowers local planning and design artefacts
 docs/superpowers/
 
-# Hook executables invoked by .github/hooks/*.json
+# Workflow-mode scripts
 scripts/hooks/
 
 # Workflow configuration scripts

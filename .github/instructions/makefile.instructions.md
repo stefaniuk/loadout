@@ -23,9 +23,9 @@ They are **non-negotiable** unless an exception is explicitly documented (with r
 
 This section exists so humans and AI assistants can reliably apply the most important rules even when context is tight.
 
-- [MK-QR-001] **Thin root Makefile**: keep the top-level `Makefile` small; push reusable logic into `scripts/**/*.mk` and `scripts/**/*.sh` ([MK-STR-001], [MK-STR-004], [MK-SH-008]).
+- [MK-QR-001] **Thin root Makefile**: the root `Makefile` includes `scripts/init.mk` and defines only project targets; push reusable logic into `scripts/**/*.mk` and `scripts/**/*.sh` ([MK-STR-001], [MK-STR-004], [MK-SH-008]).
 - [MK-QR-002] **Help-first UX**: default goal is `help`; every public target has an inline description and category ([MK-UX-001]–[MK-UX-006]).
-- [MK-QR-003] **Safe by default**: no destructive behaviour without explicit scoping and confirmation options ([MK-SEC-001]–[MK-SEC-006]).
+- [MK-QR-003] **Safe by default**: destructive targets preview by default and act only with `CONFIRM=true` ([MK-SEC-001]–[MK-SEC-006]).
 - [MK-QR-004] **Fail fast**: recipes must fail on errors; never hide failures ([MK-SH-001]–[MK-SH-006]).
 - [MK-QR-005] **CI uses make**: CI/CD should call the same targets developers run locally ([MK-CI-001]–[MK-CI-006]).
 - [MK-QR-006] **Deterministic targets**: stable outputs and consistent environment handling ([MK-OP-003], [MK-VAR-001]–[MK-VAR-006]).
@@ -33,6 +33,7 @@ This section exists so humans and AI assistants can reliably apply the most impo
 - [MK-QR-008] **Fast feedback**: local development and tests must be quick and confidence-building ([MK-OP-005], [MK-LCL-001]–[MK-LCL-005]).
 - [MK-QR-009] **Run the quality gates** after any Makefile/script change and iterate to clean ([MK-QG-001]–[MK-QG-003]).
 - [MK-QR-010] **Avoid common anti-patterns**: `|| true` without comment, large inline shell, hardcoded paths, unscoped `rm -rf` (§12).
+- [MK-QR-011] **The repository is the reference**: `Makefile`, `scripts/init.mk`, `scripts/docker/docker.mk` and [Use_Bash_and_Make.md](../../docs/guides/Use_Bash_and_Make.md) show these rules applied; when they disagree with this file, follow them and correct this file.
 
 ---
 
@@ -56,8 +57,8 @@ The build system must be **fully usable locally**, providing rapid feedback befo
 
 **Terminology.** This document distinguishes two things that are easy to conflate:
 
-- **Dependency / deps**: the shipped project's own runtime and dev packages (npm, uv/pip, Cargo, Go modules, etc.), pinned in a language lock file and installed by the language's own package manager. Always addressed as `deps`/`deps-prod`/`deps-update` ([MK-LCL-001]).
-- **Toolchain**: the CLI tools the build system itself needs to run (linters, formatters, runtimes, version managers such as `mise`), pinned in a tool-version file (e.g. `.tool-versions`) and installed by the toolchain manager, not the project's package manager.
+- **Dependency / deps**: the shipped project's own runtime and dev packages (npm, uv/pip, Cargo, Go modules, etc.), pinned in a language lock file and installed by the language's own package manager. Always addressed as `deps`, or `deps-prod` and `deps-update` where a project needs them ([MK-LCL-001]).
+- **Toolchain**: the CLI tools the build system itself needs to run (linters, formatters, runtimes), pinned in the `[tools]` table of `mise.toml` and installed by `make config`, not by the project's package manager. Container images used by tool wrappers are pinned in the `[_.docker]` table of the same file.
 
 Never call a toolchain tool a "dependency"; keep the two vocabularies and their target names separate (see [MK-LCL-008]).
 
@@ -65,17 +66,17 @@ Never call a toolchain tool a "dependency"; keep the two vocabularies and their 
 
 Provide repository-standard targets so an engineer can operate the repo quickly:
 
-- [MK-LCL-001] Bootstrap: `make deps` - installs production and development dependencies from the lock file, as defined in Section 11. Use `make deps-prod` for production-only dependencies.
-- [MK-LCL-002] Lint/format: `make lint` and `make format` - run the paired lint and format targets defined in Section 11.
+- [MK-LCL-001] Bootstrap: `make config` provisions the toolchain, Git hooks and pinned images, and `make deps` installs the project's dependencies from the lock file. Add `make deps-prod` when production-only dependencies differ.
+- [MK-LCL-002] Lint/format: `make lint` and `make format`. `make lint` runs one `lint-*` target per check from `scripts/init.mk`, in `check=all` mode by default so a local pass predicts the pre-commit hook and CI. `make lint check=branch` limits the file checks to the branch's changes, and `lint-shell` always runs with `check=all`.
 - [MK-LCL-003] Type-check: `make typecheck` - runs the static type checker (e.g. mypy) as a blocking gate.
-- [MK-LCL-004] Test (fast lane): `make test` - must run quickly (aim: < 5 seconds for unit tests) and deterministically, matching the Section 11 target.
+- [MK-LCL-004] Test: `make test` runs every test suite deterministically. Keep it fast by running suites in parallel and stubbing external tools, as `./scripts/tests/run-test-suites.sh` does.
 - [MK-LCL-005] Full suite: optionally add an extended target (commonly `make test-all`) that builds on the Section 11 `test` recipe to include integration/e2e tiers when applicable.
-- [MK-LCL-006] Build: reuse the Section 11 `build` target (from the CI/CD block) to compile or package artefacts locally when applicable.
-- [MK-LCL-007] Run locally: `make run` or `make up` / `make down` - use the Section 11 operations targets to start/stop the application or dependency stack (if applicable).
-- [MK-LCL-013] Install: `make install` - install the project's package or binary locally and ensure its CLI entry point is available on the user's `PATH`. The target must be language- and packaging-agnostic (e.g. `pip install .`, `uv tool install .`, `npm install -g .`, `cargo install --path .`, `go install ./...`, `make build && cp …`), idempotent, and emit an actionable message when the resulting command is not yet on `PATH`.
-- [MK-LCL-014] Uninstall: `make uninstall` - reverse `make install` by removing the project's package or binary from the user environment using the same package manager or path it was installed with (e.g. `pip uninstall -y <pkg>`, `uv tool uninstall <pkg>`, `npm uninstall -g <pkg>`, `cargo uninstall <pkg>`, `rm -f $(GOBIN)/<bin>`). The target must be idempotent (succeed when nothing is installed) and must not remove unrelated files.
-- [MK-LCL-015] Link (alternative to install): `make link` - link a built package or binary from the repository into a user-writable bin directory that is already on `PATH` (e.g. `~/.local/bin`, `~/bin`, or `$(go env GOBIN)`), so changes in the working tree are reflected without reinstalling. Implementations may use editable installs (`pip install -e .`, `uv pip install -e .`), packaging links (`npm link`, `pnpm link --global`), or symlinks to built artefacts (`ln -sf $(PWD)/dist/<bin> ~/.local/bin/<bin>`). The target must select the destination from a documented, overridable variable (e.g. `BIN_DIR ?= $(HOME)/.local/bin`), refuse to overwrite an unrelated file at the destination, and warn when `BIN_DIR` is not on `PATH`.
-- [MK-LCL-016] Unlink: `make unlink` - reverse `make link` by removing the editable install or symlink created in `$(BIN_DIR)` (e.g. `pip uninstall -y <pkg>`, `npm unlink -g <pkg>`, `rm -f $(BIN_DIR)/<bin>`). The target must verify the link points into the repository before removing it (to avoid deleting unrelated files), be idempotent, and use the same overridable `BIN_DIR` as `link`.
+- [MK-LCL-006] Build: reuse the Section 11 `build` target to compile or package artefacts locally when applicable.
+- [MK-LCL-007] Run locally: `make run` or `make up` / `make down` - use the optional Section 11 operations targets to start/stop the application or dependency stack (if applicable).
+- [MK-LCL-013] Install, when the project ships a package or CLI: `make install` - install the project's package or binary locally and ensure its CLI entry point is available on the user's `PATH`. The target must be language- and packaging-agnostic (e.g. `pip install .`, `uv tool install .`, `npm install -g .`, `cargo install --path .`, `go install ./...`, `make build && cp …`), idempotent, and emit an actionable message when the resulting command is not yet on `PATH`.
+- [MK-LCL-014] Uninstall, whenever `make install` exists: `make uninstall` - reverse `make install` by removing the project's package or binary from the user environment using the same package manager or path it was installed with (e.g. `pip uninstall -y <pkg>`, `uv tool uninstall <pkg>`, `npm uninstall -g <pkg>`, `cargo uninstall <pkg>`, `rm -f $(GOBIN)/<bin>`). The target must be idempotent (succeed when nothing is installed) and must not remove unrelated files.
+- [MK-LCL-015] Link (optional alternative to install, not in the template): `make link` - link a built package or binary from the repository into a user-writable bin directory that is already on `PATH` (e.g. `~/.local/bin`, `~/bin`, or `$(go env GOBIN)`), so changes in the working tree are reflected without reinstalling. Implementations may use editable installs (`pip install -e .`, `uv pip install -e .`), packaging links (`npm link`, `pnpm link --global`), or symlinks to built artefacts (`ln -sf $(PWD)/dist/<bin> ~/.local/bin/<bin>`). The target must select the destination from a documented, overridable variable (e.g. `BIN_DIR ?= $(HOME)/.local/bin`), refuse to overwrite an unrelated file at the destination, and warn when `BIN_DIR` is not on `PATH`.
+- [MK-LCL-016] Unlink, whenever `make link` exists: `make unlink` - reverse `make link` by removing the editable install or symlink created in `$(BIN_DIR)` (e.g. `pip uninstall -y <pkg>`, `npm unlink -g <pkg>`, `rm -f $(BIN_DIR)/<bin>`). The target must verify the link points into the repository before removing it (to avoid deleting unrelated files), be idempotent, and use the same overridable `BIN_DIR` as `link`.
 
 ### 2.2 Clear, actionable errors
 
@@ -89,7 +90,7 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 
 ### 2.4 Environment check (recommended)
 
-- [MK-LCL-012] Where supported, provide a "doctor" target (for example `make doctor`) that confirms local prerequisites and surfaces actionable fixes.
+- [MK-LCL-012] Provide an environment check target that confirms local prerequisites and surfaces actionable fixes. This repository uses `make toolchain-verify-gnu`, which checks GNU Make, Bash and a container runtime.
 
 ---
 
@@ -97,13 +98,15 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 
 ### 3.1 File layout and includes (recommended baseline)
 
-- [MK-STR-001] The root `Makefile` should be **thin** and primarily:
-  - include shared bootstrap modules (for example `include scripts/init.mk`);
-  - define only project-specific hooks used by developers and CI/CD.
+- [MK-STR-001] The root `Makefile` must be **thin**:
+  - its first line is `include scripts/init.mk`, which brings in the Make settings, `help`, the quality and toolchain targets, and `scripts/docker/docker.mk`;
+  - it then defines only project-specific targets, followed by their `${VERBOSE}.SILENT:` list.
 - [MK-STR-002] Shared targets must live in `scripts/**/*.mk` modules where feasible.
 - [MK-STR-003] Required modules use `include`. Optional modules use `-include`.
 - [MK-STR-004] Reusable logic must live in scripts (for example `scripts/**/something.sh`) and be called from a wrapper target; do not embed large shell programs inside recipes.
-- [MK-STR-005] If the repo uses a shared template module, add a clear banner comment such as "DO NOT edit – maintained upstream".
+- [MK-STR-005] A module copied from another repository starts with a one-line marker naming its source, for example `# loadout-managed: scripts/loadout.mk`. Do not add "do not edit" banners.
+- [MK-STR-008] Add capabilities as extension modules. `scripts/init.mk` includes every `*.ext.mk` file under `scripts/` in sorted order. Name only entry points `*.ext.mk`, name helpers `*.lib.mk`, and never include one `*.ext.mk` from another ([Use_Bash_and_Make.md](../../docs/guides/Use_Bash_and_Make.md)).
+- [MK-STR-009] Keep the Make settings (`.DEFAULT_GOAL`, `.ONESHELL`, `.SHELLFLAGS`, `SHELL`, `.PHONY: *`) and the `help` implementation in `scripts/init.mk` only. Never repeat them in the root `Makefile` or a module.
 
 ### 3.2 Target composition across modules
 
@@ -126,16 +129,19 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
   some-target: # One-line description - mandatory: foo=[...]; optional: bar=[..., default is X] @Category
   ```
 
-- [MK-UX-004] Categories must be short and consistent. Preferred set (as defined in Section 11):
-  - `@Pipeline`, `@Development`, `@Testing`, `@CodeQuality`, `@Operations`, `@Setup`, `@Others`
-- [MK-UX-005] Internal/helper targets must be prefixed with `_` and must not be presented as the primary entrypoints.
-- [MK-UX-006] Target names should use **verb-noun** and hyphens (for example `test-unit`, `docker-build`, `terraform-plan`).
+- [MK-UX-004] Categories must be short and consistent. Use the set already in this repository, and do not invent new ones:
+  - `@Build`, `@Configuration`, `@Development`, `@ExamplesAndTests`, `@Operations`, `@Quality`, `@Release`, `@Others`
+- [MK-UX-005] Internal/helper targets must be prefixed with `_` and must not be presented as the primary entrypoints. `make help` hides them.
+- [MK-UX-006] Target names use kebab-case, starting with the area so related targets sort together: `docker-build`, `toolchain-upgrade`, `githooks-run`. A `lint-*` target runs one quality script with a configurable `check` mode. Do not wrap it in a second target that only fixes a mode. Set the mode where `make lint` calls it instead.
 
 ### 4.2 Guardrails for "public" targets
 
 - [MK-UX-007] Public targets must document required variables (mandatory/optional) in the help description.
 - [MK-UX-008] Public targets must not rely on interactive prompts in CI paths; provide non-interactive defaults and flags.
 - [MK-UX-009] Treat every `make` target as a CLI surface that follows the shared [CLI contract](./includes/cli-contract-baseline.include.md): keep targets thin, delegate real work to scripts, honour exit-code/stream rules, and refactor when behaviour drifts from the underlying tooling.
+- [MK-UX-010] Add every target to the `${VERBOSE}.SILENT:` list of the file that defines it, in alphabetical order, so recipes print only their output unless `VERBOSE=true`.
+- [MK-UX-011] A target that wraps a check prints one success line when it passes, for example `./scripts/quality/check-shell-lint.sh && echo "shell lint: ok"`. A failing script prints its own diagnostics on stderr.
+- [MK-UX-012] Give a target's mode a default on the line above its definition, so the target and the script can differ, for example `lint-file-format: check ?= all`.
 
 ---
 
@@ -150,10 +156,10 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 ### 5.1 Fail-fast defaults (non-negotiable)
 
 - [MK-SH-001] Use bash consistently unless the repo explicitly documents another shell:
-  - `SHELL := $(shell command -v bash)` selects Bash 5.2+ from `PATH` at Make startup, including with `.ONESHELL:`.
+  - `SHELL := $(shell command -v bash)` selects Bash 5.2+ from `PATH` at Make startup, including with `.ONESHELL:`. GNU Make 3.82 or later is required.
 - [MK-SH-002] Use a fail-fast shell mode (at least `-e`), and prefer:
-  - `.ONESHELL:`
-  - `.SHELLFLAGS := -ce` (and enable tracing in verbose mode, for example `-cex`)
+  - `.ONESHELL:`, so a recipe can `source scripts/docker/docker.lib.sh` and call its functions on the following lines
+  - `.SHELLFLAGS := -ce`, switched to `-cex` when `VERBOSE` is true
 - [MK-SH-003] Do not mask failures. Avoid patterns like `|| true` unless there is a clear comment explaining why it is safe.
 - [MK-SH-004] When a recipe fails, it must fail the make target (non-zero exit).
 
@@ -161,6 +167,7 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 
 - [MK-SH-005] Default to `.NOTPARALLEL:` unless you have proved targets are safe in parallel.
 - [MK-SH-006] Prefer `$(MAKE)` over `make` for recursive calls, so flags and jobserver settings propagate.
+- [MK-SH-009] Recipes reach the pinned toolchain through the mise shims that `scripts/init.mk` puts first on `PATH`. Never install or version tools inside a recipe.
 
 ### 5.3 Keep recipes small
 
@@ -177,9 +184,9 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 - [MK-VAR-001] Expose common parameters as variables with sane defaults using `?=`.
 - [MK-VAR-002] Support convenient aliases where it improves usability (for example allow `docker_dir` and `dir` to map to the same value).
 - [MK-VAR-003] Do not hardcode organisation- or environment-specific paths inside recipes; prefer variables and documented defaults.
-- [MK-VAR-004] Variables passed to scripts must be explicit and stable (avoid hidden global coupling).
+- [MK-VAR-004] Variables passed to scripts must be explicit and stable (avoid hidden global coupling). Use lowercase for options of one target (`check`, `dir`, `file`, `dry_run`) and uppercase for settings shared across targets (`VERBOSE`, `FORCE_USE_DOCKER`, `CONFIRM`, `DOCKER_IMAGE`).
 - [MK-VAR-005] Do not print secrets when listing variables or echoing commands. Treat variables ending with `_PASSWORD`, `_PASS`, `_KEY`, `_SECRET`, `_TOKEN` as sensitive by default.
-- [MK-VAR-006] Prefer `MAKEFLAGS += --no-print-directory` (or equivalent) to reduce noise.
+- [MK-VAR-006] Set `MAKEFLAGS := --no-print-directory` in `scripts/init.mk` to reduce noise.
 - [MK-VAR-007] Document precedence when variables can be set via multiple sources (command-line, environment, file). Prefer: command-line > environment > file > built-in default.
 
 ---
@@ -195,10 +202,8 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 ### 7.1 Destructive actions
 
 - [MK-SEC-001] Default behaviour must be safe. Destructive actions must require explicit intent.
-- [MK-SEC-002] `clean` must only delete well-known generated artefacts within the repo (no unscoped `rm -rf` outside the workspace).
-- [MK-SEC-003] If a target can delete or overwrite user data, it must:
-  - support `DRY_RUN=1` where feasible, and/or
-  - require a strong confirmation variable (for example `CONFIRM=YES`).
+- [MK-SEC-002] `clean` must only delete well-known generated artefacts within the repo (no unscoped `rm -rf` outside the workspace). The shared `clean::` previews `git clean -X` and deletes only with `CONFIRM=true`.
+- [MK-SEC-003] If a target can delete or overwrite user data, it must preview by default and act only when `CONFIRM=true`. A target that rewrites tracked files offers `dry_run=true`, as `make toolchain-upgrade` does. Parse both with the same true values as `is-arg-true`.
 
 ### 7.2 Secrets handling
 
@@ -224,7 +229,7 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 
 - [MK-CI-001] CI/CD workflows should call make targets (not duplicated inline bash).
 - [MK-CI-002] Pipeline targets should be stable and predictable. Common names include:
-  - `deps-prod` (reused from [MK-LCL-001], not a separate pipeline-only target), `build`, `test`, `publish`, `deploy`, `clean`
+  - `deps`, `build`, `test`, `publish`, `deploy`, `clean`
 - [MK-CI-003] Targets used in CI must be non-interactive.
 
 ### 8.2 Reproducibility
@@ -267,6 +272,8 @@ If you introduce a new public target, you must:
 - [MK-AI-006] Add/update scripts as needed ([MK-SH-008]).
 - [MK-AI-007] Ensure it runs locally and in CI where intended ([MK-CI-001]–[MK-CI-006]).
 - [MK-AI-008] Run quality gates and iterate to clean ([MK-QG-001]–[MK-QG-004]).
+- [MK-AI-012] Add it to the `${VERBOSE}.SILENT:` list ([MK-UX-010]).
+- [MK-AI-013] Never use `make -n` to inspect a target that recurses: GNU Make still runs recipe lines containing `$(MAKE)`. Read the recipe instead.
 
 ### 10.3 Existing target modifications
 
@@ -280,7 +287,7 @@ When modifying existing targets:
 
 ## 11. Makefile format (non-negotiable) 📐
 
-The default Makefile format lives in [templates/Makefile.template](./templates/Makefile.template). Projects must adopt this naming convention, structure, and formatting as their baseline. Targets may be added, removed, or customised to suit project needs, but the overall layout and style must remain consistent.
+The root Makefile format lives in [templates/Makefile.template](./templates/Makefile.template), which mirrors this repository's own [Makefile](../../Makefile). Projects must adopt this naming convention, structure, and formatting as their baseline. Targets may be added, removed, or customised to suit project needs, but the overall layout and style must remain consistent. The template adds an optional section with `run`, `up`, `down`, `install` and `uninstall`. Keep only the targets the project needs, and keep the `${VERBOSE}.SILENT:` list in step with them.
 
 ---
 
@@ -299,4 +306,6 @@ These patterns cause recurring issues in Makefiles and build scripts. Avoid them
 - [MK-ANT-009] **Silent failures via subshell** - `(command)` can hide exit codes; use `set -e` or check explicitly.
 - [MK-ANT-010] **Over-engineered dependency graphs** - hard to maintain and debug; keep prerequisites simple and explicit.
 - [MK-ANT-011] **`$(shell ...)` in prerequisites** - evaluated at parse time, not execution; can cause surprising behaviour.
-- [MK-ANT-012] **Missing `.PHONY` for non-file targets** - causes skipped execution if a file with that name exists.
+- [MK-ANT-012] **Per-target `.PHONY` lists** - `scripts/init.mk` declares `.PHONY: *` for every target; do not add or change `.PHONY` declarations.
+- [MK-ANT-013] **`@` prefixes on recipe lines** - inconsistent with the `${VERBOSE}.SILENT:` lists; add the target to the list instead.
+- [MK-ANT-014] **Repeated Make settings** - a second `SHELL`, `.ONESHELL` or `help` definition outside `scripts/init.mk` causes conflicting behaviour ([MK-STR-009]).

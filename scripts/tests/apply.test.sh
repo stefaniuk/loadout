@@ -28,6 +28,8 @@ SKIP_SINGLETONS_DEST=""
 GITIGNORE_DEST=""
 OWNED_FILES_DEST=""
 OWNED_REVERT_DEST=""
+LEGACY_HOOKS_DEST=""
+LEGACY_REVERT_DEST=""
 ESCAPED_SPACE_ROOT=""
 
 # Subset shared dests
@@ -67,6 +69,10 @@ function main() {
     test-apply-updates-existing-gitignore-managed-section \
     test-apply-respects-git-tracked-destination-owned-files \
     test-revert-respects-destination-owned-adr-template \
+    test-apply-removes-legacy-hook-files \
+    test-revert-removes-legacy-hook-files \
+    test-legacy-hook-cleanup-keeps-files-git-cannot-check \
+    test-legacy-hook-cleanup-keeps-files-behind-a-link \
     test-apply-subset-agents-only \
     test-apply-subset-prompts-and-agents \
     test-apply-subset-instructions-only-with-python-tech \
@@ -103,6 +109,8 @@ function test-apply-suite-setup() {
   GITIGNORE_DEST="${TEMP_DIR}/_shared_gitignore"
   OWNED_FILES_DEST="${TEMP_DIR}/_shared_owned_files"
   OWNED_REVERT_DEST="${TEMP_DIR}/_shared_owned_revert"
+  LEGACY_HOOKS_DEST="${TEMP_DIR}/_shared_legacy_hooks"
+  LEGACY_REVERT_DEST="${TEMP_DIR}/_shared_legacy_revert"
   ESCAPED_SPACE_ROOT="${TEMP_DIR}/_esc_space"
   SUBSET_AGENTS_DEST="${TEMP_DIR}/_subset_agents"
   SUBSET_PROMPTS_AGENTS_DEST="${TEMP_DIR}/_subset_prompts_agents"
@@ -149,6 +157,16 @@ function test-apply-suite-setup() {
     seed-destination-owned-files "${OWNED_REVERT_DEST}"
     ./scripts/apply.sh "${OWNED_REVERT_DEST}" > /dev/null 2>&1
     bash ./scripts/revert.sh --dest "${OWNED_REVERT_DEST}" > /dev/null 2>&1
+  }) &
+  ({
+    seed-legacy-hook-files "${LEGACY_HOOKS_DEST}"
+    ./scripts/apply.sh "${LEGACY_HOOKS_DEST}" > /dev/null 2>&1
+  }) &
+  ({
+    ./scripts/apply.sh "${LEGACY_REVERT_DEST}" > /dev/null 2>&1
+    mkdir -p "${LEGACY_REVERT_DEST}/.github/hooks"
+    echo '{"hooks":{}}' > "${LEGACY_REVERT_DEST}/.github/hooks/quality-gates.json"
+    bash ./scripts/revert.sh --dest "${LEGACY_REVERT_DEST}" > /dev/null 2>&1
   }) &
   (subset=agents ./scripts/apply.sh "${SUBSET_AGENTS_DEST}" > /dev/null 2>&1) &
   (subset="prompts,agents" ./scripts/apply.sh "${SUBSET_PROMPTS_AGENTS_DEST}" > /dev/null 2>&1) &
@@ -252,10 +270,10 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/.gitignore" ]] || return 1
   grep -qF "loadout managed content" "${d}/.gitignore" || return 1
   # Hooks
-  [[ -f "${d}/.github/hooks/quality-gates.json" ]] || return 1
+  [[ ! -e "${d}/.github/hooks" ]] || return 1
   [[ ! -f "${d}/hooks.json" ]] || return 1
-  [[ -x "${d}/scripts/hooks/session-start-cheatsheet.sh" ]] || return 1
-  [[ -x "${d}/scripts/hooks/stop-gate.sh" ]] || return 1
+  [[ -x "${d}/scripts/hooks/workflow-mode.sh" ]] || return 1
+  [[ ! -e "${d}/scripts/hooks/stop-gate.sh" ]] || return 1
   return 0
 }
 
@@ -433,6 +451,53 @@ function test-revert-respects-destination-owned-adr-template() {
   return 0
 }
 
+function test-apply-removes-legacy-hook-files() {
+
+  local d="${LEGACY_HOOKS_DEST}"
+  # Untracked hook files from an older loadout are removed
+  [[ ! -e "${d}/.github/hooks/quality-gates.json" ]] || return 1
+  [[ ! -e "${d}/scripts/hooks/stop-gate.sh" ]] || return 1
+  # A tracked hook file and other hook files belong to the destination
+  grep -q "team-owned-prompt-hook" "${d}/scripts/hooks/user-prompt-record.sh" || return 1
+  [[ -f "${d}/.github/hooks/team.json" ]] || return 1
+  [[ -x "${d}/scripts/hooks/workflow-mode.sh" ]] || return 1
+  return 0
+}
+
+function test-revert-removes-legacy-hook-files() {
+
+  local d="${LEGACY_REVERT_DEST}"
+  [[ ! -e "${d}/.github/hooks" ]] || return 1
+  return 0
+}
+
+# Git refuses to look into a repository another user owns, as when loadout runs
+# as root, so it cannot tell which files are tracked and none may be removed.
+function test-legacy-hook-cleanup-keeps-files-git-cannot-check() {
+
+  local d="${TEMP_DIR}/_legacy_git_refuses" stubs="${TEMP_DIR}/_legacy_git_refuses_bin"
+  seed-legacy-hook-files "${d}"
+  mkdir -p "${stubs}"
+  printf '#!/bin/bash\necho "fatal: detected dubious ownership in repository" >&2\nexit 128\n' > "${stubs}/git"
+  chmod +x "${stubs}/git"
+  PATH="${stubs}:${PATH}" bash -c 'source ./scripts/common.lib.sh && remove-legacy-hook-files "$1"' _ "${d}" > /dev/null 2>&1 || return 1
+  [[ -f "${d}/.github/hooks/quality-gates.json" ]] || return 1
+  [[ -f "${d}/scripts/hooks/stop-gate.sh" ]] || return 1
+  return 0
+}
+
+# A linked '.github/hooks' points outside the destination, whose files are not loadout's.
+function test-legacy-hook-cleanup-keeps-files-behind-a-link() {
+
+  local d="${TEMP_DIR}/_legacy_linked" outside="${TEMP_DIR}/_legacy_outside"
+  mkdir -p "${d}/.github" "${outside}"
+  echo '{"hooks":{}}' > "${outside}/quality-gates.json"
+  ln -s "${outside}" "${d}/.github/hooks"
+  bash -c 'source ./scripts/common.lib.sh && remove-legacy-hook-files "$1"' _ "${d}" > /dev/null 2>&1 || return 1
+  [[ -f "${outside}/quality-gates.json" ]] || return 1
+  return 0
+}
+
 # ==============================================================================
 # Subset selector
 
@@ -532,6 +597,23 @@ function seed-destination-owned-files() {
   git -C "${dest}" init -q
   git -C "${dest}" add -A
   git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" commit -q -m "seed destination-owned files"
+
+  return 0
+}
+
+function seed-legacy-hook-files() {
+
+  local dest="$1"
+
+  mkdir -p "${dest}/.github/hooks" "${dest}/scripts/hooks"
+  echo '{"hooks":{}}' > "${dest}/.github/hooks/quality-gates.json"
+  echo '{"hooks":{}}' > "${dest}/.github/hooks/team.json"
+  echo "# old loadout stop gate" > "${dest}/scripts/hooks/stop-gate.sh"
+  echo "# team-owned-prompt-hook" > "${dest}/scripts/hooks/user-prompt-record.sh"
+
+  git -C "${dest}" init -q
+  git -C "${dest}" add scripts/hooks/user-prompt-record.sh
+  git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" commit -q -m "track a hook script"
 
   return 0
 }

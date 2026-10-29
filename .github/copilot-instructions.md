@@ -1,19 +1,20 @@
-# GitHub Copilot Instructions
+# GitHub Copilot Instructions 🤖
 
 This file is the authoritative instruction source for routine GitHub Copilot work in this repository. Use it as the operational default. Consult the [constitution](../.specify/memory/constitution.md) directly when a task affects specifications, behaviour, architecture, ADRs, or governance, or when guidance conflicts.
 
-## Implementation discipline
+## Implementation discipline 🛠️
 
 - Do not invent requirements or widen scope.
 - Keep outputs deterministic, make side effects explicit, and surface errors.
-- If code and specification diverge, either fix the implementation or amend the specification with rationale.
-- Order code to follow the primary execution or call flow when that improves readability, and group widely shared utilities clearly.
-- When applying an update or observation to documentation or comments, fold it into the section that already owns that topic. Do not append a parallel section that restates context the reader must reconcile; prefer editing one authoritative place over layering.
-- Do not `git add`/stage changes unless explicitly asked to.
-- Leave the working tree and the index (staged changes) exactly as they were before the prompt started, except for the changes the prompt actually asked for. Do not stage, unstage, or otherwise touch files unrelated to the request.
+- Follow execution or call-flow order where it improves clarity. Group widely
+  shared utilities.
 
-## Test-driven development
+## Specification and testing 🧪
 
+- When code and specification diverge, assess both. Fix incorrect code and
+  revise wrong or impractical specifications with rationale and impact
+  assessment. Align code and tests with the result. Never justify accidental
+  behaviour by rewriting the specification.
 - For behavioural changes, follow `Red -> Green -> Refactor`.
 - Use property-based testing where it adds value.
 
@@ -31,26 +32,34 @@ This file is the authoritative instruction source for routine GitHub Copilot wor
 - Do not mix the Speckit and Superpowers lifecycle commands in the same session or worktree.
 - Switch explicitly with `make workflow-use mode=speckit` or `make workflow-use mode=superpowers`, then start a fresh chat session.
 
-## Repository verification policy
+## Repository verification policy 🔍
 
-The Stop hook is the canonical enforcement for local quality gates.
-When that hook is active, do not rerun the same commands manually unless diagnosing a failure or the hook is unavailable.
+Run failing tests and focused checks while working. After edits, the Stop hook
+runs `make lint` and `make test`. Since `make lint` checks tracked files only,
+stage newly created files so they are included. Do not stage existing files just
+for the hook. Do not rerun the full gates manually unless diagnosing a failure
+or the hook is unavailable.
 
-## Communication style
+## Communication style 💬
 
 - Use British English.
 - Keep language simple, direct, and active.
 - Do not use em dashes or semicolons in prose.
 - Write short sentences and prefer intention-revealing wording.
+- Update existing documentation or comments in place. Avoid competing
+  explanations of the same topic.
 
-## Documentation ADRs
+## Documentation ADRs 🧾
 
-Record significant technical decisions in [docs/adr](../docs/adr). Consult the [Tech Radar](../docs/adr/Tech_Radar.md) first and follow the existing ADR format.
+Record significant technical decisions and technology choices in
+[docs/adr](../docs/adr). Consult the current internal NHS Tech Radar for
+approval status first, then the local
+[Technology Recommendations](../docs/adr/Technology_Recommendations.md) for
+candidate tools. Even a default choice needs an ADR comparing alternatives using
+the [ADR template](../docs/adr/ADR-nnn_Any_Decision_Record_Template.md).
 
-## Toolchain version
+## Toolchain version 🔧
 
-Use the latest stable language, runtime, and framework versions unless the task must stay within an established project constraint.
-
-## Repository tooling
-
-Use the [repository-template skill](skills/repository-template/SKILL.md) when adopting missing repository capabilities such as linting, CI/CD, Docker support, or hooks.
+Use the newest eligible stable language, runtime and framework versions that
+meet project constraints, including the cooldown in
+[Update Dependencies](../docs/guides/Update_Dependencies.md).

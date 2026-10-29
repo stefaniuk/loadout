@@ -18,9 +18,9 @@ They must remain applicable to:
 
 They are **non-negotiable** unless an exception is explicitly documented (with rationale and expiry) in an ADR/decision record.
 
-**Cross-references.** For Makefile orchestration conventions that build Docker images, see [makefile.instructions.md](./makefile.instructions.md). For shell scripts that wrap Docker commands, see [shell.instructions.md](./shell.instructions.md). This file focuses on Dockerfile patterns and Docker Compose for development.
+**Cross-references.** For Makefile orchestration conventions that build Docker images, see [makefile.instructions.md](./makefile.instructions.md). For shell scripts that wrap Docker commands, including the `docker run` flags for tool containers, see [shell.instructions.md](./shell.instructions.md). This file focuses on Dockerfile patterns and Docker Compose for development.
 
-**Identifier scheme.** Every normative rule carries a unique tag in the form `[DF-<prefix>-NNN]`, where the prefix maps to the containing section (for example `QR` for Quick Reference, `STR` for Structure, `FROM` for Base Image, `ARG` for Build Arguments, `ENV` for Environment Variables, `RUN` for Run Instructions, `COPY` for Copy Instructions, `META` for Metadata, `SEC` for Security, `OPT` for Optimisation, `CMP` for Compose). Use these identifiers when referencing, planning, or validating requirements.
+**Identifier scheme.** Every normative rule carries a unique tag in the form `[DF-<prefix>-NNN]`, where the prefix maps to the containing section (for example `QR` for Quick Reference, `OP` for Operating principles, `STR` for Structure, `FROM` for Base Image, `ARG` for Build Arguments, `ENV` for Environment Variables, `RUN` for Run Instructions, `COPY` for Copy Instructions, `CFG` for Container configuration, `META` for Metadata, `SEC` for Security, `OPT` for Optimisation, `QG` for Quality gates, `LC` for Build lifecycle, `ANT` for Anti-patterns, `CMP` for Compose, `AI` for AI-assisted changes). Use these identifiers when referencing, planning, or validating requirements.
 
 ---
 
@@ -29,17 +29,19 @@ They are **non-negotiable** unless an exception is explicitly documented (with r
 This section exists so humans and AI assistants can reliably apply the most important rules even when context is tight.
 
 - [DF-QR-001] **Pin base image versions**: never use a literal `latest` tag anywhere in the Dockerfile, including in `ARG` defaults; pin to a specific version with digest where possible ([DF-FROM-001], [DF-FROM-002]).
-- [DF-QR-002] **Instruction order**: `FROM` → `ARG` → `ENV` → `RUN` (install) → `COPY` → `RUN` (configure) → `VOLUME` → `EXPOSE` → `WORKDIR` → `USER` → `CMD`/`ENTRYPOINT` → Metadata ([DF-STR-001]).
+- [DF-QR-002] **Instruction order**: version `ARG` → `FROM` → `ARG` → `ENV` → `RUN` (install) → `COPY` → `RUN` (configure) → `VOLUME` → `EXPOSE` → `WORKDIR` → `USER` → `CMD`/`ENTRYPOINT` ([DF-STR-001]).
 - [DF-QR-003] **Multi-line RUN with `set -ex`**: start RUN blocks with `set -ex` or `set -ex;` for debugging and fail-fast behaviour ([DF-RUN-001], [DF-RUN-002]).
 - [DF-QR-004] **Build dependencies pattern**: define, install, use, then purge build dependencies in a single RUN layer ([DF-RUN-004]–[DF-RUN-006]).
 - [DF-QR-005] **Clean up in every RUN**: remove temp files, package manager caches, and build artefacts at the end of each RUN ([DF-RUN-007]).
-- [DF-QR-006] **Metadata at the end**: place OCI-compliant LABEL instructions at the very end of the Dockerfile ([DF-META-001]–[DF-META-003]).
-- [DF-QR-007] **Use `mise.toml` for pinning**: define image versions in `mise.toml`'s `[_.docker]`/`[tools]` tables and reference them through an `ARG ..._VERSION` default, for reproducibility ([DF-FROM-003]).
+- [DF-QR-006] **Metadata is appended**: the build tooling appends the OCI `LABEL` block; never write it by hand ([DF-META-001]–[DF-META-004]).
+- [DF-QR-007] **Use `mise.toml` for pinning**: define image versions in `mise.toml`'s `[_.docker]` table and reference them through an `ARG ..._VERSION` default before `FROM`, for reproducibility ([DF-FROM-003]).
 - [DF-QR-008] **Lint with hadolint**: all Dockerfiles must pass hadolint with no errors or warnings ([DF-QG-001]).
 - [DF-QR-009] **Non-root user**: run containers as non-root where possible ([DF-SEC-001]).
 - [DF-QR-010] **Minimal layers**: combine related commands to reduce layer count and image size ([DF-OPT-001]).
 - [DF-QR-011] **Docker Compose for development**: use `compose.yaml` with healthchecks, secrets, custom networks, and Compose Watch for hot-reload ([DF-CMP-001]–[DF-CMP-030]).
 - [DF-QR-012] **Integrity and least privilege**: verify downloaded artefacts and lock down ownership/permissions at build time ([DF-SEC-009]–[DF-SEC-011]).
+- [DF-QR-013] **Build through make**: create images with `make docker-build` from `infrastructure/images/<name>/`, never with a bare `docker build` ([DF-LC-001]–[DF-LC-009]).
+- [DF-QR-014] **The repository is the reference**: [docker.lib.sh](../../scripts/docker/docker.lib.sh), [docker.mk](../../scripts/docker/docker.mk), the [example Dockerfile](../../scripts/docker/tests/Dockerfile) and [Build_Docker_images.md](../../docs/guides/Build_Docker_images.md) show these rules applied; when they disagree with this file, follow them and correct this file.
 
 ---
 
@@ -62,37 +64,37 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
 ### 2.1 Canonical instruction order
 
 - [DF-STR-001] Dockerfiles must follow this canonical instruction order:
-  1. `FROM` - base image specification
-  2. `ARG` - build-time arguments (proxies, versions, configuration)
-  3. `ENV` - environment variables (versions, paths, configuration)
-  4. `RUN` - package installation and system setup
-  5. `COPY`/`ADD` - application files and assets
-  6. `RUN` - application-specific configuration
-  7. `VOLUME` - mount points (if applicable)
-  8. `EXPOSE` - network ports (if applicable)
-  9. `WORKDIR` - working directory (if applicable)
-  10. `USER` - non-root user (if applicable)
-  11. `CMD`/`ENTRYPOINT` - container startup command
-  12. Metadata section (ARG + LABEL block)
+  1. `ARG <NAME>_VERSION=<pinned version>` - base image version, declared before `FROM` so `FROM` can use it
+  2. `FROM` - base image specification, `FROM <image>:${<NAME>_VERSION}`
+  3. `ARG` - build-time arguments (proxies, configuration)
+  4. `ENV` - environment variables (versions, paths, configuration)
+  5. `RUN` - package installation and system setup
+  6. `COPY`/`ADD` - application files and assets
+  7. `RUN` - application-specific configuration
+  8. `VOLUME` - mount points (if applicable)
+  9. `EXPOSE` - network ports (if applicable)
+  10. `WORKDIR` - working directory (if applicable)
+  11. `USER` - non-root user
+  12. `CMD`/`ENTRYPOINT` - container startup command
 
-- [DF-STR-002] Use section comments to visually separate logical blocks:
+  The build tooling appends the metadata section after the last instruction ([DF-META-004]).
+
+- [DF-STR-002] Use section comments to visually separate logical blocks, in the same 80-character format as the appended metadata block:
 
   ```dockerfile
-  # === Dependencies ===========================================================
+  # === Dependencies =============================================================
 
-  # === Application ============================================================
-
-  # === Metadata ===============================================================
+  # === Application ==============================================================
   ```
 
 - [DF-STR-003] Group related instructions together; do not scatter similar concerns.
 
 ### 2.2 File naming conventions
 
-- [DF-STR-004] The primary Dockerfile must be named `Dockerfile` (no extension).
+- [DF-STR-004] The primary Dockerfile must be named `Dockerfile` (no extension) and live in its own image directory, by default `infrastructure/images/<image-name>/`, next to its `VERSION` file.
 - [DF-STR-005] Use `Dockerfile.<variant>` for variant images (for example `Dockerfile.dev`, `Dockerfile.test`).
-- [DF-STR-006] The build tooling generates `Dockerfile.effective` with version substitutions and metadata appended - do not edit this file manually.
-- [DF-STR-007] Use `Dockerfile.dockerignore` (or `.dockerignore`) to exclude files from the build context.
+- [DF-STR-006] The build tooling generates `Dockerfile.effective` and `.version` - do not edit or commit them. Commit only `Dockerfile`, `VERSION` and `Dockerfile.dockerignore`.
+- [DF-STR-007] Exclude files from the build context with a `Dockerfile.dockerignore` next to the `Dockerfile`, with paths relative to the repository root, which is the build context. The tooling copies it to `Dockerfile.effective.dockerignore` so Docker applies it to the effective file.
 
 ---
 
@@ -110,63 +112,67 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
   ARG PYTHON_VERSION=latest
   FROM python:${PYTHON_VERSION}
 
-  # ✅ Good - pinned version
-  FROM python:3.12.1-alpine3.19
-
   # ✅ Good - pinned version, parameterised through an ARG so the pin can be
-  # kept in sync with 'mise.toml' by the build tooling
+  # kept in sync with 'mise.toml' by the build tooling ([DF-FROM-003])
   ARG PYTHON_VERSION=3.12.1-alpine3.19
   FROM python:${PYTHON_VERSION}
   ```
 
   A literal `:latest` (with or without a `# hadolint ignore=DL3007` comment) is only ever caught by hadolint. Scanners that don't understand hadolint's inline-ignore syntax (for example Checkov, Trivy config, Snyk IaC, GitHub code scanning) and human reviewers still see the floating tag with no context, so it must never appear in a committed Dockerfile.
 
-- [DF-FROM-002] Where security is critical, pin to digest as well as tag:
-
-  ```dockerfile
-  FROM python:3.12.1-alpine3.19@sha256:abc123...
-  ```
-
-  When parameterised through an `ARG`, the tag and digest can be combined in the same default value:
+- [DF-FROM-002] Where security is critical, pin to digest as well as tag, in the same `ARG` default:
 
   ```dockerfile
   ARG PYTHON_VERSION=3.12.1-alpine3.19@sha256:abc123...
   FROM python:${PYTHON_VERSION}
   ```
 
-- [DF-FROM-003] Define base image versions in the repository's `mise.toml` file, under the `[_.docker]` table (exact image name) or the `[tools]` table (fallback), for example:
+- [DF-FROM-003] Define base image versions in the repository's `mise.toml` file, under the `[_.docker]` table, keyed by the exact image name, for example:
 
   ```toml
   [_.docker]
   "python" = "3.12.1-alpine3.19@sha256:abc123..."
   ```
 
-  The build tooling rewrites the matching `ARG ..._VERSION=...` default in `Dockerfile.effective` to this pinned value, matched by the exact base image name in the `FROM image:${..._VERSION}` instruction. The `ARG` default committed to the source Dockerfile must already be a real, valid version, not a placeholder, so the substitution is an update rather than a requirement for the Dockerfile to build.
+  The build tooling rewrites the matching `ARG ..._VERSION=...` default in `Dockerfile.effective` to this pinned value, matched by the exact base image name in the `FROM image:${..._VERSION}` instruction. It falls back to the `[tools]` table when `[_.docker]` has no entry for that name. The `ARG` default committed to the source Dockerfile must already be a real, valid version, not a placeholder, so the substitution is an update rather than a requirement for the Dockerfile to build. [The example Dockerfile](../../scripts/docker/tests/Dockerfile) shows the pattern:
+
+  ```dockerfile
+  ARG PYTHON_VERSION=3.11.0
+  FROM python:${PYTHON_VERSION}
+  USER nobody
+  ```
+
+- [DF-FROM-009] Add or update an image pin with a tag and its digest together, and respect the release cooldown in [Update_Dependencies.md](../../docs/guides/Update_Dependencies.md). Run `make docker-pull-pinned-images` afterwards to fetch every pinned image.
 
 ### 3.2 Base image selection criteria
 
 - [DF-FROM-004] Prefer minimal base images (Alpine, distroless, scratch) unless specific dependencies require a full distribution.
-- [DF-FROM-005] Prefer official images from trusted registries (Docker Hub official, `ghcr.io`, `mcr.microsoft.com`).
+- [DF-FROM-005] Pull base images only from the registries listed under `trustedRegistries` in `scripts/config/hadolint.yaml` (Docker Hub, Google, Amazon ECR and Azure Container Registry), and prefer official images there. Hadolint rejects any other registry. Adding a registry to that list needs a security review.
 - [DF-FROM-006] Document the rationale for base image choice in comments if non-obvious.
 
 ### 3.3 Multi-stage builds
 
-- [DF-FROM-007] Use multi-stage builds to separate build-time and runtime dependencies:
+- [DF-FROM-007] Use multi-stage builds to separate build-time and runtime dependencies. Declare one version `ARG` per base image before the first `FROM`, so every stage can use it and every pin stays in `mise.toml`:
 
   ```dockerfile
-  FROM golang:1.21 AS builder
+  ARG GOLANG_VERSION=1.21.13
+  ARG ALPINE_VERSION=3.19.4
+
+  FROM golang:${GOLANG_VERSION} AS builder
   # Build steps...
 
-  FROM alpine:3.19
+  FROM alpine:${ALPINE_VERSION}
   COPY --from=builder /app/binary /usr/local/bin/
   ```
 
 - [DF-FROM-008] Name build stages with meaningful aliases using `AS`:
 
   ```dockerfile
-  FROM node:20-alpine AS deps
-  FROM node:20-alpine AS builder
-  FROM node:20-alpine AS runner
+  ARG NODE_VERSION=20.11.0-alpine3.19
+
+  FROM node:${NODE_VERSION} AS deps
+  FROM node:${NODE_VERSION} AS builder
+  FROM node:${NODE_VERSION} AS runner
   ```
 
 ---
@@ -175,10 +181,11 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
 
 ### 4.1 Common build arguments
 
-- [DF-ARG-001] Define build-time arguments immediately after `FROM`:
+- [DF-ARG-001] Define build-time arguments, other than the base image version ([DF-STR-001]), immediately after `FROM`. An `ARG` declared before `FROM` is not visible after it unless declared again:
 
   ```dockerfile
-  FROM python:3.12-alpine
+  ARG PYTHON_VERSION=3.12.1-alpine3.19
+  FROM python:${PYTHON_VERSION}
 
   ARG APT_PROXY
   ARG APT_PROXY_SSL
@@ -222,21 +229,18 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
 
 ### 5.1 Version variables
 
-- [DF-ENV-001] Define version numbers as environment variables for visibility and override capability:
+- [DF-ENV-001] Define the versions of software installed by `RUN` as environment variables for visibility and override capability. Do not reuse the name of the base image version `ARG`, or a variable the base image already sets:
 
   ```dockerfile
-  ENV PYTHON_VERSION="3.12.1" \
-      PYTHON_PIP_VERSION="24.0" \
-      NODE_VERSION="20.11.0"
+  ENV PIP_VERSION="24.0" \
+      POETRY_VERSION="1.8.2"
   ```
 
 - [DF-ENV-002] Use the multi-line backslash format for multiple related variables:
 
   ```dockerfile
-  ENV PYTHON_VERSION="3.12.1" \
-      PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python" \
-      PYTHON_PIP_VERSION="24.0" \
-      PYTHON_PIP_DOWNLOAD_URL="https://bootstrap.pypa.io/get-pip.py"
+  ENV TERRAFORM_VERSION="1.9.8" \
+      TERRAFORM_DOWNLOAD_URL="https://releases.hashicorp.com/terraform"
   ```
 
 ### 5.2 Naming conventions
@@ -493,12 +497,12 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
 
 ### 9.1 OCI-compliant labels (non-negotiable)
 
-- [DF-META-001] Place the metadata section at the **very end** of the Dockerfile, after all other instructions.
+- [DF-META-001] The metadata section comes last in `Dockerfile.effective`. The build tooling appends it, so a source `Dockerfile` ends with its `CMD` or `ENTRYPOINT`.
 
-- [DF-META-002] Use section comment to clearly mark the metadata block:
+- [DF-META-002] The appended block starts with this section comment:
 
   ```dockerfile
-  # === Metadata ===============================================================
+  # === Metadata =================================================================
   ```
 
 - [DF-META-003] Use OCI Image Spec labels (`org.opencontainers.image.*`). The build tooling appends the standard metadata block from `scripts/docker/Dockerfile.metadata`:
@@ -525,23 +529,11 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
       org.opencontainers.image.version=$BUILD_VERSION
   ```
 
-- [DF-META-004] Do not manually add the metadata block to Dockerfiles - it is appended automatically during the `docker-bake-dockerfile` / `docker-build` lifecycle.
+- [DF-META-004] Do not manually add the metadata block to Dockerfiles - it is appended automatically during the `docker-bake-dockerfile` / `docker-build` lifecycle. `docker-build` passes the values as `--build-arg`, taking the title from `DOCKER_TITLE`, the URL, branch and commit from Git, and the version from the `.version` file.
 
-### 9.2 Legacy label schema (deprecated)
+### 9.2 Retired label schema
 
-- [DF-META-005] For legacy compatibility, the `org.label-schema.*` format may be encountered:
-
-  ```dockerfile
-  LABEL \
-      org.label-schema.name=$IMAGE \
-      org.label-schema.build-date=$BUILD_DATE \
-      org.label-schema.version=$VERSION \
-      org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url=$VCS_URL \
-      org.label-schema.schema-version="1.0"
-  ```
-
-  Prefer the OCI format for new images.
+- [DF-META-005] Do not use the retired `org.label-schema.*` labels. Replace any you find with the OCI labels above.
 
 ---
 
@@ -588,8 +580,8 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
 
 ### 10.6 Vulnerability scanning and SBOMs (free tooling)
 
-- [DF-SEC-012] Scan built images with Grype in CI; fail on critical/high vulnerabilities unless an ADR documents the exception.
-- [DF-SEC-013] Generate an SBOM using Syft for release images and store it alongside build artefacts.
+- [DF-SEC-012] When the project publishes images, scan them with Grype in CI and fail on critical or high vulnerabilities unless an ADR documents the exception. The template does not ship this step, so add it with the first published image.
+- [DF-SEC-013] When the project publishes release images, generate an SBOM with Syft and store it alongside the build artefacts.
 
 ---
 
@@ -599,7 +591,7 @@ These principles extend [constitution.md §3](../../.specify/memory/constitution
 
 - [DF-OPT-001] Combine related commands into single RUN instructions to reduce layers.
 - [DF-OPT-002] Order instructions from least to most frequently changing for cache efficiency.
-- [DF-OPT-003] Use `.dockerignore` to exclude unnecessary files from build context.
+- [DF-OPT-003] Use a `Dockerfile.dockerignore` to exclude unnecessary files from build context ([DF-STR-007]).
 
 ### 11.2 Image size optimisation
 
@@ -625,10 +617,10 @@ Per [constitution.md §7.8](../../.specify/memory/constitution.md#78-mandatory-l
 
 ### 12.1 Hadolint (mandatory)
 
-- [DF-QG-001] All Dockerfiles must pass hadolint with no errors or warnings:
+- [DF-QG-001] All Dockerfiles must pass hadolint with no errors or warnings. `make docker-lint` lints the generated `Dockerfile.effective` with the configuration in `scripts/config/hadolint.yaml`, natively or in Docker:
 
   ```bash
-  make docker-lint
+  DOCKER_IMAGE=my-image make docker-lint
   ```
 
 - [DF-QG-002] Use directive comments to disable specific warnings only when justified:
@@ -638,7 +630,7 @@ Per [constitution.md §7.8](../../.specify/memory/constitution.md#78-mandatory-l
   RUN apt-get install -y package
   ```
 
-- [DF-QG-003] Do not use `# hadolint ignore=DL3007` to ignore the `:latest` tag warning - pin your versions instead.
+- [DF-QG-003] Do not use `# hadolint ignore=DL3007` to ignore the `:latest` tag warning - pin your versions instead. The tooling deletes that comment from `Dockerfile.effective`, so it has no effect.
 
 ### 12.2 Iteration requirement
 
@@ -649,21 +641,27 @@ Per [constitution.md §7.8](../../.specify/memory/constitution.md#78-mandatory-l
 
 ## 13. Build lifecycle integration 🔄
 
-The Docker make targets define the image development lifecycle:
+The Docker make targets in [docker.mk](../../scripts/docker/docker.mk) define the image development lifecycle. Each takes the image name from `DOCKER_IMAGE` and the image directory from `dir`, default `infrastructure/images/$DOCKER_IMAGE`.
 
 ### 13.1 Development targets
 
 - [DF-LC-001] `make docker-bake-dockerfile` - generates `Dockerfile.effective` with version substitutions and appended metadata.
 - [DF-LC-002] `make docker-lint` - runs hadolint over `Dockerfile.effective` (depends on `docker-bake-dockerfile`).
-- [DF-LC-003] `make docker-build` - builds the image (depends on `docker-lint`).
+- [DF-LC-003] `make docker-build` - builds the image for `linux/amd64` and tags it with every version in `VERSION` and with `latest` (depends on `docker-lint`). The local `latest` tag is a convenience; deploy by version.
 - [DF-LC-004] `make docker-run` - runs the built image locally.
 - [DF-LC-005] `make docker-push` - pushes the image to the registry.
+- [DF-LC-009] `make docker-test-suite-run` - tests the Docker helpers, not your image. Test your image with a project test suite.
 
 ### 13.2 Supporting files
 
-- [DF-LC-006] `VERSION` - contains semantic version(s) for the image (one per line).
-- [DF-LC-007] `.tool-versions` - contains pinned versions for base images and tools.
-- [DF-LC-008] `Dockerfile.dockerignore` - excludes files from build context.
+- [DF-LC-006] `VERSION` - one version pattern per line, built from the tokens `${yyyy}`, `${mm}`, `${dd}`, `${HH}`, `${MM}`, `${SS}` and `${hash}`, for example `${yyyy}${mm}${dd}-${hash}`. The build writes the expanded versions to `.version`.
+- [DF-LC-007] `mise.toml` - pins base and tool images in its `[_.docker]` table ([DF-FROM-003]).
+- [DF-LC-008] `Dockerfile.dockerignore` - excludes files from build context ([DF-STR-007]).
+
+### 13.3 Platform
+
+- [DF-LC-010] Build and run images for `linux/amd64`, so a container behaves the same on every host. Apple silicon runs it under emulation, which is slower but expected.
+- [DF-LC-011] The build helpers call `docker`. A Podman machine works when it provides a `docker` command, for example through `podman-docker`. Only `make docker-pull-pinned-images` falls back to `podman` by itself.
 
 ---
 
@@ -679,10 +677,12 @@ These patterns cause recurring issues in Dockerfiles. Avoid them unless an ADR d
 - [DF-ANT-006] **Secrets in ENV or ARG** - secrets baked into image layers; use runtime injection or BuildKit secrets.
 - [DF-ANT-007] **Shell form CMD** - signal handling issues; use exec form (JSON array).
 - [DF-ANT-008] **ADD for local files** - unnecessary complexity; use COPY unless extracting archives.
-- [DF-ANT-009] **Missing .dockerignore** - slow builds, bloated context; always include.
+- [DF-ANT-009] **Missing `Dockerfile.dockerignore`** - slow builds, bloated context; always include ([DF-STR-007]).
 - [DF-ANT-010] **Ignoring hadolint warnings** - quality debt; fix or document exception.
 - [DF-ANT-011] **Manual metadata block** - inconsistent labels; let build tooling append metadata.
 - [DF-ANT-012] **Not using `set -e` in RUN** - silent failures; always use `set -ex`.
+- [DF-ANT-013] **Hardcoded base image tag in `FROM`** - the pin in `mise.toml` cannot reach it; use `FROM <image>:${<NAME>_VERSION}` with an `ARG` default ([DF-FROM-003]).
+- [DF-ANT-014] **Bare `docker build` or committed `Dockerfile.effective`** - skips pinning, linting and labels; use `make docker-build` ([DF-LC-003]).
 
 ---
 
@@ -701,7 +701,7 @@ Docker Compose simplifies multi-container development by defining services, netw
 
 ### 15.2 Service definition best practices
 
-- [DF-CMP-005] Pin image versions; never use `:latest` in Compose (mirrors [DF-FROM-001]).
+- [DF-CMP-005] Pin every image to a specific tag, adding the digest where security is critical. Never use `:latest` or a floating major tag such as `postgres:17` (mirrors [DF-FROM-001], [DF-FROM-002]).
 - [DF-CMP-006] Prefer `build.target` to select a multi-stage Dockerfile stage (for example `target: development`).
 - [DF-CMP-007] Use `restart: unless-stopped` for resilience in development; use `restart: always` in production overrides.
 - [DF-CMP-008] Use `depends_on` with conditions (`service_healthy`, `service_started`) to control startup order:
@@ -814,10 +814,10 @@ Use the template at [templates/compose.yaml.template](./templates/compose.yaml.t
 
 ## 16. AI-assisted change expectations 🤖
 
-Per [constitution.md §3.5](../../.specify/memory/constitution.md#35-ai-assisted-development-discipline--change-governance), when you create or modify Dockerfiles:
+Per [constitution.md §3.5](../../.specify/memory/constitution.md#35-ai-assisted-development-discipline), when you create or modify Dockerfiles:
 
 - [DF-AI-001] Follow the shared [AI change baseline](./includes/ai-assisted-change-baseline.include.md) for scope, quality, and governance.
-- [DF-AI-002] Use the established patterns: instruction order, `set -ex`, build dependencies, cleanup.
+- [DF-AI-002] Use the established patterns: version `ARG` before `FROM`, instruction order, `set -ex`, build dependencies, cleanup.
 - [DF-AI-003] Run `make docker-lint` and iterate until clean.
 
 ---

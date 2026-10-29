@@ -11,7 +11,7 @@ The prompt library is organised into six customisation layers. Each layer builds
 ```text
 ┌─────────────────────────────────────────────┐
 │  Layer 5: Hooks (deterministic gates)       │
-│  .github/hooks/*.json                       │
+│  owned by repository-template               │
 ├─────────────────────────────────────────────┤
 │  Layer 4: Skills (reusable capabilities)    │
 │  .github/skills/*/SKILL.md                  │
@@ -49,7 +49,7 @@ The repository supports two mutually exclusive lifecycle families in the same co
 - **Spec Kit** for specification-first work via `speckit-*` skills and review prompts.
 - **Superpowers** for standalone design, planning, execution, and review via the imported workflow skills.
 
-Only one family should be active in a given session or worktree. The active mode is stored locally in `.copilot/workflow-mode.json`, changed with `make workflow-use mode=speckit` or `make workflow-use mode=superpowers`, and read by the SessionStart hook through `scripts/hooks/workflow-mode.sh`.
+Only one family should be active in a given session or worktree. The active mode is stored locally in `.copilot/workflow-mode.json`, changed with `make workflow-use mode=speckit` or `make workflow-use mode=superpowers`, and managed by `scripts/hooks/workflow-mode.sh`.
 
 The `.copilot/` directory now has two distinct roles:
 
@@ -64,7 +64,6 @@ Why an explicit switch is used instead of branch-name inference:
 
 Enforcement is layered:
 
-- The SessionStart hook injects a mode-specific cheatsheet.
 - `.github/copilot-instructions.md` declares the one-lane-per-session rule.
 - Patched workflow skills contain mode guards so the inactive family refuses to proceed and points back to `make workflow-use ...`.
 
@@ -82,7 +81,7 @@ Enforcement is layered:
 
 ```mermaid
 flowchart TD
-  q1{"Deterministic gate - no LLM in the loop?"} -- Yes --> hook["Hook<br/>.github/hooks/*.json<br/>+ scripts/hooks/*.sh"]
+  q1{"Deterministic gate - no LLM in the loop?"} -- Yes --> hook["Hook<br/>owned by repository-template<br/>.github/hooks/*.json"]
   q1 -- No --> q2{"Always-on standard scoped by file type?"}
   q2 -- Yes --> instr["Instructions<br/>.github/instructions/&lt;tech&gt;.instructions.md"]
   q2 -- No --> q3{"Reusable multi-step capability<br/>bundled with scripts or assets?"}
@@ -191,16 +190,11 @@ Customisations currently marked as subagent workers:
 
 - [`speckit-analyze`](../.github/skills/speckit-analyze/SKILL.md) - Non-destructive cross-artefact consistency check; should only be reached through the spec-kit pipeline.
 - [`speckit-checklist`](../.github/skills/speckit-checklist/SKILL.md) - Appends checklist files (single-writer). Useful directly as well as via handoff.
-  The repository does not currently ship any custom agents under `.github/agents/`; the worker/coordinator split is expressed through skills and hooks instead.
+  The repository does not currently ship any custom agents under `.github/agents/`; the worker/coordinator split is expressed through skills instead.
 
-The repository ships two lifecycle hooks that align with this worker/coordinator split:
+This repository ships no Copilot hooks. The Copilot hook implementation, including the quality gate that runs on `Stop`, lives in repository-template and is installed there, not by loadout. `make apply` and `make revert` remove the hook files that older loadout versions installed. They keep a file the destination tracks in git, every file when git cannot tell what the destination tracks, and a file that a link places outside the destination.
 
-- `SubagentStart` - [`scripts/hooks/subagent-start-context.sh`](../scripts/hooks/subagent-start-context.sh). Injects an `additionalContext` envelope identifying the worker and the most recently modified feature dir.
-- `SubagentStop` - [`scripts/hooks/subagent-stop-log.sh`](../scripts/hooks/subagent-stop-log.sh). Records a one-line JSON event when the worker stops; never blocks completion.
-
-Both hooks append structured records to `${COPILOT_PROMPT_LOG_DIR:-~/.local/state/copilot-prompts}/subagent-events.jsonl`, which gives a chronological trail of every subagent invocation alongside the existing `hooks.log` and daily prompt logs. The scripts also honour an explicit `LOG_DIR` override so the test harness can redirect output to a tempdir. They are registered in [`.github/hooks/quality-gates.json`](../.github/hooks/quality-gates.json), which is both the in-repo and distributable source of truth.
-
-**Guardrails.** Workers are constrained to read-only tool sets or to a single-writer responsibility; coordinators are the only agents that orchestrate handoffs and trigger the `Stop` quality gate. This keeps the blast radius of a subagent invocation small and auditable.
+**Guardrails.** Workers are constrained to read-only tool sets or to a single-writer responsibility; coordinators are the only agents that orchestrate handoffs and trigger the quality gate. This keeps the blast radius of a subagent invocation small and auditable.
 
 **Discovery caveat.** If this repository later adds custom agents, prefer placing them directly under `.github/agents/` unless a downstream runtime is known to support nested discovery. The `subagent` marker is informational metadata that the repository's own tooling reads; it does not change how VS Code resolves the file at runtime.
 

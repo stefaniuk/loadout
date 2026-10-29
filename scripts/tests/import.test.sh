@@ -25,7 +25,6 @@ REPO_SNAPSHOT=""
 IMPORT_PATHS=(
   ".github/copilot-instructions.md"
   ".github/agents"
-  ".github/hooks"
   ".github/instructions"
   ".github/prompts"
   ".github/skills"
@@ -58,7 +57,7 @@ function main() {
     test-import-new-false-does-not-import-new-files \
     test-import-ignores-generated-skill-assets \
     test-import-skips-destination-owned-adr-template \
-    test-import-detects-and-round-trips-singletons-and-hooks \
+    test-import-detects-and-round-trips-workflow-scripts \
   )
 
   local log_dir="${TEMP_DIR}/logs"
@@ -373,36 +372,25 @@ function test-import-force-copies-changed-files-back() {
   return 0
 }
 
-# Consolidated: hook config and hook scripts must all be detected in one
-# dry-run and round-trip in one force run; hook scripts keep their executable
-# bit.
-function test-import-detects-and-round-trips-singletons-and-hooks() {
+# Hook scripts that remain (workflow-mode) must be detected in one dry-run and
+# round-trip in one force run, keeping their executable bit.
+function test-import-detects-and-round-trips-workflow-scripts() {
 
   local dest repo
-  dest=$(make-dest "singletons-and-hooks")
-  repo=$(make-repo "singletons-and-hooks")
+  dest=$(make-dest "workflow-scripts")
+  repo=$(make-repo "workflow-scripts")
 
   local marker
-  marker="SINGLETON-HOOK-MARKER-$(date +%s)"
-  printf '\n' >> "${dest}/.github/hooks/quality-gates.json"
-  echo "# ${marker}" >> "${dest}/scripts/hooks/session-start-cheatsheet.sh"
-  echo "# ${marker}" >> "${dest}/scripts/hooks/stop-gate.sh"
+  marker="WORKFLOW-SCRIPT-MARKER-$(date +%s)"
+  echo "# ${marker}" >> "${dest}/scripts/hooks/workflow-mode.sh"
 
-  # Dry-run detection covers all three paths
   local output
   output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
-  echo "${output}" | grep -q "quality-gates.json" || return 1
-  echo "${output}" | grep -q "session-start-cheatsheet.sh" || return 1
-  echo "${output}" | grep -q "stop-gate.sh" || return 1
+  echo "${output}" | grep -q "workflow-mode.sh" || return 1
 
-  # Force import round-trips the changes
   LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
-  diff -q "${dest}/.github/hooks/quality-gates.json" "${repo}/.github/hooks/quality-gates.json" > /dev/null 2>&1 || return 1
-  grep -q "${marker}" "${repo}/scripts/hooks/session-start-cheatsheet.sh" || return 1
-  grep -q "${marker}" "${repo}/scripts/hooks/stop-gate.sh" || return 1
-  # Executable bits preserved
-  [[ -x "${repo}/scripts/hooks/session-start-cheatsheet.sh" ]] || return 1
-  [[ -x "${repo}/scripts/hooks/stop-gate.sh" ]] || return 1
+  grep -q "${marker}" "${repo}/scripts/hooks/workflow-mode.sh" || return 1
+  [[ -x "${repo}/scripts/hooks/workflow-mode.sh" ]] || return 1
 
   return 0
 }

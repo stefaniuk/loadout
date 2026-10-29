@@ -9,7 +9,7 @@ This guide walks new users and contributors through every supported installation
 Three paths are supported. Pick the one that matches your goal:
 
 - **Full clone** - contribute to the library or experiment with every artefact locally. Start at [First setup](#first-setup).
-- **Plugin install** - get skills, agents, and hooks in VS Code without managing files in your repo. See [Plugin installation path](#plugin-installation-path).
+- **Plugin install** - get skills and agents in VS Code without managing files in your repo. See [Plugin installation path](#plugin-installation-path).
 - **Selective copy** - pull only a subset of prompts, instructions, or templates into a target repository. See [Selective install](#selective-install).
 
 ## Prerequisites
@@ -57,7 +57,7 @@ Switch to Superpowers:
 make workflow-use mode=superpowers
 ```
 
-The selection is stored locally in `.copilot/workflow-mode.json` and is ignored by git. After switching, start a fresh chat session so the SessionStart hook injects the correct workflow banner.
+The selection is stored locally in `.copilot/workflow-mode.json` and is ignored by git. After switching, start a fresh chat session so the chat picks up the active workflow family.
 
 Copilot also uses `.copilot/analysis/` as a tracked local scaffold for ephemeral analysis output. The nested `.gitignore` in that directory ignores generated files while keeping the scaffold itself in git history.
 
@@ -87,7 +87,7 @@ make apply dest=/absolute/path/to/target
 
 What gets copied:
 
-- `.github/agents`, `.github/hooks`, `.github/instructions`, `.github/prompts`, `.github/skills`
+- `.github/agents`, `.github/instructions`, `.github/prompts`, `.github/skills`
 - `.github/copilot-instructions.md`
 - `.github/pull_request_template.md` (only if missing in the target)
 - `.specify/memory/constitution.md`
@@ -102,7 +102,7 @@ After the copy completes, review `git status` in the target repository, commit t
 
 ## Plugin installation path
 
-The repository can be installed directly as a VS Code agent plugin, providing skills, hooks, and any repo-scoped custom agents without invoking `make apply`:
+The repository can be installed directly as a VS Code agent plugin, providing skills and any repo-scoped custom agents without invoking `make apply`:
 
 1. Open VS Code with Copilot agent mode enabled.
 2. Run `Cmd+Shift+P` → **Chat: Install Plugin From Source**.
@@ -112,7 +112,7 @@ After installation, skills like `/enforcement-audit` and `/architecture-docs` ap
 
 If you also install the Superpowers workflow skills, set the active lane locally with `make workflow-use ...` before you start work. The plugin install does not remove the need to choose one workflow family per session.
 
-> **Note:** Plugin installation provides skills, agents, and hooks only. For project-specific instructions, templates, and include baselines, use `make apply`.
+> **Note:** Plugin installation provides skills and agents only. For project-specific instructions, templates, and include baselines, use `make apply`.
 
 ## Selective install
 
@@ -143,7 +143,7 @@ Use `subset=<csv>` to scope which categories of artefacts are copied. Omitting `
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `all`          | Everything (default; equivalent to omitting `subset`)                                                                                                                               |
 | `agents`       | `.github/agents/` (custom agent files, or the placeholder README when no agents are shipped)                                                                                        |
-| `hooks`        | `.github/hooks/` and `scripts/hooks/`                                                                                                                                               |
+| `hooks`        | `scripts/hooks/` (workflow-mode scripts)                                                                                                                                            |
 | `instructions` | `.github/instructions/` (plus tech files when language flags are set)                                                                                                               |
 | `prompts`      | `.github/prompts/` (plus tech enforcement prompts when language flags are set)                                                                                                      |
 | `skills`       | `.github/skills/` (plus tech skills when language flags are set)                                                                                                                    |
