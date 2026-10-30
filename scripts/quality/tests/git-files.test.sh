@@ -292,13 +292,14 @@ function test-quality-remove-ignored-paths-fails-when-git-fails() {
   cd "$TEST_TMP/repo"
   printf 'a.md\n' > .ignore
   local -a paths=(a.md)
+  local rc=0
   source ./scripts/quality/git-files.lib.sh
   test-isolate-path
   test-stub git 'exit 7'
-  # Act
-  test-capture quality-remove-ignored-paths paths .ignore
+  # Act, without a subshell, so the assertions see the caller's array
+  quality-remove-ignored-paths paths .ignore || rc=$?
   # Assert
-  assert-equal 7 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-equal 7 "$rc" "$EXIT_STATUS_LABEL"
   assert-equal a.md "${paths[*]}" "paths are unchanged"
 
   return 0

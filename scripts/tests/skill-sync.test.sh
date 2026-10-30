@@ -37,7 +37,7 @@ function main() {
     test-skill-sync-writes-editorconfig-excludes \
     test-skill-sync-editorconfig-excludes-are-idempotent \
     test-skill-sync-does-not-create-editorconfigignore \
-    test-skill-sync-writes-shelllint-ignore \
+    test-skill-sync-writes-commentlength-ignore \
   )
   local status=0
 
@@ -581,7 +581,7 @@ function test-skill-sync-does-not-create-editorconfigignore() {
   return 0
 }
 
-function test-skill-sync-writes-shelllint-ignore() {
+function test-skill-sync-writes-commentlength-ignore() {
 
   local expected
   expected=$(printf '%s\n' \
@@ -591,7 +591,7 @@ function test-skill-sync-writes-shelllint-ignore() {
     ".github/skills/vanilla-skill/" \
     "# end: synced skills")
 
-  [[ "$(sed -n '/^# begin: synced skills$/,/^# end: synced skills$/p' "${PATCHED_FIXTURE}/scripts/config/.shelllintignore")" == "${expected}" ]] || return 1
+  [[ "$(sed -n '/^# begin: synced skills$/,/^# end: synced skills$/p' "${PATCHED_FIXTURE}/scripts/config/.commentlengthignore")" == "${expected}" ]] || return 1
 
   return 0
 }

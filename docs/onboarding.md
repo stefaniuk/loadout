@@ -424,7 +424,7 @@ make skill-patch name=incremental-implementation
    skills.
 3. The resolved commit SHA is written back to `scripts/config/skills.yaml`.
 4. The synced skill directories are written to the managed sections of
-   `.markdownlintignore`, `.prettierignore`, `.shelllintignore` and
+   `.markdownlintignore`, `.prettierignore`, `.commentlengthignore` and
    `lychee.toml`, and to the `Exclude` list of `editorconfig-checker.json`, all
    under `scripts/config/` (sorted alphabetically).
 5. Synced skill directories are therefore excluded from the file format,

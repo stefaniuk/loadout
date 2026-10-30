@@ -3,6 +3,3 @@
 printWidth: 80
 proseWrap: always
 useTabs: false
-# Keep YAML frontmatter and fenced examples verbatim. Copilot customisation
-# files need single-line frontmatter values for every consumer to parse them.
-embeddedLanguageFormatting: "off"

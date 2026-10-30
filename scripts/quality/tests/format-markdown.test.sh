@@ -125,7 +125,7 @@ function test-format-markdown-formats-existing-tracked-files() {
   # Assert
   assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
   assert-equal \
-    "--config $r/scripts/config/prettierrc.yaml --ignore-path $r/scripts/config/.prettierignore --write -- README.md docs/my\\ doc.md" \
+    "--config $r/scripts/config/prettierrc.yaml --ignore-path /dev/null --write -- README.md docs/my\\ doc.md" \
     "$(test-stub-calls prettier)" "the only prettier call"
   assert-stub-not-called docker
 
@@ -278,7 +278,7 @@ function test-format-markdown-deduplicates-overlapping-branch-diffs() {
 
   # Arrange
   local repo="$TEST_TMP/repo"
-  local options="--config $repo/scripts/config/prettierrc.yaml --ignore-path $repo/scripts/config/.prettierignore --write --"
+  local options="--config $repo/scripts/config/prettierrc.yaml --ignore-path /dev/null --write --"
   quality-create-fixture-repo docs/a.md docs/b.md
   test-isolate-path
   test-stub prettier
@@ -301,7 +301,7 @@ function test-format-markdown-deduplicates-overlapping-branch-diffs() {
 function test-format-markdown-uses-docker-when-forced() {
 
   # Arrange
-  local options="--config /workdir/scripts/config/prettierrc.yaml --ignore-path /workdir/scripts/config/.prettierignore --write"
+  local options="--config /workdir/scripts/config/prettierrc.yaml --ignore-path /dev/null --write"
   quality-create-fixture-repo README.md "$DOC_WITH_SPACE" gone.md
   test-isolate-path
   test-stub prettier
@@ -388,7 +388,7 @@ function test-format-markdown-propagates-prettier-failure() {
   # Assert
   assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
   assert-stub-called prettier \
-    "--config $r/scripts/config/prettierrc.yaml --ignore-path $r/scripts/config/.prettierignore --write -- README.md"
+    "--config $r/scripts/config/prettierrc.yaml --ignore-path /dev/null --write -- README.md"
 
   return 0
 }
@@ -427,7 +427,7 @@ function test-format-markdown-skips-paths-in-the-ignore-file() {
   # Assert
   assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
   assert-equal \
-    "--config $r/scripts/config/prettierrc.yaml --ignore-path $r/scripts/config/.prettierignore --write -- README.md" \
+    "--config $r/scripts/config/prettierrc.yaml --ignore-path /dev/null --write -- README.md" \
     "$(test-stub-calls prettier)" "only the file the ignore file does not match"
 
   return 0

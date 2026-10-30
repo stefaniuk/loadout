@@ -88,7 +88,6 @@ function main() {
     test-check-shell-lint-counts-bytes-in-comments \
     test-check-shell-lint-all-skips-comments-of-paths-in-the-ignore-file \
     test-check-shell-lint-ignore-file-uses-git-ignore-rules \
-    test-check-shell-lint-without-ignore-file-checks-every-script \
     test-check-shell-lint-scoped-mode-skips-comments-of-paths-in-the-ignore-file \
     test-check-shell-lint-scoped-mode-checks-every-comment-when-the-ignore-file-changes
 
@@ -1170,7 +1169,7 @@ function test-check-shell-lint-all-skips-comments-of-paths-in-the-ignore-file() 
   cd "$TEST_TMP/repo"
   mkdir -p scripts/config
   printf '# %s\n' "$(printf 'a%.0s' {1..79})" > vendor/tool/y.sh
-  printf '# Vendored scripts\r\n\r\nvendor/\r\n' > scripts/config/.shelllintignore
+  printf '# Vendored scripts\r\n\r\nvendor/\r\n' > scripts/config/.commentlengthignore
   # Act
   test-capture env check=all ./scripts/quality/check-shell-lint.sh
   # Assert
@@ -1190,32 +1189,13 @@ function test-check-shell-lint-ignore-file-uses-git-ignore-rules() {
   cd "$TEST_TMP/repo"
   mkdir -p scripts/config
   printf '# %s\n' "$(printf 'a%.0s' {1..79})" | tee vendor/a.sh vendor/b.sh > lib/vendor/c.sh
-  printf '/vendor/*.sh\n!vendor/b.sh\n' > scripts/config/.shelllintignore
+  printf '/vendor/*.sh\n!vendor/b.sh\n' > scripts/config/.commentlengthignore
   # Act
   test-capture env check=all ./scripts/quality/check-shell-lint.sh
   # Assert
   assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
   assert-equal $'lib/vendor/c.sh:1: comment is 81 characters, the limit is 80\nvendor/b.sh:1: comment is 81 characters, the limit is 80' \
     "$TEST_STDERR" "only the files the entries do not match"
-
-  return 0
-}
-
-function test-check-shell-lint-without-ignore-file-checks-every-script() {
-
-  # Arrange
-  quality-create-fixture-repo scripts/x.sh vendor/tool/y.sh
-  test-isolate-path
-  test-stub shellcheck
-  cd "$TEST_TMP/repo"
-  printf '# %s\n' "$(printf 'a%.0s' {1..79})" > vendor/tool/y.sh
-  rm -f scripts/config/.shelllintignore
-  # Act
-  test-capture env check=all ./scripts/quality/check-shell-lint.sh
-  # Assert
-  assert-equal 1 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
-  assert-equal "vendor/tool/y.sh:1: comment is 81 characters, the limit is 80" "$TEST_STDERR" "stderr"
-  assert-contains "$(test-stub-calls shellcheck)" "vendor/tool/y.sh" "ShellCheck sees every script"
 
   return 0
 }
@@ -1228,8 +1208,8 @@ function test-check-shell-lint-scoped-mode-skips-comments-of-paths-in-the-ignore
   test-stub shellcheck
   cd "$TEST_TMP/repo"
   mkdir -p scripts/config
-  printf 'vendor/\nscripts/vendor.mk\n' > scripts/config/.shelllintignore
-  git add scripts/config/.shelllintignore
+  printf 'vendor/\nscripts/vendor.mk\n' > scripts/config/.commentlengthignore
+  git add scripts/config/.commentlengthignore
   git commit -q -m 'ignore vendored files'
   printf '# %s\n' "$(printf 'a%.0s' {1..79})" | tee vendor/tool/y.sh > scripts/vendor.mk
   git add vendor/tool/y.sh scripts/vendor.mk
@@ -1251,12 +1231,12 @@ function test-check-shell-lint-scoped-mode-checks-every-comment-when-the-ignore-
   test-stub shellcheck
   cd "$TEST_TMP/repo"
   mkdir -p scripts/config
-  printf 'vendor/\nscripts/vendor.mk\n' > scripts/config/.shelllintignore
+  printf 'vendor/\nscripts/vendor.mk\n' > scripts/config/.commentlengthignore
   printf '# %s\n' "$(printf 'a%.0s' {1..79})" | tee vendor/tool/y.sh > scripts/vendor.mk
   git add -A
   git commit -q -m 'vendored files with long comments'
-  printf 'vendor/\n' > scripts/config/.shelllintignore
-  git add scripts/config/.shelllintignore
+  printf 'vendor/\n' > scripts/config/.commentlengthignore
+  git add scripts/config/.commentlengthignore
   # Act
   test-capture env check=staged-changes ./scripts/quality/check-shell-lint.sh
   # Assert

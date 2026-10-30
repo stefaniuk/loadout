@@ -124,15 +124,12 @@ function quality-remove-ignored-paths() {
 
   local -n quality_filtered_paths="$1" || return "$?"
   local ignore_file="$2" path list_file rc=0
-  local -a pathspec=() kept=()
+  local -a kept=()
   local -A ignored=()
   [[ -f "$ignore_file" && ${#quality_filtered_paths[@]} -gt 0 ]] || return 0
-  for path in "${quality_filtered_paths[@]}"; do
-    pathspec+=(":(literal)${path#./}")
-  done
   list_file="$(mktemp)" || return "$?"
   quality-git-paths ls-files -z --cached --ignored \
-    --exclude-from="$ignore_file" -- "${pathspec[@]}" > "$list_file" || rc=$?
+    --exclude-from="$ignore_file" > "$list_file" || rc=$?
   if [[ $rc -eq 0 ]]; then
     while IFS= read -r -d '' path; do
       ignored["$path"]=1

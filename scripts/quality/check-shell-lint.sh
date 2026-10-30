@@ -53,10 +53,11 @@ set -euo pipefail
 #   5) A line counts as a comment when its first non-blank character is '#',
 #      including such lines in heredocs and embedded awk or Python code. A
 #      comment line containing '://' is exempt, so a long URL never fails.
-#   6) Paths that './scripts/config/.shelllintignore' matches, with Git's
-#      ignore rules, skip the comment length check, for example scripts
-#      vendored from another repository. ShellCheck still lints them. A scoped
-#      mode that changes this file checks the comments of every script.
+#   6) Paths that './scripts/config/.commentlengthignore' matches, with Git's
+#      ignore rules from the repository root, skip the comment length check,
+#      for example scripts vendored from another repository. ShellCheck still
+#      lints them. A scoped mode that changes this file checks the comments of
+#      every script and Make file.
 
 # ==============================================================================
 
@@ -107,7 +108,7 @@ function main() {
       run-shellcheck-in-docker-all graph_files dependencies "${files[@]}" || rc=$?
     fi
   fi
-  quality-remove-ignored-paths comment_paths ./scripts/config/.shelllintignore || return "$?"
+  quality-remove-ignored-paths comment_paths ./scripts/config/.commentlengthignore || return "$?"
   check-comment-length "${comment_paths[@]}" || [[ $rc -ne 0 ]] || rc=1
 
   return "$rc"
@@ -115,7 +116,7 @@ function main() {
 
 # Collect the changed shell scripts and Make files of a scoped check mode, the
 # shell scripts it deletes, and whether it changes a ShellCheck setting or the
-# shell lint ignore list.
+# comment length ignore list.
 # Arguments:
 #   $1=[name reference of the changed shell scripts]
 #   $2=[name reference of the changed Make files]
@@ -147,7 +148,7 @@ function collect-changed-paths() {
         # shellcheck disable=SC2034
         shellcheck_settings_changed=true
         ;;
-      scripts/config/.shelllintignore)
+      scripts/config/.commentlengthignore)
         # shellcheck disable=SC2034
         ignore_list_changed_flag=true
         ;;
