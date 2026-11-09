@@ -49,7 +49,7 @@ make lint && make validate-customisations && make test
 ## Select the active workflow
 
 This repository can host both lifecycle families at once, but only one should be
-active in a given session or worktree.
+active in a given worktree.
 
 Check the current mode:
 
@@ -69,9 +69,11 @@ Switch to Superpowers:
 make workflow-use mode=superpowers
 ```
 
-The selection is stored locally in `.copilot/workflow-mode.json` and is ignored
-by git. After switching, start a fresh chat session so the chat picks up the
-active workflow family.
+The choice is stored per worktree in the file that
+`git rev-parse --git-path workflow-mode` names and is never committed. After
+switching, start a fresh chat session so the chat picks up the active workflow
+family. See [workflow-modes.md](workflow-modes.md) for how the hook keeps the
+agent to the mode.
 
 Copilot also uses `.copilot/analysis/` as a tracked local scaffold for ephemeral
 analysis output. The nested `.gitignore` in that directory ignores generated
@@ -202,7 +204,7 @@ set.
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `all`          | Everything (default; equivalent to omitting `subset`)                                                                                                                               |
 | `agents`       | `.github/agents/` (custom agent files, or the placeholder README when no agents are shipped)                                                                                        |
-| `hooks`        | `scripts/hooks/` (workflow-mode scripts)                                                                                                                                            |
+| `hooks`        | `scripts/hooks/` (workflow mode script, jq module and modes) and `.github/hooks/workflow-mode.json`                                                                                 |
 | `instructions` | `.github/instructions/` (plus tech files when language flags are set)                                                                                                               |
 | `prompts`      | `.github/prompts/` (plus tech enforcement prompts when language flags are set)                                                                                                      |
 | `skills`       | `.github/skills/` (plus tech skills when language flags are set)                                                                                                                    |

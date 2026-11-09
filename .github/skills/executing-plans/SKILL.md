@@ -3,16 +3,6 @@ name: executing-plans
 description: Use when executing an implementation plan in the current session as the implementer yourself — your human partner chose inline execution, or no subagent tool is available
 ---
 
-## Workflow Mode Guard
-
-Use this skill only when the active local workflow mode is `superpowers`.
-
-Before proceeding:
-
-- Run `./scripts/hooks/workflow-mode.sh status`.
-- If the active mode is `speckit`, stop and tell the user to switch with `make workflow-use mode=superpowers` or continue with the Spec Kit lifecycle instead.
-- Do not mix Superpowers workflow skills with `speckit-*` commands in the same session or worktree.
-
 # Executing Plans
 
 Execute the plan yourself, task by task, in this session: no implementer

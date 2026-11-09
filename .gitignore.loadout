@@ -26,8 +26,12 @@
 # Superpowers local planning and design artefacts
 docs/superpowers/
 
-# Workflow-mode scripts
+# Workflow mode hook script, jq module and modes
 scripts/hooks/
+
+# Workflow mode hook - entry is commented out per-destination if the file is
+# already tracked in that repo's git history
+.github/hooks/workflow-mode.json
 
 # Workflow configuration scripts
 scripts/loadout.ext.mk

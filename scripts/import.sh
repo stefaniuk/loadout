@@ -133,6 +133,7 @@ function collect-copilot-changes() {
   local source_dir="$1"
 
   compare-file "${source_dir}" ".github/copilot-instructions.md"
+  compare-file "${source_dir}" ".github/hooks/workflow-mode.json"
   compare-directory-recursive "${source_dir}" ".github/agents"
   compare-directory-files "${source_dir}" ".github/instructions" "*.instructions.md"
   compare-directory-recursive "${source_dir}" ".github/instructions/includes"
@@ -159,6 +160,8 @@ function collect-shared-changes() {
   compare-file "${source_dir}" "docs/adr/Technology_Recommendations.md"
   compare-file "${source_dir}" "docs/adr/Tech_Radar.md"
   compare-directory-files "${source_dir}" "scripts/hooks" "*.sh"
+  compare-directory-files "${source_dir}" "scripts/hooks" "*.jq"
+  compare-directory-files "${source_dir}" "scripts/hooks" "*.yaml"
 
   return 0
 }
@@ -184,6 +187,9 @@ function is-ignored-import-path() {
     if [[ "${path}" == "${owned_path}" ]] && is-destination-owned "${source_dir}" "${owned_path}"; then
       return 0
     fi
+  done
+  for owned_path in "${LEGACY_HOOK_FILES[@]}"; do
+    [[ "${path}" != "${owned_path}" ]] || return 0
   done
 
   return 1

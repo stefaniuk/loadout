@@ -1,7 +1,14 @@
 ---
 name: system-documentation
-description: Establish, synchronise, audit, and review an opinionated repository documentation system across entrypoints, architecture, reference, explanation, tutorials, how-to guides, operations, audience indexes, and governance/lifecycle artefacts.
-argument-hint: "Optional: step (foundation, architecture, reference, explanation, how-to, tutorials, operations, audience-indexes, governance, all), mode (establish, sync, audit, pre-pr-review), and scope (path, feature dir, or changed files)"
+description:
+  Establish, synchronise, audit, and review an opinionated repository
+  documentation system across entrypoints, architecture, reference, explanation,
+  tutorials, how-to guides, operations, audience indexes, and
+  governance/lifecycle artefacts.
+argument-hint:
+  "Optional: step (foundation, architecture, reference, explanation, how-to,
+  tutorials, operations, audience-indexes, governance, all), mode (establish,
+  sync, audit, pre-pr-review), and scope (path, feature dir, or changed files)"
 license: MIT
 version: 1.4.0
 ---
@@ -82,8 +89,7 @@ first-class artefacts. See
 │   ├── NNN-feature-name/
 │   └── product/
 ├── .copilot/
-│   ├── analysis/
-│   └── workflow-mode.json
+│   └── analysis/
 └── docs/
     ├── README.md
     ├── architecture.md

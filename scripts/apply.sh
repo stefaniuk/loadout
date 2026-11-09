@@ -51,9 +51,11 @@ set -euo pipefail
 #   - Default templates (Makefile, Dockerfile, compose.yaml, shell-script)
 #   - All skills under .github/skills/
 #   - copilot-instructions.md
-#   - scripts/hooks/ (workflow-mode scripts; chmod +x), removing the hook files
-#     older loadout versions installed unless the destination tracks them or
-#     git cannot tell
+#   - scripts/hooks/ (workflow mode script, jq module and modes; chmod +x) and
+#     .github/hooks/workflow-mode.json, unless the destination tracks it,
+#     removing the hook files older loadout versions installed unless the
+#     destination tracks them or git cannot tell, and moving a workflow mode
+#     chosen with an older loadout to where the script reads it
 #   - scripts/loadout.ext.mk for downstream repos whose repository-template
 #     scripts/init.mk loads '*.ext.mk' files, replacing the scripts/loadout.mk
 #     and Makefile include block that older loadout versions installed
@@ -95,6 +97,7 @@ COPILOT_PROMPTS_DIR="${REPO_ROOT}/.github/prompts"
 COPILOT_SKILLS_DIR="${REPO_ROOT}/.github/skills"
 COPILOT_INSTRUCTIONS_MD_FILE="${REPO_ROOT}/.github/copilot-instructions.md"
 HOOK_SCRIPTS_DIR="${REPO_ROOT}/scripts/hooks"
+WORKFLOW_MODE_HOOK="${REPO_ROOT}/${WORKFLOW_MODE_HOOK_PATH}"
 LOADOUT_MAKEFILE_MODULE="${REPO_ROOT}/scripts/loadout.ext.mk"
 
 SPECIFY_MEMORY="${REPO_ROOT}/.specify/memory"
@@ -748,25 +751,75 @@ function copilot-copy-instructions-md() {
   cp "${COPILOT_INSTRUCTIONS_MD_FILE}" "${dest}/"
 }
 
-# Copy scripts/hooks/ to the destination.
+# Copy scripts/hooks/ and the workflow mode hook to the destination.
 # Arguments (provided as function parameters):
 #   $1=[destination directory path]
 function copy-hook-scripts() {
 
-  local dest="$1/scripts/hooks"
+  local destination="$1"
+  local dest="${destination}/scripts/hooks"
   mkdir -p "${dest}"
 
   print-info "Copying hook scripts to ${dest}"
-  local scripts=()
+  local files=()
   shopt -s nullglob
-  scripts=("${HOOK_SCRIPTS_DIR}"/*.sh)
+  files=("${HOOK_SCRIPTS_DIR}"/*.sh "${HOOK_SCRIPTS_DIR}"/*.jq "${HOOK_SCRIPTS_DIR}"/*.yaml)
   shopt -u nullglob
-  if (( ${#scripts[@]} == 0 )); then
+  if (( ${#files[@]} == 0 )); then
     print-info "No hook scripts to copy"
     return 0
   fi
-  cp "${scripts[@]}" "${dest}/"
+  cp "${files[@]}" "${dest}/"
   chmod +x "${dest}"/*.sh
+
+  copy-workflow-mode-hook "${destination}"
+  migrate-legacy-workflow-mode "${destination}"
+}
+
+# Copy .github/hooks/workflow-mode.json to the destination, unless the
+# destination tracks it.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function copy-workflow-mode-hook() {
+
+  local destination="$1"
+
+  if is-destination-owned "${destination}" "${WORKFLOW_MODE_HOOK_PATH}"; then
+    print-info "Skipping ${WORKFLOW_MODE_HOOK_PATH} (destination-owned; tracked in destination git history)"
+    return 0
+  fi
+  print-info "Copying ${WORKFLOW_MODE_HOOK_PATH} to ${destination}/.github/hooks"
+  mkdir -p "${destination}/.github/hooks"
+  cp "${WORKFLOW_MODE_HOOK}" "${destination}/${WORKFLOW_MODE_HOOK_PATH}"
+
+  return 0
+}
+
+# Move the workflow mode that older loadout versions kept in
+# .copilot/workflow-mode.json to the file that scripts/hooks/workflow-mode.sh
+# reads, unless a mode is already chosen there.
+# Arguments (provided as function parameters):
+#   $1=[destination directory path]
+function migrate-legacy-workflow-mode() {
+
+  local destination="$1"
+  local legacy="${destination}/${LEGACY_WORKFLOW_MODE_STATE_PATH}"
+  local mode state_file
+
+  [[ -f "${legacy}" ]] || return 0
+  if is-destination-owned "${destination}" "${LEGACY_WORKFLOW_MODE_STATE_PATH}"; then
+    return 0
+  fi
+  state_file="$(git -C "${destination}" rev-parse --path-format=absolute --git-path workflow-mode 2> /dev/null)" || return 0
+  mode="$(sed -En 's/.*"active"[[:space:]]*:[[:space:]]*"(speckit|superpowers)".*/\1/p' "${legacy}" | head -n 1)"
+  if [[ -n "${mode}" && ! -e "${state_file}" && ! -L "${state_file}" ]]; then
+    print-info "Moving the workflow mode '${mode}' from ${legacy} to ${state_file}"
+    printf '%s\n' "${mode}" > "${state_file}"
+  fi
+  print-info "Removing old loadout workflow mode file ${legacy}"
+  rm -f "${legacy}"
+
+  return 0
 }
 
 # Copy PULL_REQUEST_TEMPLATE.md to the destination if it has no pull request
@@ -1033,9 +1086,10 @@ Other options:
 
 Always copied (default/glue layer):
     .github/copilot-instructions.md
-    scripts/hooks/ (workflow-mode scripts; chmod +x), removing the hook files
-      older loadout versions installed unless the destination tracks them or
-      git cannot tell
+    scripts/hooks/ (workflow mode script, jq module and modes; chmod +x) and
+      .github/hooks/workflow-mode.json, removing the hook files older
+      loadout versions installed unless the destination tracks them or git
+      cannot tell
     scripts/loadout.ext.mk for downstream repos whose repository-template
       scripts/init.mk loads '*.ext.mk' files
     Default skills: enforcement-audit, architecture-docs, code-review, spec-consolidation, system-documentation

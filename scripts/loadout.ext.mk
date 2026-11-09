@@ -1,22 +1,25 @@
 # loadout-managed: scripts/loadout.ext.mk
 
 # ==============================================================================
-# Loadout workflow targets
+# Loadout workflow mode targets
 # ==============================================================================
 
-workflow-status: # Print the active local workflow mode; optional: LOADOUT_WORKFLOW_MODE_FILE=[path] @Operations
+workflow-clear: # Clear the workflow mode chosen for this worktree, so the default applies @Operations
+	./scripts/hooks/workflow-mode.sh clear
+
+workflow-list: # List the workflow modes and mark the active one @Operations
+	./scripts/hooks/workflow-mode.sh list
+
+workflow-status: # Print the active workflow mode of this worktree, or none @Operations
 	./scripts/hooks/workflow-mode.sh status
 
-workflow-switch: # Flip the active local workflow mode between superpowers and speckit; optional: LOADOUT_WORKFLOW_MODE_FILE=[path] @Operations
-	./scripts/hooks/workflow-mode.sh switch
-
-workflow-use: # Set the active local workflow mode; mandatory: mode=[speckit|superpowers]; optional: LOADOUT_WORKFLOW_MODE_FILE=[path] @Operations
-	$(if $(mode),,$(error mode is required. Usage: make workflow-use mode=speckit))
-	./scripts/hooks/workflow-mode.sh use "$(mode)"
+workflow-use: # Make a workflow mode active in this worktree - mandatory: mode=[name from make workflow-list] @Operations
+	mode=$(mode) ./scripts/hooks/workflow-mode.sh use
 
 # ==============================================================================
 
 ${VERBOSE}.SILENT: \
-	workflow-switch \
+	workflow-clear \
+	workflow-list \
 	workflow-status \
 	workflow-use \

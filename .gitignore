@@ -2,5 +2,4 @@
 *.code-workspace
 
 # You can add project-specific ignore rules below this line as needed.
-.copilot/workflow-mode.json
 docs/superpowers/

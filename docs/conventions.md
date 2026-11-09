@@ -143,18 +143,18 @@ Adding a new prefix requires an ADR.
 
 ## File extension and location matrix
 
-| Artefact             | Extension / file form                 | Canonical location                | Notes                                                             |
-| -------------------- | ------------------------------------- | --------------------------------- | ----------------------------------------------------------------- |
-| Instruction pack     | `<slug>.instructions.md`              | `.github/instructions/`           | Carries `applyTo` glob; auto-applied to matching files            |
-| Instruction template | `*.instructions.md`                   | `.github/instructions/templates/` | Scaffolds used by automation; never auto-loaded                   |
-| Instruction include  | `<topic>.include.md`                  | `.github/instructions/includes/`  | Shared baseline fragments referenced from instruction packs       |
-| Prompt               | `<prefix>.<slug>.prompt.md`           | `.github/prompts/`                | Invokable as slash command `/<prefix>.<slug>`                     |
-| Prompt include       | `<topic>.include.md`                  | `.github/prompts/includes/`       | Currently a reserved scaffold; see directory README before adding |
-| Agent                | `<slug>.agent.md`                     | `.github/agents/`                 | Optional custom roles                                             |
-| Skill (spec-kit)     | `SKILL.md`                            | `.github/skills/speckit-<step>/`  | Upstream-managed via `make speckit-sync`                          |
-| Skill                | `SKILL.md` (+ `assets/`, `examples/`) | `.github/skills/<slug>/`          | Folder-based; `SKILL.md` is mandatory                             |
-| Hook                 | `<name>.json`                         | `.github/hooks/`                  | Owned by repository-template, not shipped by loadout              |
-| ADR                  | `ADR-NNN[a-z]?_*.md`                  | `docs/adr/`                       | Cluster letters reserved for language-pack ADRs                   |
+| Artefact             | Extension / file form                 | Canonical location                | Notes                                                                      |
+| -------------------- | ------------------------------------- | --------------------------------- | -------------------------------------------------------------------------- |
+| Instruction pack     | `<slug>.instructions.md`              | `.github/instructions/`           | Carries `applyTo` glob; auto-applied to matching files                     |
+| Instruction template | `*.instructions.md`                   | `.github/instructions/templates/` | Scaffolds used by automation; never auto-loaded                            |
+| Instruction include  | `<topic>.include.md`                  | `.github/instructions/includes/`  | Shared baseline fragments referenced from instruction packs                |
+| Prompt               | `<prefix>.<slug>.prompt.md`           | `.github/prompts/`                | Invokable as slash command `/<prefix>.<slug>`                              |
+| Prompt include       | `<topic>.include.md`                  | `.github/prompts/includes/`       | Currently a reserved scaffold; see directory README before adding          |
+| Agent                | `<slug>.agent.md`                     | `.github/agents/`                 | Optional custom roles                                                      |
+| Skill (spec-kit)     | `SKILL.md`                            | `.github/skills/speckit-<step>/`  | Upstream-managed via `make speckit-sync`                                   |
+| Skill                | `SKILL.md` (+ `assets/`, `examples/`) | `.github/skills/<slug>/`          | Folder-based; `SKILL.md` is mandatory                                      |
+| Hook                 | `<name>.json`                         | `.github/hooks/`                  | Loadout ships `workflow-mode.json` only, repository-template owns the rest |
+| ADR                  | `ADR-NNN[a-z]?_*.md`                  | `docs/adr/`                       | Cluster letters reserved for language-pack ADRs                            |
 
 ## Frontmatter schema by artefact type
 
@@ -192,7 +192,8 @@ description: "Python Engineering Instructions (CLI + API, framework-agnostic)"
 ```yaml
 ---
 agent: agent
-argument-hint: "Optional: target paths/files to audit (defaults to whole repository)"
+argument-hint:
+  "Optional: target paths/files to audit (defaults to whole repository)"
 description: Enforce repository-wide compliance with python.instructions.md
 ---
 ```
@@ -209,7 +210,9 @@ description: Enforce repository-wide compliance with python.instructions.md
 
 ```yaml
 ---
-description: Execute an approved plan, make the necessary code changes, and run the project's quality gates.
+description:
+  Execute an approved plan, make the necessary code changes, and run the
+  project's quality gates.
 argument-hint: "Pass the planner's brief or a direct change request"
 handoffs:
   - label: Review changes
@@ -233,7 +236,10 @@ handoffs:
 ```yaml
 ---
 name: code-review
-description: Run a structured Spec Kit review focused on code compliance, documentation quality, or test coverage, positioned within the spec-driven development pipeline.
+description:
+  Run a structured Spec Kit review focused on code compliance, documentation
+  quality, or test coverage, positioned within the spec-driven development
+  pipeline.
 argument-hint: "Specify review type: code, documentation, or test"
 license: MIT
 version: 1.0.0

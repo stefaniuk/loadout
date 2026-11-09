@@ -23,6 +23,8 @@ the spec-kit workflow. This repository does not currently ship a `specs/` tree.
   lifecycle, governance gates, and hook boundaries.
 - [conventions.md](conventions.md) defines naming, placement, frontmatter, and
   ADR rules.
+- [workflow-modes.md](workflow-modes.md) explains how the workflow mode keeps
+  the agent to Spec Kit or Superpowers, and how to change the modes.
 - `docs/adr/` stores long-lived architecture and tooling decisions, including
   the [Tech Radar](adr/Tech_Radar.md).
 

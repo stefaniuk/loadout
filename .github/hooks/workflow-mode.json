@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/workflow-mode.sh hook",
+        "timeoutSec": 15
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "matcher": "skill",
+        "command": "./scripts/hooks/workflow-mode.sh hook",
+        "timeoutSec": 15
+      }
+    ]
+  }
+}

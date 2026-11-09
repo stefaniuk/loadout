@@ -261,7 +261,8 @@ description: "<Technology> Engineering Instructions (one-line summary)"
 
 # <Technology> Engineering Instructions 🛠️
 
-These instructions define the default engineering approach for <scope>. They are **non-negotiable** unless an exception is documented in an ADR.
+These instructions define the default engineering approach for <scope>. They are
+**non-negotiable** unless an exception is documented in an ADR.
 
 ## Quick Reference
 
@@ -524,11 +525,16 @@ semver; `allowed-tools` scoped to minimum. Full schema:
 
 ### 🪝 Hooks Quickstart
 
-**Loadout does not ship hooks.** The Copilot hook and the quality gate that
-blocks the agent from finishing come from repository-template, in
-`.github/hooks/` and `scripts/quality/`. Change them there. Add a project gate
-as a drop-in file in `scripts/config/quality-gates.d/`, as `customisations.yaml`
-does.
+**Loadout ships one hook.** `.github/hooks/workflow-mode.json` runs
+`scripts/hooks/workflow-mode.sh`, which keeps the agent to one workflow mode.
+See [docs/workflow-modes.md](../docs/workflow-modes.md). Change the modes in
+`scripts/hooks/workflow-modes.yaml` and test them in
+`scripts/tests/workflow-mode.test.sh`.
+
+The quality gate that blocks the agent from finishing comes from
+repository-template, in `.github/hooks/` and `scripts/quality/`. Change it
+there. Add a project gate as a drop-in file in
+`scripts/config/quality-gates.d/`, as `customisations.yaml` does.
 
 <a id="instruction-precedence"></a>
 

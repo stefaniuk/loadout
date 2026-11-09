@@ -23,6 +23,12 @@ LEGACY_LOADOUT_MAKEFILE_FILE_MARKER="# loadout-managed: scripts/loadout.mk"
 LEGACY_LOADOUT_MAKEFILE_BEGIN_MARKER="# >>> loadout managed makefile include - DO NOT EDIT BELOW THIS LINE >>>"
 LEGACY_LOADOUT_MAKEFILE_END_MARKER="# <<< loadout managed makefile include - DO NOT EDIT ABOVE THIS LINE <<<"
 
+# The only Copilot hook file loadout installs. repository-template owns the
+# other files in '.github/hooks/'.
+WORKFLOW_MODE_HOOK_PATH=".github/hooks/workflow-mode.json"
+# Where older loadout versions kept the chosen workflow mode
+LEGACY_WORKFLOW_MODE_STATE_PATH=".copilot/workflow-mode.json"
+
 # Paths that, once tracked in a destination repo's own git history, are
 # considered destination-owned: apply/import/revert will not manage them. The
 # lower-case pull request template is the name older loadout versions used.
@@ -31,6 +37,7 @@ CONDITIONALLY_OWNED_PATHS=(
   ".github/pull_request_template.md"
   "docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
   "docs/adr/Technology_Recommendations.md"
+  ".github/hooks/workflow-mode.json"
 )
 
 # Paths that apply overwrites even when the destination tracks them, as
@@ -40,11 +47,12 @@ TRACKED_OVERWRITTEN_PATHS=(
   ".github/copilot-instructions.md"
 )
 
-# Hook files that older loadout versions installed. The Copilot hooks now
-# live in repository-template, which owns '.github/hooks/'.
+# Hook files that older loadout versions installed. repository-template now
+# owns the quality gate hooks.
 LEGACY_HOOK_FILES=(
   ".github/hooks/quality-gates.json"
   "scripts/hooks/_common.sh"
+  "scripts/hooks/workflow-mode.lib.sh"
   "scripts/hooks/session-start-cheatsheet.sh"
   "scripts/hooks/stop-gate.sh"
   "scripts/hooks/subagent-start-context.sh"

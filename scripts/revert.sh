@@ -140,6 +140,16 @@ function revert-copilot() {
   # tracks
   revert-tracked-overwritten-paths "${dest}"
 
+  # Remove the workflow mode hook, unless the destination tracks it
+  if [[ -f "${dest}/${WORKFLOW_MODE_HOOK_PATH}" ]]; then
+    if is-destination-owned "${dest}" "${WORKFLOW_MODE_HOOK_PATH}"; then
+      print-info "Skipping ${dest}/${WORKFLOW_MODE_HOOK_PATH} (destination-owned; tracked in destination git history)"
+    else
+      print-info "Removing ${dest}/${WORKFLOW_MODE_HOOK_PATH}"
+      rm -f "${dest:?}/${WORKFLOW_MODE_HOOK_PATH}"
+    fi
+  fi
+
   # Remove hook files that older loadout versions installed
   remove-legacy-hook-files "${dest}"
 

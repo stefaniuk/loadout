@@ -5,9 +5,9 @@
 > walkthrough.
 
 This document holds the deep architectural reference for the prompt library: the
-six-layer customisation model, the artefact type decision matrix, the
-workflow-mode switch, the spec-kit lifecycle, governance gates, and commit
-conventions per lifecycle stage.
+six-layer customisation model, the artefact type decision matrix, the workflow
+modes, the spec-kit lifecycle, governance gates, and commit conventions per
+lifecycle stage.
 
 ## Six-layer customisation model
 
@@ -18,7 +18,7 @@ automation hooks.
 ```text
 ┌─────────────────────────────────────────────┐
 │  Layer 5: Hooks (deterministic gates)       │
-│  owned by repository-template               │
+│  .github/hooks/*.json                       │
 ├─────────────────────────────────────────────┤
 │  Layer 4: Skills (reusable capabilities)    │
 │  .github/skills/*/SKILL.md                  │
@@ -67,41 +67,46 @@ Each layer in detail:
   `architecture-docs`, `enforcement-audit`, and `code-review`.
 - **Layer 5 - Hooks.** Deterministic automation that runs without an LLM in the
   loop: lint, format, link checks, and quality gates wired into the agent
-  environment.
+  environment. repository-template owns the quality gate hooks. Loadout ships
+  one hook, `.github/hooks/workflow-mode.json`, which keeps the agent to one
+  workflow mode.
 
-## Workflow mode switch
+## Workflow modes
 
-The repository supports two mutually exclusive lifecycle families in the same
-codebase:
+The repository supports two lifecycle families in the same codebase:
 
 - **Spec Kit** for specification-first work via `speckit-*` skills and review
   prompts.
 - **Superpowers** for standalone design, planning, execution, and review via the
   imported workflow skills.
 
-Only one family should be active in a given session or worktree. The active mode
-is stored locally in `.copilot/workflow-mode.json`, changed with
-`make workflow-use mode=speckit` or `make workflow-use mode=superpowers`, and
-managed by `scripts/hooks/workflow-mode.sh`.
+A workflow mode names the skills of one family. One mode is active per worktree.
+It is chosen with `make workflow-use mode=<name>` and stored in the file that
+`git rev-parse --git-path workflow-mode` names, which is never committed.
+`scripts/hooks/workflow-modes.yaml` defines the loadout modes, and a project
+changes them in `scripts/config/workflow-modes.d/*.yaml`.
 
-The `.copilot/` directory now has two distinct roles:
+The `.copilot/` directory holds `.copilot/analysis/`, a tracked scaffold for
+ignored local analysis output such as bounded diffs, review notes, and
+architecture evidence.
 
-- `.copilot/workflow-mode.json` is ignored local workflow state.
-- `.copilot/analysis/` is a tracked scaffold for ignored local analysis output
-  such as bounded diffs, review notes, and architecture evidence.
-
-Why an explicit switch is used instead of branch-name inference:
+Why an explicit choice is used instead of branch-name inference:
 
 - It is visible and reversible.
 - It works without renaming branches or worktrees.
 - It lets both skill families stay installed while still keeping the agent on
   one lane.
 
-Enforcement is layered:
+Enforcement sits outside the skills, in `scripts/hooks/workflow-mode.sh`:
 
-- `.github/copilot-instructions.md` declares the one-lane-per-session rule.
-- Patched workflow skills contain mode guards so the inactive family refuses to
-  proceed and points back to `make workflow-use ...`.
+- At session start, the hook tells the agent which mode is active and which
+  skills each mode owns.
+- Before a skill runs, the hook refuses a skill that only another mode owns.
+- `.github/copilot-instructions.md` tells the agent never to change the mode
+  itself.
+
+See [workflow-modes.md](workflow-modes.md) for the commands, the configuration
+and the limits.
 
 ## Artefact type decision matrix
 
@@ -117,7 +122,7 @@ Enforcement is layered:
 
 ```mermaid
 flowchart TD
-  q1{"Deterministic gate - no LLM in the loop?"} -- Yes --> hook["Hook<br/>owned by repository-template<br/>.github/hooks/*.json"]
+  q1{"Deterministic gate - no LLM in the loop?"} -- Yes --> hook["Hook<br/>.github/hooks/*.json"]
   q1 -- No --> q2{"Always-on standard scoped by file type?"}
   q2 -- Yes --> instr["Instructions<br/>.github/instructions/&lt;tech&gt;.instructions.md"]
   q2 -- No --> q3{"Reusable multi-step capability<br/>bundled with scripts or assets?"}

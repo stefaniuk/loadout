@@ -1,0 +1,57 @@
+# Workflow modes read by scripts/hooks/workflow-mode.sh. A mode is a named set of
+# agent skills that belong to one way of working. One mode is active per
+# worktree, chosen with 'make workflow-use mode=<name>'. The Copilot hooks in
+# .github/hooks/workflow-mode.json tell the agent which mode is active when a
+# session starts, and refuse a skill that only other modes own.
+#
+# Loadout manages this file and overwrites it on every 'make apply'. Change or
+# add modes in scripts/config/workflow-modes.d/*.yaml instead. Drop-in files
+# are read in byte order of their names, dot files are ignored, a symbolic link
+# is skipped with a warning, and a name may use only ASCII letters, digits, '.',
+# '_' and '-'. Both .yaml and .yml work.
+#
+# Each file starts with 'version: 1'. A drop-in mode with the name of an earlier
+# mode overrides only the fields it sets, and a list such as 'skills' replaces
+# the earlier list. A mode name may appear once per file. A later 'default'
+# wins, and 'default: null' clears it. For example, this drop-in changes one
+# description:
+#
+#   version: 1
+#   modes:
+#     - name: speckit
+#       description: Specification-driven delivery for this team.
+#
+# Fields of a mode:
+#   name         Unique, lower case, used with 'make workflow-use mode=<name>'
+#   skills       Patterns of the skill names the mode owns: '*' is any
+#                characters, '?' is one character, and every other character
+#                stands for itself. A skill that no mode owns is always allowed
+#   description  Free text for 'make workflow-list' and the agent
+#
+# 'default' names a defined mode that is active when none was chosen. Without
+# it, no mode is active until one is chosen, and every skill is allowed.
+version: 1
+
+default: superpowers
+
+modes:
+  - name: speckit
+    description: >-
+      Specification-driven delivery. Durable spec, plan and tasks under specs/.
+    skills:
+      - speckit-*
+
+  - name: superpowers
+    description: >-
+      Conversation-driven delivery. Design, plan, then test-driven execution.
+    skills:
+      - brainstorming
+      - writing-plans
+      - executing-plans
+      - subagent-driven-development
+      - dispatching-parallel-agents
+      - incremental-implementation
+      - using-git-worktrees
+      - requesting-code-review
+      - receiving-code-review
+      - finishing-a-development-branch

@@ -30,6 +30,7 @@ OWNED_FILES_DEST=""
 OWNED_REVERT_DEST=""
 LEGACY_HOOKS_DEST=""
 LEGACY_REVERT_DEST=""
+LEGACY_MODE_DEST=""
 ESCAPED_SPACE_ROOT=""
 
 # Subset shared dests
@@ -78,6 +79,8 @@ function main() {
     test-revert-removes-legacy-hook-files \
     test-legacy-hook-cleanup-keeps-files-git-cannot-check \
     test-legacy-hook-cleanup-keeps-files-behind-a-link \
+    test-apply-moves-legacy-workflow-mode \
+    test-apply-keeps-a-chosen-workflow-mode \
     test-apply-subset-agents-only \
     test-apply-subset-prompts-and-agents \
     test-apply-subset-instructions-only-with-python-tech \
@@ -116,6 +119,7 @@ function test-apply-suite-setup() {
   OWNED_REVERT_DEST="${TEMP_DIR}/_shared_owned_revert"
   LEGACY_HOOKS_DEST="${TEMP_DIR}/_shared_legacy_hooks"
   LEGACY_REVERT_DEST="${TEMP_DIR}/_shared_legacy_revert"
+  LEGACY_MODE_DEST="${TEMP_DIR}/_shared_legacy_mode"
   ESCAPED_SPACE_ROOT="${TEMP_DIR}/_esc_space"
   SUBSET_AGENTS_DEST="${TEMP_DIR}/_subset_agents"
   SUBSET_PROMPTS_AGENTS_DEST="${TEMP_DIR}/_subset_prompts_agents"
@@ -174,6 +178,10 @@ function test-apply-suite-setup() {
     mkdir -p "${LEGACY_REVERT_DEST}/.github/hooks"
     echo '{"hooks":{}}' > "${LEGACY_REVERT_DEST}/.github/hooks/quality-gates.json"
     bash ./scripts/revert.sh --dest "${LEGACY_REVERT_DEST}" > /dev/null 2>&1
+  }) &
+  ({
+    seed-legacy-workflow-mode "${LEGACY_MODE_DEST}" speckit
+    ./scripts/apply.sh "${LEGACY_MODE_DEST}" > /dev/null 2>&1
   }) &
   (subset=agents ./scripts/apply.sh "${SUBSET_AGENTS_DEST}" > /dev/null 2>&1) &
   (subset="prompts,agents" ./scripts/apply.sh "${SUBSET_PROMPTS_AGENTS_DEST}" > /dev/null 2>&1) &
@@ -287,9 +295,14 @@ function test-apply-default-copies-expected-artefacts() {
   [[ -f "${d}/.gitignore" ]] || return 1
   grep -qF "loadout managed content" "${d}/.gitignore" || return 1
   # Hooks
-  [[ ! -e "${d}/.github/hooks" ]] || return 1
+  [[ "$(ls -A "${d}/.github/hooks")" == "workflow-mode.json" ]] || return 1
+  cmp -s .github/hooks/workflow-mode.json "${d}/.github/hooks/workflow-mode.json" || return 1
+  grep -qxF ".github/hooks/workflow-mode.json" "${d}/.gitignore" || return 1
   [[ ! -f "${d}/hooks.json" ]] || return 1
   [[ -x "${d}/scripts/hooks/workflow-mode.sh" ]] || return 1
+  cmp -s scripts/hooks/workflow-mode.jq "${d}/scripts/hooks/workflow-mode.jq" || return 1
+  cmp -s scripts/hooks/workflow-modes.yaml "${d}/scripts/hooks/workflow-modes.yaml" || return 1
+  [[ ! -e "${d}/scripts/hooks/workflow-mode.lib.sh" ]] || return 1
   [[ ! -e "${d}/scripts/hooks/stop-gate.sh" ]] || return 1
   return 0
 }
@@ -386,6 +399,8 @@ function test-apply-template-destination-installs-loadout-extension() {
   git -C "${d}" diff --quiet -- Makefile scripts/init.mk || return 1
   grep -qxF "scripts/loadout.ext.mk" "${d}/.gitignore" || return 1
   make -C "${d}" -n workflow-status > /dev/null 2>&1 || return 1
+  # The installed script reads the installed modes
+  (cd "${d}" && ./scripts/hooks/workflow-mode.sh status) | grep -qxF "Workflow mode: superpowers (default)" || return 1
   return 0
 }
 
@@ -496,6 +511,8 @@ function test-apply-respects-git-tracked-destination-owned-files() {
   grep -qF "# docs/adr/ADR-nnn_Any_Decision_Record_Template.md" "${d}/.gitignore" || return 1
   grep -qx "custom-owned-technology-recommendations" "${d}/docs/adr/Technology_Recommendations.md" || return 1
   grep -qF "# docs/adr/Technology_Recommendations.md" "${d}/.gitignore" || return 1
+  grep -qx '{"hooks":{"team":true}}' "${d}/.github/hooks/workflow-mode.json" || return 1
+  grep -qF "# .github/hooks/workflow-mode.json" "${d}/.gitignore" || return 1
   # A skill directory the destination tracks is its own, even under a
   # retired loadout skill name
   grep -qx "team-owned-skill" "${d}/.github/skills/repository-template/SKILL.md" || return 1
@@ -515,6 +532,7 @@ function test-revert-respects-destination-owned-adr-template() {
   grep -q "custom-owned-pr-template" "${d}/.github/pull_request_template.md" || return 1
   grep -q "custom-owned-adr-template" "${d}/docs/adr/ADR-nnn_Any_Decision_Record_Template.md" || return 1
   grep -qx "custom-owned-technology-recommendations" "${d}/docs/adr/Technology_Recommendations.md" || return 1
+  grep -qx '{"hooks":{"team":true}}' "${d}/.github/hooks/workflow-mode.json" || return 1
   [[ ! -f "${d}/docs/adr/Tech_Radar.md" ]] || return 1
   return 0
 }
@@ -525,6 +543,7 @@ function test-apply-removes-legacy-hook-files() {
   # Untracked hook files from an older loadout are removed
   [[ ! -e "${d}/.github/hooks/quality-gates.json" ]] || return 1
   [[ ! -e "${d}/scripts/hooks/stop-gate.sh" ]] || return 1
+  [[ ! -e "${d}/scripts/hooks/workflow-mode.lib.sh" ]] || return 1
   # A tracked hook file and other hook files belong to the destination
   grep -q "team-owned-prompt-hook" "${d}/scripts/hooks/user-prompt-record.sh" || return 1
   [[ -f "${d}/.github/hooks/team.json" ]] || return 1
@@ -567,6 +586,26 @@ function test-legacy-hook-cleanup-keeps-files-behind-a-link() {
   ln -s "${outside}" "${d}/.github/hooks"
   bash -c 'source ./scripts/common.lib.sh && remove-legacy-hook-files "$1"' _ "${d}" > /dev/null 2>&1 || return 1
   [[ -f "${outside}/quality-gates.json" ]] || return 1
+  return 0
+}
+
+# A mode chosen with an older loadout moves to where the hook script reads it.
+function test-apply-moves-legacy-workflow-mode() {
+
+  local d="${LEGACY_MODE_DEST}"
+  [[ "$(cat "${d}/.git/workflow-mode")" == "speckit" ]] || return 1
+  [[ ! -e "${d}/.copilot/workflow-mode.json" ]] || return 1
+  return 0
+}
+
+function test-apply-keeps-a-chosen-workflow-mode() {
+
+  local d="${TEMP_DIR}/_chosen_mode"
+  seed-legacy-workflow-mode "${d}" speckit
+  echo "superpowers" > "${d}/.git/workflow-mode"
+  ./scripts/apply.sh "${d}" > /dev/null 2>&1 || return 1
+  [[ "$(cat "${d}/.git/workflow-mode")" == "superpowers" ]] || return 1
+  [[ ! -e "${d}/.copilot/workflow-mode.json" ]] || return 1
   return 0
 }
 
@@ -669,6 +708,8 @@ function seed-destination-owned-files() {
   echo "custom-owned-technology-recommendations" > "${dest}/docs/adr/Technology_Recommendations.md"
   mkdir -p "${dest}/.github/skills/repository-template"
   echo "team-owned-skill" > "${dest}/.github/skills/repository-template/SKILL.md"
+  mkdir -p "${dest}/.github/hooks"
+  echo '{"hooks":{"team":true}}' > "${dest}/.github/hooks/workflow-mode.json"
 
   git -C "${dest}" init -q
   git -C "${dest}" add -A
@@ -685,6 +726,7 @@ function seed-legacy-hook-files() {
   echo '{"hooks":{}}' > "${dest}/.github/hooks/quality-gates.json"
   echo '{"hooks":{}}' > "${dest}/.github/hooks/team.json"
   echo "# old loadout stop gate" > "${dest}/scripts/hooks/stop-gate.sh"
+  echo "# old loadout workflow mode library" > "${dest}/scripts/hooks/workflow-mode.lib.sh"
   echo "# team-owned-prompt-hook" > "${dest}/scripts/hooks/user-prompt-record.sh"
   mkdir -p "${dest}/.github/skills/repository-template/assets"
   echo "# Retired skill" > "${dest}/.github/skills/repository-template/SKILL.md"
@@ -693,6 +735,21 @@ function seed-legacy-hook-files() {
   git -C "${dest}" init -q
   git -C "${dest}" add scripts/hooks/user-prompt-record.sh
   git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" -c commit.gpgsign=false commit -q -m "track a hook script"
+
+  return 0
+}
+
+# Create a git repository with the mode file that older loadout versions wrote.
+# Arguments:
+#   $1=[destination directory path]
+#   $2=[mode]
+function seed-legacy-workflow-mode() {
+
+  local dest="$1"
+
+  mkdir -p "${dest}/.copilot"
+  printf '{"active":"%s"}\n' "$2" > "${dest}/.copilot/workflow-mode.json"
+  git -C "${dest}" init -q
 
   return 0
 }

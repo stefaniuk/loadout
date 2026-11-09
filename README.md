@@ -195,6 +195,8 @@ Further reading:
   and governance gates.
 - [docs/conventions.md](docs/conventions.md): naming, placement, frontmatter,
   and ADR rules.
+- [docs/workflow-modes.md](docs/workflow-modes.md): keep the agent to Spec Kit
+  or Superpowers with a workflow mode.
 - [docs/guides/](docs/guides/): repository-template guides for the toolchain,
   quality gates, Git hooks, secret scanning and dependency updates.
 

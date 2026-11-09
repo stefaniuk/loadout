@@ -32,28 +32,10 @@ defaults:
   templates: after-frontmatter
 
 overrides:
-  # Superpowers skills
-  brainstorming/SKILL.md: after-frontmatter
-  dispatching-parallel-agents/SKILL.md: after-frontmatter
-  executing-plans/SKILL.md: after-frontmatter
-  finishing-a-development-branch/SKILL.md: after-frontmatter
-  incremental-implementation/SKILL.md: after-frontmatter
-  receiving-code-review/SKILL.md: after-frontmatter
-  requesting-code-review/SKILL.md: after-frontmatter
-  subagent-driven-development/SKILL.md: after-frontmatter
-  using-git-worktrees/SKILL.md: after-frontmatter
-  writing-plans/SKILL.md: after-frontmatter
   # Spec Kit skills
-  speckit-analyze/SKILL.md: after-frontmatter
-  speckit-checklist/SKILL.md: after-frontmatter
-  speckit-clarify/SKILL.md: after-frontmatter
-  speckit-constitution/SKILL.md: after-frontmatter
-  speckit-converge/SKILL.md: after-frontmatter
   speckit-implement/SKILL.md: after-frontmatter
   speckit-plan/SKILL.md: after-frontmatter
-  speckit-specify/SKILL.md: after-frontmatter
   speckit-tasks/SKILL.md: after-frontmatter
-  speckit-taskstoissues/SKILL.md: after-frontmatter
 
 frontmatter:
   # Superpowers skills

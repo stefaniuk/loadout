@@ -34,6 +34,7 @@ IMPORT_PATHS=(
   "docs/adr/ADR-nnn_Any_Decision_Record_Template.md"
   "docs/adr/Tech_Radar.md"
   "docs/adr/Technology_Recommendations.md"
+  ".github/hooks/workflow-mode.json"
   "scripts/hooks"
 )
 
@@ -379,8 +380,9 @@ function test-import-force-copies-changed-files-back() {
   return 0
 }
 
-# Hook scripts that remain (workflow-mode) must be detected in one dry-run and
-# round-trip in one force run, keeping their executable bit.
+# Hook files (the workflow mode script, jq module, modes and hook config) must
+# be detected in one dry-run and round-trip in one force run, keeping the
+# script's executable bit. The retired library is never imported.
 function test-import-detects-and-round-trips-workflow-scripts() {
 
   local dest repo
@@ -390,14 +392,27 @@ function test-import-detects-and-round-trips-workflow-scripts() {
   local marker
   marker="WORKFLOW-SCRIPT-MARKER-$(date +%s)"
   echo "# ${marker}" >> "${dest}/scripts/hooks/workflow-mode.sh"
+  echo "# ${marker}" >> "${dest}/scripts/hooks/workflow-mode.jq"
+  echo "# ${marker}" >> "${dest}/scripts/hooks/workflow-modes.yaml"
+  sed -i.bak 's/"timeoutSec": 15/"timeoutSec": 20/' "${dest}/.github/hooks/workflow-mode.json"
+  rm -f "${dest}/.github/hooks/workflow-mode.json.bak"
+  echo "# old library" > "${dest}/scripts/hooks/workflow-mode.lib.sh"
 
   local output
   output=$(LOADOUT_IMPORT_REPO_ROOT="${repo}" ./scripts/import.sh "${dest}" 2>&1)
   echo "${output}" | grep -q "workflow-mode.sh" || return 1
+  echo "${output}" | grep -q "workflow-mode.jq" || return 1
+  echo "${output}" | grep -q "workflow-modes.yaml" || return 1
+  echo "${output}" | grep -q ".github/hooks/workflow-mode.json" || return 1
+  ! echo "${output}" | grep -q "workflow-mode.lib.sh" || return 1
 
-  LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
+  LOADOUT_IMPORT_REPO_ROOT="${repo}" force=true new=true ./scripts/import.sh "${dest}" > /dev/null 2>&1
   grep -q "${marker}" "${repo}/scripts/hooks/workflow-mode.sh" || return 1
   [[ -x "${repo}/scripts/hooks/workflow-mode.sh" ]] || return 1
+  grep -q "${marker}" "${repo}/scripts/hooks/workflow-mode.jq" || return 1
+  grep -q "${marker}" "${repo}/scripts/hooks/workflow-modes.yaml" || return 1
+  grep -qF '"timeoutSec": 20' "${repo}/.github/hooks/workflow-mode.json" || return 1
+  [[ ! -e "${repo}/scripts/hooks/workflow-mode.lib.sh" ]] || return 1
 
   return 0
 }
