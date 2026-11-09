@@ -988,7 +988,7 @@ skills.
 | 3    | `verification-before-completion` | ✅     | 🟢 Full       | Yes         | No         | No    | Completion gate           |
 | 4    | All `speckit-*` skills           | ✅     | 🟣 Bundled    | Blocked     | Yes        | Yes   | Spec Kit workflow         |
 | 7    | `security-and-hardening`         | ✅     | 🟢 Full       | Yes         | No         | No    | Security default          |
-| 10   | `incremental-implementation`     | ✅     | 🟠 Mode-gated | Yes         | Yes        | No    | Superpowers discipline    |
+| 10   | `incremental-implementation`     | ✅     | � Full        | Yes         | No         | No    | Superpowers discipline    |
 | 12   | `semgrep`                        | ✅     | 🔵 Manual     | Blocked     | No         | No    | Rapid SAST                |
 | 20   | `find-bugs`                      | ✅     | 🟢 Full       | Yes         | No         | No    | Main review skill         |
 | 25   | `supply-chain-risk-auditor`      | ✅     | 🔵 Manual     | Blocked     | No         | No    | Dependency posture        |
@@ -998,14 +998,14 @@ skills.
 | 39   | `gha-security-review`            | ✅     | 🔵 Manual     | Blocked     | No         | No    | Actions security          |
 | 40   | `skill-scanner`                  | ✅     | 🔵 Manual     | Blocked     | No         | No    | Skill supply chain        |
 | 5    | `writing-plans`                  | ✅     | 🟠 Mode-gated | Yes         | Yes        | No    | Superpowers lane          |
-| 6    | `using-git-worktrees`            | ✅     | 🟠 Mode-gated | Yes         | Yes        | No    | Superpowers cross-cutting |
+| 6    | `using-git-worktrees`            | ✅     | � Full        | Yes         | No         | No    | Superpowers cross-cutting |
 | 16   | `subagent-driven-development`    | ✅     | 🟠 Mode-gated | Yes         | Yes        | No    | Superpowers lane          |
-| 19   | `requesting-code-review`         | ✅     | 🟠 Mode-gated | Yes         | Yes        | No    | Superpowers review        |
+| 19   | `requesting-code-review`         | ✅     | � Full        | Yes         | No         | No    | Superpowers review        |
 | 21   | `brainstorming`                  | ✅     | 🟠 Mode-gated | Yes         | Yes        | No    | Superpowers entry         |
-| 22   | `dispatching-parallel-agents`    | ✅     | 🟠 Mode-gated | Yes         | Yes        | No    | Superpowers orchestration |
+| 22   | `dispatching-parallel-agents`    | ✅     | � Full        | Yes         | No         | No    | Superpowers orchestration |
 | 23   | `executing-plans`                | ✅     | 🟠 Mode-gated | Yes         | Yes        | No    | Superpowers execution     |
-| 24   | `receiving-code-review`          | ✅     | 🟠 Mode-gated | Blocked     | Yes        | Yes   | Superpowers review        |
-| 25   | `finishing-a-development-branch` | ✅     | 🟠 Mode-gated | Blocked     | Yes        | Yes   | Superpowers finish        |
+| 24   | `receiving-code-review`          | ✅     | � Manual      | Blocked     | No         | Yes   | Superpowers review        |
+| 25   | `finishing-a-development-branch` | ✅     | 🔵 Manual     | Blocked     | No         | Yes   | Superpowers finish        |
 | 14   | `writing-skills`                 | ✅     | 🔵 Manual     | Blocked     | No         | No    | Skills maintenance        |
 | 15   | `playwright-cli`                 | ✅     | 🟢 Full       | Yes         | No         | No    | Browser automation        |
 | 29   | `api-and-interface-design`       | ✅     | 🟢 Full       | Yes         | No         | No    | Contract-first design     |
@@ -1024,8 +1024,8 @@ Adoption notes:
 - ✅ All `speckit-*` skills are bundled through `make speckit-sync` and remain
   the primary Spec Kit workflow.
 - ✅ `incremental-implementation` is imported through
-  `scripts/config/skills.yaml` and the workflow mode hook gates it, so it runs
-  only in the `superpowers` lane.
+  `scripts/config/skills.yaml` and belongs to no workflow mode, so it is
+  available in both lanes.
 - ✅ The Superpowers workflow lane is now imported through
   `scripts/config/skills.yaml`, including `brainstorming`, `writing-plans`,
   `dispatching-parallel-agents`, `executing-plans`,
@@ -1034,12 +1034,15 @@ Adoption notes:
 - ✅ `semgrep`, `supply-chain-risk-auditor`, `insecure-defaults`, `sharp-edges`,
   `gha-security-review`, and `skill-scanner` are now imported as manual-only
   specialist skills for shell, CI, and skill supply-chain review.
-- ✅ Those Superpowers workflow skills, plus `incremental-implementation`, are
-  intentionally mode-gated rather than always active. Use `make workflow-status`
-  to inspect the current lane and `make workflow-use mode=speckit|superpowers`
-  to switch lanes.
-- ✅ `using-git-worktrees` and `brainstorming` are auto-invocable, and the
-  workflow mode hook refuses them outside the `superpowers` lane.
+- ✅ The Superpowers lifecycle skills `brainstorming`, `writing-plans`,
+  `executing-plans` and `subagent-driven-development` are mode-gated rather than
+  always active. The worktree, parallel-agent, review and finishing skills, and
+  `incremental-implementation`, help in both lanes and are not gated. Use
+  `make workflow-status` to inspect the current lane and
+  `make workflow-use mode=speckit|superpowers` to switch lanes.
+- ✅ `brainstorming` is auto-invocable, and the workflow mode hook refuses it
+  outside the `superpowers` lane. `using-git-worktrees` is auto-invocable in
+  both lanes.
 - ✅ `writing-skills` remains manual alongside the newly imported specialist
   review skills.
 
@@ -1057,29 +1060,29 @@ Adoption notes:
 Core-set notes:
 
 - ✅ The imported core set is already in place for this repository.
-- 🟠 `incremental-implementation` now sits outside the Spec Kit core and only
-  activates in the `superpowers` lane.
+- ✅ `incremental-implementation` sits outside the Spec Kit core and is
+  available in both lanes.
 - 🟣 The Spec Kit path for planned work remains `speckit-plan` → `speckit-tasks`
   → `speckit-implement`.
 
 ### Recommended workflow lanes
 
 - `speckit`: all `speckit-*` skills, plus the shared full-adoption core set.
-- `superpowers`: `brainstorming`, `writing-plans`,
-  `dispatching-parallel-agents`, `executing-plans`,
-  `subagent-driven-development`, `incremental-implementation`,
-  `requesting-code-review`, `receiving-code-review`,
-  `finishing-a-development-branch`, plus the shared full-adoption core set.
+- `superpowers`: `brainstorming`, `writing-plans`, `executing-plans` and
+  `subagent-driven-development`, plus the shared full-adoption core set.
+- Shared by both lanes: `using-git-worktrees`, `dispatching-parallel-agents`,
+  `incremental-implementation`, `requesting-code-review`,
+  `receiving-code-review` and `finishing-a-development-branch`.
 
 Lane notes:
 
-- Use one workflow family per session or worktree.
-- `incremental-implementation` now follows the same workflow-mode switch as the
-  rest of the `superpowers` lane.
+- Use one workflow family per worktree.
+- A lane owns only the skills that write or read its own artefacts. The skills
+  shared by both lanes do not, so the workflow mode leaves them available.
 - The repository now supports both lanes explicitly, so the recommendation is no
   longer to avoid these Superpowers skills entirely.
 - The constraint is mode isolation, not non-adoption. Keep Spec Kit and
-  Superpowers lifecycle commands separated by the workflow-mode switch.
+  Superpowers lifecycle commands separated by the workflow mode.
 
 ### Compatible specialist skills
 
@@ -1181,9 +1184,12 @@ Mode-gated in `superpowers`:
 
 brainstorming
 writing-plans
-dispatching-parallel-agents
 executing-plans
 subagent-driven-development
+
+Shared by both lanes:
+
+dispatching-parallel-agents
 incremental-implementation
 requesting-code-review
 receiving-code-review
@@ -1201,8 +1207,8 @@ skill-scanner
 ```
 
 Then add stack-specific and security-analysis skills only where the project
-actually needs them. For this repository, the full Superpowers lane is
-mode-gated and auto-invocable, with `brainstorming` and `using-git-worktrees`
-now included. `writing-skills`, `semgrep`, `supply-chain-risk-auditor`,
-`insecure-defaults`, `sharp-edges`, `gha-security-review`, and `skill-scanner`
-remain manual specialist imports.
+actually needs them. For this repository, the Superpowers lifecycle skills are
+mode-gated and auto-invocable, and the worktree, parallel-agent and review
+skills are shared by both lanes. `writing-skills`, `semgrep`,
+`supply-chain-risk-auditor`, `insecure-defaults`, `sharp-edges`,
+`gha-security-review`, and `skill-scanner` remain manual specialist imports.

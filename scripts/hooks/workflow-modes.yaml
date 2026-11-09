@@ -30,6 +30,11 @@
 #
 # 'default' names a defined mode that is active when none was chosen. Without
 # it, no mode is active until one is chosen, and every skill is allowed.
+#
+# A mode owns only the skills that write or read its own artefacts. Skills such
+# as 'using-git-worktrees', 'dispatching-parallel-agents',
+# 'incremental-implementation' and the code review skills help in either
+# workflow, so no mode owns them and they stay available in both.
 version: 1
 
 default: superpowers
@@ -49,9 +54,3 @@ modes:
       - writing-plans
       - executing-plans
       - subagent-driven-development
-      - dispatching-parallel-agents
-      - incremental-implementation
-      - using-git-worktrees
-      - requesting-code-review
-      - receiving-code-review
-      - finishing-a-development-branch

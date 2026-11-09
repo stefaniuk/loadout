@@ -79,13 +79,14 @@ Copilot also uses `.copilot/analysis/` as a tracked local scaffold for ephemeral
 analysis output. The nested `.gitignore` in that directory ignores generated
 files while keeping the scaffold itself in git history.
 
-Use one workflow family per session or worktree:
+Use one workflow family per worktree:
 
 - `speckit` mode: use `speckit-*` skills and review prompts.
-- `superpowers` mode: use the imported Superpowers workflow skills such as
-  `/brainstorming`, `/writing-plans`, `/executing-plans`,
-  `/subagent-driven-development`, `/requesting-code-review`, and
-  `/receiving-code-review`.
+- `superpowers` mode: use the Superpowers lifecycle skills `/brainstorming`,
+  `/writing-plans`, `/executing-plans` and `/subagent-driven-development`.
+
+The worktree, review and finishing skills, such as `/requesting-code-review` and
+`/receiving-code-review`, belong to no mode and work in both.
 
 ## First run + expected output
 

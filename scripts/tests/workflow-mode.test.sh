@@ -52,6 +52,7 @@ function main() {
     test-workflow-mode-lists-the-modes-and-marks-the-active-one \
     test-workflow-mode-list-shortens-long-skill-lists \
     test-workflow-mode-list-says-when-no-mode-is-defined \
+    test-workflow-mode-list-checks-the-patterns-against-installed-skills \
     test-workflow-mode-drop-ins-override-modes-by-name-in-byte-order \
     test-workflow-mode-warns-about-a-symlinked-drop-in \
     test-workflow-mode-rejects-an-unknown-configuration-key \
@@ -62,6 +63,8 @@ function main() {
     test-workflow-mode-rejects-drop-in-names-that-are-not-plain-ascii \
     test-workflow-mode-rejects-an-unknown-command \
     test-workflow-mode-hook-describes-the-active-mode-at-session-start \
+    test-workflow-mode-hook-describes-the-active-mode-to-a-subagent \
+    test-workflow-mode-hook-names-the-skills-only-the-user-can-start \
     test-workflow-mode-hook-never-forbids-a-skill-of-the-active-mode-with-three-modes \
     test-workflow-mode-hook-asks-for-a-mode-when-none-is-active \
     test-workflow-mode-hook-says-nothing-without-modes \
@@ -78,10 +81,11 @@ function main() {
     test-workflow-mode-hook-fails-open-on-an-invalid-payload \
     test-workflow-mode-hook-fails-open-on-an-invalid-configuration \
     test-workflow-mode-hook-tells-the-agent-when-the-check-cannot-run \
+    test-workflow-mode-hook-tells-the-agent-when-only-the-loadout-modes-exist \
     test-workflow-mode-hook-fails-open-when-jq-cannot-run \
     test-workflow-mode-hook-tells-the-agent-when-jq-cannot-run \
     test-workflow-mode-hook-runs-with-the-system-bash \
-    test-workflow-mode-registers-both-hook-events \
+    test-workflow-mode-registers-the-hook-events \
     test-workflow-mode-loadout-defines-speckit-and-superpowers
 
   return 0
@@ -155,6 +159,18 @@ function mode-skill-event() {
 function assert-hook-allows() {
 
   assert-equal '{}' "$(jq -c . <<< "$1")" 'hook output'
+
+  return 0
+}
+
+# Install a skill in the repository.
+# Arguments:
+#   $1=[skill name]
+#   $2=[extra front matter line, optional]
+function mode-install-skill() {
+
+  mkdir -p ".github/skills/$1"
+  printf -- '---\nname: %s\ndescription: Test skill\n%s\n---\n\n# %s\n' "$1" "${2:-}" "$1" > ".github/skills/$1/SKILL.md"
 
   return 0
 }
@@ -412,6 +428,25 @@ function test-workflow-mode-list-says-when-no-mode-is-defined() {
   return 0
 }
 
+function test-workflow-mode-list-checks-the-patterns-against-installed-skills() {
+
+  # Arrange
+  mode-create-repo
+  mode-install-skill alpha-guide 'disable-model-invocation: true'
+  mode-install-skill alpha-tool
+  mode-install-skill shared
+  # A later line that only looks like the setting is not front matter
+  printf 'disable-model-invocation: true\n' >> .github/skills/alpha-tool/SKILL.md
+  # Act
+  test-capture "$SCRIPT" list
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-matches "$TEST_STDOUT" $'\ndefault +alpha +alpha-\\*,shared +First way of working'
+  assert-equal $'Note: mode alpha owns 1 skill that only the user can start with a slash command, so the hook never checks it.\nWARNING: mode beta: the pattern \'beta-?\' matches no skill in .github/skills.' "$TEST_STDERR"
+
+  return 0
+}
+
 function test-workflow-mode-drop-ins-override-modes-by-name-in-byte-order() {
 
   # Arrange
@@ -562,6 +597,41 @@ function test-workflow-mode-hook-describes-the-active-mode-at-session-start() {
   assert-not-contains "$context" "beta-?, shared" 'shared skill listed as forbidden'
   assert-equal "$context" "$(jq -r .hookSpecificOutput.additionalContext <<< "$TEST_STDOUT")" 'Local harness context'
   assert-equal SessionStart "$(jq -r .hookSpecificOutput.hookEventName <<< "$TEST_STDOUT")"
+  assert-not-contains "$context" "slash commands" 'user-only skills without any installed'
+
+  return 0
+}
+
+function test-workflow-mode-hook-describes-the-active-mode-to-a-subagent() {
+
+  # Arrange
+  mode-create-repo
+  # Act
+  test-capture mode-hook '{"hook_event_name":"SubagentStart","agent_id":"a1","agent_type":"Plan"}'
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-contains "$(jq -r .additionalContext <<< "$TEST_STDOUT")" "'alpha' is active in this worktree"
+  assert-equal SubagentStart "$(jq -r .hookSpecificOutput.hookEventName <<< "$TEST_STDOUT")"
+
+  return 0
+}
+
+function test-workflow-mode-hook-names-the-skills-only-the-user-can-start() {
+
+  # Arrange
+  mode-create-repo
+  mode-install-skill alpha-guide 'disable-model-invocation: true'
+  mode-install-skill alpha-tool
+  mode-install-skill beta-1 'disable-model-invocation: true'
+  # Act
+  test-capture mode-hook "$SESSION_START"
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  local context
+  context="$(jq -r .additionalContext <<< "$TEST_STDOUT")"
+  assert-contains "$context" $'\nThe user starts these skills of this mode with slash commands: /alpha-guide. Suggest the next one when it fits. Do not load them or read their SKILL.md files yourself.\n'
+  assert-not-contains "$context" "/alpha-tool" 'skill the agent may load'
+  assert-not-contains "$context" "/beta-1" 'user-only skill of another mode'
 
   return 0
 }
@@ -670,8 +740,10 @@ function test-workflow-mode-hook-denies-a-skill-of-another-mode() {
   assert-contains "$reason" "'alpha' is active"
   assert-contains "$reason" "make workflow-use mode=beta"
   assert-contains "$reason" "even if this session started in another mode"
+  assert-contains "$reason" "Continue the task without this skill. If the user wants it, they can run 'make workflow-use mode=beta' and start a new chat session."
   assert-contains "$reason" "Do not run that command yourself or read the skill's SKILL.md instead."
-  assert-contains "$reason" "If you cannot ask the user, for example as a subagent, stop and report this refusal."
+  assert-not-contains "$reason" "stop" 'a refused skill must not end the task'
+  assert-not-contains "$reason" "Use the skills of" 'the active mode may have no skill the agent can load'
 
   return 0
 }
@@ -820,6 +892,25 @@ function test-workflow-mode-hook-tells-the-agent-when-the-check-cannot-run() {
   return 0
 }
 
+# Loadout defines its modes in the base file, so a destination may have no
+# drop-in file at all
+function test-workflow-mode-hook-tells-the-agent-when-only-the-loadout-modes-exist() {
+
+  # Arrange
+  mode-create-repo
+  rm "$DROP_IN"
+  cp "$TEST_REPO_ROOT/$BASE_CONFIG" "$BASE_CONFIG"
+  test-stub jq 'exit 1'
+  # Act
+  test-capture mode-hook '{"hook_event_name": "SubagentStart"}'
+  # Assert
+  assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
+  assert-contains "$TEST_STDOUT" '"additionalContext":"Workflow mode: the workflow mode check could not run'
+  assert-contains "$TEST_STDOUT" '"hookEventName":"SubagentStart"'
+
+  return 0
+}
+
 function test-workflow-mode-hook-fails-open-when-jq-cannot-run() {
 
   # Arrange
@@ -869,7 +960,7 @@ function test-workflow-mode-hook-runs-with-the-system-bash() {
   return 0
 }
 
-function test-workflow-mode-registers-both-hook-events() {
+function test-workflow-mode-registers-the-hook-events() {
 
   # Arrange
   local file="$TEST_REPO_ROOT/.github/hooks/workflow-mode.json"
@@ -877,7 +968,11 @@ function test-workflow-mode-registers-both-hook-events() {
   test-capture jq -r '[.version, (.hooks | keys | join(" ")), ([.hooks[][].command] | unique | join(" ")), .hooks.PreToolUse[0].matcher] | join("|")' "$file"
   # Assert
   assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
-  assert-equal "1|PreToolUse SessionStart|$SCRIPT hook|skill" "$TEST_STDOUT"
+  assert-equal "1|PreToolUse SessionStart SubagentStart|$SCRIPT hook|skill" "$TEST_STDOUT"
+  # Without Bash on Windows a failed PreToolUse hook would deny every skill,
+  # and a hook started outside the repository root would not find the script
+  test-capture jq -r '[.hooks[][] | "\(.powershell)|\(.cwd)"] | unique | join(" ")' "$file"
+  assert-equal "Write-Output '{}'|." "$TEST_STDOUT"
 
   return 0
 }
@@ -894,6 +989,9 @@ function test-workflow-mode-loadout-defines-speckit-and-superpowers() {
   assert-equal 0 "$TEST_STATUS" "$EXIT_STATUS_LABEL"
   assert-matches "$TEST_STDOUT" $'\n +speckit +speckit-\\* +Specification-driven delivery'
   assert-matches "$TEST_STDOUT" $'\ndefault +superpowers +brainstorming,'
+  # Superpowers owns only the skills that write or read its own artefacts
+  test-capture yq -r '.modes[] | select(.name == "superpowers") | .skills | join(",")' "$BASE_CONFIG"
+  assert-equal "brainstorming,writing-plans,executing-plans,subagent-driven-development" "$TEST_STDOUT"
 
   return 0
 }

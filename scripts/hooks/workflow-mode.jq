@@ -77,6 +77,10 @@ def config($files):
 # Input: the resolved configuration. The names of the modes that own the skill.
 def owners($skill): [.modes[] | select(any(.skills[]; pattern_to_regex as $re | $skill | test($re))) | .name];
 
+# Input: a list of skill patterns. The installed skills that match one, as
+# [{name, user_only}], in the order of $installed.
+def matching($installed): . as $patterns | [$installed[] | .name as $name | select(any($patterns[]; pattern_to_regex as $re | $name | test($re)))];
+
 # Input: the resolved configuration. A mode as a list item, '- name: patterns'.
 def summary: "- \(.name): \(.skills | join(", "))";
 
@@ -103,10 +107,11 @@ def skills_cell($width):
   end;
 
 # Input: the resolved configuration. The text that tells the agent about the
-# active mode at the start of a session, or empty when no mode is defined.
-# $state is how the mode was found, as printed by 'mode-state' in
-# workflow-mode.sh, and $value the mode name or the chosen value.
-def session_context($state; $value):
+# active mode when a session or a subagent starts, or empty when no mode is
+# defined. $state is how the mode was found, as printed by 'mode-state' in
+# workflow-mode.sh, $value the mode name or the chosen value, and $installed
+# the installed skills, as printed by 'installed-skills'.
+def session_context($state; $value; $installed):
   if (.modes | length) == 0 then
     empty
   elif $state == "undefined" then
@@ -117,9 +122,12 @@ def session_context($state; $value):
     (.modes[] | select(.name == $value)) as $mode
     # A pattern the active mode also lists is allowed, so it is never shown as forbidden
     | [.modes[] | select(.name != $value) | .skills -= $mode.skills | select(.skills | length > 0) | summary] as $others
+    # The agent cannot load these, so it may only suggest them
+    | [$mode.skills | matching($installed)[] | select(.user_only) | "/\(.name)"] as $manual
     | "Workflow mode: '\($value)' is active in this worktree."
       + (if $mode.description == "" then "" else "\nDescription: \($mode.description)" end)
       + "\nSkills of this mode: \($mode.skills | join(", "))."
+      + (if ($manual | length) == 0 then "" else "\nThe user starts these skills of this mode with slash commands: \($manual | join(", ")). Suggest the next one when it fits. Do not load them or read their SKILL.md files yourself." end)
       + (if ($others | length) == 0 then "" else "\nOther modes own these skills. Do not use them unless this mode also owns them:\n\($others | join("\n"))" end)
       + "\nSkills that no mode owns stay available. To change the mode, ask the user to run 'make workflow-use mode=<name>' and to start a new chat session. Do not run it yourself."
   else
@@ -133,10 +141,21 @@ def deny_reason($skill; $active):
   | if ($owners | length) == 0 or ($owners | index($active)) then
       empty
     else
-      "Workflow mode: the skill '\($skill)' belongs to the workflow \(if ($owners | length) == 1 then "mode" else "modes" end) \($owners | and_list), but '\($active)' is active in this worktree. This refusal applies even if this session started in another mode. Use the skills of '\($active)' instead, or ask the user to run "
+      "Workflow mode: the skill '\($skill)' belongs to the workflow \(if ($owners | length) == 1 then "mode" else "modes" end) \($owners | and_list), but '\($active)' is active in this worktree. This refusal applies even if this session started in another mode. Continue the task without this skill. If the user wants it, they can run "
       + (if ($owners | length) == 1 then "'make workflow-use mode=\($owners[0])'" else "'make workflow-use mode=<name>' with one of \($owners | join(", "))" end)
-      + " and to start a new chat session. Do not run that command yourself or read the skill's SKILL.md instead. If you cannot ask the user, for example as a subagent, stop and report this refusal."
+      + " and start a new chat session. Do not run that command yourself or read the skill's SKILL.md instead."
     end;
+
+# Input: the resolved configuration. Lines for 'make workflow-list' about the
+# installed skills: a pattern that matches none, and the skills of a mode that
+# only the user can start, which the hook never sees. $installed is as for
+# session_context.
+def skill_notes($installed):
+  .modes[] as $mode
+  | ($mode.skills[] | select([.] | matching($installed) | length == 0)
+      | "WARNING: mode \($mode.name): the pattern '\(.)' matches no skill in .github/skills."),
+    ([$mode.skills | matching($installed)[] | select(.user_only)] | length | select(. > 0)
+      | "Note: mode \($mode.name) owns \(.) skill\(if . == 1 then "" else "s" end) that only the user can start with a slash command, so the hook never checks \(if . == 1 then "it" else "them" end).");
 
 # Input: the resolved configuration. What 'make workflow-status' prints for a
 # usable state: the active mode with its description, skills, where it is set

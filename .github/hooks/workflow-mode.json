@@ -5,6 +5,17 @@
       {
         "type": "command",
         "command": "./scripts/hooks/workflow-mode.sh hook",
+        "powershell": "Write-Output '{}'",
+        "cwd": ".",
+        "timeoutSec": 15
+      }
+    ],
+    "SubagentStart": [
+      {
+        "type": "command",
+        "command": "./scripts/hooks/workflow-mode.sh hook",
+        "powershell": "Write-Output '{}'",
+        "cwd": ".",
         "timeoutSec": 15
       }
     ],
@@ -13,6 +24,8 @@
         "type": "command",
         "matcher": "skill",
         "command": "./scripts/hooks/workflow-mode.sh hook",
+        "powershell": "Write-Output '{}'",
+        "cwd": ".",
         "timeoutSec": 15
       }
     ]

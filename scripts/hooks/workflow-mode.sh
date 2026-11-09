@@ -37,16 +37,21 @@ set -euo pipefail
 #      where it is set and how to change it, and 'use' and 'clear' show the
 #      same after their change. The choice is kept in
 #      '$(git rev-parse --git-path workflow-mode)', which is per worktree and
-#      never tracked. 'clear' removes it.
-#   2) The hook handles two events. At 'SessionStart' it tells the agent which
-#      mode is active and which skills each mode owns. At 'PreToolUse' it
-#      denies a call of the 'skill' tool for a skill that only other modes own.
-#      A skill that no mode owns is always allowed, and so is every skill when
-#      no mode is active or the chosen mode is not defined or cannot be read.
+#      never tracked. 'clear' removes it. 'list' also checks the patterns
+#      against the skills in '.github/skills' and prints its findings on
+#      stderr.
+#   2) The hook handles three events. At 'SessionStart' and 'SubagentStart' it
+#      tells the agent which mode is active and which skills each mode owns,
+#      and names the skills of the mode that only the user can start. At
+#      'PreToolUse' it denies a call of the 'skill' tool for a skill that only
+#      other modes own. A skill that no mode owns is always allowed, and so is
+#      every skill when no mode is active or the chosen mode is not defined or
+#      cannot be read.
 #   3) The hook fails open. When it cannot run it prints '{}' and the reason on
 #      stderr, because the Copilot runtime denies the tool call when a
-#      'PreToolUse' command hook fails. At 'SessionStart', when drop-in files
-#      exist, it tells the agent instead that no mode is enforced.
+#      'PreToolUse' command hook fails. At 'SessionStart' and 'SubagentStart',
+#      when modes are defined, it tells the agent instead that no mode is
+#      enforced.
 #   4) The hook reads the configuration from the working tree. It guards
 #      against mixing workflows by mistake and is not a security control.
 #   5) The editor may start the hook with the macOS Bash 3.2, so the script
@@ -57,6 +62,7 @@ set -euo pipefail
 readonly CONFIG_FILE=scripts/hooks/workflow-modes.yaml
 readonly CONFIG_DIR=scripts/config/workflow-modes.d
 readonly JQ_MODULE_DIR=scripts/hooks
+readonly SKILLS_DIR=.github/skills
 readonly MODE_PATTERN='^[a-z0-9][a-z0-9-]{0,39}$'
 readonly DROP_IN_PATTERN='^[A-Za-z0-9][A-Za-z0-9._-]*\.ya?ml$'
 readonly USE_HINT="make workflow-use mode=<name>"
@@ -64,7 +70,7 @@ readonly USE_HINT="make workflow-use mode=<name>"
 readonly GUIDE=https://github.com/stefaniuk/loadout/blob/main/docs/workflow-modes.md
 # Told to the agent at session start when the hook cannot check the mode
 readonly FALLBACK_CONTEXT="Workflow mode: the workflow mode check could not run, so no mode is enforced. Tell the user to run 'make workflow-status' to see why."
-readonly SESSION_START_PATTERN='"hook_event_name"[[:space:]]*:[[:space:]]*"SessionStart"'
+readonly CONTEXT_EVENT_PATTERN='"hook_event_name"[[:space:]]*:[[:space:]]*"(SessionStart|SubagentStart)"'
 
 # Run the requested command.
 function main() {
@@ -119,7 +125,7 @@ function status-command() {
 # Print the defined modes and mark the active one as 'chosen' or 'default'.
 function list-command() {
 
-  local config line state value rows
+  local config line state value rows installed
   config="$(load-config)" || return "$?"
   if [[ $(jq '.modes | length' <<< "$config") -eq 0 ]]; then
     echo "No workflow modes are defined. Add them in $CONFIG_DIR/<name>.yaml, see $GUIDE."
@@ -134,6 +140,10 @@ function list-command() {
   rows="$(jq -r -L "$JQ_MODULE_DIR" --arg state "$state" --arg active "$value" 'include "workflow-mode"; .modes[] | [(if .name == $active and ($state == "chosen" or $state == "default") then $state else "" end), .name, (.skills | skills_cell(40)), .description] | @tsv' <<< "$config")" || return 2
   printf '%s\n' "$rows" \
     | awk -F'\t' 'BEGIN { printf "%-8s %-20s %-40s %s\n", "ACTIVE", "NAME", "SKILLS", "DESCRIPTION" } NF > 0 { printf "%-8s %-20s %-40s %s\n", $1, $2, $3, $4 }'
+  installed="$(installed-skills)" || return 1
+  if [[ $installed != "[]" ]]; then
+    jq -r -L "$JQ_MODULE_DIR" --argjson installed "$installed" 'include "workflow-mode"; skill_notes($installed)' <<< "$config" >&2 || return 2
+  fi
 
   return 0
 }
@@ -198,8 +208,8 @@ function clear-command() {
 # Hook
 
 # Handle a Copilot hook event from stdin. Print the response and never fail.
-# When the hook cannot run, it prints '{}', or at session start a context that
-# says so when modes are defined.
+# When the hook cannot run, it prints '{}', or when a session or subagent
+# starts, a context that says so when modes are defined.
 function run-hook() {
 
   local payload response
@@ -207,8 +217,8 @@ function run-hook() {
   payload="$(cat)" || payload=""
   if response="$(handle-hook "$payload")" && [[ -n $response ]]; then
     printf '%s\n' "$response"
-  elif [[ $payload =~ $SESSION_START_PATTERN ]] && has-drop-ins; then
-    printf '{"additionalContext":"%s","hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$FALLBACK_CONTEXT" "$FALLBACK_CONTEXT"
+  elif [[ $payload =~ $CONTEXT_EVENT_PATTERN ]] && has-modes; then
+    printf '{"additionalContext":"%s","hookSpecificOutput":{"hookEventName":"%s","additionalContext":"%s"}}\n' "$FALLBACK_CONTEXT" "${BASH_REMATCH[1]}" "$FALLBACK_CONTEXT"
   else
     echo '{}'
   fi
@@ -216,11 +226,15 @@ function run-hook() {
   return 0
 }
 
-# Succeed when the repository has a drop-in file, so modes may be defined.
-function has-drop-ins() {
+# Succeed when modes may be defined: the loadout modes file lists one, or a
+# drop-in file exists. It needs neither jq nor yq.
+function has-modes() {
 
   local top path
   top="$(git rev-parse --show-toplevel 2> /dev/null)" || return 1
+  if grep -Eq '^[[:space:]]*-[[:space:]]+name:' "$top/$CONFIG_FILE" 2> /dev/null; then
+    return 0
+  fi
   for path in "$top/$CONFIG_DIR"/*.yaml "$top/$CONFIG_DIR"/*.yml; do
     if [[ -e $path ]]; then
       return 0
@@ -244,7 +258,7 @@ function handle-hook() {
   fi
   IFS=$'\x1f' read -r event tool skill <<< "$fields"
   case $event in
-    SessionStart)
+    SessionStart|SubagentStart)
       ;;
     PreToolUse)
       if [[ $tool != skill || -z $skill ]]; then
@@ -263,29 +277,33 @@ function handle-hook() {
   config="$(load-config)" || return 1
   line="$(mode-state "$config")" || return 1
   IFS=$'\t' read -r state value <<< "$line"
-  if [[ $event == SessionStart ]]; then
-    emit-context "$config" "$state" "$value" || return 1
-  elif [[ $state == chosen || $state == default ]]; then
-    emit-decision "$config" "$value" "$skill" || return 1
+  if [[ $event == PreToolUse ]]; then
+    if [[ $state == chosen || $state == default ]]; then
+      emit-decision "$config" "$value" "$skill" || return 1
+    else
+      echo '{}'
+    fi
   else
-    echo '{}'
+    emit-context "$config" "$event" "$state" "$value" || return 1
   fi
 
   return 0
 }
 
-# Print the SessionStart response. The context goes both at the top level,
-# which the Copilot runtime reads, and in hookSpecificOutput, which the VS Code
-# Local harness reads.
+# Print the SessionStart or SubagentStart response. The context goes both at
+# the top level, which the Copilot runtime reads, and in hookSpecificOutput,
+# which the VS Code Local harness reads.
 # Arguments:
 #   $1=[configuration JSON]
-#   $2=[state, as printed by mode-state]
-#   $3=[mode name or chosen value, as printed by mode-state]
+#   $2=[event name]
+#   $3=[state, as printed by mode-state]
+#   $4=[mode name or chosen value, as printed by mode-state]
 function emit-context() {
 
-  local config="$1" state="$2" value="$3"
-  jq -c -L "$JQ_MODULE_DIR" --arg state "$state" --arg value "$value" \
-    'include "workflow-mode"; [session_context($state; $value)] | if length == 0 then {} else {additionalContext: .[0], hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: .[0]}} end' \
+  local config="$1" event="$2" state="$3" value="$4" installed
+  installed="$(installed-skills)" || return 1
+  jq -c -L "$JQ_MODULE_DIR" --arg event "$event" --arg state "$state" --arg value "$value" --argjson installed "$installed" \
+    'include "workflow-mode"; [session_context($state; $value; $installed)] | if length == 0 then {} else {additionalContext: .[0], hookSpecificOutput: {hookEventName: $event, additionalContext: .[0]}} end' \
     <<< "$config" || return 1
 
   return 0
@@ -375,6 +393,35 @@ function is-drop-in-name() {
     LC_ALL=C
     [[ $1 =~ $DROP_IN_PATTERN ]]
   ) || return 1
+
+  return 0
+}
+
+# Print the installed skills as a JSON array of {name, user_only}. A skill is
+# user-only when its front matter sets 'disable-model-invocation: true', so
+# only the user can start it, with a slash command, and the hook never sees it.
+function installed-skills() {
+
+  local file
+  local -a files=()
+  for file in "$SKILLS_DIR"/*/SKILL.md; do
+    if [[ -f $file ]]; then
+      files+=("$file")
+    fi
+  done
+  if [[ ${#files[@]} -eq 0 ]]; then
+    echo '[]'
+    return 0
+  fi
+  awk '
+    function emit() { n = split(file, part, "/"); printf "%s\t%s\n", part[n - 1], (user ? "true" : "false") }
+    FNR == 1 { if (file != "") emit(); file = FILENAME; head = ($0 == "---"); user = 0; next }
+    head && $0 == "---" { head = 0 }
+    head && /^disable-model-invocation:[[:space:]]*true[[:space:]]*$/ { user = 1 }
+    END { if (file != "") emit() }
+  ' "${files[@]}" \
+    | jq -R -s -c '[split("\n")[] | select(length > 0) | split("\t") | select(.[0] | test("^[A-Za-z0-9._-]+$")) | {name: .[0], user_only: (.[1] == "true")}]' \
+    || return 1
 
   return 0
 }

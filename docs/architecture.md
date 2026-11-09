@@ -99,9 +99,13 @@ Why an explicit choice is used instead of branch-name inference:
 
 Enforcement sits outside the skills, in `scripts/hooks/workflow-mode.sh`:
 
-- At session start, the hook tells the agent which mode is active and which
-  skills each mode owns.
-- Before a skill runs, the hook refuses a skill that only another mode owns.
+- At session and subagent start, the hook tells the agent which mode is active,
+  which skills each mode owns, and which skills of the mode only the user can
+  start.
+- Before a skill runs, the hook refuses a skill that only another mode owns, and
+  the agent carries on without it. Spec Kit skills start only from the user's
+  slash commands, so in practice the hook stops the Superpowers lifecycle skills
+  from starting in a Spec Kit worktree.
 - `.github/copilot-instructions.md` tells the agent never to change the mode
   itself.
 

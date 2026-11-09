@@ -32,18 +32,9 @@ conflicts.
 
 ## Workflow mode
 
-- A workflow mode is a named set of skills for one way of working. Loadout
-  defines the modes in `scripts/hooks/workflow-modes.yaml`, a project changes
-  them in `scripts/config/workflow-modes.d/*.yaml`, and one is active per
-  worktree.
-- The session start context names the active mode and the skills each mode owns.
-  Run `make workflow-status` and `make workflow-list` only when you have no such
-  context.
-- Use only the skills of the active mode. Skills that no mode owns stay
-  available.
-- Never change the mode yourself. Do not run `make workflow-use` or
-  `make workflow-clear`, and do not edit the mode configuration. Ask the user to
-  change it and to start a new chat session.
+- Never change the workflow mode yourself. Do not run `make workflow-use` or
+  `make workflow-clear`, and do not edit the mode configuration. The session
+  start context names the active mode.
 
 ## Repository verification policy 🔍
 

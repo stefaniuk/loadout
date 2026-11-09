@@ -10,6 +10,8 @@
     - [Spec Kit session](#spec-kit-session)
     - [Superpowers session](#superpowers-session)
   - [How the agent keeps to the mode 🚧](#how-the-agent-keeps-to-the-mode-)
+    - [What the hook can see](#what-the-hook-can-see)
+    - [Limits](#limits)
   - [Add or change a mode 🔧](#add-or-change-a-mode-)
   - [Move from the old workflow switch 🚚](#move-from-the-old-workflow-switch-)
   - [Troubleshooting 🔍](#troubleshooting-)
@@ -24,15 +26,15 @@ workflow and a plan with another, and neither set of artefacts is complete.
 
 A workflow mode prevents that. A mode is a named set of skills for one way of
 working. One mode is active per worktree. The agent hears which mode is active
-when a chat session starts, and Copilot refuses a skill that only another mode
-owns. Skills that no mode owns, such as `systematic-debugging`, stay available
-in every mode.
+when a chat session or a subagent starts, and Copilot refuses a skill that only
+another mode owns. Skills that no mode owns, such as `systematic-debugging`,
+stay available in every mode.
 
 Loadout installs the skills of two lifecycle workflows,
 [Spec Kit](https://github.com/github/spec-kit) and
-[Superpowers](https://github.com/obra/superpowers), and defines a mode for
-each. `make apply` installs the hook, the script and the modes in the
-destination repository, next to the skills.
+[Superpowers](https://github.com/obra/superpowers), and defines a mode for each.
+`make apply` installs the hook, the script and the modes in the destination
+repository, next to the skills.
 
 ## Key files 📁
 
@@ -77,12 +79,6 @@ modes:
       - writing-plans
       - executing-plans
       - subagent-driven-development
-      - dispatching-parallel-agents
-      - incremental-implementation
-      - using-git-worktrees
-      - requesting-code-review
-      - receiving-code-review
-      - finishing-a-development-branch
 ```
 
 Check them:
@@ -92,14 +88,22 @@ $ make workflow-list
 ACTIVE   NAME                 SKILLS                                   DESCRIPTION
          speckit              speckit-*                                Specification-driven delivery. Durable spec, plan and tasks under specs/.
 default  superpowers          brainstorming,writing-plans,...          Conversation-driven delivery. Design, plan, then test-driven execution.
+Note: mode speckit owns 10 skills that only the user can start with a slash command, so the hook never checks them.
 ```
 
 `ACTIVE` shows `default` for the default mode and `chosen` for a mode chosen
-with `make workflow-use`. A long skills list is cut short with `...`.
+with `make workflow-use`. A long skills list is cut short with `...`. The lines
+after the table compare the patterns with the skills in `.github/skills`. A
+`WARNING` names a pattern that matches no skill, often a typo. A `Note` counts
+the skills that only you can start, which the hook never sees, as
+[What the hook can see](#what-the-hook-can-see) explains.
 
-Skills such as `test-driven-development`, `systematic-debugging` and
-`verification-before-completion` are in neither list. Both workflows use them,
-so they stay available in both modes.
+A mode owns only the skills that write or read its own artefacts. Skills such as
+`test-driven-development`, `systematic-debugging`,
+`verification-before-completion`, `using-git-worktrees`,
+`dispatching-parallel-agents`, `incremental-implementation` and the code review
+skills are in neither list. They help in both workflows, so they stay available
+in both modes.
 
 ## Choose a mode 🤔
 
@@ -155,10 +159,7 @@ Workflow mode: superpowers (default)
   Description  Conversation-driven delivery. Design, plan, then test-driven
                execution.
   Skills       brainstorming, writing-plans, executing-plans,
-               subagent-driven-development, dispatching-parallel-agents,
-               incremental-implementation, using-git-worktrees,
-               requesting-code-review, receiving-code-review,
-               finishing-a-development-branch
+               subagent-driven-development
   Set by       default in scripts/hooks/workflow-modes.yaml
   Other modes  speckit
   To change    make workflow-use mode=speckit, then start a new chat session
@@ -166,12 +167,12 @@ Workflow mode: superpowers (default)
 
 Start a new chat session after `make workflow-use`. The agent learns the mode
 when a session starts, so an open session keeps its old view, although Copilot
-still refuses the skills of the other mode.
+refuses the skills of the other mode at once.
 
 The choice is stored in the file that `git rev-parse --git-path workflow-mode`
 names, usually `.git/workflow-mode`. It is kept per worktree and is never
-committed. `make workflow-clear` removes it. To run both workflows at the same
-time, use two worktrees:
+committed. `make workflow-clear` removes it. All chat sessions in a worktree
+share the mode. To run both workflows at the same time, use two worktrees:
 
 ```shell
 git worktree add -b feature/payments-spec ../my-repo-spec
@@ -179,8 +180,8 @@ cd ../my-repo-spec && make workflow-use mode=speckit
 ```
 
 A new worktree sees only committed files. The loadout files are git-ignored, so
-run `make apply dest=../my-repo-spec` from loadout first, and commit any
-drop-in file.
+run `make apply dest=../my-repo-spec` from loadout first, and commit any drop-in
+file.
 
 ## Example sessions 💬
 
@@ -204,8 +205,9 @@ skill name as a slash command followed by your input.
 6. `/speckit-implement` works through the tasks.
 7. `/speckit-converge` adds any work the code still lacks as new tasks.
 
-If you ask for `brainstorming` in this session, Copilot refuses it and names the
-mode that owns it.
+Only you can start these skills. The session context lists them, so the agent
+can suggest the next one. If the agent tries to load `brainstorming` in this
+session, Copilot refuses it and the agent carries on without it.
 
 ### Superpowers session
 
@@ -229,39 +231,61 @@ the work moves on.
 6. `finishing-a-development-branch` decides how to merge, open a pull request or
    clean up.
 
-If the agent tries `speckit-plan` in this session, Copilot refuses it.
+The worktree, review and finishing skills belong to no mode, so a Spec Kit
+session can use them too. The agent cannot start `speckit-plan` in any mode, as
+the Spec Kit skills start only from your slash commands.
 
 ## How the agent keeps to the mode 🚧
 
-Two Copilot hooks in
+Three Copilot hooks in
 [`workflow-mode.json`](../.github/hooks/workflow-mode.json) run
 `workflow-mode.sh hook`:
 
-- **Session start.** The hook adds the active mode, its skills and the skills of
-  the other modes to the agent's context. With no active mode, it lists the
-  modes and tells the agent to ask you to choose one.
+- **Session or subagent start.** The hook adds the active mode, its skills and
+  the skills of the other modes to the agent's context. It names the skills of
+  the mode that only you can start, so the agent suggests them instead of
+  loading them. With no active mode, it lists the modes and tells the agent to
+  ask you to choose one.
 - **Before a skill runs.** The hook refuses a call of the `skill` tool when only
   other modes own that skill. The refusal names every mode that owns it and the
-  command that would switch. It tells the agent not to run that command or read
-  the skill's `SKILL.md` itself, and tells a subagent that cannot ask you to
-  stop and report. The hook allows a skill that the active mode owns, even when
-  other modes also own it, and a skill that no mode owns. It allows every skill
-  when no mode is active or the chosen mode cannot be used.
+  command that would switch, and tells the agent to carry on without the skill.
+  It tells the agent not to run that command or read the skill's `SKILL.md`
+  itself. The hook allows a skill that the active mode owns, even when other
+  modes also own it, and a skill that no mode owns. It allows every skill when
+  no mode is active or the chosen mode cannot be used.
 
 The [Copilot instructions](../.github/copilot-instructions.md) tell the agent
-the same rules and that it must never change the mode itself.
+that it must never change the mode itself.
 
-Know the limits:
+### What the hook can see
+
+The hook sees only the skills that the agent loads with the `skill` tool:
+
+- A skill whose front matter sets `disable-model-invocation: true` starts only
+  from your slash command, so the hook never sees it. Loadout sets this on every
+  `speckit-*` skill. In practice the `speckit` mode refuses the four Superpowers
+  lifecycle skills, and the `superpowers` mode refuses nothing the agent could
+  otherwise load. There it only adds the context.
+- When you start a skill with a slash command, the editor may load it without a
+  `skill` tool call. The hook then does not check it, and your choice wins.
+
+### Limits
 
 - The guard stops mistakes. It is not a security control. It reads the working
   tree, so an agent that edits the configuration or runs `make workflow-use` can
   get round it.
 - It checks only the `skill` tool. An agent that reads a `SKILL.md` file
   directly is not stopped, although the session context still tells it not to.
+- The mode belongs to the worktree, not to a chat session.
 - The hook fails open. When it cannot run, for example because `yq` is missing,
   it allows the call and writes the reason to stderr. Copilot would otherwise
-  refuse every call while the hook is broken. At session start it tells the
-  agent that no mode is enforced, so the agent can tell you.
+  refuse every call while the hook is broken. When a session or a subagent
+  starts, it tells the agent that no mode is enforced, so the agent can tell
+  you.
+- In the Copilot harness, a `PreToolUse` command that cannot start at all denies
+  the call. Each hook entry therefore sets `cwd` to the repository root and has
+  a PowerShell command that prints `{}`, so on Windows no mode is enforced and
+  every skill stays usable.
 - Copilot hooks are in preview. The tests use events in the format the VS Code
   Local harness sends. Confirm the hook in your harness with a new session.
 
@@ -342,6 +366,9 @@ Older loadout versions kept the mode in `.copilot/workflow-mode.json` and put a
 - **A skill was refused that should be shared.** Check its name against the
   patterns with `make workflow-list`. A skill owned by the active mode is always
   allowed, even when another mode also owns it.
+- **`make workflow-list` warns that a pattern matches no skill.** Check the
+  spelling in the drop-in file, or run `make apply` from loadout when the skill
+  is not installed yet.
 
 ## Testing 🧪
 
@@ -352,7 +379,8 @@ Run the suite:
 ```
 
 It runs the script in scratch repositories with two example modes, and covers
-the commands, the configuration rules, both hook events, failing open and the
-macOS Bash 3.2. It also checks that the loadout modes load. `make test` runs it
-with the other suites, and `scripts/tests/apply.test.sh` covers the install,
-the move from the old switch and revert.
+the commands, the configuration rules, the three hook events, the skills only
+the user can start, failing open and the macOS Bash 3.2. It also checks the
+loadout modes and the hook file. `make test` runs it with the other suites, and
+`scripts/tests/apply.test.sh` covers the install, the move from the old switch
+and revert.
