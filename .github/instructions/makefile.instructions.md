@@ -54,8 +54,8 @@ important rules even when context is tight.
   iterate to clean ([MK-QG-001]–[MK-QG-003]).
 - [MK-QR-010] **Avoid common anti-patterns**: `|| true` without comment, large
   inline shell, hardcoded paths, unscoped `rm -rf` (§12).
-- [MK-QR-011] **The repository is the reference**: `Makefile`,
-  `scripts/init.mk`, `scripts/docker/docker.mk` and
+- [MK-QR-011] **The repository (based on the repository template) is the
+  reference**: `Makefile`, `scripts/init.mk`, `scripts/docker/docker.mk` and
   [Use_Bash_and_Make.md](../../docs/guides/Use_Bash_and_Make.md) show these
   rules applied; when they disagree with this file, follow them and correct this
   file.
@@ -73,8 +73,9 @@ These principles extend
 - [MK-OP-002] Prefer **small, explicit, testable** changes over broad rewrites.
 - [MK-OP-003] Design for **determinism**: the same inputs produce the same
   outputs.
-- [MK-OP-004] Make is for **orchestration**. Complex logic belongs in scripts
-  (shell, Python, etc.).
+- [MK-OP-004] Make is for **orchestration**. Complex logic belongs in scripts,
+  e.g. shell, Python, etc. See the [Technology Recommendations](../../docs/adr/Technology_Recommendations.md)
+  guide.
 - [MK-OP-005] **Fast feedback is paramount**: key local targets must be quick,
   automated, and confidence-building.
 - [MK-OP-006] Avoid inventing requirements or expanding scope beyond what the

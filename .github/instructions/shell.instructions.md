@@ -68,8 +68,9 @@ important rules even when context is tight.
   `mise.toml` with `--rm --platform linux/amd64 --network none` and a read-only
   checkout mount, and document any network or write need ([SH-EXEC-009],
   [SH-EXEC-010], [SH-EXEC-016]).
-- [SH-QR-015] **The repository is the reference**: when a rule here and the
-  repository's own scripts disagree, follow the scripts and correct this file
+- [SH-QR-015] **The repository (based on the repository template) is the
+  reference**: when a rule here and the repository's own scripts disagree,
+  follow the scripts and correct this file
   ([SH-OP-008]).
 
 ---
@@ -85,7 +86,8 @@ These principles extend
 - [SH-OP-003] Design for **determinism**: the same inputs and environment
   produce the same outputs.
 - [SH-OP-004] Scripts are for **orchestration and automation**. Complex business
-  logic belongs elsewhere.
+  logic belongs elsewhere, e.g. Python, TypeScript, etc. See the [Technology
+  Recommendations](../../docs/adr/Technology_Recommendations.md) guide.
 - [SH-OP-005] **Fail fast and fail loud**: errors must not be hidden or ignored.
 - [SH-OP-006] Optimise for **readability, maintainability, and debugging**, not
   cleverness.
@@ -99,7 +101,7 @@ These principles extend
 
 ---
 
-## 2. Header structure (non-negotiable) 📋
+## 2. Header structure 📋
 
 Every script must begin with a consistent header structure that makes the script
 self-documenting.
@@ -109,7 +111,7 @@ self-documenting.
 - [SH-HDR-001] The first line must be `#!/usr/bin/env bash`, selecting GNU Bash
   5.2 or later from `PATH`.
 - [SH-HDR-002] Put `set -euo pipefail` after the shebang, separated by one blank
-  line. Do not add a "do not edit" warning comment. A test suite puts its
+  line. A test suite puts its
   `# shellcheck disable=...` line directly under the shebang ([SH-TST-004]):
   - `-e`: Exit immediately if any command returns non-zero
   - `-u`: Exit if an uninitialised variable is used
@@ -648,7 +650,7 @@ Per
 after making **any** change to shell scripts, you must run the repository's
 **canonical** quality gates.
 
-### 10.1 ShellCheck (mandatory)
+### 10.1 ShellCheck
 
 - [SH-QG-001] All shell scripts must pass ShellCheck with no errors or warnings.
 - [SH-QG-002] Lint through the repository targets, which run ShellCheck natively
