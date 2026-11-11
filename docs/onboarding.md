@@ -471,7 +471,8 @@ make test                     # Every test suite under scripts/
    [.github/copilot-instructions.md](../.github/copilot-instructions.md).
 
 See [.github/CONTRIBUTING.md](../.github/CONTRIBUTING.md) for the full
-contributor guide.
+contributor guide. For the shared repository setup and tooling baseline, see
+[the template guide index](guides/template/README.md).
 
 ## Troubleshooting
 

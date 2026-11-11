@@ -1,5 +1,22 @@
 .version
 *.code-workspace
 
+.env
+.env.*
+!.env.example
+
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+tmp/
+temp/
+logs/
+
+.DS_Store
+Thumbs.db
+
 # You can add project-specific ignore rules below this line as needed.
 docs/superpowers/

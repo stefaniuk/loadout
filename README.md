@@ -15,7 +15,7 @@ starting point for governance, authoring rules, reusable workflows, and quality
 checks, then makes that toolkit easy to copy into another repository with the
 same structure and expectations.
 
-## Quick start
+## Quick start 🚀
 
 This path proves the repository is healthy locally and shows the main
 contributor workflow.
@@ -197,8 +197,8 @@ Further reading:
   and ADR rules.
 - [docs/workflow-modes.md](docs/workflow-modes.md): keep the agent to Spec Kit
   or Superpowers with a workflow mode.
-- [docs/guides/](docs/guides/): repository-template guides for the toolchain,
-  quality gates, Git hooks, secret scanning and dependency updates.
+- [docs/guides/](docs/guides/): shared repository setup and tooling guides,
+  indexed in [the guide README](docs/guides/template/README.md).
 
 ## Contributing
 
@@ -215,7 +215,7 @@ make test
 ```
 
 The Copilot Stop hook runs the same gates when an agent finishes a turn. See
-[docs/guides/Run_quality_gate_on_agent_stop.md](docs/guides/Run_quality_gate_on_agent_stop.md).
+[Run the quality gate when the agent stops](docs/guides/template/Run_quality_gate_on_agent_stop.md).
 
 See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for the full contributor
 guide and [.github/SECURITY.md](.github/SECURITY.md) for private vulnerability
@@ -229,7 +229,7 @@ These are the top-level paths most contributors need to recognise first.
 .
 ├── .github/      # Agents, instructions, prompts, skills, hooks, workflows, and governance files
 ├── .specify/     # Project constitution and spec-kit templates
-├── docs/         # Architecture, onboarding, ADRs, and repository-template guides
+├── docs/         # Architecture, onboarding, ADRs, and both guide sets
 ├── scripts/      # Apply, import, skill sync, quality checks, and their tests
 ├── Makefile      # Main entrypoint for setup, validation, and apply workflows
 └── mise.toml     # Pinned toolchain versions

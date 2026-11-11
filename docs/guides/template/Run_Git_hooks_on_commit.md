@@ -1,11 +1,11 @@
-# Run Git hooks on commit
+# Run Git hooks on commit 🪝
 
-- [Run Git hooks on commit](#run-git-hooks-on-commit)
-  - [Overview](#overview)
-  - [Key files](#key-files)
-  - [Testing](#testing)
+- [Run Git hooks on commit 🪝](#run-git-hooks-on-commit-)
+  - [Overview 🧭](#overview-)
+  - [Key files 📁](#key-files-)
+  - [Testing 🧪](#testing-)
 
-## Overview
+## Overview 🧭
 
 Git hooks are implemented as Make targets that pre-commit executes automatically
 on each commit (after you run `make config` to install the hooks). Each hook
@@ -17,20 +17,20 @@ The [pre-commit](https://pre-commit.com/) framework is a powerful tool for
 managing Git hooks, providing automated hook installation and management
 capabilities.
 
-## Key files
+## Key files 📁
 
 - Scripts
-  - [`check-file-format.sh`](../../scripts/quality/check-file-format.sh)
-  - [`check-markdown-format.sh`](../../scripts/quality/check-markdown-format.sh)
-  - [`check-markdown-links.sh`](../../scripts/quality/check-markdown-links.sh)
-  - [`check-shell-lint.sh`](../../scripts/quality/check-shell-lint.sh)
-  - [`check-workflow-security.sh`](../../scripts/quality/check-workflow-security.sh)
-  - [`scan-secrets.sh`](../../scripts/quality/scan-secrets.sh)
+  - [`check-file-format.sh`](../../../scripts/quality/check-file-format.sh)
+  - [`check-markdown-format.sh`](../../../scripts/quality/check-markdown-format.sh)
+  - [`check-markdown-links.sh`](../../../scripts/quality/check-markdown-links.sh)
+  - [`check-shell-lint.sh`](../../../scripts/quality/check-shell-lint.sh)
+  - [`check-workflow-security.sh`](../../../scripts/quality/check-workflow-security.sh)
+  - [`scan-secrets.sh`](../../../scripts/quality/scan-secrets.sh)
 - Configuration
-  - [`pre-commit.yaml`](../../scripts/config/pre-commit.yaml)
-  - [`init.mk`](../../scripts/init.mk): make targets
+  - [`pre-commit.yaml`](../../../scripts/config/pre-commit.yaml)
+  - [`init.mk`](../../../scripts/init.mk): make targets
 
-## Testing
+## Testing 🧪
 
 Review and trust `mise.toml` before installing the hooks. Run these commands
 from the repository root. If you already ran `make config`, the hooks are

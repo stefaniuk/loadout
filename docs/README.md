@@ -25,6 +25,8 @@ the spec-kit workflow. This repository does not currently ship a `specs/` tree.
   ADR rules.
 - [workflow-modes.md](workflow-modes.md) explains how the workflow mode keeps
   the agent to Spec Kit or Superpowers, and how to change the modes.
+- [guides/README.md](guides/README.md) indexes the shared setup and tooling
+  guides under `guides/template/`.
 - `docs/adr/` stores long-lived architecture and tooling decisions, including
   the [Tech Radar](adr/Tech_Radar.md).
 

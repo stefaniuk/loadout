@@ -1,21 +1,21 @@
-# Harden repository security
+# Harden repository security 🔒
 
-- [Harden repository security](#harden-repository-security)
-  - [Overview](#overview)
-  - [Trust boundaries](#trust-boundaries)
-  - [GitHub Actions](#github-actions)
+- [Harden repository security 🔒](#harden-repository-security-)
+  - [Overview 🧭](#overview-)
+  - [Trust boundaries 🧱](#trust-boundaries-)
+  - [GitHub Actions 🤖](#github-actions-)
     - [Workflow security check](#workflow-security-check)
     - [Fix a failing check](#fix-a-failing-check)
     - [Publish and deploy](#publish-and-deploy)
-  - [Secrets](#secrets)
-  - [Dependencies and images](#dependencies-and-images)
-  - [Tool containers](#tool-containers)
+  - [Secrets 🔐](#secrets-)
+  - [Dependencies and images 📦](#dependencies-and-images-)
+  - [Tool containers 🐳](#tool-containers-)
     - [Use the containers on a workstation](#use-the-containers-on-a-workstation)
-  - [Making a security-sensitive change](#making-a-security-sensitive-change)
-  - [Testing](#testing)
-  - [Limits and responsibilities](#limits-and-responsibilities)
+  - [Making a security-sensitive change 🚦](#making-a-security-sensitive-change-)
+  - [Testing 🧪](#testing-)
+  - [Limits and responsibilities 📏](#limits-and-responsibilities-)
 
-## Overview
+## Overview 🧭
 
 This template runs repository code, third-party tools and GitHub Actions on
 developer machines and CI runners. Treat pull request content, workflow inputs,
@@ -27,7 +27,7 @@ The template provides toolchain, workflow and quality-check defaults, not an
 application security policy. Teams that add services must assess their own
 authentication, data handling, network exposure and deployment controls.
 
-## Trust boundaries
+## Trust boundaries 🧱
 
 - **Workflow input to a CI script:** A branch name, pull request title or
   dispatch input becomes code when a workflow expression inserts it into a
@@ -44,32 +44,33 @@ authentication, data handling, network exposure and deployment controls.
   available after it is deleted. Secret scanning checks every commit, and an
   exposed credential must be rotated.
 
-## GitHub Actions
+## GitHub Actions 🤖
 
-Every [workflow](../../.github/workflows/) sets `permissions: {}`, so each job
-starts with no `GITHUB_TOKEN` permissions and declares the ones it needs. Most
-jobs need only `contents: read`. The `metadata` job of the pull request workflow
-also reads pull requests to find one for the branch. The `publish` job holds the
-only write permission, `contents: write`, which `gh release create` needs. It
-does not check out the repository, so no repository code runs with that token.
+Every [workflow](../../../.github/workflows/) sets `permissions: {}`, so each
+job starts with no `GITHUB_TOKEN` permissions and declares the ones it needs.
+Most jobs need only `contents: read`. The `metadata` job of the pull request
+workflow also reads pull requests to find one for the branch. The `publish` job
+holds the only write permission, `contents: write`, which `gh release create`
+needs. It does not check out the repository, so no repository code runs with
+that token.
 
 ### Workflow security check
 
-[check-workflow-security.sh](../../scripts/quality/check-workflow-security.sh)
+[check-workflow-security.sh](../../../scripts/quality/check-workflow-security.sh)
 checks every tracked workflow file and every tracked local `action.yaml` or
-`action.yml` under [.github/actions](../../.github/actions). Like the other
+`action.yml` under [.github/actions](../../../.github/actions). Like the other
 checks, `check=staged-changes`, `check=working-tree-changes` or `check=branch`
 limits it to the changed files, and untracked files are never checked. A change
 to the allowlist, the rules or the check script checks every file. It converts
 each file to JSON with `yq`, applies the rules in
-[check-workflow-security.jq](../../scripts/quality/check-workflow-security.jq)
+[check-workflow-security.jq](../../../scripts/quality/check-workflow-security.jq)
 with `jq`, and fails when a file breaks a rule or cannot be parsed. The rules
 require:
 
 - `permissions: {}` at workflow level and a permissions mapping on every job. A
   job may hold a write permission only when
-  [workflow-security.yaml](../../scripts/config/workflow-security.yaml) approves
-  it for that workflow and job.
+  [workflow-security.yaml](../../../scripts/config/workflow-security.yaml)
+  approves it for that workflow and job.
 - No `pull_request_target` or `workflow_run` trigger, and no `secrets: inherit`
   on a reusable workflow call. Pass only the named secrets that are needed.
 - Secrets only in step environments, not in workflow, job, container or service
@@ -82,7 +83,7 @@ require:
 - No `${{` expressions in `run` scripts or `actions/github-script` scripts.
 - `FORCE_USE_DOCKER=true` on the five container-based quality actions, and no
   `jdx/mise-action` step in their commit-stage jobs. See
-  [Tool containers](#tool-containers).
+  [Tool containers](#tool-containers-).
 
 Each rule in the jq file has a short description and an example of passing and
 failing YAML. The check runs in `make lint`, as a pre-commit hook and in the
@@ -112,9 +113,9 @@ Each error names the file and the rule it breaks. The usual fixes are:
 
 ### Publish and deploy
 
-[cicd-2-publish.yaml](../../.github/workflows/cicd-2-publish.yaml) runs
+[cicd-2-publish.yaml](../../../.github/workflows/cicd-2-publish.yaml) runs
 `gh release create` with `--repo "$GITHUB_REPOSITORY"`, so the publish job needs
-no checkout. [cicd-3-deploy.yaml](../../.github/workflows/cicd-3-deploy.yaml)
+no checkout. [cicd-3-deploy.yaml](../../../.github/workflows/cicd-3-deploy.yaml)
 requires a `tag` input with no default. It rejects `latest`, checks the value
 with `git check-ref-format` and checks out `refs/tags/<tag>` instead of the
 default branch. A valid ref name does not prove that the tag exists or that it
@@ -124,9 +125,9 @@ in the repository settings.
 The build, publish, deploy and acceptance steps are template placeholders.
 Implement and review them before relying on them.
 
-## Secrets
+## Secrets 🔐
 
-[scan-secrets.sh](../../scripts/quality/scan-secrets.sh) runs Gitleaks with
+[scan-secrets.sh](../../../scripts/quality/scan-secrets.sh) runs Gitleaks with
 redacted output. The pre-commit hook and the commit-stage CI job use
 `check=whole-history`, which scans every commit on every ref but not uncommitted
 files. `check=all` scans staged changes, working-tree files including untracked
@@ -141,9 +142,9 @@ from logging, forwarding or misusing it. If a credential is exposed, revoke or
 rotate it first, then assess history, logs and downstream copies. Add an ignore
 rule only for a reviewed false positive, never to accept a real credential.
 
-## Dependencies and images
+## Dependencies and images 📦
 
-[mise.toml](../../mise.toml) pins every native tool to an exact version and
+[mise.toml](../../../mise.toml) pins every native tool to an exact version and
 every helper image to a tag and SHA-256 digest in its `[_.docker]` table. Its
 settings make mise record checksums and supported provenance in `mise.lock`,
 install only locked versions and re-check provenance on install. When mise
@@ -153,22 +154,22 @@ its dependencies are benign, so review release notes and lock changes before you
 upgrade. Follow [Update Dependencies](Update_Dependencies.md) for the cooldown,
 approval and digest-refresh steps.
 
-[Dependabot](../../.github/dependabot.yaml) proposes Docker, GitHub Actions, npm
-and uv updates after a seven-day cooldown. It does not read `mise.toml`, so tool
-and image pins are refreshed by hand.
+[Dependabot](../../../.github/dependabot.yaml) proposes Docker, GitHub Actions,
+npm and uv updates after a seven-day cooldown. It does not read `mise.toml`, so
+tool and image pins are refreshed by hand.
 
-[docker.lib.sh](../../scripts/docker/docker.lib.sh) stops with an error when a
-helper image has no valid digest pin, instead of falling back to `latest`. It
+[docker.lib.sh](../../../scripts/docker/docker.lib.sh) stops with an error when
+a helper image has no valid digest pin, instead of falling back to `latest`. It
 pulls the pinned digest when the image is missing locally, and the wrappers run
 the image by that digest.
 
-[format-markdown.sh](../../scripts/quality/format-markdown.sh) runs the Prettier
-version pinned as `npm:prettier` in `[tools]`. Natively it runs the copy that
-`make config` installs from the lockfile. In Docker it runs
+[format-markdown.sh](../../../scripts/quality/format-markdown.sh) runs the
+Prettier version pinned as `npm:prettier` in `[tools]`. Natively it runs the
+copy that `make config` installs from the lockfile. In Docker it runs
 `npx --yes prettier@<version>` in the pinned `node` image, which downloads that
 exact version from npm at run time without checking it against `mise.lock`.
 
-## Tool containers
+## Tool containers 🐳
 
 Apart from the workflow security check, each check runs its tool natively when
 the tool is installed. Otherwise, or when `FORCE_USE_DOCKER=true`, it runs the
@@ -176,7 +177,7 @@ tool's pinned image. The Gitleaks, EditorConfig Checker, markdownlint, Lychee,
 ShellCheck and Hadolint containers run with `--network none` and mount the
 checkout read-only. A compromised dependency in one of these images cannot send
 data over the network or change the working tree. Lychee also has
-`offline = true` in [lychee.toml](../../scripts/config/lychee.toml), so it
+`offline = true` in [lychee.toml](../../../scripts/config/lychee.toml), so it
 checks local links only, natively or in Docker.
 
 This containment has limits:
@@ -226,25 +227,25 @@ the most time in both modes, though it runs in parallel, one container for each
 group of related scripts in Docker. A first image pull adds time, and x64 CI
 runners have no emulation cost.
 
-## Making a security-sensitive change
+## Making a security-sensitive change 🚦
 
 1. Identify who controls each input, dependency, token, file and network path.
    Include CI jobs and native runs, not only Docker runs.
 2. Grant the smallest job permissions and keep secrets in step `env`. For a
    necessary write permission, review the job and add its approval to
-   [workflow-security.yaml](../../scripts/config/workflow-security.yaml).
+   [workflow-security.yaml](../../../scripts/config/workflow-security.yaml).
 3. Pin external actions and images. Follow the cooldown and integrity checks in
    [Update Dependencies](Update_Dependencies.md). Do not fetch executable
    dependencies at run time unless the risk is reviewed.
 4. Add a failing test for the policy or wrapper behaviour you are changing, make
    the change and rerun the test. Keep local and CI paths aligned.
-5. Run the checks in [Testing](#testing) and review the diff, including new
+5. Run the checks in [Testing](#testing-) and review the diff, including new
    files, generated output and the GitHub settings that cannot be tested here.
 
-## Testing
+## Testing 🧪
 
 Review and trust `mise.toml`, then run `make config` as the
-[README](../../README.md) describes. From the repository root, run:
+[README](../../../README.md) describes. From the repository root, run:
 
 ```shell
 make scan-secrets
@@ -255,7 +256,7 @@ make test
 
 `make lint` does not scan for secrets, so run `make scan-secrets` as well.
 `make test` includes
-[check-workflow-security.test.sh](../../scripts/quality/tests/check-workflow-security.test.sh),
+[check-workflow-security.test.sh](../../../scripts/quality/tests/check-workflow-security.test.sh),
 which you can also run on its own. To exercise the containers, prefix a check
 with `FORCE_USE_DOCKER=true`.
 
@@ -266,7 +267,7 @@ directories directly, so it includes new files. Git hooks run only where
 `make config` installed them, and `git commit --no-verify` skips them.
 [Run Git hooks on commit](Run_Git_hooks_on_commit.md) describes the hooks.
 
-## Limits and responsibilities
+## Limits and responsibilities 📏
 
 The workflow security check enforces specific YAML rules. It does not audit
 shell code, action behaviour, repository settings or external integrations.
@@ -276,10 +277,10 @@ trustworthy. `--network none` and the read-only mount constrain only the tool
 containers, not native programs, CI runners or image pulls.
 
 CI is the shared backstop only when branch protection or a ruleset requires its
-checks. [CODEOWNERS](../../.github/CODEOWNERS) names an owner for every file,
+checks. [CODEOWNERS](../../../.github/CODEOWNERS) names an owner for every file,
 including the workflows and `workflow-security.yaml`, but GitHub enforces that
 review only when a rule requires code owner review. Each adopting team must
 configure branch and tag protection, required status checks, deployment
 environments and permissions, and must review its own application dependencies.
 Report vulnerabilities through the route in
-[SECURITY.md](../../.github/SECURITY.md).
+[SECURITY.md](../../../.github/SECURITY.md).

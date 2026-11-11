@@ -56,7 +56,8 @@ important rules even when context is tight.
   inline shell, hardcoded paths, unscoped `rm -rf` (§12).
 - [MK-QR-011] **The repository (based on the repository template) is the
   reference**: `Makefile`, `scripts/init.mk`, `scripts/docker/docker.mk` and
-  [Use_Bash_and_Make.md](../../docs/guides/Use_Bash_and_Make.md) show these
+  [Use Bash and Make](../../docs/guides/template/Use_Bash_and_Make.md)
+  show these
   rules applied; when they disagree with this file, follow them and correct this
   file.
 
@@ -210,7 +211,8 @@ Provide repository-standard targets so an engineer can operate the repo quickly:
 - [MK-STR-008] Add capabilities as extension modules. `scripts/init.mk` includes
   every `*.ext.mk` file under `scripts/` in sorted order. Name only entry points
   `*.ext.mk`, name helpers `*.lib.mk`, and never include one `*.ext.mk` from
-  another ([Use_Bash_and_Make.md](../../docs/guides/Use_Bash_and_Make.md)).
+  another
+  ([Use Bash and Make](../../docs/guides/template/Use_Bash_and_Make.md)).
 - [MK-STR-009] Keep the Make settings (`.DEFAULT_GOAL`, `.ONESHELL`,
   `.SHELLFLAGS`, `SHELL`, `.PHONY: *`) and the `help` implementation in
   `scripts/init.mk` only. Never repeat them in the root `Makefile` or a module.

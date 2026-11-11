@@ -79,7 +79,8 @@ important rules even when context is tight.
   [docker.lib.sh](../../scripts/docker/docker.lib.sh),
   [docker.mk](../../scripts/docker/docker.mk), the
   [example Dockerfile](../../scripts/docker/tests/Dockerfile) and
-  [Build_Docker_images.md](../../docs/guides/Build_Docker_images.md) show these
+  [Build Docker images](../../docs/guides/template/Build_Docker_images.md)
+  show these
   rules applied; when they disagree with this file, follow them and correct this
   file.
 
@@ -222,7 +223,8 @@ These principles extend
 
 - [DF-FROM-009] Add or update an image pin with a tag and its digest together,
   and respect the release cooldown in
-  [Update_Dependencies.md](../../docs/guides/Update_Dependencies.md). Run
+  [Update Dependencies](../../docs/guides/template/Update_Dependencies.md).
+  Run
   `make docker-pull-pinned-images` afterwards to fetch every pinned image.
 
 ### 3.2 Base image selection criteria

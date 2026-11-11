@@ -712,7 +712,7 @@ function seed-destination-owned-files() {
   echo '{"hooks":{"team":true}}' > "${dest}/.github/hooks/workflow-mode.json"
 
   git -C "${dest}" init -q
-  git -C "${dest}" add -A
+  git -C "${dest}" -c core.excludesfile=/dev/null add -A
   git -C "${dest}" -c user.email="test@example.com" -c user.name="Loadout Test" -c commit.gpgsign=false commit -q -m "seed destination-owned files"
 
   return 0
